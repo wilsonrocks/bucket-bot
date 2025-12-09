@@ -1,6 +1,7 @@
 import { Kysely, PostgresDialect } from "kysely";
 import type { DB } from "kysely-codegen";
 import { Pool } from "pg";
+import Koa from "koa";
 
 const db = new Kysely<DB>({
   dialect: new PostgresDialect({
@@ -10,14 +11,20 @@ const db = new Kysely<DB>({
   }),
 });
 
-async function main() {
+async function getRows() {
   const rows = await db.selectFrom("tourney").selectAll().execute();
-  //    ^ { created_at: Date; email: string; id: number; ... }[]
-  console.log(rows);
-  await db.destroy();
+  return rows;
 }
 
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
+const app = new Koa();
+
+app.use(async (ctx) => {
+  if (ctx.path === "/tourney") {
+    const rows = await getRows();
+    ctx.body = rows;
+  } else {
+    ctx.body = "Hello World";
+  }
 });
+
+export default app;
