@@ -1,0 +1,57 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*.env
+.env*
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+*.log
+
+# JavaScript/Node
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Ignore node_modules in all subdirectories
+**/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# AWS CDK
+cdk.out/
+
+# AWS credentials
+.aws/
+
+# direnv
+.envrc
+.envrc.local
+.envrc.*
+
+# VS Code
+.vscode/
+
+# Misc
+.DS_Store
+*.swp
+*.swo
+.idea/
+*.bak
+*.tmp
+
+# Test/coverage
+coverage/
+*.cover
+*.pytest_cache/
+
+# OS generated files
+Thumbs.db
+Desktop.ini
