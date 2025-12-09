@@ -15,15 +15,17 @@ The hope is that using Discord
 ## Vague Plan
 
 ```
-+-------------------+   +---------------------+   +-------------------+
-| Discord Server   |<-->| Lambda (FastAPI)   |<-->| DynamoDB Table   |
-| (Bot messages)   |   | (Python API)       |   | (Data storage)   |
-+-------------------+   +---------------------+   +-------------------+
-	^
-	|
-	v
-+----------------------+
-| Frontend (React)     |
-| Vite + S3 Bucket     |
-+----------------------+
++-------------------+      +---------------------+      +-------------------+
+| Discord Server    | <--> | Lambda (FastAPI)    | <--> | DynamoDB Table    |
+| (Bot messages)    |      | (Python API)        |      | (Data storage)    |
++-------------------+      +---------------------+      +-------------------+
+
+                                    ^
+                                    |
+                                    v
+
+                            +--------------------+
+                            | Frontend (React)   |
+                            | Vite + S3 Bucket   |
+                            +--------------------+
 ```
