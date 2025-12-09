@@ -1,5 +1,5 @@
-import * as cdk from 'aws-cdk-lib/core';
-import { Construct } from 'constructs';
+import * as cdk from "aws-cdk-lib/core";
+import { Construct } from "constructs";
 // import * as sqs from 'aws-cdk-lib/aws-sqs';
 
 export class InfraStack extends cdk.Stack {
@@ -12,5 +12,8 @@ export class InfraStack extends cdk.Stack {
     // const queue = new sqs.Queue(this, 'InfraQueue', {
     //   visibilityTimeout: cdk.Duration.seconds(300)
     // });
+
+    // Tag all resources in this stack with the project name
+    cdk.Tags.of(this).add("project", "Bucket Bot");
   }
 }
