@@ -15,10 +15,10 @@ The hope is that using Discord
 ## Vague Plan
 
 ```
-+-------------------+      +---------------------+      +-------------------+
-| Discord Server    | <--> | Lambda (FastAPI)    | <--> | DynamoDB Table    |
-| (Bot messages)    |      | (Python API)        |      | (Data storage)    |
-+-------------------+      +---------------------+      +-------------------+
++-------------------+      +---------------------+      +----------------------------+
+| Discord Server    | <--> | Lambda (FastAPI)    | <--> | SQL Database (on Aiven)    |
+| (Bot messages)    |      | (Python API)        |      | (Data storage)             |
++-------------------+      +---------------------+      +----------------------------+
                                     ^
                                     |
                                     v
