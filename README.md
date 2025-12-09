@@ -16,8 +16,8 @@ The hope is that using Discord
 
 ```
 +-------------------+      +---------------------+      +----------------------------+
-| Discord Server    | <--> | Lambda (FastAPI)    | <--> | SQL Database (on Aiven)    |
-| (Bot messages)    |      | (Python API)        |      | (Data storage)             |
+| Discord Server    | <--> | Lambda nodeJS       | <--> | SQL Database (on Aiven)    |
+| (Bot messages)    |      |                     |      | (Data storage)             |
 +-------------------+      +---------------------+      +----------------------------+
                                     ^
                                     |
