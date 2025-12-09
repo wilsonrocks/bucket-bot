@@ -19,11 +19,9 @@ The hope is that using Discord
 | Discord Server    | <--> | Lambda (FastAPI)    | <--> | DynamoDB Table    |
 | (Bot messages)    |      | (Python API)        |      | (Data storage)    |
 +-------------------+      +---------------------+      +-------------------+
-
                                     ^
                                     |
                                     v
-
                             +--------------------+
                             | Frontend (React)   |
                             | Vite + S3 Bucket   |
