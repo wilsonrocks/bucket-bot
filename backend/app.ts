@@ -29,7 +29,12 @@ router.get("/tourney", async (ctx) => {
   ctx.body = { fakeData: rows };
 });
 
+router.post("/token", async (ctx) => {
+  ctx.body = { token: "fakeToken" };
+});
+
 app.use(router.routes());
+console.log(router.routes());
 app.use(router.allowedMethods());
 app.use(async (ctx) => {
   ctx.body;
