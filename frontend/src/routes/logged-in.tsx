@@ -1,4 +1,4 @@
-import { createFileRoute, useSearch } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 
 import z from 'zod'
 
@@ -14,5 +14,5 @@ export const Route = createFileRoute('/logged-in')({
 function RouteComponent() {
   const search = Route.useSearch()
 
-  return <div>Hello "/logged-in"! Code: {search.code}</div>
+  return <div>Howdy UK Malifaux Mod! Your code is: {search.code}</div>
 }
