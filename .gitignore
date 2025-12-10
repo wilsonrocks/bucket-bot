@@ -1,17 +1,9 @@
-# Python
-__pycache__/
-*.py[cod]
-*.pyo
-*.pyd
-*.pyc
-*.env
-.env*
-.venv/
-venv/
-*.egg-info/
-dist/
-build/
-*.log
+# built files
+backend/dist 
+
+# certs
+certs/*.pem
+
 
 # JavaScript/Node
 
