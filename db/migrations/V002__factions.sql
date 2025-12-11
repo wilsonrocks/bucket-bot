@@ -1,0 +1,9 @@
+CREATE TABLE faction (
+    id SERIAL PRIMARY KEY,
+    name TEXT NOT NULL,
+    hex_code TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+ALTER TABLE result
+ADD COLUMN faction_id INTEGER REFERENCES faction(id) ON DELETE SET NULL;
