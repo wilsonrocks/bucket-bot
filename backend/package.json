@@ -14,7 +14,8 @@
     "koa": "^3.1.1",
     "kysely": "^0.28.8",
     "pg": "^8.16.3",
-    "serverless-http": "^4.0.0"
+    "serverless-http": "^4.0.0",
+    "vitest": "^4.0.15"
   },
   "devDependencies": {
     "@types/koa": "^3.0.1",
