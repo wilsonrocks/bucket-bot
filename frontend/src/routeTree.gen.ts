@@ -11,7 +11,9 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoggedInRouteImport } from './routes/logged-in'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppIndexRouteImport } from './routes/app/index'
 import { Route as DemoTanstackQueryRouteImport } from './routes/demo/tanstack-query'
+import { Route as AppAppPagesEventFormRouteImport } from './routes/app/_app-pages/event-form'
 
 const LoggedInRoute = LoggedInRouteImport.update({
   id: '/logged-in',
@@ -23,9 +25,19 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppIndexRoute = AppIndexRouteImport.update({
+  id: '/app/',
+  path: '/app/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DemoTanstackQueryRoute = DemoTanstackQueryRouteImport.update({
   id: '/demo/tanstack-query',
   path: '/demo/tanstack-query',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppAppPagesEventFormRoute = AppAppPagesEventFormRouteImport.update({
+  id: '/app/_app-pages/event-form',
+  path: '/app/event-form',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -33,30 +45,49 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/logged-in': typeof LoggedInRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
+  '/app': typeof AppIndexRoute
+  '/app/event-form': typeof AppAppPagesEventFormRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/logged-in': typeof LoggedInRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
+  '/app': typeof AppIndexRoute
+  '/app/event-form': typeof AppAppPagesEventFormRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/logged-in': typeof LoggedInRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
+  '/app/': typeof AppIndexRoute
+  '/app/_app-pages/event-form': typeof AppAppPagesEventFormRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/logged-in' | '/demo/tanstack-query'
+  fullPaths:
+    | '/'
+    | '/logged-in'
+    | '/demo/tanstack-query'
+    | '/app'
+    | '/app/event-form'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/logged-in' | '/demo/tanstack-query'
-  id: '__root__' | '/' | '/logged-in' | '/demo/tanstack-query'
+  to: '/' | '/logged-in' | '/demo/tanstack-query' | '/app' | '/app/event-form'
+  id:
+    | '__root__'
+    | '/'
+    | '/logged-in'
+    | '/demo/tanstack-query'
+    | '/app/'
+    | '/app/_app-pages/event-form'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LoggedInRoute: typeof LoggedInRoute
   DemoTanstackQueryRoute: typeof DemoTanstackQueryRoute
+  AppIndexRoute: typeof AppIndexRoute
+  AppAppPagesEventFormRoute: typeof AppAppPagesEventFormRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -75,11 +106,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/': {
+      id: '/app/'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/demo/tanstack-query': {
       id: '/demo/tanstack-query'
       path: '/demo/tanstack-query'
       fullPath: '/demo/tanstack-query'
       preLoaderRoute: typeof DemoTanstackQueryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/_app-pages/event-form': {
+      id: '/app/_app-pages/event-form'
+      path: '/app/event-form'
+      fullPath: '/app/event-form'
+      preLoaderRoute: typeof AppAppPagesEventFormRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -89,6 +134,8 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoggedInRoute: LoggedInRoute,
   DemoTanstackQueryRoute: DemoTanstackQueryRoute,
+  AppIndexRoute: AppIndexRoute,
+  AppAppPagesEventFormRoute: AppAppPagesEventFormRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
