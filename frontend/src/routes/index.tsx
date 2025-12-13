@@ -1,6 +1,5 @@
-import { Button, Container, Image, Stack, Text } from '@mantine/core'
+import { Container, Stack, Text } from '@mantine/core'
 import { createFileRoute } from '@tanstack/react-router'
-import BucketBotImage from './bucket-bot.png'
 
 export const Route = createFileRoute('/')({
   component: App,
@@ -13,7 +12,7 @@ function App() {
         <Text ta="center" mb="md">
           Eventually this will do things to do with rankings
         </Text>
-        <Image src={BucketBotImage} alt="Bucket Bot" maw={200} />
+        {/* <Image src={BucketBotImage} alt="Bucket Bot" maw={200} /> */}
       </Stack>
     </Container>
   )
