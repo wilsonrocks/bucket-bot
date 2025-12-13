@@ -28,11 +28,9 @@ export const LoginButton = () => {
     )
 
   return (
-    <Box ta="right">
-      <div>
-        {auth.global_name}({auth.username})
-      </div>
-      <Anchor onClick={auth.logout}>Logout</Anchor>
+    <Box>
+      {auth.global_name ?? auth.username}{' '}
+      <Anchor onClick={auth.logout}>logout</Anchor>
     </Box>
   )
 }
