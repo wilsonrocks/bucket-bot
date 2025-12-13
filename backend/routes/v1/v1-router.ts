@@ -1,9 +1,15 @@
 import { Router } from "@koa/router";
-import { SignJWT } from "jose";
 import { Kysely, PostgresDialect } from "kysely";
 import type { DB } from "kysely-codegen";
 import { Pool } from "pg";
-import { longshanks } from "./v1-routes/longshanks";
+import { longshanks } from "./v1-routes/longshanks.js";
+import z from "zod";
+
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  throw new Error("JWT_SECRET is not defined");
+  // TODO unify and typescript this checking
+}
 
 const db = new Kysely<DB>({
   dialect: new PostgresDialect({
@@ -27,8 +33,15 @@ v1Router.get("/tourney", async (ctx) => {
   ctx.body = { fakeData: rows };
 });
 
+const tokenValidator = z.object({ code: z.string() });
+
 v1Router.post("/token", async (ctx) => {
-  console.log(ctx.request.body.code);
+  let validatedBody;
+  try {
+    validatedBody = tokenValidator.parse(ctx.request.body);
+  } catch (e) {
+    return ctx.throw(400, "Invalid request body", { cause: e });
+  }
   ctx.body = { token: "fakeToken" };
 
   const basicAuth = Buffer.from(
@@ -43,7 +56,7 @@ v1Router.post("/token", async (ctx) => {
     },
     body: new URLSearchParams({
       grant_type: "authorization_code",
-      code: ctx.request.body.code,
+      code: validatedBody.code,
       redirect_uri: "http://localhost:3000/logged-in",
     }),
   });
@@ -60,6 +73,7 @@ v1Router.post("/token", async (ctx) => {
   const userData = await idResponse.json();
   const { id, username, global_name } = userData;
 
+  const { SignJWT } = await import("jose");
   const jwt = await new SignJWT({ id, username, global_name })
     .setProtectedHeader({ alg: "HS256", typ: "JWT" })
     .setExpirationTime("1y")

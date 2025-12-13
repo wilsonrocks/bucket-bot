@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { calculatePoints } from "./points";
+import { calculatePoints } from "./points.js";
 
 describe("mastersEligibility", () => {
   describe("ineligible if fewer than twelve players", () => {
@@ -95,7 +95,7 @@ describe("scaling points", () => {
         46.36363636, 38.09090909, 29.81818182, 21.54545455, 13.27272727, 5,
       ];
       for (let i = 0; i < answer.length - 1; i++) {
-        expect(output.points[i]).toBeCloseTo(answer[i], 2);
+        expect(output.points[i]).toBeCloseTo(answer[i] as number, 2);
       }
     });
 
@@ -113,7 +113,7 @@ describe("scaling points", () => {
         8.461538462, 5,
       ];
       for (let i = 0; i < answer.length - 1; i++) {
-        expect(output.points[i]).toBeCloseTo(answer[i], 2);
+        expect(output.points[i]).toBeCloseTo(answer[i] as number, 2);
       }
     });
   });

@@ -17,11 +17,17 @@ export class InfraStack extends cdk.Stack {
       throw new Error("PROD_DATABASE_URL environment variable is not set");
     } // TODO probably a neater way to do this inc typescript
 
+    if (!process.env.JWT_SECRET) {
+      throw new Error("JWT_SECRET env var is not set");
+    }
+
     const backendLambda = new lambda.Function(this, "BucketBotHandler", {
       code: lambda.Code.fromAsset("../backend/dist"),
       handler: "handler.handler",
       runtime: lambda.Runtime.NODEJS_22_X,
+      timeout: cdk.Duration.seconds(10),
       environment: {
+        JWT_SECRET: process.env.JWT_SECRET,
         DATABASE_URL: process.env.PROD_DATABASE_URL,
         NODE_EXTRA_CA_CERTS: "/var/task/certs/ca.pem", // make sure this is copied across
       },
