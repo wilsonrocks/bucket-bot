@@ -1,6 +1,6 @@
+import { useLocalStorage } from '@mantine/hooks'
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { useEffect } from 'react'
-import { useLocalStorage } from '@mantine/hooks'
 import z from 'zod'
 
 const LoggedInSearchParams = z.object({
@@ -32,7 +32,7 @@ export const Route = createFileRoute('/logged-in')({
 
 function RouteComponent() {
   const search = Route.useSearch()
-  const [authData, setAuthData] = useLocalStorage<{
+  const [authData] = useLocalStorage<{
     jwt: string
     username: string
     global_name: string

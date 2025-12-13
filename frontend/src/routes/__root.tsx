@@ -94,7 +94,6 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
         'og:title': 'b(UK)et bot',
       },
       { 'og:description': "Let's get ranking!" },
-      { 'og:image': bucketBotImage.toString() },
     ],
   }),
 })
