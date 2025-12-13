@@ -21,6 +21,18 @@ export class InfraStack extends cdk.Stack {
       throw new Error("JWT_SECRET env var is not set");
     }
 
+    if (!process.env.DISCORD_CLIENT_ID) {
+      throw new Error("DISCORD_CLIENT_ID env var is not set");
+    }
+
+    if (!process.env.DISCORD_CLIENT_SECRET) {
+      throw new Error("DISCORD_CLIENT_SECRET env var is not set");
+    }
+
+    if (!process.env.DISCORD_REDIRECT_URL) {
+      throw new Error("DISCORD_REDIRECT_URL env var is not set");
+    }
+
     const backendLambda = new lambda.Function(this, "BucketBotHandler", {
       code: lambda.Code.fromAsset("../backend/dist"),
       handler: "handler.handler",
@@ -28,7 +40,10 @@ export class InfraStack extends cdk.Stack {
       timeout: cdk.Duration.seconds(10),
       environment: {
         JWT_SECRET: process.env.JWT_SECRET,
+        DISCORD_REDIRECT_URL: process.env.DISCORD_REDIRECT_URL,
         DATABASE_URL: process.env.PROD_DATABASE_URL,
+        DISCORD_CLIENT_ID: process.env.DISCORD_CLIENT_ID,
+        DISCORD_CLIENT_SECRET: process.env.DISCORD_CLIENT_SECRET,
         NODE_EXTRA_CA_CERTS: "/var/task/certs/ca.pem", // make sure this is copied across
       },
     });
@@ -44,10 +59,14 @@ export class InfraStack extends cdk.Stack {
     v1.addProxy({
       defaultIntegration: new apigateway.LambdaIntegration(backendLambda),
       anyMethod: true,
+      defaultCorsPreflightOptions: {
+        allowOrigins: apigateway.Cors.ALL_ORIGINS,
+        allowMethods: apigateway.Cors.ALL_METHODS,
+        allowHeaders: ["Content-Type", "Authorization"],
+      },
     });
 
     // Tag all resources in this stack with the project name
-    cdk.Tags.of(this).add("project", "Bucket Bot");
 
     // S3 bucket for frontend hosting
     const frontendBucket = new s3.Bucket(this, "FrontendBucket", {
@@ -118,5 +137,6 @@ export class InfraStack extends cdk.Stack {
       description: "URL of the Frontend",
       exportName: "BucketBotFrontendUrl",
     });
+    cdk.Tags.of(this).add("project", "Bucket Bot");
   }
 }
