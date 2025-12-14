@@ -5,6 +5,7 @@ import { Pool } from "pg";
 import { longshanks } from "./v1-routes/longshanks.js";
 import z from "zod";
 import jsonWebToken from "jsonwebtoken";
+import { hasRankingReporterRole } from "./v1-routes/roles.js";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) {
@@ -47,6 +48,7 @@ async function getRows() {
 export const v1Router = new Router({ prefix: "/v1" });
 
 v1Router.get("/longshanks", longshanks);
+v1Router.get("/has-role", hasRankingReporterRole);
 
 v1Router.get("/tourney", async (ctx) => {
   const rows = await getRows();

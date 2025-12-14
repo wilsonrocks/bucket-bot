@@ -13,6 +13,7 @@
   "dependencies": {
     "@koa/cors": "^5.0.0",
     "@koa/router": "^15.0.0",
+    "discord.js": "^14.25.1",
     "jsdom": "^27.3.0",
     "jsonwebtoken": "^9.0.3",
     "koa": "^3.1.1",
