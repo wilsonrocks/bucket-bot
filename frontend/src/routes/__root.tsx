@@ -59,11 +59,13 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
             <LoginButton />
             <Navbar />
           </AppShell.Navbar>
-          <Center>
-            <Container>
-              <Outlet />
-            </Container>
-          </Center>
+          <AppShell.Main>
+            <Center>
+              <Container>
+                <Outlet />
+              </Container>
+            </Center>
+          </AppShell.Main>
         </AppShell>
         <TanStackDevtools
           config={{
