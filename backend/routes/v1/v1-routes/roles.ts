@@ -13,8 +13,7 @@ const RANKING_REPORTER_ROLE_ID = "1449009972339015862";
 const UK_MALIFAUX_SERVER_ID = "820257369379962881";
 
 export const hasRankingReporterRole = async (ctx: Context) => {
-  const userId = ctx.request.query.userId;
-  console.log({ userId, type: typeof userId });
+  const { id: userId } = ctx.state.user;
 
   if (typeof userId !== "string") {
     return ctx.throw(400, "Missing userId");

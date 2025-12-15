@@ -7,7 +7,10 @@ import z from "zod";
 import jsonWebToken from "jsonwebtoken";
 import { hasRankingReporterRole } from "./v1-routes/roles.js";
 
+import koaJwt from "koa-jwt";
+
 const JWT_SECRET = process.env.JWT_SECRET;
+
 if (!JWT_SECRET) {
   throw new Error("JWT_SECRET is not defined");
   // TODO unify and typescript this checking
@@ -46,9 +49,6 @@ async function getRows() {
 }
 
 export const v1Router = new Router({ prefix: "/v1" });
-
-v1Router.get("/longshanks", longshanks);
-v1Router.get("/has-role", hasRankingReporterRole);
 
 v1Router.get("/tourney", async (ctx) => {
   const rows = await getRows();
@@ -121,3 +121,9 @@ v1Router.post("/token", async (ctx) => {
 
   ctx.response.body = { jwt, username, global_name };
 });
+
+// now these need authentication
+v1Router.use(koaJwt({ secret: process.env.JWT_SECRET }));
+
+v1Router.get("/longshanks", longshanks);
+v1Router.get("/has-role", hasRankingReporterRole);
