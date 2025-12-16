@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import {
   AppShell,
   Burger,
@@ -12,18 +13,16 @@ import {
   HeadContent,
   Outlet,
   createRootRouteWithContext,
-  useRouter,
   useRouterState,
 } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 
 import { useDisclosure } from '@mantine/hooks'
 import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
+import type { QueryClient } from '@tanstack/react-query'
 
 import { LoginButton } from '@/components/LoginButton'
 import { Navbar } from '@/components/navbar'
-import type { QueryClient } from '@tanstack/react-query'
-import { useEffect } from 'react'
 
 interface MyRouterContext {
   queryClient: QueryClient

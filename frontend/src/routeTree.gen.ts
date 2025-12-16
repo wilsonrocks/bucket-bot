@@ -13,7 +13,9 @@ import { Route as LoggedInRouteImport } from './routes/logged-in'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app/index'
 import { Route as DemoTanstackQueryRouteImport } from './routes/demo/tanstack-query'
-import { Route as AppAppPagesEventFormRouteImport } from './routes/app/_app-pages/event-form'
+import { Route as AppAppPagesEventsIndexRouteImport } from './routes/app/_app-pages/events/index'
+import { Route as AppAppPagesEventsNewRouteImport } from './routes/app/_app-pages/events/new'
+import { Route as AppAppPagesEventsIdEditRouteImport } from './routes/app/_app-pages/events.$id.edit'
 
 const LoggedInRoute = LoggedInRouteImport.update({
   id: '/logged-in',
@@ -35,9 +37,19 @@ const DemoTanstackQueryRoute = DemoTanstackQueryRouteImport.update({
   path: '/demo/tanstack-query',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppAppPagesEventFormRoute = AppAppPagesEventFormRouteImport.update({
-  id: '/app/_app-pages/event-form',
-  path: '/app/event-form',
+const AppAppPagesEventsIndexRoute = AppAppPagesEventsIndexRouteImport.update({
+  id: '/app/_app-pages/events/',
+  path: '/app/events/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppAppPagesEventsNewRoute = AppAppPagesEventsNewRouteImport.update({
+  id: '/app/_app-pages/events/new',
+  path: '/app/events/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppAppPagesEventsIdEditRoute = AppAppPagesEventsIdEditRouteImport.update({
+  id: '/app/_app-pages/events/$id/edit',
+  path: '/app/events/$id/edit',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -46,14 +58,18 @@ export interface FileRoutesByFullPath {
   '/logged-in': typeof LoggedInRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/app': typeof AppIndexRoute
-  '/app/event-form': typeof AppAppPagesEventFormRoute
+  '/app/events/new': typeof AppAppPagesEventsNewRoute
+  '/app/events': typeof AppAppPagesEventsIndexRoute
+  '/app/events/$id/edit': typeof AppAppPagesEventsIdEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/logged-in': typeof LoggedInRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/app': typeof AppIndexRoute
-  '/app/event-form': typeof AppAppPagesEventFormRoute
+  '/app/events/new': typeof AppAppPagesEventsNewRoute
+  '/app/events': typeof AppAppPagesEventsIndexRoute
+  '/app/events/$id/edit': typeof AppAppPagesEventsIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -61,7 +77,9 @@ export interface FileRoutesById {
   '/logged-in': typeof LoggedInRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/app/': typeof AppIndexRoute
-  '/app/_app-pages/event-form': typeof AppAppPagesEventFormRoute
+  '/app/_app-pages/events/new': typeof AppAppPagesEventsNewRoute
+  '/app/_app-pages/events/': typeof AppAppPagesEventsIndexRoute
+  '/app/_app-pages/events/$id/edit': typeof AppAppPagesEventsIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -70,16 +88,27 @@ export interface FileRouteTypes {
     | '/logged-in'
     | '/demo/tanstack-query'
     | '/app'
-    | '/app/event-form'
+    | '/app/events/new'
+    | '/app/events'
+    | '/app/events/$id/edit'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/logged-in' | '/demo/tanstack-query' | '/app' | '/app/event-form'
+  to:
+    | '/'
+    | '/logged-in'
+    | '/demo/tanstack-query'
+    | '/app'
+    | '/app/events/new'
+    | '/app/events'
+    | '/app/events/$id/edit'
   id:
     | '__root__'
     | '/'
     | '/logged-in'
     | '/demo/tanstack-query'
     | '/app/'
-    | '/app/_app-pages/event-form'
+    | '/app/_app-pages/events/new'
+    | '/app/_app-pages/events/'
+    | '/app/_app-pages/events/$id/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -87,7 +116,9 @@ export interface RootRouteChildren {
   LoggedInRoute: typeof LoggedInRoute
   DemoTanstackQueryRoute: typeof DemoTanstackQueryRoute
   AppIndexRoute: typeof AppIndexRoute
-  AppAppPagesEventFormRoute: typeof AppAppPagesEventFormRoute
+  AppAppPagesEventsNewRoute: typeof AppAppPagesEventsNewRoute
+  AppAppPagesEventsIndexRoute: typeof AppAppPagesEventsIndexRoute
+  AppAppPagesEventsIdEditRoute: typeof AppAppPagesEventsIdEditRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -120,11 +151,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DemoTanstackQueryRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/app/_app-pages/event-form': {
-      id: '/app/_app-pages/event-form'
-      path: '/app/event-form'
-      fullPath: '/app/event-form'
-      preLoaderRoute: typeof AppAppPagesEventFormRouteImport
+    '/app/_app-pages/events/': {
+      id: '/app/_app-pages/events/'
+      path: '/app/events'
+      fullPath: '/app/events'
+      preLoaderRoute: typeof AppAppPagesEventsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/_app-pages/events/new': {
+      id: '/app/_app-pages/events/new'
+      path: '/app/events/new'
+      fullPath: '/app/events/new'
+      preLoaderRoute: typeof AppAppPagesEventsNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/_app-pages/events/$id/edit': {
+      id: '/app/_app-pages/events/$id/edit'
+      path: '/app/events/$id/edit'
+      fullPath: '/app/events/$id/edit'
+      preLoaderRoute: typeof AppAppPagesEventsIdEditRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -135,7 +180,9 @@ const rootRouteChildren: RootRouteChildren = {
   LoggedInRoute: LoggedInRoute,
   DemoTanstackQueryRoute: DemoTanstackQueryRoute,
   AppIndexRoute: AppIndexRoute,
-  AppAppPagesEventFormRoute: AppAppPagesEventFormRoute,
+  AppAppPagesEventsNewRoute: AppAppPagesEventsNewRoute,
+  AppAppPagesEventsIndexRoute: AppAppPagesEventsIndexRoute,
+  AppAppPagesEventsIdEditRoute: AppAppPagesEventsIdEditRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
