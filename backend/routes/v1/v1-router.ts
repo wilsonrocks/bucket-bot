@@ -123,7 +123,7 @@ v1Router.post("/token", async (ctx) => {
 });
 
 // now these need authentication
-v1Router.use(koaJwt({ secret: process.env.JWT_SECRET }));
+v1Router.use(koaJwt({ secret: process.env.JWT_SECRET! }));
 
 v1Router.get("/longshanks", longshanks);
 v1Router.get("/has-role", hasRankingReporterRole);

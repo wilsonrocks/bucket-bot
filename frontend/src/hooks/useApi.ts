@@ -6,6 +6,9 @@ export const useHasRole = () => {
   const hasRole = useQuery({
     queryKey: ['has-role'],
     queryFn: async (): Promise<{ rankingReporter: boolean }> => {
+      if (!auth) {
+        throw new Error('No auth available')
+      }
       const url = `${import.meta.env.VITE_BACKEND_URL}/v1/has-role`
       const res = await fetch(url, {
         headers: {

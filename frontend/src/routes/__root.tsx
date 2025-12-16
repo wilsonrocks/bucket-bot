@@ -55,7 +55,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
               </Text>
             </Group>
           </AppShell.Header>
-          <AppShell.Navbar p="md">
+          <AppShell.Navbar p="md" bg="gradient(white, lightgrey)">
             <LoginButton />
             <Navbar />
           </AppShell.Navbar>

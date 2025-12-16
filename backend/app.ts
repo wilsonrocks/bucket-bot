@@ -7,6 +7,7 @@ import error from "koa-json-error";
 import { v1Router } from "./routes/v1/v1-router.js";
 
 const app = new Koa();
+app.use(cors());
 app.use(
   error({
     format: (err: any) => {
@@ -19,7 +20,6 @@ app.use(
   })
 );
 app.use(logger());
-app.use(cors());
 app.use(bodyParser());
 
 app.use(v1Router.routes());

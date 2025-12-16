@@ -33,6 +33,10 @@ export class InfraStack extends cdk.Stack {
       throw new Error("DISCORD_REDIRECT_URL env var is not set");
     }
 
+    if (!process.env.DISCORD_BOT_TOKEN) {
+      throw new Error("DISCORD_BOT_TOKEN env var is not set");
+    }
+
     const backendLambda = new lambda.Function(this, "BucketBotHandler", {
       code: lambda.Code.fromAsset("../backend/dist"),
       handler: "handler.handler",
@@ -44,6 +48,7 @@ export class InfraStack extends cdk.Stack {
         DATABASE_URL: process.env.PROD_DATABASE_URL,
         DISCORD_CLIENT_ID: process.env.DISCORD_CLIENT_ID,
         DISCORD_CLIENT_SECRET: process.env.DISCORD_CLIENT_SECRET,
+        DISCORD_BOT_TOKEN: process.env.DISCORD_BOT_TOKEN,
         NODE_EXTRA_CA_CERTS: "/var/task/certs/ca.pem", // make sure this is copied across
       },
     });
