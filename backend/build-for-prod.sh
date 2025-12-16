@@ -1,5 +1,7 @@
 #!/bin/bash
 set -e
+echo 'Installing Typescript compiler...'
+npm install typescript
 echo "Building backend for production..."
 npx tsc
 cp package*.json dist
