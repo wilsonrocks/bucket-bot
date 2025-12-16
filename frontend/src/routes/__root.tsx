@@ -12,6 +12,8 @@ import {
   HeadContent,
   Outlet,
   createRootRouteWithContext,
+  useRouter,
+  useRouterState,
 } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 
@@ -21,6 +23,7 @@ import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
 import { LoginButton } from '@/components/LoginButton'
 import { Navbar } from '@/components/navbar'
 import type { QueryClient } from '@tanstack/react-query'
+import { useEffect } from 'react'
 
 interface MyRouterContext {
   queryClient: QueryClient
@@ -28,7 +31,16 @@ interface MyRouterContext {
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({
   component: () => {
-    const [opened, { toggle }] = useDisclosure()
+    const [opened, { toggle, close }] = useDisclosure()
+
+    const location = useRouterState({
+      select: (s) => s.location,
+    })
+
+    useEffect(() => {
+      close()
+    }, [location.pathname])
+
     return (
       <>
         <HeadContent />
