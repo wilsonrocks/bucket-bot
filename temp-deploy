@@ -1,0 +1,19 @@
+#!/bin/bash
+set -e
+
+echo 'Eventually this will all be done with github actions!'
+
+cd backend
+./build-for-prod.sh
+
+cd ../frontend
+VITE_BACKEND_URL=$PROD_BACKEND_URL npm run build
+
+cd ../infra
+DATABASE_URL=$PROD_DATABASE_URL DISCORD_REDIRECT_URL=$PROD_DISCORD_REDIRECT_URL cdk deploy
+
+cd ..
+echo 'Deployed!'
+
+
+
