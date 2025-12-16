@@ -8,7 +8,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "tsx --watch index.ts"
+    "dev": "tsx --watch index.ts",
+    "generate-db-types": "kysely-codegen --out-file db.d.ts"
   },
   "dependencies": {
     "@koa/cors": "^5.0.0",
