@@ -1,6 +1,7 @@
 import { Context } from "koa";
 import { parseHTML } from "linkedom";
 import z from "zod";
+import { calculatePoints, maxPoints } from "../../../logic/points";
 
 const otherDataValidator = z.object({
   longshanksId: z.string(),
@@ -51,6 +52,10 @@ export const newLongshanksEvent = async (ctx: Context) => {
             name: el.querySelector(".player_link")?.textContent?.trim(),
             faction: el.querySelector(".factions img")?.getAttribute("title"),
             team: el.querySelectorAll(".player_link")[1]?.textContent?.trim(),
+            rounds:
+              parseInt(el.querySelectorAll(".wins")[0].textContent) +
+              parseInt(el.querySelectorAll(".loss")[0].textContent) +
+              parseInt(el.querySelectorAll(".ties")?.[0]?.textContent || "0"),
           };
           return player;
         }
@@ -59,41 +64,37 @@ export const newLongshanksEvent = async (ctx: Context) => {
     })(),
     (async () => {
       const otherData: Record<string, unknown> = {};
-      {
-        const otherDataUrl = `https://malifaux.longshanks.org/event/${longshanksEventId}/`;
-        const html = await fetch(otherDataUrl);
+      const otherDataUrl = `https://malifaux.longshanks.org/event/${longshanksEventId}/`;
+      const html = await fetch(otherDataUrl);
 
-        if (!html.ok) {
-          ctx.throw(
-            502,
-            `Failed to fetch data from Longshanks ${otherDataUrl}`
-          );
-        }
-        const htmlText = await html.text();
-        const { document } = parseHTML(htmlText);
-        if (!document) {
-          return ctx.throw(
-            500,
-            `No document found when parsing from Longshanks HTML at URL ${otherDataUrl}`
-          );
-        }
-        otherData.longshanksId = longshanksEventId;
-        otherData.eventName = document
-          .querySelector(".desktop")
-          ?.textContent?.trim();
-
-        const tableCells = [...document.querySelectorAll(".details table td")];
-
-        otherData.location = tableCells.at(-7)?.textContent?.trim();
-
-        otherData.date = tableCells.at(-5)?.textContent?.trim().split(" ")[0];
-
-        otherData.to_longshanks_id = tableCells
-          .at(-3)
-          ?.textContent?.trim()
-          .split("#")
-          .at(-1);
+      if (!html.ok) {
+        ctx.throw(502, `Failed to fetch data from Longshanks ${otherDataUrl}`);
       }
+      const htmlText = await html.text();
+      const { document } = parseHTML(htmlText);
+      if (!document) {
+        return ctx.throw(
+          500,
+          `No document found when parsing from Longshanks HTML at URL ${otherDataUrl}`
+        );
+      }
+      otherData.longshanksId = longshanksEventId;
+      otherData.eventName = document
+        .querySelector(".desktop")
+        ?.textContent?.trim();
+
+      const tableCells = [...document.querySelectorAll(".details table td")];
+
+      otherData.location = tableCells.at(-7)?.textContent?.trim();
+
+      otherData.date = tableCells.at(-5)?.textContent?.trim().split(" ")[0];
+
+      otherData.to_longshanks_id = tableCells
+        .at(-3)
+        ?.textContent?.trim()
+        .split("#")
+        .at(-1);
+
       return otherData;
     })(),
   ]);
@@ -144,7 +145,17 @@ export const newLongshanksEvent = async (ctx: Context) => {
           )
           .returning("id")
           .execute();
-
+        const points = calculatePoints(
+          players.length,
+          maxPoints("Local", Math.max(...players.map((x) => x.rounds))) // TODO not hard code to local
+        ).points;
+        console.log({
+          points,
+          indexRank: player.rank - 1,
+          p: points[player.rank - 1],
+          pzero: points[0],
+        });
+        throw "stop";
         await trx
           .insertInto("result")
           .values({
@@ -152,6 +163,7 @@ export const newLongshanksEvent = async (ctx: Context) => {
             player_id: dbPlayer[0].id,
             place: player.rank,
             faction_id: factionMap[player.faction || "Unknown"] || null,
+            points,
           })
           .execute();
         // then add player results

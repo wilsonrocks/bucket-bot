@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { calculatePoints } from "./points.js";
+import { calculatePoints } from "./points";
 
 describe("mastersEligibility", () => {
   describe("ineligible if fewer than twelve players", () => {

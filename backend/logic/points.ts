@@ -45,3 +45,15 @@ export const calculatePoints = (
     delta,
   };
 };
+
+export const maxPoints = (level: string, rounds: number): number => {
+  if (level === "GT") return 130;
+  if (level === "Nationals") return 140;
+
+  if (rounds === 3) return 100;
+  if (rounds === 4) return 110;
+  if (rounds === 5) return 120;
+  throw new Error(
+    `issue calculating max points for event level ${level} and rounds ${rounds}`
+  );
+};
