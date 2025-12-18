@@ -1,0 +1,2 @@
+ALTER TABLE tourney DROP COLUMN date;
+ALTER TABLE tourney ADD COLUMN date DATE;

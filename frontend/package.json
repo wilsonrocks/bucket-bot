@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@mantine/core": "^8.3.10",
+    "@mantine/form": "^8.3.10",
     "@mantine/hooks": "^8.3.10",
     "@tailwindcss/vite": "^4.0.6",
     "@tanstack/react-devtools": "^0.7.0",

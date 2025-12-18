@@ -1,0 +1,1 @@
+ALTER TABLE tourney ALTER COLUMN level_code SET DEFAULT 'local';

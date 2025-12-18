@@ -8,9 +8,8 @@ export const Route = createFileRoute('/app/_app-pages/events/')({
 function RouteComponent() {
   return (
     <div>
-      {' '}
-      <Button component={Link} to="new">
-        Create New Event
+      <Button component={Link} to="new-longshanks">
+        New Longshanks Event
       </Button>
     </div>
   )

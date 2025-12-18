@@ -1,0 +1,1 @@
+ALTER TABLE player ALTER COLUMN discord_id DROP NOT NULL;

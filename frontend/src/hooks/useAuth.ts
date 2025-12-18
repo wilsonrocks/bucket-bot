@@ -11,5 +11,11 @@ export const useAuth = () => {
   >({ key: 'auth' })
 
   if (!authData) return null
-  return { ...authData, logout: () => setAuthData(undefined) }
+  return {
+    ...authData,
+    logout: () => setAuthData(undefined),
+    headers: {
+      Authorization: `Bearer ${authData.jwt}`,
+    },
+  }
 }

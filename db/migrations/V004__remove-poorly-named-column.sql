@@ -1,0 +1,2 @@
+ALTER TABLE tourney DROP COLUMN location;
+ALTER TABLE tourney ADD COLUMN venue TEXT

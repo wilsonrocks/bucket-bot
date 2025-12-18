@@ -1,0 +1,1 @@
+ALTER TABLE tourney ADD COLUMN longshanks_id TEXT UNIQUE;

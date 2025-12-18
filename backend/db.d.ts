@@ -46,6 +46,7 @@ export interface Player {
   discord_username: string;
   id: Generated<number>;
   longshanks_id: string | null;
+  longshanks_name: string | null;
   name: string;
 }
 
@@ -65,20 +66,13 @@ export interface Team {
 }
 
 export interface Tourney {
-  best_painted: number | null;
-  best_sport: number | null;
   created_at: Generated<Timestamp | null>;
-  date: Timestamp;
+  date: Timestamp | null;
   id: Generated<number>;
+  longshanks_id: string | null;
   name: string;
-  venue_id: number | null;
-}
-
-export interface Venue {
-  created_at: Generated<Timestamp | null>;
-  id: Generated<number>;
-  name: string;
-  post_code: string;
+  organiser_id: number | null;
+  venue: string | null;
 }
 
 export interface DB {
@@ -89,5 +83,4 @@ export interface DB {
   result: Result;
   team: Team;
   tourney: Tourney;
-  venue: Venue;
 }

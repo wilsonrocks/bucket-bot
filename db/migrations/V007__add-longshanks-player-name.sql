@@ -1,0 +1,1 @@
+ALTER TABLE player ADD COLUMN longshanks_name TEXT;

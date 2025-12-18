@@ -14,7 +14,9 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app/index'
 import { Route as DemoTanstackQueryRouteImport } from './routes/demo/tanstack-query'
 import { Route as AppAppPagesEventsIndexRouteImport } from './routes/app/_app-pages/events/index'
-import { Route as AppAppPagesEventsNewRouteImport } from './routes/app/_app-pages/events/new'
+import { Route as AppAppPagesEventsNewManualRouteImport } from './routes/app/_app-pages/events/new-manual'
+import { Route as AppAppPagesEventsNewLongshanksRouteImport } from './routes/app/_app-pages/events/new-longshanks'
+import { Route as AppAppPagesEventsNewBotRouteImport } from './routes/app/_app-pages/events/new-bot'
 import { Route as AppAppPagesEventsIdEditRouteImport } from './routes/app/_app-pages/events.$id.edit'
 
 const LoggedInRoute = LoggedInRouteImport.update({
@@ -42,9 +44,21 @@ const AppAppPagesEventsIndexRoute = AppAppPagesEventsIndexRouteImport.update({
   path: '/app/events/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppAppPagesEventsNewRoute = AppAppPagesEventsNewRouteImport.update({
-  id: '/app/_app-pages/events/new',
-  path: '/app/events/new',
+const AppAppPagesEventsNewManualRoute =
+  AppAppPagesEventsNewManualRouteImport.update({
+    id: '/app/_app-pages/events/new-manual',
+    path: '/app/events/new-manual',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const AppAppPagesEventsNewLongshanksRoute =
+  AppAppPagesEventsNewLongshanksRouteImport.update({
+    id: '/app/_app-pages/events/new-longshanks',
+    path: '/app/events/new-longshanks',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const AppAppPagesEventsNewBotRoute = AppAppPagesEventsNewBotRouteImport.update({
+  id: '/app/_app-pages/events/new-bot',
+  path: '/app/events/new-bot',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppAppPagesEventsIdEditRoute = AppAppPagesEventsIdEditRouteImport.update({
@@ -58,7 +72,9 @@ export interface FileRoutesByFullPath {
   '/logged-in': typeof LoggedInRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/app': typeof AppIndexRoute
-  '/app/events/new': typeof AppAppPagesEventsNewRoute
+  '/app/events/new-bot': typeof AppAppPagesEventsNewBotRoute
+  '/app/events/new-longshanks': typeof AppAppPagesEventsNewLongshanksRoute
+  '/app/events/new-manual': typeof AppAppPagesEventsNewManualRoute
   '/app/events': typeof AppAppPagesEventsIndexRoute
   '/app/events/$id/edit': typeof AppAppPagesEventsIdEditRoute
 }
@@ -67,7 +83,9 @@ export interface FileRoutesByTo {
   '/logged-in': typeof LoggedInRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/app': typeof AppIndexRoute
-  '/app/events/new': typeof AppAppPagesEventsNewRoute
+  '/app/events/new-bot': typeof AppAppPagesEventsNewBotRoute
+  '/app/events/new-longshanks': typeof AppAppPagesEventsNewLongshanksRoute
+  '/app/events/new-manual': typeof AppAppPagesEventsNewManualRoute
   '/app/events': typeof AppAppPagesEventsIndexRoute
   '/app/events/$id/edit': typeof AppAppPagesEventsIdEditRoute
 }
@@ -77,7 +95,9 @@ export interface FileRoutesById {
   '/logged-in': typeof LoggedInRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/app/': typeof AppIndexRoute
-  '/app/_app-pages/events/new': typeof AppAppPagesEventsNewRoute
+  '/app/_app-pages/events/new-bot': typeof AppAppPagesEventsNewBotRoute
+  '/app/_app-pages/events/new-longshanks': typeof AppAppPagesEventsNewLongshanksRoute
+  '/app/_app-pages/events/new-manual': typeof AppAppPagesEventsNewManualRoute
   '/app/_app-pages/events/': typeof AppAppPagesEventsIndexRoute
   '/app/_app-pages/events/$id/edit': typeof AppAppPagesEventsIdEditRoute
 }
@@ -88,7 +108,9 @@ export interface FileRouteTypes {
     | '/logged-in'
     | '/demo/tanstack-query'
     | '/app'
-    | '/app/events/new'
+    | '/app/events/new-bot'
+    | '/app/events/new-longshanks'
+    | '/app/events/new-manual'
     | '/app/events'
     | '/app/events/$id/edit'
   fileRoutesByTo: FileRoutesByTo
@@ -97,7 +119,9 @@ export interface FileRouteTypes {
     | '/logged-in'
     | '/demo/tanstack-query'
     | '/app'
-    | '/app/events/new'
+    | '/app/events/new-bot'
+    | '/app/events/new-longshanks'
+    | '/app/events/new-manual'
     | '/app/events'
     | '/app/events/$id/edit'
   id:
@@ -106,7 +130,9 @@ export interface FileRouteTypes {
     | '/logged-in'
     | '/demo/tanstack-query'
     | '/app/'
-    | '/app/_app-pages/events/new'
+    | '/app/_app-pages/events/new-bot'
+    | '/app/_app-pages/events/new-longshanks'
+    | '/app/_app-pages/events/new-manual'
     | '/app/_app-pages/events/'
     | '/app/_app-pages/events/$id/edit'
   fileRoutesById: FileRoutesById
@@ -116,7 +142,9 @@ export interface RootRouteChildren {
   LoggedInRoute: typeof LoggedInRoute
   DemoTanstackQueryRoute: typeof DemoTanstackQueryRoute
   AppIndexRoute: typeof AppIndexRoute
-  AppAppPagesEventsNewRoute: typeof AppAppPagesEventsNewRoute
+  AppAppPagesEventsNewBotRoute: typeof AppAppPagesEventsNewBotRoute
+  AppAppPagesEventsNewLongshanksRoute: typeof AppAppPagesEventsNewLongshanksRoute
+  AppAppPagesEventsNewManualRoute: typeof AppAppPagesEventsNewManualRoute
   AppAppPagesEventsIndexRoute: typeof AppAppPagesEventsIndexRoute
   AppAppPagesEventsIdEditRoute: typeof AppAppPagesEventsIdEditRoute
 }
@@ -158,11 +186,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAppPagesEventsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/app/_app-pages/events/new': {
-      id: '/app/_app-pages/events/new'
-      path: '/app/events/new'
-      fullPath: '/app/events/new'
-      preLoaderRoute: typeof AppAppPagesEventsNewRouteImport
+    '/app/_app-pages/events/new-manual': {
+      id: '/app/_app-pages/events/new-manual'
+      path: '/app/events/new-manual'
+      fullPath: '/app/events/new-manual'
+      preLoaderRoute: typeof AppAppPagesEventsNewManualRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/_app-pages/events/new-longshanks': {
+      id: '/app/_app-pages/events/new-longshanks'
+      path: '/app/events/new-longshanks'
+      fullPath: '/app/events/new-longshanks'
+      preLoaderRoute: typeof AppAppPagesEventsNewLongshanksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/_app-pages/events/new-bot': {
+      id: '/app/_app-pages/events/new-bot'
+      path: '/app/events/new-bot'
+      fullPath: '/app/events/new-bot'
+      preLoaderRoute: typeof AppAppPagesEventsNewBotRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app/_app-pages/events/$id/edit': {
@@ -180,7 +222,9 @@ const rootRouteChildren: RootRouteChildren = {
   LoggedInRoute: LoggedInRoute,
   DemoTanstackQueryRoute: DemoTanstackQueryRoute,
   AppIndexRoute: AppIndexRoute,
-  AppAppPagesEventsNewRoute: AppAppPagesEventsNewRoute,
+  AppAppPagesEventsNewBotRoute: AppAppPagesEventsNewBotRoute,
+  AppAppPagesEventsNewLongshanksRoute: AppAppPagesEventsNewLongshanksRoute,
+  AppAppPagesEventsNewManualRoute: AppAppPagesEventsNewManualRoute,
   AppAppPagesEventsIndexRoute: AppAppPagesEventsIndexRoute,
   AppAppPagesEventsIdEditRoute: AppAppPagesEventsIdEditRoute,
 }

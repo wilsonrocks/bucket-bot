@@ -1,10 +1,12 @@
 import cors from "@koa/cors";
 import Koa from "koa";
 import bodyParser from "koa-bodyparser";
+
 import logger from "koa-logger";
 import error from "koa-json-error";
 
 import { v1Router } from "./routes/v1/v1-router.js";
+import { dbClient } from "./db-client.js";
 
 const app = new Koa();
 app.use(cors());
@@ -19,6 +21,10 @@ app.use(
     },
   })
 );
+app.use(async (ctx, next) => {
+  ctx.state.db = dbClient;
+  await next();
+});
 app.use(logger());
 app.use(bodyParser());
 
