@@ -76,4 +76,38 @@ describe("Extract Longshanks Players", () => {
       );
     });
   });
+
+  describe("New Frontier MWS", () => {
+    test("should extract players who dropped", () => {
+      const playerData = extractPlayersFromLongshanksHTML(
+        newFrontierPlayersHtml
+      );
+
+      expect(playerData).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            name: "Dylan J Lee",
+          }),
+          expect.objectContaining({ name: "Dan JustDiesel H" }),
+        ])
+      );
+    });
+  });
+
+  describe("Oz's Magical Mystery Tour", () => {
+    test("should NOT extract players who dropped before playing games", () => {
+      const playerData = extractPlayersFromLongshanksHTML(
+        ozMagicalMysteryTourPlayersHtml
+      );
+
+      expect(playerData).not.toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            name: "Dave Roberts",
+          }),
+          expect.objectContaining({ name: "Oz Rampage Games Goff" }),
+        ])
+      );
+    });
+  });
 });
