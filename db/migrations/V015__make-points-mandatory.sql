@@ -1,0 +1,1 @@
+ALTER TABLE result ALTER COLUMN points SET NOT NULL;

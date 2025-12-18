@@ -115,7 +115,7 @@ export const newLongshanksEvent = async (ctx: Context) => {
   await ctx.state.db.transaction().execute(async (trx) => {
     // first make the event
 
-    const tourney = await ctx.state.db
+    const tourney = await trx
       .insertInto("tourney")
       .values({
         // TODO add in organiser_id which is a foreign key to player table
