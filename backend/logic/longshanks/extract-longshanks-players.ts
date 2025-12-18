@@ -26,7 +26,9 @@ export const extractPlayersFromLongshanksHTML = (
     throw new Error(`No document found when parsing from Longshanks HTML`);
   }
 
-  const players = [...document.querySelectorAll("[class=player]")].map((el) => {
+  const players = [
+    ...document.querySelectorAll("[class=player], [class='player drop']"),
+  ].map((el) => {
     const longshanksId = el.getAttribute("id")?.split("_")[1];
 
     if (typeof longshanksId !== "string") {
@@ -71,5 +73,5 @@ export const extractPlayersFromLongshanksHTML = (
     };
     return player;
   });
-  return players;
+  return players.filter((p) => p.roundsPlayed > 0); // in case anyone drops all games
 };

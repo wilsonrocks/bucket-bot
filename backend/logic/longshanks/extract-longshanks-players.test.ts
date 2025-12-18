@@ -1,6 +1,10 @@
 import { describe, expect, test } from "vitest";
 ("");
-import { powderMonkeyFaux3PlayersHtml } from "./html";
+import {
+  newFrontierPlayersHtml,
+  ozMagicalMysteryTourPlayersHtml,
+  powderMonkeyFaux3PlayersHtml,
+} from "./html";
 import { extractPlayersFromLongshanksHTML } from "./extract-longshanks-players";
 
 describe("Extract Longshanks Players", () => {
@@ -12,9 +16,19 @@ describe("Extract Longshanks Players", () => {
       expect(playerData.length).toBe(18);
     });
 
-    test.todo("one where someone dropped");
+    test("New Frontier MWS", () => {
+      const playerData = extractPlayersFromLongshanksHTML(
+        newFrontierPlayersHtml
+      );
+      expect(playerData.length).toBe(32);
+    });
 
-    test.todo("one where a game is incomplete or people played no games");
+    test("Oz's Magical Mystery Tour", () => {
+      const playerData = extractPlayersFromLongshanksHTML(
+        ozMagicalMysteryTourPlayersHtml
+      );
+      expect(playerData.length).toBe(32);
+    });
   });
 
   describe("should extract players correctly", () => {
