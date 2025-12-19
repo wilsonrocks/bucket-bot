@@ -1,6 +1,7 @@
 import { Button, Modal, TextInput } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { Route as EventIdRoute } from '../events.$id.edit.tsx'
 import { Route as IndexRoute } from './index.tsx'
 import { useCreateLongshanksEventMutation } from '@/hooks/useApi.ts'
 
@@ -27,7 +28,7 @@ function RouteComponent() {
       ),
     }),
   })
-
+  const navigateToEventPage = EventIdRoute.useNavigate()
   const newLongshanksEventMutation = useCreateLongshanksEventMutation()
   return (
     <Modal
@@ -40,8 +41,8 @@ function RouteComponent() {
       <form
         onSubmit={form.onSubmit((values) => {
           newLongshanksEventMutation.mutate(values.longshanksId, {
-            onSuccess: () => {
-              debugger
+            onSuccess: (response) => {
+              navigateToEventPage({ params: { id: response.id } })
             },
             onError: (error) => {
               debugger

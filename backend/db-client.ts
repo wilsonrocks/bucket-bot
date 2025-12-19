@@ -8,4 +8,11 @@ export const dbClient = new Kysely<DB>({
       connectionString: process.env.DATABASE_URL,
     }),
   }),
+  log: (event) => {
+    if (process.env.NODE_ENV === "production") return;
+    if (event.level === "query") {
+      console.log("SQL:", event.query.sql);
+      console.log("PARAMS:", event.query.parameters);
+    }
+  },
 });

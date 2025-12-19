@@ -1,8 +1,9 @@
 import { useGetAllTourneys } from '@/hooks/useApi'
-import { Anchor, Button, Table } from '@mantine/core'
+import { Anchor, Button, Table, Title } from '@mantine/core'
 import { createFileRoute } from '@tanstack/react-router'
 import { format, parseISO } from 'date-fns'
 import { Route as EventIdRoute } from '../events.$id.edit'
+import { Route as NewLongshanksRoute } from './new-longshanks'
 import { Link } from '@/components/link'
 
 export const Route = createFileRoute('/app/_app-pages/events/')({
@@ -11,17 +12,16 @@ export const Route = createFileRoute('/app/_app-pages/events/')({
 
 function RouteComponent() {
   const tourneys = useGetAllTourneys()
-
+  const navigateToNewLongshanksEvent = NewLongshanksRoute.useNavigate()
   return (
     <div>
-      <Button component={Link} to="new-longshanks">
-        New Longshanks Event
-      </Button>
+      <Title order={1} mb="md">
+        Events
+      </Title>
 
       {tourneys.data ? (
         <Table
           data={{
-            caption: 'Events',
             body: tourneys.data.map(
               ({ id, name, date, players, level_code }) => [
                 <Anchor component={Link} to={EventIdRoute.path} params={{ id }}>
@@ -38,6 +38,10 @@ function RouteComponent() {
       ) : (
         <div>Loading...</div>
       )}
+
+      <Button component={Link} to={NewLongshanksRoute.path} mt="md">
+        New Longshanks Event
+      </Button>
     </div>
   )
 }

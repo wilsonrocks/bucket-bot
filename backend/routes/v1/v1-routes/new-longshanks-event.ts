@@ -4,6 +4,7 @@ import z from "zod";
 import { calculatePoints, maxPoints } from "../../../logic/points";
 import { extractPlayersFromLongshanksHTML } from "../../../logic/longshanks/extract-longshanks-players";
 import { extractTourneyFromLongshanksHtml } from "../../../logic/longshanks/extract-longshanks-tourney-data";
+import { allTourneys } from "./tourney";
 
 const otherDataValidator = z.object({
   longshanksId: z.string(),
@@ -34,7 +35,6 @@ export const newLongshanksEvent = async (ctx: Context) => {
       return playerData;
     })(),
     (async () => {
-      const otherData: Record<string, unknown> = {};
       const otherDataUrl = `https://malifaux.longshanks.org/event/${longshanksEventId}/`;
       const html = await fetch(otherDataUrl);
 
@@ -48,10 +48,7 @@ export const newLongshanksEvent = async (ctx: Context) => {
     })(),
   ]);
 
-  console.table(otherData);
   const parsedOtherData = otherDataValidator.parse(otherData);
-  console.table(parsedOtherData);
-  console.table(players);
 
   const factions = await ctx.state.db
     .selectFrom("faction")
@@ -100,14 +97,8 @@ export const newLongshanksEvent = async (ctx: Context) => {
           maxPoints("Local", Math.max(...players.map((x) => x.roundsPlayed))) // TODO not hard code to local
         ).points[player.rank - 1];
 
-        console.log({
-          player,
-          rank: player.rank,
-          points,
-          indexRank: player.rank - 1,
-          p: points[player.rank - 1],
-          pzero: points[0],
-        });
+        if (!points)
+          ctx.throw(400, "Not enough players to award points/rankings");
 
         await trx
           .insertInto("result")
@@ -124,5 +115,11 @@ export const newLongshanksEvent = async (ctx: Context) => {
     );
   });
 
-  ctx.body = { ...otherData, players };
+  const tourney = await ctx.state.db
+    .selectFrom("tourney")
+    .where("longshanks_id", "=", otherData.longshanksId)
+    .select("id")
+    .executeTakeFirstOrThrow();
+
+  ctx.body = { ...otherData, players, id: tourney.id };
 };

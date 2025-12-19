@@ -73,3 +73,37 @@ export const useGetAllTourneys = () => {
   })
   return allTourneys
 }
+
+export const useGetTourneyDetail = (id: number) => {
+  const auth = useAuth()
+  const tourneyDetail = useQuery({
+    queryKey: ['tourney-detail', 'id'],
+    enabled: !!auth,
+    queryFn: async (): Promise<{
+      tourney: {
+        id: number
+        name: string
+        date: string
+        venue: string
+        level_code: string
+      }
+      players: {
+        playerId: number
+        factionName: string
+        playerName: string
+        place: number
+        points: number
+      }[]
+    }> => {
+      const url = `${import.meta.env.VITE_BACKEND_URL}/v1/tourney/${id}`
+      const res = await fetch(url, {
+        headers: auth!.headers, // is checked on enabled
+      })
+      if (!res.ok) {
+        throw new Error('Failed to fetch tourney detail')
+      }
+      return res.json()
+    },
+  })
+  return tourneyDetail
+}
