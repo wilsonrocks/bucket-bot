@@ -1,8 +1,9 @@
 import { useGetAllTourneys } from '@/hooks/useApi'
-import { Button, Table } from '@mantine/core'
-import { Link, createFileRoute } from '@tanstack/react-router'
-import { format, parse, parseISO } from 'date-fns'
+import { Anchor, Button, Table } from '@mantine/core'
+import { createFileRoute } from '@tanstack/react-router'
+import { format, parseISO } from 'date-fns'
 import { Route as EventIdRoute } from '../events.$id.edit'
+import { Link } from '@/components/link'
 
 export const Route = createFileRoute('/app/_app-pages/events/')({
   component: RouteComponent,
@@ -23,9 +24,9 @@ function RouteComponent() {
             caption: 'Events',
             body: tourneys.data.map(
               ({ id, name, date, players, level_code }) => [
-                <Link to={EventIdRoute.path} params={{ id }}>
+                <Anchor component={Link} to={EventIdRoute.path} params={{ id }}>
                   {name}
-                </Link>,
+                </Anchor>,
                 format(parseISO(date), 'dd MMM yyyy'),
                 players,
                 level_code,

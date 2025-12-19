@@ -1,14 +1,13 @@
 import { Stack } from '@mantine/core'
 import { AppNavLink } from './app-nav-link'
-import { HasRankingReporterRole } from './auth'
+import { useHasRole } from '@/hooks/useApi'
 import { Route as EventsRoute } from '@/routes/app/_app-pages/events/index.tsx'
 
 export const Navbar = () => {
+  const hasRole = useHasRole()
   return (
     <Stack>
-      <HasRankingReporterRole>
-        <AppNavLink to={EventsRoute.path} label="Events" />
-      </HasRankingReporterRole>
+      {hasRole && <AppNavLink to={EventsRoute.path} label="Events" />}
     </Stack>
   )
 }
