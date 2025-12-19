@@ -8,6 +8,13 @@ import {
 import { extractPlayersFromLongshanksHTML } from "./extract-longshanks-players";
 
 describe("Extract Longshanks Players", () => {
+  describe("does not crash on HTML in the wrong structure", () => {
+    test("very empty HTML", () => {
+      const playerData = extractPlayersFromLongshanksHTML(`<html/>`);
+      expect(playerData.length).toBe(0);
+    });
+  });
+
   describe("should get correct number of players", () => {
     test("PowderMonkeyFaux3", () => {
       const playerData = extractPlayersFromLongshanksHTML(
