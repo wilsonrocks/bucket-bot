@@ -26,6 +26,7 @@ export const extractPlayersFromLongshanksHTML = (
     throw new Error(`No document found when parsing from Longshanks HTML`);
   }
 
+  let cumulativeRank = 0;
   const players = [
     ...document.querySelectorAll("[class=player], [class='player drop']"),
   ].map((el) => {
@@ -63,9 +64,13 @@ export const extractPlayersFromLongshanksHTML = (
       );
     }
 
+    if (roundsPlayed > 0) {
+      cumulativeRank += 1;
+    }
+
     const player: LongshanksPlayerData = {
       longshanksId,
-      rank: parseInt(el.querySelector(".rank")?.textContent?.trim() ?? ""),
+      rank: cumulativeRank,
       name,
       faction,
       team,

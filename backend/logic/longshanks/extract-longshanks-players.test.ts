@@ -94,8 +94,9 @@ describe("Extract Longshanks Players", () => {
         expect.arrayContaining([
           expect.objectContaining({
             name: "Dylan J Lee",
+            rank: 32,
           }),
-          expect.objectContaining({ name: "Dan JustDiesel H" }),
+          expect.objectContaining({ name: "Dan JustDiesel H", rank: 31 }),
         ])
       );
     });
@@ -113,6 +114,42 @@ describe("Extract Longshanks Players", () => {
             name: "Dave Roberts",
           }),
           expect.objectContaining({ name: "Oz Rampage Games Goff" }),
+        ])
+      );
+    });
+
+    test("gets correct rank if a player above has dropped", () => {
+      const playerData = extractPlayersFromLongshanksHTML(
+        ozMagicalMysteryTourPlayersHtml
+      );
+
+      const player = playerData.find((p) => p.name === "Michael " + "Olsen");
+      expect(playerData).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            longshanksId: "2702",
+            name: "John Donaldson",
+            rank: 31,
+            faction: "Explorers Society",
+            team: "Muppet Forth and Lose",
+            roundsPlayed: 3,
+          }),
+          expect.objectContaining({
+            longshanksId: "51053",
+            name: "Rob Bell",
+            rank: 30,
+            faction: "Ten Thunders",
+            roundsPlayed: 3,
+            team: undefined,
+          }),
+          expect.objectContaining({
+            longshanksId: "15108",
+            name: "Just Raf",
+            rank: 32,
+            faction: "Arcanists",
+            roundsPlayed: 3,
+            team: "Imps Gaming",
+          }),
         ])
       );
     });

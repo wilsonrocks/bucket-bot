@@ -2,13 +2,15 @@ import { Context } from "koa";
 import { parseHTML } from "linkedom";
 import z from "zod";
 import { calculatePoints, maxPoints } from "../../../logic/points";
+import { extractPlayersFromLongshanksHTML } from "../../../logic/longshanks/extract-longshanks-players";
+import { extractTourneyFromLongshanksHtml } from "../../../logic/longshanks/extract-longshanks-tourney-data";
 
 const otherDataValidator = z.object({
   longshanksId: z.string(),
-  eventName: z.string(),
+  name: z.string(),
   location: z.string(),
   date: z.string(),
-  to_longshanks_id: z.string(),
+  tournamentOrganiserId: z.string().optional(),
 });
 
 export const newLongshanksEvent = async (ctx: Context) => {
@@ -27,40 +29,9 @@ export const newLongshanksEvent = async (ctx: Context) => {
       }
 
       const htmlText = await html.text();
-      let document;
-      try {
-        const parsed = parseHTML(htmlText);
-        document = parsed.document;
-      } catch (e) {
-        ctx.throw(500, `Error parsing HTML from ${standingsUrl}`, { cause: e });
-      }
 
-      if (!document) {
-        return ctx.throw(
-          500,
-          `No document found when parsing from Longshanks HTML at URL ${standingsUrl}`
-        );
-      }
-
-      const players = [...document.querySelectorAll("[class=player]")].map(
-        (el) => {
-          const player = {
-            longshanksId: el.getAttribute("id")?.split("_")[1],
-            rank: parseInt(
-              el.querySelector(".rank")?.textContent?.trim() ?? ""
-            ),
-            name: el.querySelector(".player_link")?.textContent?.trim(),
-            faction: el.querySelector(".factions img")?.getAttribute("title"),
-            team: el.querySelectorAll(".player_link")[1]?.textContent?.trim(),
-            rounds:
-              parseInt(el.querySelectorAll(".wins")[0].textContent) +
-              parseInt(el.querySelectorAll(".loss")[0].textContent) +
-              parseInt(el.querySelectorAll(".ties")?.[0]?.textContent || "0"),
-          };
-          return player;
-        }
-      );
-      return players;
+      const playerData = extractPlayersFromLongshanksHTML(htmlText);
+      return playerData;
     })(),
     (async () => {
       const otherData: Record<string, unknown> = {};
@@ -70,37 +41,15 @@ export const newLongshanksEvent = async (ctx: Context) => {
       if (!html.ok) {
         ctx.throw(502, `Failed to fetch data from Longshanks ${otherDataUrl}`);
       }
+
       const htmlText = await html.text();
-      const { document } = parseHTML(htmlText);
-      if (!document) {
-        return ctx.throw(
-          500,
-          `No document found when parsing from Longshanks HTML at URL ${otherDataUrl}`
-        );
-      }
-      otherData.longshanksId = longshanksEventId;
-      otherData.eventName = document
-        .querySelector(".desktop")
-        ?.textContent?.trim();
-
-      const tableCells = [...document.querySelectorAll(".details table td")];
-
-      otherData.location = tableCells.at(-7)?.textContent?.trim();
-
-      otherData.date = tableCells.at(-5)?.textContent?.trim().split(" ")[0];
-
-      otherData.to_longshanks_id = tableCells
-        .at(-3)
-        ?.textContent?.trim()
-        .split("#")
-        .at(-1);
-
-      return otherData;
+      const tourneyData = extractTourneyFromLongshanksHtml(htmlText);
+      return tourneyData;
     })(),
   ]);
 
+  console.table(otherData);
   const parsedOtherData = otherDataValidator.parse(otherData);
-
   console.table(parsedOtherData);
   console.table(players);
 
@@ -121,7 +70,7 @@ export const newLongshanksEvent = async (ctx: Context) => {
       .values({
         // TODO add in organiser_id which is a foreign key to player table
         longshanks_id: parsedOtherData.longshanksId,
-        name: parsedOtherData.eventName,
+        name: parsedOtherData.name,
         venue: parsedOtherData.location,
         date: new Date(parsedOtherData.date),
       })
@@ -144,23 +93,27 @@ export const newLongshanksEvent = async (ctx: Context) => {
               .doUpdateSet({ longshanks_name: player.name })
           )
           .returning("id")
-          .execute();
+          .executeTakeFirstOrThrow();
+
         const points = calculatePoints(
           players.length,
-          maxPoints("Local", Math.max(...players.map((x) => x.rounds))) // TODO not hard code to local
-        ).points;
+          maxPoints("Local", Math.max(...players.map((x) => x.roundsPlayed))) // TODO not hard code to local
+        ).points[player.rank - 1];
+
         console.log({
+          player,
+          rank: player.rank,
           points,
           indexRank: player.rank - 1,
           p: points[player.rank - 1],
           pzero: points[0],
         });
-        throw "stop";
+
         await trx
           .insertInto("result")
           .values({
             tourney_id: tourney.id,
-            player_id: dbPlayer[0].id,
+            player_id: dbPlayer.id,
             place: player.rank,
             faction_id: factionMap[player.faction || "Unknown"] || null,
             points,

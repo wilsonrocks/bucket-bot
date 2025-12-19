@@ -44,3 +44,32 @@ export const useCreateLongshanksEventMutation = () => {
   })
   return mutation
 }
+
+export const useGetAllTourneys = () => {
+  const auth = useAuth()
+  const allTourneys = useQuery({
+    queryKey: ['all-tourneys'],
+    enabled: !!auth,
+    queryFn: async (): Promise<
+      Array<{
+        id: number
+        name: string
+        date: string
+        venue: string
+        level_code: string
+        longshanks_id: number | null
+        players: number
+      }>
+    > => {
+      const url = `${import.meta.env.VITE_BACKEND_URL}/v1/tourney`
+      const res = await fetch(url, {
+        headers: auth!.headers, // is checked on enabled
+      })
+      if (!res.ok) {
+        throw new Error('Failed to fetch tourneys')
+      }
+      return res.json()
+    },
+  })
+  return allTourneys
+}

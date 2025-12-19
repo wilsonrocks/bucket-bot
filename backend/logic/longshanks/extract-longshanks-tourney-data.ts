@@ -1,7 +1,7 @@
 import { parseHTML } from "linkedom";
 
 interface LongshanksTourneyData {
-  tourneyId: string;
+  longshanksId: string;
   location: string;
   name: string;
   date: string;
@@ -24,11 +24,11 @@ export const extractTourneyFromLongshanksHtml = (
     );
   }
 
-  const tourneyId = document
+  const longshanksId = document
     .querySelector("title")
     ?.textContent?.match(/\d+/)?.[0];
 
-  if (!tourneyId) {
+  if (!longshanksId) {
     throw new Error(`No tournament ID found when parsing from Longshanks HTML`);
   }
 
@@ -57,7 +57,7 @@ export const extractTourneyFromLongshanksHtml = (
   }
 
   return {
-    tourneyId,
+    longshanksId,
     location,
     name,
     date,

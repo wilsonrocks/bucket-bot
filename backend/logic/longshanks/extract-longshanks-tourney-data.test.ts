@@ -13,7 +13,7 @@ describe("extractLongshanksTourneyData", () => {
         powderMonkeyFaux3TourneyHtml
       );
 
-      expect(tourneyData.tourneyId).toEqual("21816");
+      expect(tourneyData.longshanksId).toEqual("21816");
       expect(tourneyData.name).toEqual("Powder Monkeyfaux III");
       expect(tourneyData.location).toContain("Powder Monkey Gaming");
       expect(tourneyData.date).toEqual("2025-03-09");
@@ -25,7 +25,7 @@ describe("extractLongshanksTourneyData", () => {
         newFrontierTourneyHtml
       );
 
-      expect(tourneyData.tourneyId).toEqual("25681");
+      expect(tourneyData.longshanksId).toEqual("25681");
       expect(tourneyData.name).toEqual("New Frontier");
       expect(tourneyData.location).toContain("Virtual");
       expect(tourneyData.date).toEqual("2025-05-19");
@@ -37,7 +37,7 @@ describe("extractLongshanksTourneyData", () => {
         ozMagicalMysteryTourTourneyHtml
       );
 
-      expect(tourneyData.tourneyId).toEqual("22198");
+      expect(tourneyData.longshanksId).toEqual("22198");
       expect(tourneyData.name).toEqual("Oz's Magical Mystery Tour");
       expect(tourneyData.location).toContain("Battlefield Hobbies");
       expect(tourneyData.date).toEqual("2025-03-23");

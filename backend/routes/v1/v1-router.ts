@@ -6,6 +6,7 @@ import { hasRankingReporterRole } from "./v1-routes/roles.js";
 
 import { DefaultContext } from "koa";
 import koaJwt from "koa-jwt";
+import { allTourneys } from "./v1-routes/tourney.js";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -39,11 +40,6 @@ async function getRows(ctx: DefaultContext) {
 }
 
 export const v1Router = new Router({ prefix: "/v1" });
-
-v1Router.get("/tourney", async (ctx) => {
-  const rows = await getRows(ctx);
-  ctx.body = { fakeData: rows };
-});
 
 const tokenValidator = z.object({ code: z.string() });
 
@@ -117,3 +113,4 @@ v1Router.use(koaJwt({ secret: process.env.JWT_SECRET! }));
 
 v1Router.post("/longshanks-event/:id", newLongshanksEvent);
 v1Router.get("/has-role", hasRankingReporterRole);
+v1Router.get("/tourney", allTourneys);
