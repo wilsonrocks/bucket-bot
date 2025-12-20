@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+set -e
+
+# Get the directory of this script
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)"
+DIR="$SCRIPT_DIR/migrations"
+DESC="$*"
+
+if [ -z "$DESC" ]; then
+  echo "Usage: new-migration <description>"
+  exit 1
+fi
+
+
+# Find highest version number (zero-padded to 3 digits)
+LAST_VERSION=$(ls "$DIR"/V*.sql 2>/dev/null \
+  | sed -E 's/.*V([0-9]+)__.*/\1/' \
+  | sort -n \
+  | tail -1)
+
+if [ -z "$LAST_VERSION" ]; then
+  NEXT_VERSION=1
+else
+  NEXT_VERSION=$((10#$LAST_VERSION + 1))
+fi
+
+# Pad version to 3 digits
+PADDED_VERSION=$(printf "%03d" "$NEXT_VERSION")
+FILENAME="V${PADDED_VERSION}__${DESC// /_}.sql"
+
+touch "$DIR/$FILENAME"
+echo "Created $DIR/$FILENAME"

@@ -7,6 +7,8 @@ import { hasRankingReporterRole } from "./v1-routes/roles.js";
 import { DefaultContext } from "koa";
 import koaJwt from "koa-jwt";
 import { allTourneys, detailTourney } from "./v1-routes/tourney.js";
+import { generate } from "kysely-codegen";
+import { generateRankings } from "./v1-routes/generate-rankings.js";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -115,3 +117,4 @@ v1Router.post("/longshanks-event/:id", newLongshanksEvent);
 v1Router.get("/has-role", hasRankingReporterRole);
 v1Router.get("/tourney", allTourneys);
 v1Router.get("/tourney/:id", detailTourney);
+v1Router.post("/generate-rankings", generateRankings);
