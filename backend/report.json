@@ -1,0 +1,489 @@
+{
+  "individualResults": [
+    {
+      "initialSchemaVersion": null,
+      "targetSchemaVersion": null,
+      "schemaName": "",
+      "migrations": [],
+      "migrationsExecuted": 0,
+      "success": true,
+      "flywayVersion": "9.22.3",
+      "database": "testdb",
+      "warnings": [],
+      "timestamp": "2025-12-20T22:07:28.939157979",
+      "operation": "migrate",
+      "exception": null,
+      "licenseFailed": false
+    },
+    {
+      "initialSchemaVersion": null,
+      "targetSchemaVersion": null,
+      "schemaName": "",
+      "migrations": [],
+      "migrationsExecuted": 0,
+      "success": true,
+      "flywayVersion": "9.22.3",
+      "database": "testdb",
+      "warnings": [],
+      "timestamp": "2025-12-20T22:08:37.168229594",
+      "operation": "migrate",
+      "exception": null,
+      "licenseFailed": false
+    },
+    {
+      "initialSchemaVersion": null,
+      "targetSchemaVersion": null,
+      "schemaName": "",
+      "migrations": [],
+      "migrationsExecuted": 0,
+      "success": true,
+      "flywayVersion": "9.22.3",
+      "database": "testdb",
+      "warnings": [],
+      "timestamp": "2025-12-20T22:08:42.529918708",
+      "operation": "migrate",
+      "exception": null,
+      "licenseFailed": false
+    },
+    {
+      "initialSchemaVersion": null,
+      "targetSchemaVersion": null,
+      "schemaName": "",
+      "migrations": [],
+      "migrationsExecuted": 0,
+      "success": true,
+      "flywayVersion": "9.22.3",
+      "database": "testdb",
+      "warnings": [],
+      "timestamp": "2025-12-20T22:08:50.520532672",
+      "operation": "migrate",
+      "exception": null,
+      "licenseFailed": false
+    },
+    {
+      "initialSchemaVersion": null,
+      "targetSchemaVersion": null,
+      "schemaName": "",
+      "migrations": [],
+      "migrationsExecuted": 0,
+      "success": true,
+      "flywayVersion": "9.22.3",
+      "database": "testdb",
+      "warnings": [],
+      "timestamp": "2025-12-20T22:09:16.528071134",
+      "operation": "migrate",
+      "exception": null,
+      "licenseFailed": false
+    },
+    {
+      "initialSchemaVersion": null,
+      "targetSchemaVersion": null,
+      "schemaName": "",
+      "migrations": [],
+      "migrationsExecuted": 0,
+      "success": true,
+      "flywayVersion": "9.22.3",
+      "database": "testdb",
+      "warnings": [],
+      "timestamp": "2025-12-20T22:09:47.499916866",
+      "operation": "migrate",
+      "exception": null,
+      "licenseFailed": false
+    },
+    {
+      "initialSchemaVersion": null,
+      "targetSchemaVersion": null,
+      "schemaName": "",
+      "migrations": [],
+      "migrationsExecuted": 0,
+      "success": true,
+      "flywayVersion": "9.22.3",
+      "database": "testdb",
+      "warnings": [],
+      "timestamp": "2025-12-20T22:10:42.940548971",
+      "operation": "migrate",
+      "exception": null,
+      "licenseFailed": false
+    },
+    {
+      "initialSchemaVersion": null,
+      "targetSchemaVersion": null,
+      "schemaName": "",
+      "migrations": [],
+      "migrationsExecuted": 0,
+      "success": true,
+      "flywayVersion": "9.22.3",
+      "database": "testdb",
+      "warnings": [],
+      "timestamp": "2025-12-20T22:10:48.420375963",
+      "operation": "migrate",
+      "exception": null,
+      "licenseFailed": false
+    },
+    {
+      "initialSchemaVersion": null,
+      "targetSchemaVersion": null,
+      "schemaName": "",
+      "migrations": [],
+      "migrationsExecuted": 0,
+      "success": true,
+      "flywayVersion": "9.22.3",
+      "database": "testdb",
+      "warnings": [],
+      "timestamp": "2025-12-20T22:15:24.223491916",
+      "operation": "migrate",
+      "exception": null,
+      "licenseFailed": false
+    },
+    {
+      "initialSchemaVersion": null,
+      "targetSchemaVersion": null,
+      "schemaName": "",
+      "migrations": [],
+      "migrationsExecuted": 0,
+      "success": true,
+      "flywayVersion": "9.22.3",
+      "database": "testdb",
+      "warnings": [],
+      "timestamp": "2025-12-20T22:17:22.367251989",
+      "operation": "migrate",
+      "exception": null,
+      "licenseFailed": false
+    },
+    {
+      "initialSchemaVersion": null,
+      "targetSchemaVersion": null,
+      "schemaName": "",
+      "migrations": [],
+      "migrationsExecuted": 0,
+      "success": true,
+      "flywayVersion": "9.22.3",
+      "database": "testdb",
+      "warnings": [],
+      "timestamp": "2025-12-20T22:20:35.334158165",
+      "operation": "migrate",
+      "exception": null,
+      "licenseFailed": false
+    },
+    {
+      "initialSchemaVersion": null,
+      "targetSchemaVersion": "018",
+      "schemaName": "",
+      "migrations": [
+        {
+          "category": "Versioned",
+          "version": "001",
+          "description": "initial-tables",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V001__initial-tables.sql",
+          "executionTime": 54
+        },
+        {
+          "category": "Versioned",
+          "version": "002",
+          "description": "factions",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V002__factions.sql",
+          "executionTime": 12
+        },
+        {
+          "category": "Versioned",
+          "version": "003",
+          "description": "remove-venues-add-tourney-columns",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V003__remove-venues-add-tourney-columns.sql",
+          "executionTime": 8
+        },
+        {
+          "category": "Versioned",
+          "version": "004",
+          "description": "remove-poorly-named-column",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V004__remove-poorly-named-column.sql",
+          "executionTime": 3
+        },
+        {
+          "category": "Versioned",
+          "version": "005",
+          "description": "change date type in tourney",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V005__change date type in tourney.sql",
+          "executionTime": 3
+        },
+        {
+          "category": "Versioned",
+          "version": "006",
+          "description": "add-longshanks-id-field",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V006__add-longshanks-id-field.sql",
+          "executionTime": 7
+        },
+        {
+          "category": "Versioned",
+          "version": "007",
+          "description": "add-longshanks-player-name",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V007__add-longshanks-player-name.sql",
+          "executionTime": 4
+        },
+        {
+          "category": "Versioned",
+          "version": "008",
+          "description": "make-longshanks-player-id-unique",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V008__make-longshanks-player-id-unique.sql",
+          "executionTime": 5
+        },
+        {
+          "category": "Versioned",
+          "version": "009",
+          "description": "let-player-discord-be-null",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V009__let-player-discord-be-null.sql",
+          "executionTime": 3
+        },
+        {
+          "category": "Versioned",
+          "version": "010",
+          "description": "let-discord-username-be-null",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V010__let-discord-username-be-null.sql",
+          "executionTime": 5
+        },
+        {
+          "category": "Versioned",
+          "version": "011",
+          "description": "add-facton-data",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V011__add-facton-data.sql",
+          "executionTime": 13
+        },
+        {
+          "category": "Versioned",
+          "version": "012",
+          "description": "points-stuff",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V012__points-stuff.sql",
+          "executionTime": 26
+        },
+        {
+          "category": "Versioned",
+          "version": "013",
+          "description": "make-level-code-mandatory-with-default",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V013__make-level-code-mandatory-with-default.sql",
+          "executionTime": 10
+        },
+        {
+          "category": "Versioned",
+          "version": "014",
+          "description": "fix-default",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V014__fix-default.sql",
+          "executionTime": 9
+        },
+        {
+          "category": "Versioned",
+          "version": "015",
+          "description": "make-points-mandatory",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V015__make-points-mandatory.sql",
+          "executionTime": 8
+        },
+        {
+          "category": "Versioned",
+          "version": "016",
+          "description": "add-fields-to-tourney",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V016__add-fields-to-tourney.sql",
+          "executionTime": 3
+        },
+        {
+          "category": "Versioned",
+          "version": "017",
+          "description": "add ranking tables",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V017__add_ranking_tables.sql",
+          "executionTime": 32
+        },
+        {
+          "category": "Versioned",
+          "version": "018",
+          "description": "change type table",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V018__change_type_table.sql",
+          "executionTime": 15
+        }
+      ],
+      "migrationsExecuted": 18,
+      "success": true,
+      "flywayVersion": "9.22.3",
+      "database": "testdb",
+      "warnings": [],
+      "timestamp": "2025-12-20T22:23:28.491042879",
+      "operation": "migrate",
+      "exception": null,
+      "licenseFailed": false
+    },
+    {
+      "initialSchemaVersion": null,
+      "targetSchemaVersion": "018",
+      "schemaName": "",
+      "migrations": [
+        {
+          "category": "Versioned",
+          "version": "001",
+          "description": "initial-tables",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V001__initial-tables.sql",
+          "executionTime": 93
+        },
+        {
+          "category": "Versioned",
+          "version": "002",
+          "description": "factions",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V002__factions.sql",
+          "executionTime": 17
+        },
+        {
+          "category": "Versioned",
+          "version": "003",
+          "description": "remove-venues-add-tourney-columns",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V003__remove-venues-add-tourney-columns.sql",
+          "executionTime": 16
+        },
+        {
+          "category": "Versioned",
+          "version": "004",
+          "description": "remove-poorly-named-column",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V004__remove-poorly-named-column.sql",
+          "executionTime": 12
+        },
+        {
+          "category": "Versioned",
+          "version": "005",
+          "description": "change date type in tourney",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V005__change date type in tourney.sql",
+          "executionTime": 3
+        },
+        {
+          "category": "Versioned",
+          "version": "006",
+          "description": "add-longshanks-id-field",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V006__add-longshanks-id-field.sql",
+          "executionTime": 6
+        },
+        {
+          "category": "Versioned",
+          "version": "007",
+          "description": "add-longshanks-player-name",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V007__add-longshanks-player-name.sql",
+          "executionTime": 6
+        },
+        {
+          "category": "Versioned",
+          "version": "008",
+          "description": "make-longshanks-player-id-unique",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V008__make-longshanks-player-id-unique.sql",
+          "executionTime": 11
+        },
+        {
+          "category": "Versioned",
+          "version": "009",
+          "description": "let-player-discord-be-null",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V009__let-player-discord-be-null.sql",
+          "executionTime": 2
+        },
+        {
+          "category": "Versioned",
+          "version": "010",
+          "description": "let-discord-username-be-null",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V010__let-discord-username-be-null.sql",
+          "executionTime": 2
+        },
+        {
+          "category": "Versioned",
+          "version": "011",
+          "description": "add-facton-data",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V011__add-facton-data.sql",
+          "executionTime": 5
+        },
+        {
+          "category": "Versioned",
+          "version": "012",
+          "description": "points-stuff",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V012__points-stuff.sql",
+          "executionTime": 31
+        },
+        {
+          "category": "Versioned",
+          "version": "013",
+          "description": "make-level-code-mandatory-with-default",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V013__make-level-code-mandatory-with-default.sql",
+          "executionTime": 2
+        },
+        {
+          "category": "Versioned",
+          "version": "014",
+          "description": "fix-default",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V014__fix-default.sql",
+          "executionTime": 7
+        },
+        {
+          "category": "Versioned",
+          "version": "015",
+          "description": "make-points-mandatory",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V015__make-points-mandatory.sql",
+          "executionTime": 3
+        },
+        {
+          "category": "Versioned",
+          "version": "016",
+          "description": "add-fields-to-tourney",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V016__add-fields-to-tourney.sql",
+          "executionTime": 2
+        },
+        {
+          "category": "Versioned",
+          "version": "017",
+          "description": "add ranking tables",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V017__add_ranking_tables.sql",
+          "executionTime": 35
+        },
+        {
+          "category": "Versioned",
+          "version": "018",
+          "description": "change type table",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V018__change_type_table.sql",
+          "executionTime": 33
+        }
+      ],
+      "migrationsExecuted": 18,
+      "success": true,
+      "flywayVersion": "9.22.3",
+      "database": "testdb",
+      "warnings": [],
+      "timestamp": "2025-12-20T22:23:46.510287731",
+      "operation": "migrate",
+      "exception": null,
+      "licenseFailed": false
+    }
+  ]
+}
