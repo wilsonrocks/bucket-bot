@@ -7,7 +7,7 @@ cd backend
 ./build-for-prod.sh
 
 cd ../frontend
-VITE_BACKEND_URL=$PROD_BACKEND_URL npx vite #npm run build # will need to typescheck at SOME point
+VITE_BACKEND_URL=$PROD_BACKEND_URL npx vite build #npm run build # will need to typescheck at SOME point
 
 cd ../infra
 DATABASE_URL=$PROD_DATABASE_URL DISCORD_REDIRECT_URL=$PROD_DISCORD_REDIRECT_URL cdk deploy
