@@ -1,4 +1,4 @@
-import { Button, Modal, TextInput } from '@mantine/core'
+import { Button, Loader, Modal, TextInput } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Route as EventIdRoute } from '../events.$id.edit.tsx'
@@ -45,7 +45,7 @@ function RouteComponent() {
               navigateToEventPage({ params: { id: response.id } })
             },
             onError: (error) => {
-              debugger
+              console.error(error)
             },
           })
         })}
@@ -55,7 +55,10 @@ function RouteComponent() {
           placeholder="Enter Longshanks ID or URL"
           {...form.getInputProps('longshanksIdOrUrl')}
         />
-        <Button type="submit">Create Event</Button>
+        <Button type="submit" disabled={newLongshanksEventMutation.isPending}>
+          'Create Event'
+        </Button>
+        {newLongshanksEventMutation.isPending && <Loader type="bars" />}
       </form>
     </Modal>
   )
