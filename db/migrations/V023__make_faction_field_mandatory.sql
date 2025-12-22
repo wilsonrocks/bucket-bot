@@ -1,0 +1,1 @@
+ALTER TABLE faction ALTER COLUMN longshanks_html_name SET NOT NULL;

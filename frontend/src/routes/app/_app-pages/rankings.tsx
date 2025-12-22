@@ -12,12 +12,13 @@ function RouteComponent() {
     <div>
       {rankings.data ? (
         <Table
+          tabularNums
           data={{
             head: ['Rank', 'Player', 'Total Points'],
             body: rankings.data.map((player) => [
               player.rank,
               player.name,
-              player.total_points,
+              player.total_points.toFixed(2),
             ]),
           }}
         />

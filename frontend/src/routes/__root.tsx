@@ -11,6 +11,7 @@ import {
 import { TanStackDevtools } from '@tanstack/react-devtools'
 import {
   HeadContent,
+  Link,
   Outlet,
   createRootRouteWithContext,
   useRouterState,
@@ -60,10 +61,14 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
                 hiddenFrom="sm"
                 size="sm"
               />
-              <Image src="/bucket-bot-logo.png" alt="b(UK)et bot" w={50} />
-              <Text>
-                b(<b>UK</b>)et bot
-              </Text>
+              <Link to="/">
+                <Image src="/bucket-bot-logo.png" alt="b(UK)et bot" w={50} />
+              </Link>
+              <Link to="/">
+                <Text>
+                  b(<b>UK</b>)et bot
+                </Text>
+              </Link>
             </Group>
           </AppShell.Header>
           <AppShell.Navbar p="md" bg="gradient(white, lightgrey)">

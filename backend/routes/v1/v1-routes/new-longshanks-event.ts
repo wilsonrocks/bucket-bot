@@ -56,7 +56,7 @@ export const newLongshanksEvent = async (ctx: Context) => {
     .execute();
   const factionMap: Record<string, number> = {};
   factions.forEach((faction) => {
-    factionMap[faction.name] = faction.id;
+    factionMap[faction.longshanks_html_name] = faction.id;
   });
 
   await ctx.state.db.transaction().execute(async (trx) => {

@@ -10,6 +10,7 @@ export const rankingsHandler = async (ctx: Context) => {
     .innerJoin("player", "ranking_snapshot.player_id", "player.id")
     .where("batch_id", "=", snapshotId)
     .selectAll()
+    .orderBy("rank", "asc")
     .execute();
 
   ctx.body = rankings;

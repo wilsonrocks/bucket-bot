@@ -78,6 +78,5 @@ export const extractPlayersFromLongshanksHTML = (
     };
     return player;
   });
-
   return players.filter((p) => p.roundsPlayed > 0); // in case anyone drops all games
 };

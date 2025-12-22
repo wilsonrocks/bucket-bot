@@ -4,6 +4,7 @@ import {
   newFrontierPlayersHtml,
   ozMagicalMysteryTourPlayersHtml,
   powderMonkeyFaux3PlayersHtml,
+  wyrdLittleCacoonPlayersHtml,
 } from "./html";
 import { extractPlayersFromLongshanksHTML } from "./extract-longshanks-players";
 
@@ -152,6 +153,16 @@ describe("Extract Longshanks Players", () => {
           }),
         ])
       );
+    });
+  });
+
+  describe("Wyrd Little Cacoon", () => {
+    test("should extract players correctly", () => {
+      const playerData = extractPlayersFromLongshanksHTML(
+        wyrdLittleCacoonPlayersHtml
+      );
+
+      expect(playerData.length).toBe(12);
     });
   });
 });
