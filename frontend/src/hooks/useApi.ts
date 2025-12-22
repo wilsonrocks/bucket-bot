@@ -12,6 +12,7 @@ export const useHasRole = () => {
         headers: auth!.headers, // is checked on enabled
       })
       if (!res.ok) {
+        localStorage.clear()
         throw new Error('Failed to fetch role information')
       }
       return res.json()
