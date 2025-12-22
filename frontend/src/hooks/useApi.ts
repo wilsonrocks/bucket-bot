@@ -23,6 +23,28 @@ export const useHasRole = () => {
   return hasRole.data?.rankingReporter ?? false
 }
 
+export const useGenerateRankingsSnapshotMutation = () => {
+  const auth = useAuth()
+
+  const mutation = useMutation({
+    mutationFn: async () => {
+      const url = `${import.meta.env.VITE_BACKEND_URL}/v1/generate-rankings`
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          ...auth!.headers, // is checked on use
+          'Content-Type': 'application/json',
+        },
+      })
+      if (!res.ok) {
+        throw new Error('Failed to generate rankings snapshot')
+      }
+      return res.json()
+    },
+  })
+  return mutation
+}
+
 export const useCreateLongshanksEventMutation = () => {
   const auth = useAuth()
 
@@ -106,4 +128,61 @@ export const useGetTourneyDetail = (id: number) => {
     },
   })
   return tourneyDetail
+}
+
+export const useGetRankingTypes = () => {
+  const auth = useAuth()
+  const allTourneys = useQuery({
+    queryKey: ['all-ranking-types'],
+    enabled: !!auth,
+    queryFn: async (): Promise<
+      Array<{
+        id: number
+        name: string
+        date: string
+        venue: string
+        level_code: string
+        longshanks_id: number | null
+        players: number
+      }>
+    > => {
+      const url = `${import.meta.env.VITE_BACKEND_URL}/v1/ranking-types`
+      const res = await fetch(url, {
+        headers: auth!.headers, // is checked on enabled
+      })
+      if (!res.ok) {
+        throw new Error('Failed to fetch ranking types')
+      }
+      return res.json()
+    },
+  })
+  return allTourneys
+}
+
+export const useGetRankings = () => {
+  const auth = useAuth()
+  const allTourneys = useQuery({
+    queryKey: ['rankings'],
+    enabled: !!auth,
+    queryFn: async (): Promise<
+      Array<{
+        batch_id: number
+        player_id: number
+        rank: number
+        total_points: number
+        id: number
+        name: string
+      }>
+    > => {
+      const url = `${import.meta.env.VITE_BACKEND_URL}/v1/rankings`
+      const res = await fetch(url, {
+        headers: auth!.headers, // is checked on enabled
+      })
+      if (!res.ok) {
+        throw new Error('Failed to fetch ranking types')
+      }
+      return res.json()
+    },
+  })
+  return allTourneys
 }

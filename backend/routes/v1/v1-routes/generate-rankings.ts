@@ -2,7 +2,16 @@ import { Context } from "koa";
 import { generateRankings } from "../../../logic/generate-rankings";
 
 export const generateRankingsHandler = async (ctx: Context) => {
-  await generateRankings(ctx.state.db);
+  const rankings = await ctx.state.db
+    .selectFrom("ranking_snapshot_type")
+    .selectAll()
+    .execute();
+
+  await Promise.allSettled(
+    rankings.map(async (rankingType) => {
+      await generateRankings(ctx.state.db, rankingType.code);
+    })
+  );
 
   ctx.body = { rankings: [] };
 };

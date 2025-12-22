@@ -9,6 +9,8 @@ import koaJwt from "koa-jwt";
 import { allTourneys, detailTourney } from "./v1-routes/tourney.js";
 import { generate } from "kysely-codegen";
 import { generateRankingsHandler } from "./v1-routes/generate-rankings.js";
+import { rankingTypesHandler } from "./v1-routes/ranking-types.js";
+import { rankingsHandler } from "./v1-routes/rankings.js";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -118,3 +120,5 @@ v1Router.get("/has-role", hasRankingReporterRole);
 v1Router.get("/tourney", allTourneys);
 v1Router.get("/tourney/:id", detailTourney);
 v1Router.post("/generate-rankings", generateRankingsHandler);
+v1Router.get("/ranking-types", rankingTypesHandler);
+v1Router.get("/rankings", rankingsHandler);
