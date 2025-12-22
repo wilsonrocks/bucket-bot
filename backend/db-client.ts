@@ -9,7 +9,7 @@ export const dbClient = new Kysely<DB>({
     }),
   }),
   log: (event) => {
-    if (process.env.NODE_ENV === "production") return;
+    if (!process.env.DEBUG_SQL) return;
     if (event.level === "query") {
       console.log("SQL:", event.query.sql);
       console.log("PARAMS:", event.query.parameters);
