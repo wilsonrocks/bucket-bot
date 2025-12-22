@@ -33,7 +33,7 @@ describe.sequential("testing with containers exciting", () => {
     ).rejects.toThrowError("Invalid rankings type");
   });
 
-  test("generates a snapshot", async () => {
+  test("generates", async () => {
     await generateRankings(dbClient, "BEST_FOREVER");
 
     const snapshotBatch = await dbClient
@@ -43,33 +43,42 @@ describe.sequential("testing with containers exciting", () => {
     expect(snapshotBatch.length).toBe(1);
     expect(snapshotBatch[0]!.type_code).toBe("BEST_FOREVER");
 
-    const jamesId = await dbClient
-      .selectFrom("player")
-      .where("name", "=", "James")
-      .select("id")
-      .executeTakeFirstOrThrow();
-
-    const jamesSnapshot = await dbClient
+    const rankings = await dbClient
       .selectFrom("ranking_snapshot")
-      .where("batch_id", "=", snapshotBatch[0]!.id)
-      .where("player_id", "=", jamesId.id)
+      .fullJoin("player", "ranking_snapshot.player_id", "player.id")
       .selectAll()
-      .executeTakeFirstOrThrow();
+      .execute();
 
-    const emmaId = await dbClient
-      .selectFrom("player")
-      .where("name", "=", "Emma")
-      .select("id")
-      .executeTakeFirstOrThrow();
+    expect(rankings.length).toBe(11); // 11 players
 
-    const emmaSnapshot = await dbClient
-      .selectFrom("ranking_snapshot")
-      .where("batch_id", "=", snapshotBatch[0]!.id)
-      .where("player_id", "=", emmaId.id)
-      .selectAll()
-      .executeTakeFirstOrThrow();
-
-    expect(jamesSnapshot.total_points).toBe(57);
-    expect(emmaSnapshot.total_points).toBe(62);
+    expect(rankings).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          name: "James",
+          rank: 3,
+          total_points: 57,
+        }),
+        expect.objectContaining({
+          name: "Emma",
+          rank: 1,
+          total_points: 62,
+        }),
+        expect.objectContaining({
+          name: "Geraint",
+          rank: 2,
+          total_points: 61,
+        }),
+        expect.objectContaining({
+          name: "JFV",
+          rank: 5,
+          total_points: 44,
+        }),
+        expect.objectContaining({
+          name: "Matt",
+          rank: 4,
+          total_points: 46,
+        }),
+      ])
+    );
   });
 });

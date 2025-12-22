@@ -118,6 +118,64 @@ export async function addTestTourneyData(db: Kysely<DB>) {
     { player: Ed!, points: 1, place: 9, faction: "Outcasts" },
   ];
 
+  // // Transform all tourney results into an object: { [playerName]: number[] }
+  // const allResults = [
+  //   tourney1Results,
+  //   tourney2Results,
+  //   tourney3Results,
+  //   tourney4Results,
+  //   tourney5Results,
+  //   tourney6Results,
+  //   tourney7Results,
+  // ];
+
+  // const playerPointsMap: Record<string, number[]> = {};
+
+  // for (const results of allResults) {
+  //   for (const result of results) {
+  //     const name = result.player.name;
+  //     if (!playerPointsMap[name]) {
+  //       playerPointsMap[name] = [];
+  //     }
+  //     playerPointsMap[name].push(result.points);
+  //   }
+  // }
+
+  // gives:
+  // JFV: [
+  //     15, 8, 9, 7,
+  //    5, 5, 5
+  // ], best 5 = 44
+  // James: [
+  //   12, 12, 13, 11,
+  //    8,  9,  9
+  // ], best 5 = 57
+  // Oz: [
+  //   10,  7, 5, 5,
+  //    3, 15, 3
+  // ], best 5 = 42
+  // Emma: [
+  //    8, 14, 11, 13,
+  //   10, 13, 11
+  // ], best 5 = 62
+  // Matt: [
+  //   6, 10, 7, 15,
+  //   7,  7, 7
+  // ], best 5 =  46
+  // Reice: [ 4 ], best 5 = 4
+  // Yan: [
+  //    2, 3, 3, 3,
+  //   14, 3, 2
+  // ], best 5 = 28
+  // Ed: [
+  //   1, 5, 2, 2,
+  //   2, 2, 1
+  // ], best 5 = 13
+  // Esme: [ 0, 2, 1, 1, 16 ], best 5 = 20
+  // Boosey: [ 1, 1, 1 ], best 5 = 3
+  // Geraint: [ 16, 9, 12, 11, 13 ], best 5 = 61
+
+  // playerPointsMap now contains: { [playerName]: [points, ...] }
   await addResults(tourney1Results, "tourney 1", "2025-01-01", db);
   await addResults(tourney2Results, "tourney 2", "2025-02-01", db);
   await addResults(tourney3Results, "tourney 3", "2025-03-01", db);

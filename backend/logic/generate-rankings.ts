@@ -27,8 +27,6 @@ export const generateRankings = async (
     );
   }
 
-  // let's make a batch
-
   await db.transaction().execute(async (trx) => {
     const batch = await trx
       .insertInto("ranking_snapshot_batch")
@@ -38,7 +36,7 @@ export const generateRankings = async (
       .returningAll()
       .executeTakeFirstOrThrow();
 
-    const addRankings = await trx
+    return await trx
       .insertInto("ranking_snapshot")
       .columns(["batch_id", "player_id", "rank", "total_points"])
       .expression(
@@ -66,7 +64,9 @@ export const generateRankings = async (
           .select([
             "batch_id",
             "id",
-            sql.lit(0).as("rank"),
+            sql<number>`row_number() over (order by sum(points) desc)`.as(
+              "rank"
+            ),
             sql<number>`sum(points)`.as("best5"),
           ])
           .where("rn", "<=", 5)
@@ -75,6 +75,7 @@ export const generateRankings = async (
           .groupBy("batch_id")
           .orderBy("best5", "desc")
       )
+      .returningAll()
       .execute();
   });
 
