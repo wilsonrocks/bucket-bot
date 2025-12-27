@@ -11,6 +11,7 @@ import { generate } from "kysely-codegen";
 import { generateRankingsHandler } from "./v1-routes/generate-rankings.js";
 import { rankingTypesHandler } from "./v1-routes/ranking-types.js";
 import { rankingsHandler } from "./v1-routes/rankings.js";
+import { rankingsPlayerHandler } from "./v1-routes/rankings-player.js";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -122,3 +123,4 @@ v1Router.get("/tourney/:id", detailTourney);
 v1Router.post("/generate-rankings", generateRankingsHandler);
 v1Router.get("/ranking-types", rankingTypesHandler);
 v1Router.get("/rankings", rankingsHandler);
+v1Router.get("/rankings/:playerId/:typeCode", rankingsPlayerHandler);

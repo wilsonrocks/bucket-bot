@@ -13,6 +13,8 @@ import { Route as LoggedInRouteImport } from './routes/logged-in'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app/index'
 import { Route as DemoTanstackQueryRouteImport } from './routes/demo/tanstack-query'
+import { Route as SitePlayerIdRouteImport } from './routes/site/player.$id'
+import { Route as SiteEventIdRouteImport } from './routes/site/event.$id'
 import { Route as AppAppPagesRankingsRouteImport } from './routes/app/_app-pages/rankings'
 import { Route as AppAppPagesEventsIndexRouteImport } from './routes/app/_app-pages/events/index'
 import { Route as AppAppPagesEventsNewManualRouteImport } from './routes/app/_app-pages/events/new-manual'
@@ -38,6 +40,16 @@ const AppIndexRoute = AppIndexRouteImport.update({
 const DemoTanstackQueryRoute = DemoTanstackQueryRouteImport.update({
   id: '/demo/tanstack-query',
   path: '/demo/tanstack-query',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitePlayerIdRoute = SitePlayerIdRouteImport.update({
+  id: '/site/player/$id',
+  path: '/site/player/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SiteEventIdRoute = SiteEventIdRouteImport.update({
+  id: '/site/event/$id',
+  path: '/site/event/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppAppPagesRankingsRoute = AppAppPagesRankingsRouteImport.update({
@@ -79,6 +91,8 @@ export interface FileRoutesByFullPath {
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/app': typeof AppIndexRoute
   '/app/rankings': typeof AppAppPagesRankingsRoute
+  '/site/event/$id': typeof SiteEventIdRoute
+  '/site/player/$id': typeof SitePlayerIdRoute
   '/app/events/new-bot': typeof AppAppPagesEventsNewBotRoute
   '/app/events/new-longshanks': typeof AppAppPagesEventsNewLongshanksRoute
   '/app/events/new-manual': typeof AppAppPagesEventsNewManualRoute
@@ -91,6 +105,8 @@ export interface FileRoutesByTo {
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/app': typeof AppIndexRoute
   '/app/rankings': typeof AppAppPagesRankingsRoute
+  '/site/event/$id': typeof SiteEventIdRoute
+  '/site/player/$id': typeof SitePlayerIdRoute
   '/app/events/new-bot': typeof AppAppPagesEventsNewBotRoute
   '/app/events/new-longshanks': typeof AppAppPagesEventsNewLongshanksRoute
   '/app/events/new-manual': typeof AppAppPagesEventsNewManualRoute
@@ -104,6 +120,8 @@ export interface FileRoutesById {
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/app/': typeof AppIndexRoute
   '/app/_app-pages/rankings': typeof AppAppPagesRankingsRoute
+  '/site/event/$id': typeof SiteEventIdRoute
+  '/site/player/$id': typeof SitePlayerIdRoute
   '/app/_app-pages/events/new-bot': typeof AppAppPagesEventsNewBotRoute
   '/app/_app-pages/events/new-longshanks': typeof AppAppPagesEventsNewLongshanksRoute
   '/app/_app-pages/events/new-manual': typeof AppAppPagesEventsNewManualRoute
@@ -118,6 +136,8 @@ export interface FileRouteTypes {
     | '/demo/tanstack-query'
     | '/app'
     | '/app/rankings'
+    | '/site/event/$id'
+    | '/site/player/$id'
     | '/app/events/new-bot'
     | '/app/events/new-longshanks'
     | '/app/events/new-manual'
@@ -130,6 +150,8 @@ export interface FileRouteTypes {
     | '/demo/tanstack-query'
     | '/app'
     | '/app/rankings'
+    | '/site/event/$id'
+    | '/site/player/$id'
     | '/app/events/new-bot'
     | '/app/events/new-longshanks'
     | '/app/events/new-manual'
@@ -142,6 +164,8 @@ export interface FileRouteTypes {
     | '/demo/tanstack-query'
     | '/app/'
     | '/app/_app-pages/rankings'
+    | '/site/event/$id'
+    | '/site/player/$id'
     | '/app/_app-pages/events/new-bot'
     | '/app/_app-pages/events/new-longshanks'
     | '/app/_app-pages/events/new-manual'
@@ -155,6 +179,8 @@ export interface RootRouteChildren {
   DemoTanstackQueryRoute: typeof DemoTanstackQueryRoute
   AppIndexRoute: typeof AppIndexRoute
   AppAppPagesRankingsRoute: typeof AppAppPagesRankingsRoute
+  SiteEventIdRoute: typeof SiteEventIdRoute
+  SitePlayerIdRoute: typeof SitePlayerIdRoute
   AppAppPagesEventsNewBotRoute: typeof AppAppPagesEventsNewBotRoute
   AppAppPagesEventsNewLongshanksRoute: typeof AppAppPagesEventsNewLongshanksRoute
   AppAppPagesEventsNewManualRoute: typeof AppAppPagesEventsNewManualRoute
@@ -190,6 +216,20 @@ declare module '@tanstack/react-router' {
       path: '/demo/tanstack-query'
       fullPath: '/demo/tanstack-query'
       preLoaderRoute: typeof DemoTanstackQueryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/site/player/$id': {
+      id: '/site/player/$id'
+      path: '/site/player/$id'
+      fullPath: '/site/player/$id'
+      preLoaderRoute: typeof SitePlayerIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/site/event/$id': {
+      id: '/site/event/$id'
+      path: '/site/event/$id'
+      fullPath: '/site/event/$id'
+      preLoaderRoute: typeof SiteEventIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app/_app-pages/rankings': {
@@ -243,6 +283,8 @@ const rootRouteChildren: RootRouteChildren = {
   DemoTanstackQueryRoute: DemoTanstackQueryRoute,
   AppIndexRoute: AppIndexRoute,
   AppAppPagesRankingsRoute: AppAppPagesRankingsRoute,
+  SiteEventIdRoute: SiteEventIdRoute,
+  SitePlayerIdRoute: SitePlayerIdRoute,
   AppAppPagesEventsNewBotRoute: AppAppPagesEventsNewBotRoute,
   AppAppPagesEventsNewLongshanksRoute: AppAppPagesEventsNewLongshanksRoute,
   AppAppPagesEventsNewManualRoute: AppAppPagesEventsNewManualRoute,

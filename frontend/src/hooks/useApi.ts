@@ -187,3 +187,30 @@ export const useGetRankings = () => {
   })
   return allTourneys
 }
+
+export const useGetRankingsForPlayer = (playerId: number, typeCode: string) => {
+  const auth = useAuth()
+  const playerRankings = useQuery({
+    queryKey: ['rankings-player', playerId, typeCode],
+    enabled: !!auth,
+    queryFn: async (): Promise<
+      Array<{
+        batch_id: number
+        created_at: string
+        rank: number
+        total_points: number
+        name: string
+      }>
+    > => {
+      const url = `${import.meta.env.VITE_BACKEND_URL}/v1/rankings/${playerId}/${typeCode}`
+      const res = await fetch(url, {
+        headers: auth!.headers, // is checked on enabled
+      })
+      if (!res.ok) {
+        throw new Error('Failed to fetch player rankings')
+      }
+      return res.json()
+    },
+  })
+  return playerRankings
+}

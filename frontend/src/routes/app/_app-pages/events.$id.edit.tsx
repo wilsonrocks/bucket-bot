@@ -1,3 +1,4 @@
+import { Link } from '@/components/link'
 import { useGetTourneyDetail } from '@/hooks/useApi'
 import { Table, Title } from '@mantine/core'
 import { createFileRoute } from '@tanstack/react-router'
@@ -25,7 +26,7 @@ function RouteComponent() {
             head: ['Place', 'Name', 'Points', 'Faction'],
             body: tourneyDetail.data.players.map((row) => [
               row.place,
-              row.playerName,
+              <Link to={`/site/player/${row.playerId}`}>{row.playerName}</Link>,
               row.points.toFixed(2),
               row.factionName,
             ]),
