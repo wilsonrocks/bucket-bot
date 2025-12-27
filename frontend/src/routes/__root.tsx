@@ -64,15 +64,17 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
               <Link to="/">
                 <Image src="/bucket-bot-logo.png" alt="b(UK)et bot" w={50} />
               </Link>
-              <Link to="/">
-                <Text>
+              <Text visibleFrom="xs">
+                <Link to="/">
                   b(<b>UK</b>)et bot
-                </Text>
-              </Link>
+                </Link>
+              </Text>
+              <div style={{ marginLeft: 'auto' }}>
+                <LoginButton />
+              </div>
             </Group>
           </AppShell.Header>
           <AppShell.Navbar p="md" bg="gradient(white, lightgrey)">
-            <LoginButton />
             <Navbar />
           </AppShell.Navbar>
           <AppShell.Main>
