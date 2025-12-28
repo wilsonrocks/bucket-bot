@@ -1,9 +1,10 @@
-import { Anchor, Button, Table, Title } from '@mantine/core'
+import { Link } from '@/components/link'
+import { useGetAllTourneys, useGetRankingTypes } from '@/hooks/useApi'
+import { Anchor, Input, Select, Table, Title } from '@mantine/core'
+import { useInputState } from '@mantine/hooks'
 import { createFileRoute } from '@tanstack/react-router'
 import { format, parseISO } from 'date-fns'
 import { Route as EventIdRoute } from './event.$id'
-import { useGetAllTourneys } from '@/hooks/useApi'
-import { Link } from '@/components/link'
 
 export const Route = createFileRoute('/site/events')({
   component: RouteComponent,

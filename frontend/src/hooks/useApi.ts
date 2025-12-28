@@ -138,13 +138,8 @@ export const useGetRankingTypes = () => {
     enabled: !!auth,
     queryFn: async (): Promise<
       Array<{
-        id: number
-        name: string
-        date: string
-        venue: string
-        level_code: string
-        longshanks_id: number | null
-        players: number
+        code: string
+        description: string
       }>
     > => {
       const url = `${import.meta.env.VITE_BACKEND_URL}/v1/ranking-types`
@@ -160,10 +155,10 @@ export const useGetRankingTypes = () => {
   return allTourneys
 }
 
-export const useGetRankings = () => {
+export const useGetRankings = (typeCode: string | undefined) => {
   const auth = useAuth()
   const allTourneys = useQuery({
-    queryKey: ['rankings'],
+    queryKey: ['rankings', typeCode],
     enabled: !!auth,
     queryFn: async (): Promise<
       Array<{
@@ -175,7 +170,10 @@ export const useGetRankings = () => {
         name: string
       }>
     > => {
-      const url = `${import.meta.env.VITE_BACKEND_URL}/v1/rankings`
+      if (!typeCode) {
+        return []
+      }
+      const url = `${import.meta.env.VITE_BACKEND_URL}/v1/rankings/${typeCode}`
       const res = await fetch(url, {
         headers: auth!.headers, // is checked on enabled
       })

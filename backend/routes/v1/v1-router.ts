@@ -122,5 +122,5 @@ v1Router.get("/tourney", allTourneys);
 v1Router.get("/tourney/:id", detailTourney);
 v1Router.post("/generate-rankings", generateRankingsHandler);
 v1Router.get("/ranking-types", rankingTypesHandler);
-v1Router.get("/rankings", rankingsHandler);
+v1Router.get("/rankings/:typeCode", rankingsHandler);
 v1Router.get("/rankings/:playerId/:typeCode", rankingsPlayerHandler);
