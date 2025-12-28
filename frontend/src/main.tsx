@@ -14,6 +14,7 @@ import reportWebVitals from './reportWebVitals.ts'
 // Import styles of packages that you've installed.
 // All packages except `@mantine/hooks` require styles imports
 import '@mantine/core/styles.css'
+import '@mantine/charts/styles.css'
 
 // Create a new router instance
 

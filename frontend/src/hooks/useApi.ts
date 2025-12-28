@@ -193,15 +193,16 @@ export const useGetRankingsForPlayer = (playerId: number, typeCode: string) => {
   const playerRankings = useQuery({
     queryKey: ['rankings-player', playerId, typeCode],
     enabled: !!auth,
-    queryFn: async (): Promise<
-      Array<{
+    queryFn: async (): Promise<{
+      metadata: { number_of_players: number }
+      rankings: {
         batch_id: number
         created_at: string
         rank: number
         total_points: number
         name: string
-      }>
-    > => {
+      }[]
+    }> => {
       const url = `${import.meta.env.VITE_BACKEND_URL}/v1/rankings/${playerId}/${typeCode}`
       const res = await fetch(url, {
         headers: auth!.headers, // is checked on enabled

@@ -1,12 +1,11 @@
 import { Anchor, Button, Table, Title } from '@mantine/core'
 import { createFileRoute } from '@tanstack/react-router'
 import { format, parseISO } from 'date-fns'
-import { Route as EventIdRoute } from '../events.$id.edit'
-import { Route as NewLongshanksRoute } from './new-longshanks'
+import { Route as EventIdRoute } from './event.$id'
 import { useGetAllTourneys } from '@/hooks/useApi'
 import { Link } from '@/components/link'
 
-export const Route = createFileRoute('/app/_app-pages/events/')({
+export const Route = createFileRoute('/site/events')({
   component: RouteComponent,
 })
 
@@ -37,10 +36,6 @@ function RouteComponent() {
       ) : (
         <div>Loading...</div>
       )}
-
-      <Button component={Link} to={NewLongshanksRoute.path} mt="md">
-        New Longshanks Event
-      </Button>
     </div>
   )
 }

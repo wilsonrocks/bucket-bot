@@ -11,9 +11,21 @@ export const rankingsPlayerHandler = async (ctx: Context) => {
     return ctx.throw(400, "Type code is required");
   }
 
-  const rankings = await ctx.state.db
+  const metadataPromise = ctx.state.db
     .selectFrom("ranking_snapshot")
+    .innerJoin(
+      "ranking_snapshot_batch",
+      "ranking_snapshot.batch_id",
+      "ranking_snapshot_batch.id"
+    )
+    .where("type_code", "=", typeCode)
+    .select(({ fn }) =>
+      fn.max<number>("ranking_snapshot.rank").as("number_of_players")
+    )
+    .executeTakeFirstOrThrow();
 
+  const rankingsPromise = ctx.state.db
+    .selectFrom("ranking_snapshot")
     .where("player_id", "=", playerId)
     .innerJoin("player", "ranking_snapshot.player_id", "player.id")
     .innerJoin(
@@ -31,5 +43,10 @@ export const rankingsPlayerHandler = async (ctx: Context) => {
     ])
     .execute();
 
-  ctx.body = rankings;
+  const [metadata, rankings] = await Promise.all([
+    metadataPromise,
+    rankingsPromise,
+  ]);
+
+  ctx.body = { metadata, rankings };
 };
