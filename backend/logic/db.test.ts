@@ -66,15 +66,15 @@ describe.sequential("testing with containers exciting", () => {
     ).rejects.toThrowError("Invalid rankings type");
   });
 
-  test("generates", async () => {
-    await generateRankings(dbClient, "BEST_FOREVER");
+  test("ROLLING_YEAR rankings", async () => {
+    await generateRankings(dbClient, "ROLLING_YEAR");
 
     const snapshotBatch = await dbClient
       .selectFrom("ranking_snapshot_batch")
       .selectAll()
       .execute();
     expect(snapshotBatch.length).toBe(1);
-    expect(snapshotBatch[0]!.type_code).toBe("BEST_FOREVER");
+    expect(snapshotBatch[0]!.type_code).toBe("ROLLING_YEAR");
 
     const rankings = await dbClient
       .selectFrom("ranking_snapshot")
@@ -84,34 +84,26 @@ describe.sequential("testing with containers exciting", () => {
 
     expect(rankings.length).toBe(11); // 11 players
 
-    expect(rankings).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          name: "James",
-          rank: 3,
-          total_points: 57,
-        }),
-        expect.objectContaining({
-          name: "Emma",
-          rank: 1,
-          total_points: 62,
-        }),
-        expect.objectContaining({
-          name: "Geraint",
-          rank: 2,
-          total_points: 61,
-        }),
-        expect.objectContaining({
-          name: "JFV",
-          rank: 5,
-          total_points: 44,
-        }),
-        expect.objectContaining({
-          name: "Matt",
-          rank: 4,
-          total_points: 46,
-        }),
-      ])
-    );
+    for (const { name, rank, total_points } of [
+      { name: "James", rank: 2, total_points: 57 },
+      { name: "Emma", rank: 1, total_points: 61 },
+      { name: "Geraint", rank: 3, total_points: 48 },
+      { name: "JFV", rank: 5, total_points: 44 },
+      { name: "Matt", rank: 4, total_points: 46 },
+    ]) {
+      const playerRanking = rankings.find((r) => r.name === name);
+      expect(
+        playerRanking,
+        `${playerRanking!.name} should have be in the rankings`
+      ).toBeDefined();
+      expect(
+        playerRanking!.rank,
+        `${playerRanking!.name} should have rank ${rank}`
+      ).toBe(rank);
+      expect(
+        playerRanking!.total_points,
+        `${playerRanking!.name} should have total points ${total_points}`
+      ).toBe(total_points);
+    }
   });
 });

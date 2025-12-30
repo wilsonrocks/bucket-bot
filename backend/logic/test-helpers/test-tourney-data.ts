@@ -1,6 +1,7 @@
 import { Kysely } from "kysely";
 import { DB } from "kysely-codegen";
 import { dbClient } from "../../db-client";
+import { subMonths, format } from "date-fns";
 
 interface TestPlayer {
   id: number;
@@ -13,6 +14,13 @@ interface TestResult {
   place: number;
   faction: string;
 }
+
+const monthsAgo = (months: number): string => {
+  const now = new Date();
+  const then = subMonths(now, months);
+  const formatted = format(then, "yyyy-MM-dd");
+  return formatted;
+};
 
 export async function addTestTourneyData(db: Kysely<DB>) {
   const [JFV, James, Oz, Emma, Matt, Reice, Yan, Ed, Esme, Geraint, Boosey] =
@@ -148,7 +156,7 @@ export async function addTestTourneyData(db: Kysely<DB>) {
   // ], best 5 = 44
   // James: [
   //   12, 12, 13, 11,
-  //    8,  9,  9
+  //  8,  9,  x9
   // ], best 5 = 57
   // Oz: [
   //   10,  7, 5, 5,
@@ -156,11 +164,11 @@ export async function addTestTourneyData(db: Kysely<DB>) {
   // ], best 5 = 42
   // Emma: [
   //    8, 14, 11, 13,
-  //   10, 13, 11
-  // ], best 5 = 62
+  //   10, 13, x11
+  // ], best 5 = 61
   // Matt: [
   //   6, 10, 7, 15,
-  //   7,  7, 7
+  //   7,  7, x7
   // ], best 5 =  46
   // Reice: [ 4 ], best 5 = 4
   // Yan: [
@@ -173,16 +181,16 @@ export async function addTestTourneyData(db: Kysely<DB>) {
   // ], best 5 = 13
   // Esme: [ 0, 2, 1, 1, 16 ], best 5 = 20
   // Boosey: [ 1, 1, 1 ], best 5 = 3
-  // Geraint: [ 16, 9, 12, 11, 13 ], best 5 = 61
+  // Geraint: [ 16, 9, 12, 11, x13 ], best 5 = 48
 
   // playerPointsMap now contains: { [playerName]: [points, ...] }
-  await addResults(tourney1Results, "tourney 1", "2025-01-01", db);
-  await addResults(tourney2Results, "tourney 2", "2025-02-01", db);
-  await addResults(tourney3Results, "tourney 3", "2025-03-01", db);
-  await addResults(tourney4Results, "tourney 4", "2025-04-01", db);
-  await addResults(tourney5Results, "tourney 5", "2025-05-01", db);
-  await addResults(tourney6Results, "tourney 6", "2025-06-01", db);
-  await addResults(tourney7Results, "tourney 7", "2025-07-01", db);
+  await addResults(tourney1Results, "tourney 1", monthsAgo(6), db);
+  await addResults(tourney2Results, "tourney 2", monthsAgo(5), db);
+  await addResults(tourney3Results, "tourney 3", monthsAgo(4), db);
+  await addResults(tourney4Results, "tourney 4", monthsAgo(3), db);
+  await addResults(tourney5Results, "tourney 5", monthsAgo(2), db);
+  await addResults(tourney6Results, "tourney 6", monthsAgo(1), db);
+  await addResults(tourney7Results, "tourney 7", monthsAgo(13), db);
 }
 
 async function addResults(
