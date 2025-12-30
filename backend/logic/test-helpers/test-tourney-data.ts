@@ -196,7 +196,7 @@ async function addResults(
 
   const tourney = await db
     .insertInto("tourney")
-    .values({ name, date })
+    .values({ name, date, number_of_players: tourneyResults.length })
     .returningAll()
     .executeTakeFirstOrThrow();
 

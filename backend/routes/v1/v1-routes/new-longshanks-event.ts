@@ -44,7 +44,6 @@ export const newLongshanksEvent = async (ctx: Context) => {
 
       const htmlText = await html.text();
       const tourneyData = extractTourneyFromLongshanksHtml(htmlText);
-      console.log(tourneyData);
       return tourneyData;
     })(),
   ]);
@@ -55,7 +54,9 @@ export const newLongshanksEvent = async (ctx: Context) => {
     .selectFrom("faction")
     .selectAll()
     .execute();
+
   const factionMap: Record<string, number> = {};
+
   factions.forEach((faction) => {
     factionMap[faction.longshanks_html_name] = faction.id;
   });
@@ -71,6 +72,7 @@ export const newLongshanksEvent = async (ctx: Context) => {
         name: parsedOtherData.name,
         venue: parsedOtherData.location,
         date: new Date(parsedOtherData.date),
+        number_of_players: players.length,
       })
       .returning("id")
       .executeTakeFirstOrThrow();

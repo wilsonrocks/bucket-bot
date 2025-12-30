@@ -1,6 +1,7 @@
 import { ExpressionBuilder, Kysely, sql } from "kysely";
 import { DB } from "kysely-codegen";
 import { Faction } from "./fixtures";
+import { Role } from "discord.js";
 
 const oneYearAgo = sql<Date>`current_date - interval '1 year'`;
 
@@ -59,6 +60,16 @@ const rankingTypeWhereMap = {
       eb(eb.ref("faction.name_code"), "=", Faction.EXPLORER),
     (eb: ExpressionBuilder<DB, "tourney">) =>
       eb("tourney.date", ">=", oneYearAgo),
+  ],
+
+  ROLLING_YEAR: [
+    (eb: ExpressionBuilder<DB, "tourney">) =>
+      eb("tourney.date", ">=", oneYearAgo),
+  ],
+
+  MASTERS: [
+    (eb: ExpressionBuilder<DB, "tourney">) =>
+      eb("tourney.number_of_players", ">=", 12),
   ],
 } as const;
 
