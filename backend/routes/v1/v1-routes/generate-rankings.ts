@@ -12,6 +12,8 @@ export const generateRankingsHandler = async (ctx: Context) => {
       await generateRankings(ctx.state.db, rankingType.code);
     })
   );
-  console.log(donePromises);
+  console.error(
+    donePromises.flatMap((p) => (p.status === "rejected" ? [p.reason] : []))
+  );
   ctx.body = { rankings: [] };
 };

@@ -1,4 +1,4 @@
 [x] why is MYR importing as id 2025
 [ ] move where logic into own file
 [ ] write tests for BEST_RESSER
-[ ] generate nice types for faction names and snapshot types (with tests against DB)
+[x] generate nice types for faction names and snapshot types (with tests against DB)

@@ -1,16 +1,64 @@
 import { ExpressionBuilder, Kysely, sql } from "kysely";
 import { DB } from "kysely-codegen";
+import { Faction } from "./fixtures";
+
+const oneYearAgo = sql<Date>`current_date - interval '1 year'`;
 
 const rankingTypeWhereMap = {
-  BEST_FOREVER: [
-    (eb: ExpressionBuilder<DB, "faction">) =>
-      eb(sql.lit("TRUE"), "=", sql.lit("TRUE")),
-  ],
   BEST_RESSER: [
     (eb: ExpressionBuilder<DB, "faction">) =>
-      eb(eb.ref("faction.name_code"), "=", "RESSERS"),
+      eb(eb.ref("faction.name_code"), "=", Faction.RESSERS),
     (eb: ExpressionBuilder<DB, "tourney">) =>
-      eb("tourney.date", ">=", sql<Date>`current_date - interval '1 year'`),
+      eb("tourney.date", ">=", oneYearAgo),
+  ],
+
+  BEST_GUILD: [
+    (eb: ExpressionBuilder<DB, "faction">) =>
+      eb(eb.ref("faction.name_code"), "=", Faction.GUILD),
+    (eb: ExpressionBuilder<DB, "tourney">) =>
+      eb("tourney.date", ">=", oneYearAgo),
+  ],
+
+  BEST_ARCANIST: [
+    (eb: ExpressionBuilder<DB, "faction">) =>
+      eb(eb.ref("faction.name_code"), "=", Faction.ARCANISTS),
+    (eb: ExpressionBuilder<DB, "tourney">) =>
+      eb("tourney.date", ">=", oneYearAgo),
+  ],
+
+  BEST_OUTCAST: [
+    (eb: ExpressionBuilder<DB, "faction">) =>
+      eb(eb.ref("faction.name_code"), "=", Faction.OUTCASTS),
+    (eb: ExpressionBuilder<DB, "tourney">) =>
+      eb("tourney.date", ">=", oneYearAgo),
+  ],
+
+  BEST_THUNDERS: [
+    (eb: ExpressionBuilder<DB, "faction">) =>
+      eb(eb.ref("faction.name_code"), "=", Faction.THUNDERS),
+    (eb: ExpressionBuilder<DB, "tourney">) =>
+      eb("tourney.date", ">=", oneYearAgo),
+  ],
+
+  BEST_NEVERBORN: [
+    (eb: ExpressionBuilder<DB, "faction">) =>
+      eb(eb.ref("faction.name_code"), "=", Faction.NEVERBORN),
+    (eb: ExpressionBuilder<DB, "tourney">) =>
+      eb("tourney.date", ">=", oneYearAgo),
+  ],
+
+  BEST_BAYOU: [
+    (eb: ExpressionBuilder<DB, "faction">) =>
+      eb(eb.ref("faction.name_code"), "=", Faction.BAYOU),
+    (eb: ExpressionBuilder<DB, "tourney">) =>
+      eb("tourney.date", ">=", oneYearAgo),
+  ],
+
+  BEST_EXPLORERS: [
+    (eb: ExpressionBuilder<DB, "faction">) =>
+      eb(eb.ref("faction.name_code"), "=", Faction.EXPLORER),
+    (eb: ExpressionBuilder<DB, "tourney">) =>
+      eb("tourney.date", ">=", oneYearAgo),
   ],
 } as const;
 
@@ -27,6 +75,11 @@ export const generateRankings = async (
   if (!rankingSnapshotType) {
     throw new Error(`Invalid rankings type: ${rankingsType}`);
   }
+
+  if (!rankingSnapshotType.generate) {
+    return;
+  }
+
   const rankingTypeWhereSql =
     rankingTypeWhereMap[rankingsType as keyof typeof rankingTypeWhereMap]; // this cast is keeping TS happy, the real check happens below
 

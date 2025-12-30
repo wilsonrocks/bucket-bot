@@ -10,7 +10,7 @@ export enum Faction {
 }
 
 export enum RankingType {
-  BEST_FOREVER = "BEST_FOREVER",
+  BEST_FOREVER = "BEST_FOREVER", // should not be generated any more
   MASTERS = "MASTERS",
   BEST_RESSER = "BEST_RESSER",
   BEST_GUILD = "BEST_GUILD",
