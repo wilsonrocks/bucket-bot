@@ -1,10 +1,19 @@
-import { sql, Kysely } from "kysely";
+import { sql, Kysely, ExpressionBuilder, SqlBool } from "kysely";
 import { DB } from "kysely-codegen";
 
 const rankingTypeWhereMap = {
-  BEST_FOREVER: [sql.lit("TRUE"), "=", sql.lit("TRUE")],
+  BEST_FOREVER: [
+    (eb: ExpressionBuilder<DB, "faction">) =>
+      eb(sql.lit("TRUE"), "=", sql.lit("TRUE")),
+  ],
+  BEST_RESSER: [
+    (eb: ExpressionBuilder<DB, "faction">) =>
+      eb(eb.ref("faction.name_code"), "=", "RESSERS"),
+    (eb: ExpressionBuilder<DB, "tourney">) =>
+      eb("tourney.date", ">=", sql<Date>`current_date - interval '1 year'`),
+  ],
 } as const;
-
+type TEST = (typeof rankingTypeWhereMap)["BEST_RESSER"];
 export const generateRankings = async (
   db: Kysely<DB>,
   rankingsType: string // don't need to narrow type as checking at runtime and this might come from DB
@@ -45,6 +54,8 @@ export const generateRankings = async (
             trx
               .selectFrom("player")
               .innerJoin("result", "player.id", "result.player_id")
+              .innerJoin("tourney", "result.tourney_id", "tourney.id")
+              .innerJoin("faction", "result.faction_id", "faction.id")
               .select([
                 sql.lit(batch.id).as("batch_id"),
                 "player.id as id",
@@ -57,7 +68,7 @@ export const generateRankings = async (
           )
         `.as("rn"),
               ])
-              .where(...rankingTypeWhereSql)
+              .where((eb) => eb.and(rankingTypeWhereSql.map((fn) => fn(eb))))
 
               .as("ranked_results")
           )

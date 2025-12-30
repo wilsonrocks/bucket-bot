@@ -7,11 +7,11 @@ export const generateRankingsHandler = async (ctx: Context) => {
     .selectAll()
     .execute();
 
-  await Promise.allSettled(
+  const donePromises = await Promise.allSettled(
     rankings.map(async (rankingType) => {
       await generateRankings(ctx.state.db, rankingType.code);
     })
   );
-
+  console.log(donePromises);
   ctx.body = { rankings: [] };
 };
