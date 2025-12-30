@@ -1,4 +1,4 @@
-import { sql, Kysely, ExpressionBuilder, SqlBool } from "kysely";
+import { ExpressionBuilder, Kysely, sql } from "kysely";
 import { DB } from "kysely-codegen";
 
 const rankingTypeWhereMap = {
@@ -13,7 +13,7 @@ const rankingTypeWhereMap = {
       eb("tourney.date", ">=", sql<Date>`current_date - interval '1 year'`),
   ],
 } as const;
-type TEST = (typeof rankingTypeWhereMap)["BEST_RESSER"];
+
 export const generateRankings = async (
   db: Kysely<DB>,
   rankingsType: string // don't need to narrow type as checking at runtime and this might come from DB
