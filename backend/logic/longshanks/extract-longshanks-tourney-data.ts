@@ -25,7 +25,7 @@ export const extractTourneyFromLongshanksHtml = (
   }
 
   const longshanksId = document
-    .querySelector("title")
+    .querySelector("header")
     ?.textContent?.match(/\d+/)?.[0];
 
   if (!longshanksId) {

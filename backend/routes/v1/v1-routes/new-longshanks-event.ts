@@ -44,6 +44,7 @@ export const newLongshanksEvent = async (ctx: Context) => {
 
       const htmlText = await html.text();
       const tourneyData = extractTourneyFromLongshanksHtml(htmlText);
+      console.log(tourneyData);
       return tourneyData;
     })(),
   ]);

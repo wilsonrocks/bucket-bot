@@ -28,3 +28,7 @@ export const ozMagicalMysteryTourTourneyHtml = readFileSync(
 export const wyrdLittleCacoonPlayersHtml = readFileSync(
   join(__dirname, "./wyrd-little-cacoon.html")
 ).toString();
+
+export const malifauxYorkshireRumbleTourneyHtml = readFileSync(
+  join(__dirname, "./malifaux-yorkshire-rumble-tourney.html")
+).toString();

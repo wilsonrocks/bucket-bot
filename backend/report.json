@@ -1692,6 +1692,438 @@
       "operation": "migrate",
       "exception": null,
       "licenseFailed": false
+    },
+    {
+      "initialSchemaVersion": null,
+      "targetSchemaVersion": "025",
+      "schemaName": "",
+      "migrations": [
+        {
+          "category": "Versioned",
+          "version": "001",
+          "description": "initial-tables",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V001__initial-tables.sql",
+          "executionTime": 51
+        },
+        {
+          "category": "Versioned",
+          "version": "002",
+          "description": "factions",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V002__factions.sql",
+          "executionTime": 10
+        },
+        {
+          "category": "Versioned",
+          "version": "003",
+          "description": "remove-venues-add-tourney-columns",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V003__remove-venues-add-tourney-columns.sql",
+          "executionTime": 8
+        },
+        {
+          "category": "Versioned",
+          "version": "004",
+          "description": "remove-poorly-named-column",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V004__remove-poorly-named-column.sql",
+          "executionTime": 16
+        },
+        {
+          "category": "Versioned",
+          "version": "005",
+          "description": "change date type in tourney",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V005__change date type in tourney.sql",
+          "executionTime": 9
+        },
+        {
+          "category": "Versioned",
+          "version": "006",
+          "description": "add-longshanks-id-field",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V006__add-longshanks-id-field.sql",
+          "executionTime": 11
+        },
+        {
+          "category": "Versioned",
+          "version": "007",
+          "description": "add-longshanks-player-name",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V007__add-longshanks-player-name.sql",
+          "executionTime": 2
+        },
+        {
+          "category": "Versioned",
+          "version": "008",
+          "description": "make-longshanks-player-id-unique",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V008__make-longshanks-player-id-unique.sql",
+          "executionTime": 4
+        },
+        {
+          "category": "Versioned",
+          "version": "009",
+          "description": "let-player-discord-be-null",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V009__let-player-discord-be-null.sql",
+          "executionTime": 2
+        },
+        {
+          "category": "Versioned",
+          "version": "010",
+          "description": "let-discord-username-be-null",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V010__let-discord-username-be-null.sql",
+          "executionTime": 2
+        },
+        {
+          "category": "Versioned",
+          "version": "011",
+          "description": "add-facton-data",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V011__add-facton-data.sql",
+          "executionTime": 7
+        },
+        {
+          "category": "Versioned",
+          "version": "012",
+          "description": "points-stuff",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V012__points-stuff.sql",
+          "executionTime": 14
+        },
+        {
+          "category": "Versioned",
+          "version": "013",
+          "description": "make-level-code-mandatory-with-default",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V013__make-level-code-mandatory-with-default.sql",
+          "executionTime": 7
+        },
+        {
+          "category": "Versioned",
+          "version": "014",
+          "description": "fix-default",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V014__fix-default.sql",
+          "executionTime": 6
+        },
+        {
+          "category": "Versioned",
+          "version": "015",
+          "description": "make-points-mandatory",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V015__make-points-mandatory.sql",
+          "executionTime": 6
+        },
+        {
+          "category": "Versioned",
+          "version": "016",
+          "description": "add-fields-to-tourney",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V016__add-fields-to-tourney.sql",
+          "executionTime": 6
+        },
+        {
+          "category": "Versioned",
+          "version": "017",
+          "description": "add ranking tables",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V017__add_ranking_tables.sql",
+          "executionTime": 44
+        },
+        {
+          "category": "Versioned",
+          "version": "018",
+          "description": "change type table",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V018__change_type_table.sql",
+          "executionTime": 18
+        },
+        {
+          "category": "Versioned",
+          "version": "019",
+          "description": "make-date-mandatory",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V019__make-date-mandatory.sql",
+          "executionTime": 3
+        },
+        {
+          "category": "Versioned",
+          "version": "020",
+          "description": "tweak ranking schema",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V020__tweak_ranking_schema.sql",
+          "executionTime": 8
+        },
+        {
+          "category": "Versioned",
+          "version": "021",
+          "description": "add constraint to ranking snapshot",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V021__add_constraint_to_ranking_snapshot.sql",
+          "executionTime": 11
+        },
+        {
+          "category": "Versioned",
+          "version": "022",
+          "description": "enhanve faction table",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V022__enhanve_faction_table.sql",
+          "executionTime": 3
+        },
+        {
+          "category": "Versioned",
+          "version": "023",
+          "description": "make faction field mandatory",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V023__make_faction_field_mandatory.sql",
+          "executionTime": 1
+        },
+        {
+          "category": "Versioned",
+          "version": "024",
+          "description": "make points float",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V024__make_points_float.sql",
+          "executionTime": 8
+        },
+        {
+          "category": "Versioned",
+          "version": "025",
+          "description": "add faction code field",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V025__add_faction_code_field.sql",
+          "executionTime": 11
+        }
+      ],
+      "migrationsExecuted": 25,
+      "success": true,
+      "flywayVersion": "9.22.3",
+      "database": "testdb",
+      "warnings": [],
+      "timestamp": "2025-12-30T07:55:47.753750937",
+      "operation": "migrate",
+      "exception": null,
+      "licenseFailed": false
+    },
+    {
+      "initialSchemaVersion": null,
+      "targetSchemaVersion": "025",
+      "schemaName": "",
+      "migrations": [
+        {
+          "category": "Versioned",
+          "version": "001",
+          "description": "initial-tables",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V001__initial-tables.sql",
+          "executionTime": 69
+        },
+        {
+          "category": "Versioned",
+          "version": "002",
+          "description": "factions",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V002__factions.sql",
+          "executionTime": 14
+        },
+        {
+          "category": "Versioned",
+          "version": "003",
+          "description": "remove-venues-add-tourney-columns",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V003__remove-venues-add-tourney-columns.sql",
+          "executionTime": 8
+        },
+        {
+          "category": "Versioned",
+          "version": "004",
+          "description": "remove-poorly-named-column",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V004__remove-poorly-named-column.sql",
+          "executionTime": 3
+        },
+        {
+          "category": "Versioned",
+          "version": "005",
+          "description": "change date type in tourney",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V005__change date type in tourney.sql",
+          "executionTime": 3
+        },
+        {
+          "category": "Versioned",
+          "version": "006",
+          "description": "add-longshanks-id-field",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V006__add-longshanks-id-field.sql",
+          "executionTime": 5
+        },
+        {
+          "category": "Versioned",
+          "version": "007",
+          "description": "add-longshanks-player-name",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V007__add-longshanks-player-name.sql",
+          "executionTime": 2
+        },
+        {
+          "category": "Versioned",
+          "version": "008",
+          "description": "make-longshanks-player-id-unique",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V008__make-longshanks-player-id-unique.sql",
+          "executionTime": 5
+        },
+        {
+          "category": "Versioned",
+          "version": "009",
+          "description": "let-player-discord-be-null",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V009__let-player-discord-be-null.sql",
+          "executionTime": 2
+        },
+        {
+          "category": "Versioned",
+          "version": "010",
+          "description": "let-discord-username-be-null",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V010__let-discord-username-be-null.sql",
+          "executionTime": 2
+        },
+        {
+          "category": "Versioned",
+          "version": "011",
+          "description": "add-facton-data",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V011__add-facton-data.sql",
+          "executionTime": 6
+        },
+        {
+          "category": "Versioned",
+          "version": "012",
+          "description": "points-stuff",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V012__points-stuff.sql",
+          "executionTime": 12
+        },
+        {
+          "category": "Versioned",
+          "version": "013",
+          "description": "make-level-code-mandatory-with-default",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V013__make-level-code-mandatory-with-default.sql",
+          "executionTime": 7
+        },
+        {
+          "category": "Versioned",
+          "version": "014",
+          "description": "fix-default",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V014__fix-default.sql",
+          "executionTime": 4
+        },
+        {
+          "category": "Versioned",
+          "version": "015",
+          "description": "make-points-mandatory",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V015__make-points-mandatory.sql",
+          "executionTime": 2
+        },
+        {
+          "category": "Versioned",
+          "version": "016",
+          "description": "add-fields-to-tourney",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V016__add-fields-to-tourney.sql",
+          "executionTime": 2
+        },
+        {
+          "category": "Versioned",
+          "version": "017",
+          "description": "add ranking tables",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V017__add_ranking_tables.sql",
+          "executionTime": 37
+        },
+        {
+          "category": "Versioned",
+          "version": "018",
+          "description": "change type table",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V018__change_type_table.sql",
+          "executionTime": 50
+        },
+        {
+          "category": "Versioned",
+          "version": "019",
+          "description": "make-date-mandatory",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V019__make-date-mandatory.sql",
+          "executionTime": 24
+        },
+        {
+          "category": "Versioned",
+          "version": "020",
+          "description": "tweak ranking schema",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V020__tweak_ranking_schema.sql",
+          "executionTime": 10
+        },
+        {
+          "category": "Versioned",
+          "version": "021",
+          "description": "add constraint to ranking snapshot",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V021__add_constraint_to_ranking_snapshot.sql",
+          "executionTime": 11
+        },
+        {
+          "category": "Versioned",
+          "version": "022",
+          "description": "enhanve faction table",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V022__enhanve_faction_table.sql",
+          "executionTime": 4
+        },
+        {
+          "category": "Versioned",
+          "version": "023",
+          "description": "make faction field mandatory",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V023__make_faction_field_mandatory.sql",
+          "executionTime": 12
+        },
+        {
+          "category": "Versioned",
+          "version": "024",
+          "description": "make points float",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V024__make_points_float.sql",
+          "executionTime": 11
+        },
+        {
+          "category": "Versioned",
+          "version": "025",
+          "description": "add faction code field",
+          "type": "SQL",
+          "filepath": "/home/james/coding/bucket-bot/backend/../db/migrations/V025__add_faction_code_field.sql",
+          "executionTime": 11
+        }
+      ],
+      "migrationsExecuted": 25,
+      "success": true,
+      "flywayVersion": "9.22.3",
+      "database": "testdb",
+      "warnings": [],
+      "timestamp": "2025-12-30T08:01:49.406159542",
+      "operation": "migrate",
+      "exception": null,
+      "licenseFailed": false
     }
   ]
 }

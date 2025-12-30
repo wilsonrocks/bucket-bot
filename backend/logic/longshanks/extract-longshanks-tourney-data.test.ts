@@ -1,6 +1,7 @@
 import { describe, test, expect } from "vitest";
 import { extractTourneyFromLongshanksHtml } from "./extract-longshanks-tourney-data";
 import {
+  malifauxYorkshireRumbleTourneyHtml,
   newFrontierTourneyHtml,
   ozMagicalMysteryTourTourneyHtml,
   powderMonkeyFaux3TourneyHtml,
@@ -42,6 +43,14 @@ describe("extractLongshanksTourneyData", () => {
       expect(tourneyData.location).toContain("Battlefield Hobbies");
       expect(tourneyData.date).toEqual("2025-03-23");
       expect(tourneyData.tournamentOrganiserId).toEqual("3655");
+    });
+
+    test("Malifaux Yorkshire Rumble", () => {
+      const tourneyData = extractTourneyFromLongshanksHtml(
+        malifauxYorkshireRumbleTourneyHtml
+      );
+
+      expect(tourneyData.longshanksId).toEqual("21815");
     });
   });
 });
