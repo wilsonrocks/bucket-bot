@@ -5,13 +5,22 @@ import {
   shouldGenerateRankings,
 } from "./ranking-type-logic";
 
+export interface GenerateRankingsConfig {
+  playersNeededToBeMastersRanked: number;
+  numberOfTourneysToConsider: number;
+}
+
 export const generateRankings = async (
   db: Kysely<DB>,
-  rankingsType: string // don't need to narrow type as checking at runtime and this might come from DB
+  rankingsType: string, // don't need to narrow type as checking at runtime and this might come from DB
+  config: GenerateRankingsConfig = {
+    playersNeededToBeMastersRanked: 12,
+    numberOfTourneysToConsider: 5,
+  }
 ) => {
   if (!shouldGenerateRankings(rankingsType, db)) return;
 
-  const rankingTypeWhereSql = getRankingTypeWhereSql(rankingsType);
+  const rankingTypeWhereSql = getRankingTypeWhereSql(rankingsType, config);
 
   if (!rankingTypeWhereSql) {
     throw new Error(`No where SQL found for rankings type: ${rankingsType}`);
@@ -59,13 +68,13 @@ export const generateRankings = async (
             sql<number>`row_number() over (order by sum(points) desc)`.as(
               "rank"
             ),
-            sql<number>`sum(points)`.as("best5"),
+            sql<number>`sum(points)`.as("best_tourneys_points"),
           ])
-          .where("rn", "<=", 5)
+          .where("rn", "<=", config.numberOfTourneysToConsider)
           .groupBy("id")
           .groupBy("name")
           .groupBy("batch_id")
-          .orderBy("best5", "desc")
+          .orderBy("best_tourneys_points", "desc")
       )
       .returningAll()
       .execute();

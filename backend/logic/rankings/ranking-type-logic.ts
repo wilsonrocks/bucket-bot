@@ -1,73 +1,12 @@
 import { ExpressionBuilder, Kysely, sql } from "kysely";
 import { DB } from "kysely-codegen";
 import { Faction, RankingType } from "../fixtures";
+import { GenerateRankingsConfig } from "./generate-rankings";
+import { th } from "zod/v4/locales";
 
 const oneYearAgoSql = sql<Date>`current_date - interval '1 year'`;
 const oneYearAgo = (eb: ExpressionBuilder<DB, "tourney">) =>
   eb("tourney.date", ">=", oneYearAgoSql);
-
-const rankingTypeWhereMap = {
-  [RankingType.BEST_RESSER]: [
-    (eb: ExpressionBuilder<DB, "faction">) =>
-      eb(eb.ref("faction.name_code"), "=", Faction.RESSERS),
-    oneYearAgo,
-  ],
-
-  BEST_GUILD: [
-    (eb: ExpressionBuilder<DB, "faction">) =>
-      eb(eb.ref("faction.name_code"), "=", Faction.GUILD),
-    oneYearAgo,
-  ],
-
-  BEST_ARCANIST: [
-    (eb: ExpressionBuilder<DB, "faction">) =>
-      eb(eb.ref("faction.name_code"), "=", Faction.ARCANISTS),
-    oneYearAgo,
-  ],
-
-  BEST_OUTCAST: [
-    (eb: ExpressionBuilder<DB, "faction">) =>
-      eb(eb.ref("faction.name_code"), "=", Faction.OUTCASTS),
-    oneYearAgo,
-  ],
-
-  BEST_THUNDERS: [
-    (eb: ExpressionBuilder<DB, "faction">) =>
-      eb(eb.ref("faction.name_code"), "=", Faction.THUNDERS),
-    oneYearAgo,
-  ],
-
-  BEST_NEVERBORN: [
-    (eb: ExpressionBuilder<DB, "faction">) =>
-      eb(eb.ref("faction.name_code"), "=", Faction.NEVERBORN),
-    oneYearAgo,
-  ],
-
-  BEST_BAYOU: [
-    (eb: ExpressionBuilder<DB, "faction">) =>
-      eb(eb.ref("faction.name_code"), "=", Faction.BAYOU),
-    oneYearAgo,
-  ],
-
-  BEST_EXPLORERS: [
-    (eb: ExpressionBuilder<DB, "faction">) =>
-      eb(eb.ref("faction.name_code"), "=", Faction.EXPLORER),
-    oneYearAgo,
-  ],
-
-  ROLLING_YEAR: [oneYearAgo],
-
-  MASTERS: [
-    (eb: ExpressionBuilder<DB, "tourney">) =>
-      eb("tourney.number_of_players", ">=", 12),
-    oneYearAgo,
-  ],
-
-  [RankingType.BEST_FOREVER]: [
-    (eb: ExpressionBuilder<DB, "tourney">) =>
-      eb(sql.lit<number>(1), "=", sql.lit<number>(2)), // always false condition to include no records
-  ],
-} as const;
 
 const checkRankingType = (
   rankingsType: string
@@ -75,15 +14,81 @@ const checkRankingType = (
   return Object.values(RankingType).includes(rankingsType as RankingType);
 };
 
-export const getRankingTypeWhereSql = (rankingsType: string) => {
+export const getRankingTypeWhereSql = (
+  rankingsType: string,
+  config: GenerateRankingsConfig
+) => {
   if (!checkRankingType(rankingsType)) {
     throw new Error(`Invalid rankings type: ${rankingsType}`);
   }
 
-  const rankingTypeWhereSql =
-    rankingTypeWhereMap[rankingsType as keyof typeof rankingTypeWhereMap];
-
-  return rankingTypeWhereSql;
+  switch (rankingsType) {
+    case RankingType.BEST_RESSER:
+      return [
+        (eb: ExpressionBuilder<DB, "faction">) =>
+          eb(eb.ref("faction.name_code"), "=", Faction.RESSERS),
+        oneYearAgo,
+      ];
+    case "BEST_GUILD":
+      return [
+        (eb: ExpressionBuilder<DB, "faction">) =>
+          eb(eb.ref("faction.name_code"), "=", Faction.GUILD),
+        oneYearAgo,
+      ];
+    case "BEST_ARCANIST":
+      return [
+        (eb: ExpressionBuilder<DB, "faction">) =>
+          eb(eb.ref("faction.name_code"), "=", Faction.ARCANISTS),
+        oneYearAgo,
+      ];
+    case "BEST_OUTCAST":
+      return [
+        (eb: ExpressionBuilder<DB, "faction">) =>
+          eb(eb.ref("faction.name_code"), "=", Faction.OUTCASTS),
+        oneYearAgo,
+      ];
+    case "BEST_THUNDERS":
+      return [
+        (eb: ExpressionBuilder<DB, "faction">) =>
+          eb(eb.ref("faction.name_code"), "=", Faction.THUNDERS),
+        oneYearAgo,
+      ];
+    case "BEST_NEVERBORN":
+      return [
+        (eb: ExpressionBuilder<DB, "faction">) =>
+          eb(eb.ref("faction.name_code"), "=", Faction.NEVERBORN),
+        oneYearAgo,
+      ];
+    case "BEST_BAYOU":
+      return [
+        (eb: ExpressionBuilder<DB, "faction">) =>
+          eb(eb.ref("faction.name_code"), "=", Faction.BAYOU),
+        oneYearAgo,
+      ];
+    case "BEST_EXPLORERS":
+      return [
+        (eb: ExpressionBuilder<DB, "faction">) =>
+          eb(eb.ref("faction.name_code"), "=", Faction.EXPLORER),
+        oneYearAgo,
+      ];
+    case "ROLLING_YEAR":
+      return [oneYearAgo];
+    case "MASTERS":
+      return [
+        (eb: ExpressionBuilder<DB, "tourney">) =>
+          eb(
+            "tourney.number_of_players",
+            ">=",
+            config.playersNeededToBeMastersRanked
+          ),
+        oneYearAgo,
+      ];
+    case RankingType.BEST_FOREVER:
+      return [
+        (eb: ExpressionBuilder<DB, "tourney">) =>
+          eb(sql.lit<number>(1), "=", sql.lit<number>(2)),
+      ];
+  }
 };
 
 export const shouldGenerateRankings = async (
