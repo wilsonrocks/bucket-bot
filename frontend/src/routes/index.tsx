@@ -1,29 +1,33 @@
-import { Button, Container, Stack, Text } from '@mantine/core'
+import { Link } from '@/components/link'
+import { Route as RankingsRoute } from '@/routes/site/rankings'
+import { Divider, Text } from '@mantine/core'
 import { createFileRoute } from '@tanstack/react-router'
-import { useGenerateRankingsSnapshotMutation } from '@/hooks/useApi'
 
 export const Route = createFileRoute('/')({
   component: App,
+  staticData: { title: 'Welcome to B(UK)et Bot!' },
 })
 
 function App() {
-  const generateRankings = useGenerateRankingsSnapshotMutation()
   return (
-    <Container h="100vh">
-      <Stack justify="center" align="center">
-        <Text ta="center" mb="md">
-          Eventually this will do things to do with rankings
-        </Text>
+    <>
+      <Text>Welcome to a tool for rankings for the UK Malifaux Community!</Text>
 
-        <Button
-          disabled={generateRankings.isPending}
-          onClick={() => generateRankings.mutate()}
-        >
-          Generate a rankings snapshot
-        </Button>
+      <Text>
+        There's a good chance that you are looking for{' '}
+        <Link to={RankingsRoute.path}>the rankings</Link>.
+      </Text>
+      <Divider m={5} />
+      <Text>
+        This is very much a Work in Progress, and if you want to help or are
+        nosy, the code is on{' '}
+        <Link href="https://github.com/wilsonrocks/bucket-bot">github</Link>.
+      </Text>
 
-        {/* <Image src={BucketBotImage} alt="Bucket Bot" maw={200} /> */}
-      </Stack>
-    </Container>
+      <Text>
+        Feature Requests and Bug Reports are really welcomed - mention it on the
+        Discord!
+      </Text>
+    </>
   )
 }

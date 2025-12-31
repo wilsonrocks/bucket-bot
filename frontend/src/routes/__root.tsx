@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import {
+  Alert,
   AppShell,
   Burger,
   Center,
@@ -84,6 +85,17 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
           </AppShell.Navbar>
           <AppShell.Main>
             <Container>
+              <Alert title="Work in Progress" color="yellow" mb="md">
+                <Text>
+                  Until this project is up and running, this data is a weird
+                  mashup of past events, so don't panic if it looks strange -
+                  the important thing is it <em>works</em> at the moment.
+                </Text>
+                <Text>
+                  The first event is on 10th January 2026 at Element if you
+                  fancy being one of the first people to officially be ranked...
+                </Text>
+              </Alert>
               {title && (
                 <Title order={3} mb="md">
                   {title}

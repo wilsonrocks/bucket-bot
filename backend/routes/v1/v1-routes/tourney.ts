@@ -32,7 +32,7 @@ export const detailTourney = async (ctx: Context) => {
     .selectFrom("tourney")
     .innerJoin("result", "tourney.id", "result.tourney_id")
     .innerJoin("player", "result.player_id", "player.id")
-    .innerJoin("faction", "result.faction_id", "faction.id")
+    .innerJoin("faction", "result.faction_code", "faction.name_code")
     .where("tourney.id", "=", ctx.params.id)
     .select([
       "player.id as playerId",
