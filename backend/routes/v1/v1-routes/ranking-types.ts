@@ -5,6 +5,7 @@ export const rankingTypesHandler = async (ctx: Context) => {
     .selectFrom("ranking_snapshot_type")
     .where("display", "=", true)
     .select(["code", "name", "description"])
+    .orderBy("display_order")
     .execute();
   ctx.body = rankingTypes;
 };
