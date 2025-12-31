@@ -1,12 +1,20 @@
-import { Box, Center, Group, Select, Table, Text } from '@mantine/core'
-import { createFileRoute } from '@tanstack/react-router'
-import z from 'zod'
 import { useGetRankingTypes, useGetRankings } from '@/hooks/useApi'
+import { Box, Group, Select, Table, Text } from '@mantine/core'
+import { createFileRoute, redirect } from '@tanstack/react-router'
+import z from 'zod'
 
 export const Route = createFileRoute('/site/rankings')({
   component: RouteComponent,
   validateSearch: z.object({ typeCode: z.string().optional().catch('') }),
   staticData: { title: 'Rankings' },
+  beforeLoad: (context) => {
+    const { typeCode } = context.search
+    if (!typeCode)
+      throw redirect({
+        to: '/site/rankings',
+        search: { typeCode: 'ROLLING_YEAR' },
+      })
+  },
 })
 
 function RouteComponent() {

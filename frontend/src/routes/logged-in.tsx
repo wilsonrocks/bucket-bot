@@ -40,7 +40,7 @@ function RouteComponent() {
   useEffect(() => {}, [search.code])
   return (
     <div>
-      Howdy {authData?.global_name}({authData?.username})!
+      Howdy {authData.global_name}({authData.username})!
     </div>
   )
 }

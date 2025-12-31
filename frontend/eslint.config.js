@@ -7,6 +7,7 @@ export default [
   {
     rules: {
       '@typescript-eslint/array-type': 'off',
+      'import/order': 'off',
     },
   },
 ]
