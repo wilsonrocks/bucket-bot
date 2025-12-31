@@ -16,7 +16,7 @@ const checkRankingType = (
 
 export const getRankingTypeWhereSql = (
   rankingsType: string,
-  config: GenerateRankingsConfig
+  playersNeededToBeMastersRanked: number
 ) => {
   if (!checkRankingType(rankingsType)) {
     throw new Error(`Invalid rankings type: ${rankingsType}`);
@@ -76,11 +76,7 @@ export const getRankingTypeWhereSql = (
     case "MASTERS":
       return [
         (eb: ExpressionBuilder<DB, "tourney">) =>
-          eb(
-            "tourney.number_of_players",
-            ">=",
-            config.playersNeededToBeMastersRanked
-          ),
+          eb("tourney.number_of_players", ">=", playersNeededToBeMastersRanked),
         oneYearAgo,
       ];
     case RankingType.BEST_FOREVER:

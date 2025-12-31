@@ -66,57 +66,35 @@ describe.sequential("testing with containers exciting", () => {
 
     const rankings = await dbClient
       .selectFrom("ranking_snapshot")
-      .fullJoin("player", "ranking_snapshot.player_id", "player.id")
+      .innerJoin("player", "ranking_snapshot.player_id", "player.id")
       .selectAll()
       .execute();
 
     expect(rankings.length).toBe(5);
-    throw "stop";
-    for (const { name, rank, total_points } of [
-      { name: "James", rank: 2, total_points: 57 },
-      { name: "Emma", rank: 1, total_points: 61 },
-      { name: "Geraint", rank: 3, total_points: 48 },
-      { name: "JFV", rank: 5, total_points: 44 },
-      { name: "Matt", rank: 4, total_points: 46 },
-    ]) {
-      const playerRanking = rankings.find((r) => r.name === name);
-      expect(
-        playerRanking,
-        `${playerRanking!.name} should have be in the rankings`
-      ).toBeDefined();
-      expect(
-        playerRanking!.rank,
-        `${playerRanking!.name} should have rank ${rank}`
-      ).toBe(rank);
-      expect(
-        playerRanking!.total_points,
-        `${playerRanking!.name} should have total points ${total_points}`
-      ).toBe(total_points);
-    }
+
+    const Alice = rankings.find((x) => x.name === "Alice");
+    const Bob = rankings.find((x) => x.name === "Bob");
+    const Charlie = rankings.find((x) => x.name === "Charlie");
+    const David = rankings.find((x) => x.name === "David");
+    const Eve = rankings.find((x) => x.name === "Eve");
+
+    expect(Alice!.total_points).toBe(30);
+    expect(Bob!.total_points).toBe(39);
+    expect(Charlie!.total_points).toBe(39);
+    expect(David!.total_points).toBe(14);
+    expect(Eve!.total_points).toBe(4);
+
+    expect(Charlie!.rank).toBe(1);
+    expect(Bob!.rank).toBe(1);
+    expect(Alice!.rank).toBe(3);
+    expect(David!.rank).toBe(4);
+    expect(Eve!.rank).toBe(5);
   });
 
-  test.skip("BEST_RESSER rankings", async () => {
-    // throw JSON.stringify(
-    //   await dbClient
-    //     .selectFrom("result")
-    //     .innerJoin("tourney", "tourney.id", "result.tourney_id")
-    //     .innerJoin("player", "player.id", "result.player_id")
-    //     .innerJoin("faction", "faction.id", "result.faction_id")
-    //     .select([
-    //       "player.name as player_name",
-    //       "points",
-    //       "faction.name as faction_name",
-    //       "tourney.name as tourney_name",
-    //     ])
-    //     .execute(),
-    //   null,
-    //   2
-    // );
-
+  test("BEST_RESSER rankings", async () => {
     await generateRankings(dbClient, "BEST_RESSER");
     const snapshotBatch = await dbClient
       .selectFrom("ranking_snapshot_batch")
-      .where("type_code", "=", "BEST_RESSER")
       .selectAll()
       .execute();
 
@@ -125,40 +103,104 @@ describe.sequential("testing with containers exciting", () => {
 
     const rankings = await dbClient
       .selectFrom("ranking_snapshot")
-      .innerJoin(
-        "ranking_snapshot_batch",
-        "ranking_snapshot.batch_id",
-        "ranking_snapshot_batch.id"
-      )
       .innerJoin("player", "ranking_snapshot.player_id", "player.id")
-      .where("batch_id", "=", snapshotBatch[0]!.id)
-      .select(["player.name as player_name", "rank", "total_points"])
+      .selectAll()
       .execute();
 
-    expect(rankings.length).toBe(2);
+    expect(rankings.length).toBe(3);
+    const Alice = rankings.find((x) => x.name === "Alice");
+    const Bob = rankings.find((x) => x.name === "Bob");
+    const Charlie = rankings.find((x) => x.name === "Charlie");
+    const David = rankings.find((x) => x.name === "David");
+    const Eve = rankings.find((x) => x.name === "Eve");
 
-    for (const { name, rank, total_points } of [
-      { name: "Geraint", rank: 2, total_points: 9 },
-      { name: "JFV", rank: 1, total_points: 3 },
-    ]) {
-      const playerRanking = rankings.find((r) => r.player_name === name);
-
-      expect(playerRanking).toBeDefined();
-
-      expect(
-        playerRanking,
-        `${playerRanking!.player_name} should have be in the rankings`
-      ).toBeDefined();
-      expect(
-        playerRanking!.rank,
-        `${playerRanking!.player_name} should have rank ${rank}`
-      ).toBe(rank);
-      expect(
-        playerRanking!.total_points,
-        `${playerRanking!.player_name} should have total points ${total_points}`
-      ).toBe(total_points);
-    }
+    expect(Alice!.total_points).toBe(15);
+    expect(Alice!.rank).toBe(1);
+    expect(Bob).toBeUndefined();
+    expect(Charlie).toBeUndefined();
+    expect(David!.total_points).toBe(9);
+    expect(David!.rank).toBe(2);
+    expect(Eve!.total_points).toBe(4);
+    expect(Eve!.rank).toBe(3);
   });
 
-  test.todo("MASTERS rankings");
+  test("MASTERS rankings", async () => {
+    await generateRankings(dbClient, "MASTERS", {
+      playersNeededToBeMastersRanked: 4,
+      numberOfTourneysToConsider: 5,
+    });
+
+    const snapshotBatch = await dbClient
+      .selectFrom("ranking_snapshot_batch")
+      .selectAll()
+      .execute();
+    expect(snapshotBatch.length).toBe(1);
+    expect(snapshotBatch[0]!.type_code).toBe("MASTERS");
+
+    const rankings = await dbClient
+      .selectFrom("ranking_snapshot")
+      .innerJoin("player", "ranking_snapshot.player_id", "player.id")
+      .selectAll()
+      .execute();
+
+    expect(rankings.length).toBe(5);
+
+    const Alice = rankings.find((x) => x.name === "Alice");
+    const Bob = rankings.find((x) => x.name === "Bob");
+    const Charlie = rankings.find((x) => x.name === "Charlie");
+    const David = rankings.find((x) => x.name === "David");
+    const Eve = rankings.find((x) => x.name === "Eve");
+
+    expect(Alice!.total_points).toBe(15);
+    expect(Bob!.total_points).toBe(29);
+    expect(Charlie!.total_points).toBe(34);
+    expect(David!.total_points).toBe(14);
+    expect(Eve!.total_points).toBe(4);
+
+    expect(Charlie!.rank).toBe(1);
+    expect(Bob!.rank).toBe(2);
+    expect(Alice!.rank).toBe(3);
+    expect(David!.rank).toBe(4);
+    expect(Eve!.rank).toBe(5);
+  });
+
+  test("BEST X rankings", async () => {
+    await generateRankings(dbClient, "ROLLING_YEAR", {
+      playersNeededToBeMastersRanked: 10,
+      numberOfTourneysToConsider: 1,
+    });
+
+    const snapshotBatch = await dbClient
+      .selectFrom("ranking_snapshot_batch")
+      .selectAll()
+      .execute();
+    expect(snapshotBatch.length).toBe(1);
+    expect(snapshotBatch[0]!.type_code).toBe("ROLLING_YEAR");
+
+    const rankings = await dbClient
+      .selectFrom("ranking_snapshot")
+      .innerJoin("player", "ranking_snapshot.player_id", "player.id")
+      .selectAll()
+      .execute();
+
+    expect(rankings.length).toBe(5);
+
+    const Alice = rankings.find((x) => x.name === "Alice");
+    const Bob = rankings.find((x) => x.name === "Bob");
+    const Charlie = rankings.find((x) => x.name === "Charlie");
+    const David = rankings.find((x) => x.name === "David");
+    const Eve = rankings.find((x) => x.name === "Eve");
+
+    expect(Alice!.total_points).toBe(15);
+    expect(Bob!.total_points).toBe(19);
+    expect(Charlie!.total_points).toBe(20);
+    expect(David!.total_points).toBe(9);
+    expect(Eve!.total_points).toBe(4);
+
+    expect(Charlie!.rank).toBe(1);
+    expect(Bob!.rank).toBe(2);
+    expect(Alice!.rank).toBe(3);
+    expect(David!.rank).toBe(4);
+    expect(Eve!.rank).toBe(5);
+  });
 });

@@ -19,8 +19,10 @@ export const generateRankings = async (
   }
 ) => {
   if (!(await shouldGenerateRankings(rankingsType, db))) return;
-
-  const rankingTypeWhereSql = getRankingTypeWhereSql(rankingsType, config);
+  const rankingTypeWhereSql = getRankingTypeWhereSql(
+    rankingsType,
+    config.playersNeededToBeMastersRanked
+  );
 
   if (!rankingTypeWhereSql) {
     throw new Error(`No where SQL found for rankings type: ${rankingsType}`);
@@ -64,9 +66,7 @@ export const generateRankings = async (
           .select([
             "batch_id",
             "id",
-            sql<number>`row_number() over (order by sum(points) desc)`.as(
-              "rank"
-            ),
+            sql<number>`RANK() over (order by sum(points) desc)`.as("rank"),
             sql<number>`sum(points)`.as("best_tourneys_points"),
           ])
           .where("rn", "<=", config.numberOfTourneysToConsider)

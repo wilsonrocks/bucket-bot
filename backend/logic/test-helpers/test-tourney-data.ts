@@ -83,7 +83,7 @@ export async function addTestTourneyData(db: Kysely<DB>) {
 
   const tourney3Results: TestResult[] = [
     [1, Charlie, 20, Faction.NEVERBORN],
-    [2, Alice, 15, Faction.RESSERS],
+    [2, Alice, 15, Faction.EXPLORER],
     [3, Bob, 10, Faction.GUILD],
     [4, David, 5, Faction.NEVERBORN],
   ];
