@@ -55,10 +55,10 @@ export const newLongshanksEvent = async (ctx: Context) => {
     .selectAll()
     .execute();
 
-  const factionMap: Record<string, number> = {};
+  const factionMap: Record<string, string> = {};
 
   factions.forEach((faction) => {
-    factionMap[faction.longshanks_html_name] = faction.id;
+    factionMap[faction.longshanks_html_name] = faction.name_code;
   });
 
   await ctx.state.db.transaction().execute(async (trx) => {
@@ -76,10 +76,14 @@ export const newLongshanksEvent = async (ctx: Context) => {
       })
       .returning("id")
       .executeTakeFirstOrThrow();
+
     await Promise.all(
       players.map(async (player) => {
         // upsert each player
-
+        const faction_code = factionMap[player.faction];
+        if (!faction_code) {
+          throw new Error(`Can't derive faction code for ${player.faction}`);
+        }
         const dbPlayer = await trx
           .insertInto("player")
           .values({
@@ -109,7 +113,7 @@ export const newLongshanksEvent = async (ctx: Context) => {
             tourney_id: tourney.id,
             player_id: dbPlayer.id,
             place: player.rank,
-            faction_id: factionMap[player.faction || "Unknown"] || null,
+            faction_code,
             points,
           })
           .execute();
