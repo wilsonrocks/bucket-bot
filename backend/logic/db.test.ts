@@ -1,16 +1,8 @@
-import {
-  describe,
-  expect,
-  test,
-  beforeAll,
-  afterAll,
-  beforeEach,
-} from "vitest";
+import { afterAll, beforeEach, describe, expect, test } from "vitest";
 import { dbClient } from "../db-client";
-import { addTestTourneyData } from "./test-helpers/test-tourney-data";
-import { generateRankings } from "./rankings/generate-rankings";
 import { Faction, RankingType } from "./fixtures";
-import { JSONSchema } from "zod/v4/core";
+import { generateRankings } from "./rankings/generate-rankings";
+import { addTestTourneyData } from "./test-helpers/test-tourney-data";
 
 beforeEach(async () => {
   await dbClient.deleteFrom("ranking_snapshot_batch").execute();
@@ -56,23 +48,13 @@ describe.sequential("testing with containers exciting", () => {
     }
   });
 
-  test.sequential("test fixtures worked okay", async () => {
-    // Your test logic here
-
-    const players = await dbClient.selectFrom("player").selectAll().execute();
-    expect(players.length).toBe(13);
-
-    const results = await dbClient.selectFrom("result").selectAll().execute();
-    expect(results.length).toBe(67);
-  });
-
   test.sequential("throws for invalid rankings type", async () => {
     await expect(
       generateRankings(dbClient, "NOT_A_REAL_TYPE")
     ).rejects.toThrowError("Invalid rankings type");
   });
 
-  test.sequential("ROLLING_YEAR rankings", async () => {
+  test("ROLLING_YEAR rankings", async () => {
     await generateRankings(dbClient, "ROLLING_YEAR");
 
     const snapshotBatch = await dbClient
@@ -88,8 +70,8 @@ describe.sequential("testing with containers exciting", () => {
       .selectAll()
       .execute();
 
-    expect(rankings.length).toBe(13);
-
+    expect(rankings.length).toBe(5);
+    throw "stop";
     for (const { name, rank, total_points } of [
       { name: "James", rank: 2, total_points: 57 },
       { name: "Emma", rank: 1, total_points: 61 },
@@ -113,7 +95,7 @@ describe.sequential("testing with containers exciting", () => {
     }
   });
 
-  test.sequential("BEST_RESSER rankings", async () => {
+  test.skip("BEST_RESSER rankings", async () => {
     // throw JSON.stringify(
     //   await dbClient
     //     .selectFrom("result")

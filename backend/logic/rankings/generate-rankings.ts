@@ -18,7 +18,7 @@ export const generateRankings = async (
     numberOfTourneysToConsider: 5,
   }
 ) => {
-  if (!shouldGenerateRankings(rankingsType, db)) return;
+  if (!(await shouldGenerateRankings(rankingsType, db))) return;
 
   const rankingTypeWhereSql = getRankingTypeWhereSql(rankingsType, config);
 
@@ -35,7 +35,7 @@ export const generateRankings = async (
       .returningAll()
       .executeTakeFirstOrThrow();
 
-    return await trx
+    const insertQuery = trx
       .insertInto("ranking_snapshot")
       .columns(["batch_id", "player_id", "rank", "total_points"])
       .expression(
@@ -45,21 +45,20 @@ export const generateRankings = async (
               .selectFrom("player")
               .innerJoin("result", "player.id", "result.player_id")
               .innerJoin("tourney", "result.tourney_id", "tourney.id")
-              .innerJoin("faction", "result.faction_id", "faction.id")
+              .innerJoin("faction", "result.faction_code", "faction.name_code")
               .select([
-                sql.lit(batch.id).as("batch_id"),
+                sql.lit<number>(batch.id).as("batch_id"),
                 "player.id as id",
                 "player.name as name",
                 "result.points as points",
                 sql<number>`
-          row_number() over (
-            partition by result.player_id
-            order by result.points desc
-          )
-        `.as("rn"),
+                  row_number() over (
+                    partition by result.player_id
+                    order by result.points desc
+                )
+                `.as("rn"),
               ])
               .where((eb) => eb.and(rankingTypeWhereSql.map((fn) => fn(eb))))
-
               .as("ranked_results")
           )
           .select([
@@ -76,8 +75,9 @@ export const generateRankings = async (
           .groupBy("batch_id")
           .orderBy("best_tourneys_points", "desc")
       )
-      .returningAll()
-      .execute();
+      .returningAll();
+
+    return insertQuery.execute();
   });
 
   // Logic to generate rankings from the database
