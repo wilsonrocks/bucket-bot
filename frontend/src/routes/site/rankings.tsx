@@ -1,42 +1,53 @@
-import { useGetRankings, useGetRankingTypes } from '@/hooks/useApi'
-import { Select, Table } from '@mantine/core'
+import { Box, Center, Group, Select, Table, Text } from '@mantine/core'
 import { createFileRoute } from '@tanstack/react-router'
 import z from 'zod'
+import { useGetRankingTypes, useGetRankings } from '@/hooks/useApi'
 
 export const Route = createFileRoute('/site/rankings')({
   component: RouteComponent,
   validateSearch: z.object({ typeCode: z.string().optional().catch('') }),
+  staticData: { title: 'Rankings' },
 })
 
 function RouteComponent() {
-  const rankingTypes = useGetRankingTypes()
   const navigate = Route.useNavigate()
 
   const { typeCode } = Route.useSearch()
+  const rankingTypes = useGetRankingTypes()
+  const rankingDescription = rankingTypes.data?.find(
+    (rt) => rt.code === typeCode,
+  )?.description
   const rankings = useGetRankings(typeCode)
   return (
     <div>
-      <Select
-        placeholder="Select a ranking type"
-        data={rankingTypes.data?.map((rt) => ({
-          value: rt.code,
-          label: `${rt.code} - ${rt.description}`,
-        }))}
-        value={typeCode}
-        onChange={(value) => navigate({ search: { typeCode: value } })}
-      />
-      {rankings.data ? (
-        <Table
-          tabularNums
-          data={{
-            head: ['Rank', 'Player', 'Total Points'],
-            body: rankings.data.map((player) => [
-              player.rank,
-              player.name,
-              player.total_points.toFixed(2),
-            ]),
-          }}
+      <Group align="center">
+        <Select
+          searchable
+          w={200}
+          placeholder="Choose a ranking"
+          data={rankingTypes.data?.map((rt) => ({
+            value: rt.code,
+            label: rt.name,
+          }))}
+          value={typeCode}
+          onChange={(value) => navigate({ search: { typeCode: value } })}
         />
+        {rankingDescription && <Text>{rankingDescription}</Text>}
+      </Group>
+      {rankings.data ? (
+        <>
+          <Table
+            tabularNums
+            data={{
+              head: ['Rank', 'Player', 'Total Points'],
+              body: rankings.data.map((player) => [
+                <Box w={20}>{player.rank}</Box>,
+                <Box w={150}>{player.name}</Box>,
+                <Box w={50}>{player.total_points.toFixed(2)}</Box>,
+              ]),
+            }}
+          />
+        </>
       ) : (
         'Loading...'
       )}

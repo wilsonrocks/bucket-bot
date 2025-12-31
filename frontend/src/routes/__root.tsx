@@ -7,6 +7,7 @@ import {
   Group,
   Image,
   Text,
+  Title,
 } from '@mantine/core'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 import {
@@ -14,6 +15,7 @@ import {
   Link,
   Outlet,
   createRootRouteWithContext,
+  useMatches,
   useRouterState,
 } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
@@ -40,6 +42,8 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
     useEffect(() => {
       close()
     }, [location.pathname])
+    const matches = useMatches()
+    const title = matches.at(-1)?.staticData.title
 
     return (
       <>
@@ -69,6 +73,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
                   b(<b>UK</b>)et bot
                 </Link>
               </Text>
+
               <div style={{ marginLeft: 'auto' }}>
                 <LoginButton />
               </div>
@@ -78,11 +83,15 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
             <Navbar />
           </AppShell.Navbar>
           <AppShell.Main>
-            <Center>
-              <Container>
-                <Outlet />
-              </Container>
-            </Center>
+            <Container>
+              {title && (
+                <Title order={3} mb="md">
+                  {title}
+                </Title>
+              )}
+
+              <Outlet />
+            </Container>
           </AppShell.Main>
         </AppShell>
         <TanStackDevtools

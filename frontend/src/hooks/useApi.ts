@@ -139,6 +139,7 @@ export const useGetRankingTypes = () => {
     queryFn: async (): Promise<
       Array<{
         code: string
+        name: string
         description: string
       }>
     > => {
