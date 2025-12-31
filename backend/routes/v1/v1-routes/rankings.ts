@@ -3,9 +3,9 @@ import { mostRecentSnapshot } from "../../../logic/most-recent-snapshot";
 
 export const rankingsHandler = async (ctx: Context) => {
   const { typeCode } = ctx.params;
-  const snapshot = await mostRecentSnapshot(ctx.state.db);
+  const snapshot = await mostRecentSnapshot(ctx.state.db, typeCode);
   const snapshotId = snapshot.id;
-
+  console.log({ typeCode });
   const rankings = await ctx.state.db
     .selectFrom("ranking_snapshot")
     .innerJoin("player", "ranking_snapshot.player_id", "player.id")

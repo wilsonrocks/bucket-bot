@@ -23,24 +23,39 @@ const monthsAgo = (months: number): string => {
 };
 
 export async function addTestTourneyData(db: Kysely<DB>) {
-  const [JFV, James, Oz, Emma, Matt, Reice, Yan, Ed, Esme, Geraint, Boosey] =
-    await db
-      .insertInto("player")
-      .values([
-        { name: "JFV" },
-        { name: "James" },
-        { name: "Oz" },
-        { name: "Emma" },
-        { name: "Matt" },
-        { name: "Reice" },
-        { name: "Yan" },
-        { name: "Ed" },
-        { name: "Esme" },
-        { name: "Geraint" },
-        { name: "Boosey" },
-      ])
-      .returningAll()
-      .execute();
+  const [
+    JFV,
+    James,
+    Oz,
+    Emma,
+    Matt,
+    Reice,
+    Yan,
+    Ed,
+    Esme,
+    Geraint,
+    Boosey,
+    Adam,
+    Finch,
+  ] = await db
+    .insertInto("player")
+    .values([
+      { name: "Adam" },
+      { name: "Boosey" },
+      { name: "Ed" },
+      { name: "Emma" },
+      { name: "Esme" },
+      { name: "Finch" },
+      { name: "Geraint" },
+      { name: "James" },
+      { name: "JFV" },
+      { name: "Matt" },
+      { name: "Oz" },
+      { name: "Reice" },
+      { name: "Yan" },
+    ])
+    .returningAll()
+    .execute();
 
   const tourney1Results: TestResult[] = [
     { player: JFV!, points: 15, place: 1, faction: "Resurrectionists" },
@@ -51,7 +66,11 @@ export async function addTestTourneyData(db: Kysely<DB>) {
     { player: Reice!, points: 4, place: 6, faction: "Explorer's Society" },
     { player: Yan!, points: 2, place: 7, faction: "Arcanists" },
     { player: Ed!, points: 1, place: 8, faction: "Bayou" },
-    { player: Esme!, points: 0, place: 9, faction: "Bayou" },
+    { player: Esme!, points: 0.8, place: 9, faction: "Bayou" },
+    { player: Adam!, points: 0.4, place: 10, faction: "Guild" },
+    { player: Finch!, points: 0.2, place: 11, faction: "Neverborn" },
+    { player: Boosey!, points: 0.1, place: 12, faction: "Bayou" },
+    { player: Geraint!, points: 0, place: 13, faction: "Outcasts" },
   ];
 
   const tourney2Results: TestResult[] = [
@@ -200,7 +219,7 @@ async function addResults(
   db: Kysely<DB>
 ) {
   const factions = await dbClient.selectFrom("faction").selectAll().execute();
-  const factionMap = new Map(factions.map((f) => [f.name, f.id]));
+  const factionMap = Object.fromEntries(factions.map((f) => [f.name, f.id]));
 
   const tourney = await db
     .insertInto("tourney")
@@ -213,7 +232,7 @@ async function addResults(
     player_id: result.player.id,
     points: result.points,
     place: result.place,
-    faction_id: factionMap.get(result.faction)!,
+    faction_id: factionMap[result.faction]!,
   }));
 
   await db.insertInto("result").values(values).execute();

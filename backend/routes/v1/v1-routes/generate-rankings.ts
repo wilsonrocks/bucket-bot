@@ -1,5 +1,5 @@
 import { Context } from "koa";
-import { generateRankings } from "../../../logic/generate-rankings";
+import { generateRankings } from "../../../logic/rankings/generate-rankings";
 
 export const generateRankingsHandler = async (ctx: Context) => {
   const rankings = await ctx.state.db
@@ -12,8 +12,11 @@ export const generateRankingsHandler = async (ctx: Context) => {
       await generateRankings(ctx.state.db, rankingType.code);
     })
   );
-  console.error(
-    donePromises.flatMap((p) => (p.status === "rejected" ? [p.reason] : []))
+  const errors = donePromises.flatMap((p) =>
+    p.status === "rejected" ? [p.reason] : []
   );
+  if (errors.length > 0) {
+    console.error(errors);
+  }
   ctx.body = { rankings: [] };
 };
