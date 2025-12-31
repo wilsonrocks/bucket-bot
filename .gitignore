@@ -47,3 +47,6 @@ coverage/
 # OS generated files
 Thumbs.db
 Desktop.ini
+
+backend/report.html
+backend/report.json

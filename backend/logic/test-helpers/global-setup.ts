@@ -21,7 +21,8 @@ export default async function setup() {
     password: container.getPassword(),
     migrationLocations: ["filesystem:../db/migrations"],
   });
-  await flyway.migrate({});
+
+  await flyway.migrate();
   process.env.DATABASE_URL = container.getConnectionUri();
   process.env.DB_HOST = container.getHost();
   process.env.DB_PORT = String(container.getPort());
