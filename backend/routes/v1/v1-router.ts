@@ -113,14 +113,15 @@ v1Router.post("/token", async (ctx) => {
   ctx.response.body = { jwt, username, global_name };
 });
 
+v1Router.get("/ranking-types", rankingTypesHandler);
+v1Router.get("/rankings/:typeCode", rankingsHandler);
+v1Router.get("/rankings/:playerId/:typeCode", rankingsPlayerHandler);
+v1Router.get("/tourney", allTourneys);
+v1Router.get("/tourney/:id", detailTourney);
+
 // now these need authentication
 v1Router.use(koaJwt({ secret: process.env.JWT_SECRET! }));
 
 v1Router.post("/longshanks-event/:id", newLongshanksEvent);
 v1Router.get("/has-role", hasRankingReporterRole);
-v1Router.get("/tourney", allTourneys);
-v1Router.get("/tourney/:id", detailTourney);
 v1Router.post("/generate-rankings", generateRankingsHandler);
-v1Router.get("/ranking-types", rankingTypesHandler);
-v1Router.get("/rankings/:typeCode", rankingsHandler);
-v1Router.get("/rankings/:playerId/:typeCode", rankingsPlayerHandler);
