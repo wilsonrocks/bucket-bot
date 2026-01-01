@@ -8,7 +8,7 @@ cd backend
 
 cd ../frontend
 VITE_BACKEND_URL=$PROD_BACKEND_URL npx vite build #npm run build # will need to typescheck at SOME point
-
+cd ..
 
 echo 'Running DB migrations...'
 FLYWAY_USER=$PROD_DATABASE_USER FLYWAY_PASSWORD=$PROD_DATABASE_PASSWORD FLYWAY_URL=$PROD_FLYWAY_URL flyway migrate
