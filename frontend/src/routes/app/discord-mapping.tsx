@@ -1,6 +1,8 @@
+import { DiscordLookup } from '@/components/discord-lookup'
 import { useGetPlayersWithNoDiscordId } from '@/hooks/useApi'
-import { Table } from '@mantine/core'
+import { Pagination, Table } from '@mantine/core'
 import { createFileRoute } from '@tanstack/react-router'
+import { useState } from 'react'
 
 function toOrdinal(n: number) {
   const s = ['th', 'st', 'nd', 'rd']
@@ -17,37 +19,46 @@ export const Route = createFileRoute('/app/discord-mapping')({
 
 function RouteComponent() {
   const unmappedPlayers = useGetPlayersWithNoDiscordId()
+  const pageSize = 5
+  const [page, setPage] = useState(1)
 
   return (
     <div>
       {unmappedPlayers.isLoading && <div>Loading...</div>}
       {unmappedPlayers.isError && <div>Error loading unmapped players.</div>}
       {unmappedPlayers.data && (
-        <Table
-          data={{
-            head: [
-              'Our Name',
-              'Longshanks Name',
-              'Longshanks ID',
-              'Event Results',
-            ],
-            body: unmappedPlayers.data.map(
-              ({ player_name, longshanks_name, longshanks_id, results }) => [
-                player_name,
-                longshanks_name,
-                longshanks_id,
-                <div>
-                  {results.map(({ tourney_name, place, faction }, index) => (
-                    <div key={index}>
-                      <b>{toOrdinal(place)}</b> place at <em>{tourney_name}</em>{' '}
-                      playing <b>{faction}</b>
-                    </div>
-                  ))}
-                </div>,
-              ],
-            ),
-          }}
-        />
+        <>
+          <div>{unmappedPlayers.data.length} still to map!</div>
+          <Pagination
+            total={unmappedPlayers.data.length / pageSize}
+            value={page}
+            onChange={setPage}
+          />
+
+          <Table
+            data={{
+              head: ['Our Name', 'Longshanks ID', 'Event Results', 'Map to?'],
+              body: unmappedPlayers.data
+                .slice((page - 1) * pageSize, page * pageSize)
+                .map(({ player_id, player_name, longshanks_id, results }) => [
+                  player_name,
+                  longshanks_id,
+                  <div key={player_id}>
+                    {results.map(({ tourney_name, place, faction }, index) => (
+                      <div key={index}>
+                        <b>{toOrdinal(place)}</b> place at{' '}
+                        <em>{tourney_name}</em> playing <b>{faction}</b>
+                      </div>
+                    ))}
+                  </div>,
+                  <DiscordLookup
+                    playerId={player_id}
+                    initialText={player_name}
+                  />,
+                ]),
+            }}
+          />
+        </>
       )}
     </div>
   )

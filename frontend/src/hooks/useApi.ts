@@ -241,3 +241,31 @@ export const useGetPlayersWithNoDiscordId = () => {
   })
   return playerRankings
 }
+
+export const useSearchDiscordUsers = (text: string) => {
+  const auth = useAuth()
+  const playerRankings = useQuery({
+    queryKey: ['search-discord-users', text],
+    enabled: !!auth,
+    queryFn: async (): Promise<
+      {
+        discord_user_id: string
+        discord_display_name: string
+        discord_nickname: string
+        discord_avatar_url: string
+        created_at: string
+        discord_username: string
+      }[]
+    > => {
+      const url = `${import.meta.env.VITE_BACKEND_URL}/v1/search-discord-users?text=${encodeURIComponent(text)}`
+      const res = await fetch(url, {
+        headers: auth!.headers, // is checked on enabled
+      })
+      if (!res.ok) {
+        throw new Error('Failed to fetch player rankings')
+      }
+      return res.json()
+    },
+  })
+  return playerRankings
+}
