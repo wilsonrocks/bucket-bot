@@ -1,0 +1,1 @@
+ALTER TABLE ranking_snapshot_batch DROP COLUMN description;

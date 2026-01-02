@@ -12,7 +12,9 @@ import * as s3deploy from "aws-cdk-lib/aws-s3-deployment";
 export class InfraStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
-
+    if (!process.env.FRONTEND_URL) {
+      throw new Error("FRONTEND_URL env var is not set");
+    }
     if (!process.env.PROD_DATABASE_URL) {
       throw new Error("PROD_DATABASE_URL environment variable is not set");
     } // TODO probably a neater way to do this inc typescript
@@ -49,6 +51,7 @@ export class InfraStack extends cdk.Stack {
         DISCORD_CLIENT_ID: process.env.DISCORD_CLIENT_ID,
         DISCORD_CLIENT_SECRET: process.env.DISCORD_CLIENT_SECRET,
         DISCORD_BOT_TOKEN: process.env.DISCORD_BOT_TOKEN,
+        FRONTEND_URL: process.env.FRONTEND_URL,
         NODE_EXTRA_CA_CERTS: "/var/task/certs/ca.pem", // make sure this is copied across
       },
     });

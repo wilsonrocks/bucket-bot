@@ -18,6 +18,7 @@ import {
   playersWithNoDiscordId,
   searchDiscordUsersByName,
 } from "./v1-routes/discord-id.js";
+import { postDiscordRankingsHandler } from "./v1-routes/discord-rankings.js";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -138,3 +139,5 @@ v1Router.post(
   "/match-player-to-discord-user/:playerId/:discordUserId",
   matchPlayerToDiscordUser
 );
+
+v1Router.post("/post-discord-rankings", postDiscordRankingsHandler);

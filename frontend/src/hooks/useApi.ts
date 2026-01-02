@@ -313,3 +313,84 @@ export const useMatchPlayerToDiscordUser = () => {
   })
   return mutation
 }
+
+export const useFetchDiscordUsersMutation = () => {
+  const auth = useAuth()
+  const queryClient = useQueryClient()
+  const mutation = useMutation({
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['players-with-no-discord-id'],
+      })
+      queryClient.invalidateQueries({
+        queryKey: ['search-discord-users'],
+      })
+    },
+    mutationFn: async () => {
+      const url = `${import.meta.env.VITE_BACKEND_URL}/v1/fetch-discord-user-ids`
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          ...auth!.headers, // is checked on use
+          'Content-Type': 'application/json',
+        },
+      })
+      if (!res.ok) {
+        const errorData = await res.json()
+        console.error('Error fetching Discord user IDs:', errorData)
+        notifications.show({
+          title: 'Error',
+          message: `Failed to fetch Discord user IDs: ${errorData.message || res.statusText}`,
+          color: 'red',
+        })
+        throw new Error('Failed to fetch Discord user IDs')
+      }
+      return res.json()
+    },
+  })
+  return mutation
+}
+
+export const usePostRankingsToDiscordMutation = () => {
+  const auth = useAuth()
+  const queryClient = useQueryClient()
+  const mutation = useMutation({
+    onSuccess: () => {
+      notifications.show({
+        title: 'Success',
+        message: 'Rankings have been posted to Discord successfully.',
+        color: 'green',
+      })
+    },
+    onError: (error: any) => {
+      console.error('Error posting rankings to Discord:', error)
+      notifications.show({
+        title: 'Error',
+        message: `Failed to post rankings to Discord: ${error.message || 'Unknown error'}`,
+        color: 'red',
+      })
+    },
+    mutationFn: async () => {
+      const url = `${import.meta.env.VITE_BACKEND_URL}/v1/post-discord-rankings`
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          ...auth!.headers, // is checked on use
+          'Content-Type': 'application/json',
+        },
+      })
+      if (!res.ok) {
+        const errorData = await res.json()
+        console.error('Error posting rankings to Discord:', errorData)
+        notifications.show({
+          title: 'Error',
+          message: `Failed to post rankings to Discord: ${errorData.message || res.statusText}`,
+          color: 'red',
+        })
+        throw new Error('Failed to post rankings to Discord')
+      }
+      return res.json()
+    },
+  })
+  return mutation
+}
