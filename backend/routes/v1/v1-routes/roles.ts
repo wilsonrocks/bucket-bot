@@ -1,16 +1,9 @@
-import { Client, GatewayIntentBits } from "discord.js";
 import { Context } from "koa";
-
-const client = new Client({
-  intents: [
-    GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMembers, // REQUIRED
-  ],
-});
-client.login(process.env.DISCORD_BOT_TOKEN);
-
-const RANKING_REPORTER_ROLE_ID = "1449009972339015862";
-const UK_MALIFAUX_SERVER_ID = "820257369379962881";
+import {
+  discordClient,
+  RANKING_REPORTER_ROLE_ID,
+  UK_MALIFAUX_SERVER_ID,
+} from "../../../logic/discord-client";
 
 export const hasRankingReporterRole = async (ctx: Context) => {
   const { id: userId } = ctx.state.user;
@@ -22,7 +15,7 @@ export const hasRankingReporterRole = async (ctx: Context) => {
   let guild;
 
   try {
-    guild = await client.guilds.fetch(UK_MALIFAUX_SERVER_ID);
+    guild = await discordClient.guilds.fetch(UK_MALIFAUX_SERVER_ID);
   } catch (err) {
     console.error(err);
     return ctx.throw(500, { cause: err });

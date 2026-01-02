@@ -1,0 +1,1 @@
+ALTER TABLE discord_user ADD COLUMN discord_username TEXT;

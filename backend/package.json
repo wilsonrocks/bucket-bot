@@ -8,7 +8,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "tsx --watch index.ts",
+    "dev": "NODE_OPTIONS=--enable-source-maps node --inspect ./node_modules/.bin/tsx --watch index.ts",
     "generate-db-types": "kysely-codegen --out-file db.d.ts"
   },
   "dependencies": {

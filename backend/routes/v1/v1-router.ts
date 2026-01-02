@@ -12,6 +12,10 @@ import { generateRankingsHandler } from "./v1-routes/generate-rankings.js";
 import { rankingTypesHandler } from "./v1-routes/ranking-types.js";
 import { rankingsHandler } from "./v1-routes/rankings.js";
 import { rankingsPlayerHandler } from "./v1-routes/rankings-player.js";
+import {
+  fetchAndStoreDiscordUserIds,
+  searchDiscordUsersByName,
+} from "./v1-routes/discord-id.js";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -125,3 +129,5 @@ v1Router.use(koaJwt({ secret: process.env.JWT_SECRET! }));
 v1Router.post("/longshanks-event/:id", newLongshanksEvent);
 v1Router.get("/has-role", hasRankingReporterRole);
 v1Router.post("/generate-rankings", generateRankingsHandler);
+v1Router.post("/fetch-discord-user-ids", fetchAndStoreDiscordUserIds); // THIS is a weird hack because we in a lambda and this rate limits severely
+v1Router.get("/search-discord-users", searchDiscordUsersByName);
