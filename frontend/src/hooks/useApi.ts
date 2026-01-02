@@ -1,5 +1,6 @@
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from './useAuth'
+import { notifications } from '@mantine/notifications'
 
 export const useHasRole = () => {
   const auth = useAuth()
@@ -268,4 +269,47 @@ export const useSearchDiscordUsers = (text: string) => {
     },
   })
   return playerRankings
+}
+
+export const useMatchPlayerToDiscordUser = () => {
+  const auth = useAuth()
+  const queryClient = useQueryClient()
+  const mutation = useMutation({
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['players-with-no-discord-id'],
+      })
+      queryClient.invalidateQueries({
+        queryKey: ['search-discord-users'],
+      })
+    },
+    mutationFn: async ({
+      playerId,
+      discordUserId,
+    }: {
+      playerId: number
+      discordUserId: string
+    }) => {
+      const url = `${import.meta.env.VITE_BACKEND_URL}/v1/match-player-to-discord-user/${playerId}/${discordUserId}`
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          ...auth!.headers, // is checked on use
+          'Content-Type': 'application/json',
+        },
+      })
+      if (!res.ok) {
+        const errorData = await res.json()
+        console.error('Error matching player to Discord user:', errorData)
+        notifications.show({
+          title: 'Error',
+          message: `Failed to match player to Discord user: ${errorData.message || res.statusText}`,
+          color: 'red',
+        })
+        throw new Error('Failed to match player to Discord user')
+      }
+      return res.json()
+    },
+  })
+  return mutation
 }

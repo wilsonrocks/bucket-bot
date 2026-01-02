@@ -1,6 +1,6 @@
 import { DiscordLookup } from '@/components/discord-lookup'
 import { useGetPlayersWithNoDiscordId } from '@/hooks/useApi'
-import { Pagination, Table } from '@mantine/core'
+import { Pagination, Stack, Table } from '@mantine/core'
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 
@@ -43,16 +43,17 @@ function RouteComponent() {
                 .map(({ player_id, player_name, longshanks_id, results }) => [
                   player_name,
                   longshanks_id,
-                  <div key={player_id}>
+                  <Stack gap="xs" style={{ maxWidth: '200px' }}>
                     {results.map(({ tourney_name, place, faction }, index) => (
                       <div key={index}>
                         <b>{toOrdinal(place)}</b> place at{' '}
                         <em>{tourney_name}</em> playing <b>{faction}</b>
                       </div>
                     ))}
-                  </div>,
+                  </Stack>,
                   <DiscordLookup
                     playerId={player_id}
+                    playerName={player_name}
                     initialText={player_name}
                   />,
                 ]),

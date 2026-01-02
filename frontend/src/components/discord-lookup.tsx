@@ -1,17 +1,31 @@
-import { useSearchDiscordUsers } from '@/hooks/useApi'
-import { Button, Divider, Group, Select, Stack, TextInput } from '@mantine/core'
+import {
+  useMatchPlayerToDiscordUser,
+  useSearchDiscordUsers,
+} from '@/hooks/useApi'
+import {
+  Box,
+  Button,
+  Divider,
+  Group,
+  Select,
+  Stack,
+  Text,
+  TextInput,
+} from '@mantine/core'
 import { useEffect, useState } from 'react'
+import { modals } from '@mantine/modals'
 
 export const DiscordLookup: React.FC<{
   initialText: string
   playerId: number
-}> = ({ initialText, playerId }) => {
+  playerName: string
+}> = ({ initialText, playerId, playerName }) => {
   const [text, setText] = useState('')
   useEffect(() => {
     setText(initialText)
   }, [initialText])
   const options = useSearchDiscordUsers(text)
-
+  const matchMutation = useMatchPlayerToDiscordUser()
   return (
     <div>
       <TextInput
@@ -34,8 +48,43 @@ export const DiscordLookup: React.FC<{
                   src={option.discord_avatar_url}
                   alt="Avatar"
                 />
-                {option.discord_display_name} <b>@{option.discord_username}</b>
-                <Button style={{ marginLeft: 'auto' }} size="compact-xs">
+                <Stack>
+                  <span>
+                    {option.discord_display_name || option.discord_nickname}
+                  </span>{' '}
+                  <b>@{option.discord_username}</b>
+                </Stack>
+                <Button
+                  style={{ marginLeft: 'auto' }}
+                  size="compact-xs"
+                  onClick={() => {
+                    modals.openConfirmModal({
+                      title: 'Confirm Match',
+                      centered: true,
+                      labels: { confirm: 'Make it so', cancel: 'Wait...' },
+                      onConfirm: () => {
+                        matchMutation.mutate({
+                          playerId,
+                          discordUserId: option.discord_user_id,
+                        })
+                      },
+                      children: (
+                        <Box>
+                          <Text>
+                            Are you sure you want to match <em>{playerName}</em>{' '}
+                            to {option.discord_display_name}(
+                            <b>@{option.discord_username}</b>
+                            )?
+                          </Text>
+                          <Text>
+                            It will be a pain to undo this action because this
+                            app is still being built.
+                          </Text>
+                        </Box>
+                      ),
+                    })
+                  }}
+                >
                   Match
                 </Button>
               </Group>

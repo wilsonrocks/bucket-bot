@@ -1,0 +1,1 @@
+ALTER TABLE player ADD CONSTRAINT unique_discord_id UNIQUE (discord_id);

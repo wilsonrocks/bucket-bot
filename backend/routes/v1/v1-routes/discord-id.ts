@@ -47,12 +47,14 @@ export const searchDiscordUsersByName = async (ctx: Context) => {
   const candidates = await ctx.state.db
     .selectFrom("discord_user")
     .selectAll()
+    .leftJoin("player", "discord_user.discord_user_id", "player.discord_id")
+    .where("player.id", "is", null) // Exclude already linked users
     .where(
-      sql<boolean>`discord_username % ${text} OR discord_display_name % ${text} OR discord_nickname % ${text}`
+      sql<boolean>`discord_user.discord_username % ${text} OR discord_display_name % ${text} OR discord_nickname % ${text}`
     )
     .orderBy(
       sql<number>`GREATEST(
-      similarity(discord_username, ${text}),
+      similarity(discord_user.discord_username, ${text}),
       similarity(discord_display_name, ${text}),
       similarity(discord_nickname, ${text})
     )`,
@@ -102,4 +104,44 @@ export const playersWithNoDiscordId = async (ctx: Context) => {
   }
 
   ctx.response.body = Array.from(grouped.values());
+};
+
+export const matchPlayerToDiscordUser = async (ctx: Context) => {
+  const { playerId, discordUserId } = ctx.params;
+
+  // Validate playerId and discordUserId
+  if (!playerId || isNaN(Number(playerId))) {
+    ctx.status = 400;
+    return ctx.throw(400, "Invalid or missing 'playerId' parameter");
+  }
+  if (!discordUserId || typeof discordUserId !== "string") {
+    ctx.status = 400;
+    return ctx.throw(400, "Invalid or missing 'discordUserId' parameter");
+  }
+
+  try {
+    await Promise.all([
+      ctx.state.db
+        .selectFrom("player")
+        .where("id", "=", Number(playerId))
+        .executeTakeFirstOrThrow(),
+      ctx.state.db
+        .selectFrom("discord_user")
+        .where("discord_user_id", "=", discordUserId)
+        .executeTakeFirstOrThrow(),
+    ]);
+  } catch (err) {
+    console.error(err);
+    throw ctx.throw(404, `Player or Discord user not found ${err}`);
+  }
+
+  await ctx.state.db
+    .updateTable("player")
+    .set({ discord_id: discordUserId })
+    .where("id", "=", playerId)
+    .execute();
+
+  ctx.response.body = {
+    message: "Player matched to Discord user successfully",
+  };
 };
