@@ -15,6 +15,7 @@ import { Route as AppIndexRouteImport } from './routes/app/index'
 import { Route as SiteRankingsRouteImport } from './routes/site/rankings'
 import { Route as SiteEventsRouteImport } from './routes/site/events'
 import { Route as DemoTanstackQueryRouteImport } from './routes/demo/tanstack-query'
+import { Route as AppDiscordMappingRouteImport } from './routes/app/discord-mapping'
 import { Route as SitePlayerIdRouteImport } from './routes/site/player.$id'
 import { Route as SiteEventIdRouteImport } from './routes/site/event.$id'
 import { Route as AppAppPagesEventsIndexRouteImport } from './routes/app/_app-pages/events/index'
@@ -51,6 +52,11 @@ const SiteEventsRoute = SiteEventsRouteImport.update({
 const DemoTanstackQueryRoute = DemoTanstackQueryRouteImport.update({
   id: '/demo/tanstack-query',
   path: '/demo/tanstack-query',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppDiscordMappingRoute = AppDiscordMappingRouteImport.update({
+  id: '/app/discord-mapping',
+  path: '/app/discord-mapping',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SitePlayerIdRoute = SitePlayerIdRouteImport.update({
@@ -94,6 +100,7 @@ const AppAppPagesEventsIdEditRoute = AppAppPagesEventsIdEditRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/logged-in': typeof LoggedInRoute
+  '/app/discord-mapping': typeof AppDiscordMappingRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/site/events': typeof SiteEventsRoute
   '/site/rankings': typeof SiteRankingsRoute
@@ -109,6 +116,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/logged-in': typeof LoggedInRoute
+  '/app/discord-mapping': typeof AppDiscordMappingRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/site/events': typeof SiteEventsRoute
   '/site/rankings': typeof SiteRankingsRoute
@@ -125,6 +133,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/logged-in': typeof LoggedInRoute
+  '/app/discord-mapping': typeof AppDiscordMappingRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/site/events': typeof SiteEventsRoute
   '/site/rankings': typeof SiteRankingsRoute
@@ -142,6 +151,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/logged-in'
+    | '/app/discord-mapping'
     | '/demo/tanstack-query'
     | '/site/events'
     | '/site/rankings'
@@ -157,6 +167,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/logged-in'
+    | '/app/discord-mapping'
     | '/demo/tanstack-query'
     | '/site/events'
     | '/site/rankings'
@@ -172,6 +183,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/logged-in'
+    | '/app/discord-mapping'
     | '/demo/tanstack-query'
     | '/site/events'
     | '/site/rankings'
@@ -188,6 +200,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LoggedInRoute: typeof LoggedInRoute
+  AppDiscordMappingRoute: typeof AppDiscordMappingRoute
   DemoTanstackQueryRoute: typeof DemoTanstackQueryRoute
   SiteEventsRoute: typeof SiteEventsRoute
   SiteRankingsRoute: typeof SiteRankingsRoute
@@ -245,6 +258,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DemoTanstackQueryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/discord-mapping': {
+      id: '/app/discord-mapping'
+      path: '/app/discord-mapping'
+      fullPath: '/app/discord-mapping'
+      preLoaderRoute: typeof AppDiscordMappingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/site/player/$id': {
       id: '/site/player/$id'
       path: '/site/player/$id'
@@ -300,6 +320,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoggedInRoute: LoggedInRoute,
+  AppDiscordMappingRoute: AppDiscordMappingRoute,
   DemoTanstackQueryRoute: DemoTanstackQueryRoute,
   SiteEventsRoute: SiteEventsRoute,
   SiteRankingsRoute: SiteRankingsRoute,

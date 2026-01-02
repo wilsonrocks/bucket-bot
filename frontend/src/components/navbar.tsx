@@ -4,6 +4,7 @@ import { useGenerateRankingsSnapshotMutation, useHasRole } from '@/hooks/useApi'
 import { Route as EventsSiteRoute } from '@/routes/site/events'
 import { Route as EventsAppRoute } from '@/routes/app/_app-pages/events/index.tsx'
 import { Route as RankingsRoute } from '@/routes/site/rankings'
+import { Route as DiscordMappingRoute } from '@/routes/app/discord-mapping'
 
 export const Navbar = () => {
   const hasRole = useHasRole()
@@ -17,6 +18,7 @@ export const Navbar = () => {
         <>
           <Divider />
           <AppNavLink to={EventsAppRoute.path} label="Edit Events" />
+          <AppNavLink to={DiscordMappingRoute.path} label="Discord Mapping" />
           <Button
             disabled={generateRankings.isPending}
             onClick={() => generateRankings.mutate()}

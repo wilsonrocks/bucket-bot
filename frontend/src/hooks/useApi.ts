@@ -214,3 +214,30 @@ export const useGetRankingsForPlayer = (playerId: number, typeCode: string) => {
   })
   return playerRankings
 }
+
+export const useGetPlayersWithNoDiscordId = () => {
+  const auth = useAuth()
+  const playerRankings = useQuery({
+    queryKey: ['players-with-no-discord-id'],
+    enabled: !!auth,
+    queryFn: async (): Promise<
+      {
+        player_id: number
+        player_name: string
+        longshanks_name: string
+        longshanks_id: string
+        results: { tourney_name: string; place: number; faction: string }[]
+      }[]
+    > => {
+      const url = `${import.meta.env.VITE_BACKEND_URL}/v1/players-with-no-discord-id`
+      const res = await fetch(url, {
+        headers: auth!.headers, // is checked on enabled
+      })
+      if (!res.ok) {
+        throw new Error('Failed to fetch player rankings')
+      }
+      return res.json()
+    },
+  })
+  return playerRankings
+}

@@ -14,6 +14,7 @@ import { rankingsHandler } from "./v1-routes/rankings.js";
 import { rankingsPlayerHandler } from "./v1-routes/rankings-player.js";
 import {
   fetchAndStoreDiscordUserIds,
+  playersWithNoDiscordId,
   searchDiscordUsersByName,
 } from "./v1-routes/discord-id.js";
 
@@ -131,3 +132,4 @@ v1Router.get("/has-role", hasRankingReporterRole);
 v1Router.post("/generate-rankings", generateRankingsHandler);
 v1Router.post("/fetch-discord-user-ids", fetchAndStoreDiscordUserIds); // THIS is a weird hack because we in a lambda and this rate limits severely
 v1Router.get("/search-discord-users", searchDiscordUsersByName);
+v1Router.get("/players-with-no-discord-id", playersWithNoDiscordId);

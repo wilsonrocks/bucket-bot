@@ -62,3 +62,44 @@ export const searchDiscordUsersByName = async (ctx: Context) => {
 
   ctx.response.body = candidates;
 };
+
+export const playersWithNoDiscordId = async (ctx: Context) => {
+  const players = await ctx.state.db
+    .selectFrom("player")
+    .innerJoin("result", "player.id", "result.player_id")
+    .innerJoin("tourney", "result.tourney_id", "tourney.id")
+    .innerJoin("faction", "result.faction_code", "faction.name_code")
+    .where("discord_id", "is", null)
+    .select([
+      "player.id as player_id",
+      "player.name as player_name",
+      "player.longshanks_name",
+      "player.longshanks_id",
+      "tourney.name as tourney_name",
+      "result.place",
+      "faction.name as faction_name",
+    ])
+    .orderBy("player.id", "asc")
+    .execute();
+
+  // Group by player_id
+  const grouped = new Map();
+  for (const row of players) {
+    if (!grouped.has(row.player_id)) {
+      grouped.set(row.player_id, {
+        player_id: row.player_id,
+        player_name: row.player_name,
+        longshanks_name: row.longshanks_name,
+        longshanks_id: row.longshanks_id,
+        results: [],
+      });
+    }
+    grouped.get(row.player_id).results.push({
+      tourney_name: row.tourney_name,
+      place: row.place,
+      faction: row.faction_name,
+    });
+  }
+
+  ctx.response.body = Array.from(grouped.values());
+};
