@@ -4,6 +4,7 @@ import {
   getRankingTypeWhereSql,
   shouldGenerateRankings,
 } from "./ranking-type-logic";
+import { playersWithNoDiscordId } from "../../routes/v1/v1-routes/discord-id";
 
 export interface GenerateRankingsConfig {
   playersNeededToBeMastersRanked: number;
@@ -37,7 +38,7 @@ export const generateRankings = async (
       .returningAll()
       .executeTakeFirstOrThrow();
 
-    const insertQuery = trx
+    const insertRankingsQuery = trx
       .insertInto("ranking_snapshot")
       .columns(["batch_id", "player_id", "rank", "total_points"])
       .expression(
@@ -77,7 +78,40 @@ export const generateRankings = async (
       )
       .returningAll();
 
-    return insertQuery.execute();
+    const insertRankingEventsQuery = trx
+      .insertInto("ranking_snapshot_event")
+      .columns(["batch_id", "player_id", "tourney_id"])
+      .expression(
+        trx
+          .selectFrom(
+            trx
+              .selectFrom("player")
+              .innerJoin("result", "player.id", "result.player_id")
+              .innerJoin("faction", "result.faction_code", "faction.name_code")
+              .innerJoin("tourney", "result.tourney_id", "tourney.id")
+              .select([
+                sql.lit<number>(batch.id).as("batch_id"),
+                "player.id as player_id",
+                "result.tourney_id as tourney_id",
+                sql<number>`
+                row_number() over (
+                  partition by result.player_id
+                  order by result.points desc
+                )
+            `.as("rn"),
+              ])
+              .where((eb) => eb.and(rankingTypeWhereSql.map((fn) => fn(eb))))
+              .as("ranked_results_events")
+          )
+          .select(["batch_id", "player_id", "tourney_id"])
+          .where("rn", "<=", config.numberOfTourneysToConsider)
+      )
+      .returningAll();
+
+    return Promise.all([
+      insertRankingsQuery.execute(),
+      insertRankingEventsQuery.execute(),
+    ]);
   });
 
   // Logic to generate rankings from the database
