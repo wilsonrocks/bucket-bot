@@ -10,7 +10,7 @@ export const fetchAndStoreDiscordUserIds = async (ctx: Context) => {
   const guildId = UK_MALIFAUX_SERVER_ID;
   const guild = await discordClient.guilds.fetch(guildId);
 
-  const members = await guild.members.fetch();
+  const members = await guild.members.fetch(); // TODO this is expensive and harshly rate limited
 
   const mappedMembers = members.map((m) => ({
     discord_user_id: m.user.id,

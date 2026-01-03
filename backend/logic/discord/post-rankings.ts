@@ -1,12 +1,21 @@
 import { formatDate } from "date-fns";
-import { EmbedBuilder } from "discord.js";
+import { ColorResolvable, EmbedBuilder, TextChannel } from "discord.js";
 import { Kysely } from "kysely";
 import { DB } from "kysely-codegen";
-import { discordClient } from "../discord-client";
+import { discordClient, UK_MALIFAUX_SERVER_ID } from "../discord-client";
 import { mostRecentSnapshot } from "../most-recent-snapshot";
 
 const TOP_X_PLAYERS = 16;
-
+function mentionIfPossible(player: {
+  discord_user_id: string | null | undefined;
+  name: string;
+}): string {
+  if (player.discord_user_id) {
+    return `<@${player.discord_user_id}>`;
+  } else {
+    return player.name;
+  }
+}
 export const postDiscordRankings = async (db: Kysely<DB>) => {
   const rankingTypes = await db
     .selectFrom("ranking_snapshot_type")
@@ -43,6 +52,7 @@ export const postDiscordRankings = async (db: Kysely<DB>) => {
       )
       .where("batch_id", "=", batch.id)
       .select([
+        "discord_user.discord_user_id",
         "discord_user.discord_display_name",
         "discord_user.discord_nickname",
         "discord_user.discord_username",
@@ -63,6 +73,11 @@ export const postDiscordRankings = async (db: Kysely<DB>) => {
 
     // TODO have as env var
     const channel = await discordClient.channels.fetch("1447924241403220071");
+
+    if (!(channel instanceof TextChannel)) {
+      throw new Error(`Fetched channel is not a TextChannel, ${channel}`);
+    }
+
     const isSendable = channel?.isSendable;
     if (!isSendable) {
       console.warn(
@@ -74,19 +89,16 @@ export const postDiscordRankings = async (db: Kysely<DB>) => {
     const topPlayersText = rankings
       .map(
         (r) =>
-          `#${r.rank} - ${
-            r.discord_display_name ||
-            r.discord_nickname ||
-            r.discord_username ||
-            r.name
-          } (${r.total_points.toFixed(2)} pts)`
+          `#${r.rank} - ${mentionIfPossible(r)} (${r.total_points.toFixed(
+            2
+          )} pts)`
       )
       .join("\n");
 
     const embed = new EmbedBuilder()
       .setDescription(`<@&1079826009727193188>\n${description}`) // Role mention for Event Enthusiast
       .setTitle(`${name} as of ${formatDate(new Date(), "EEEE d MMM yyyy")}`)
-      .setColor(hex_code)
+      .setColor(hex_code as ColorResolvable)
       .addFields(
         { name: "Players", value: topPlayersText },
         {
