@@ -1,0 +1,10 @@
+UPDATE ranking_snapshot_type SET discord_channel_id = '1457298727818756167' WHERE code = 'ROLLING_YEAR';
+UPDATE ranking_snapshot_type SET discord_channel_id = '1457298803739594863' WHERE code = 'MASTERS';
+UPDATE ranking_snapshot_type SET discord_channel_id = '1457299584559874098' WHERE code = 'BEST_RESSER';
+UPDATE ranking_snapshot_type SET discord_channel_id = '1457299139351023626' WHERE code = 'BEST_GUILD';
+UPDATE ranking_snapshot_type SET discord_channel_id = '1457298915392225382' WHERE code = 'BEST_ARCANIST';
+UPDATE ranking_snapshot_type SET discord_channel_id = '1457299243768217682' WHERE code = 'BEST_OUTCAST';
+UPDATE ranking_snapshot_type SET discord_channel_id = '1457299810666151946' WHERE code = 'BEST_THUNDERS';
+UPDATE ranking_snapshot_type SET discord_channel_id = '1457299193638027264' WHERE code = 'BEST_NEVERBORN';
+UPDATE ranking_snapshot_type SET discord_channel_id = '1457298996782436436' WHERE code = 'BEST_BAYOU';
+UPDATE ranking_snapshot_type SET discord_channel_id = '1457299091934548111' WHERE code = 'BEST_EXPLORERS';

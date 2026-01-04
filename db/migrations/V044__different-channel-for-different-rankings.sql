@@ -1,0 +1,1 @@
+ALTER TABLE ranking_snapshot_type ADD COLUMN discord_channel_id TEXT;

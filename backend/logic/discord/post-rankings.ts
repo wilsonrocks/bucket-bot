@@ -2,7 +2,7 @@ import { formatDate } from "date-fns";
 import { ColorResolvable, EmbedBuilder, TextChannel } from "discord.js";
 import { Kysely } from "kysely";
 import { DB } from "kysely-codegen";
-import { discordClient, UK_MALIFAUX_SERVER_ID } from "../discord-client";
+import { discordClient } from "../discord-client";
 import { mostRecentSnapshot } from "../most-recent-snapshot";
 
 const TOP_X_PLAYERS = 16;
@@ -66,13 +66,16 @@ export const postDiscordRankings = async (db: Kysely<DB>) => {
       .limit(TOP_X_PLAYERS)
       .execute();
 
-    // Here you would implement the logic to post rankings to Discord
-    // For example, fetching the rankings and sending them to a Discord channel
     console.debug(`Posting rankings for type: ${typeCode}`, rankings);
-    // ... your posting logic here ...
 
-    // TODO have as env var
-    const channel = await discordClient.channels.fetch("1447924241403220071");
+    const { discord_channel_id } = batch;
+    if (!discord_channel_id) {
+      console.warn(
+        `No Discord channel ID configured for ranking type: ${typeCode}, skipping Discord post.`
+      );
+      continue;
+    }
+    const channel = await discordClient.channels.fetch(discord_channel_id);
 
     if (!(channel instanceof TextChannel)) {
       throw new Error(`Fetched channel is not a TextChannel, ${channel}`);
@@ -96,10 +99,15 @@ export const postDiscordRankings = async (db: Kysely<DB>) => {
       .join("\n");
 
     const embed = new EmbedBuilder()
-      .setDescription(`<@&1079826009727193188>\n${description}`) // Role mention for Event Enthusiast
+      .setDescription(`<@&1079826009727193188>\n${description} 🙃`) // Role mention for Event Enthusiast with upside down face emoji
       .setTitle(`${name} as of ${formatDate(new Date(), "EEEE d MMM yyyy")}`)
       .setColor(hex_code as ColorResolvable)
       .addFields(
+        {
+          name: "Note",
+          value:
+            "This is a weird set of data collate from SOME games from the past (including MWS🙃) so it does not reflect real rankings. Real data will start after 10 Jan with the first event of the year at Element!",
+        },
         { name: "Players", value: topPlayersText },
         {
           name: "See the rest",
