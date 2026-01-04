@@ -99,7 +99,6 @@ export const postDiscordRankings = async (db: Kysely<DB>) => {
       .join("\n");
 
     const embed = new EmbedBuilder()
-      .setDescription(`<@&1079826009727193188>\n${description} 🙃`) // Role mention for Event Enthusiast with upside down face emoji
       .setTitle(`${name} as of ${formatDate(new Date(), "EEEE d MMM yyyy")}`)
       .setColor(hex_code as ColorResolvable)
       .addFields(
