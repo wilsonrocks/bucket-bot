@@ -5,6 +5,7 @@ import { generateRankings } from "./rankings/generate-rankings";
 import { addTestTourneyData } from "./test-helpers/test-tourney-data";
 
 beforeEach(async () => {
+  await dbClient.deleteFrom("ranking_snapshot_event").execute();
   await dbClient.deleteFrom("ranking_snapshot_batch").execute();
   await dbClient.deleteFrom("ranking_snapshot").execute();
   await dbClient.deleteFrom("result").execute();
@@ -202,5 +203,55 @@ describe.sequential("testing with containers exciting", () => {
     expect(Alice!.rank).toBe(3);
     expect(David!.rank).toBe(4);
     expect(Eve!.rank).toBe(5);
+  });
+
+  test("saving events used for rankings", async () => {
+    await generateRankings(dbClient, "ROLLING_YEAR", {
+      playersNeededToBeMastersRanked: 10,
+      numberOfTourneysToConsider: 2,
+    });
+
+    const snapshotBatch = await dbClient
+      .selectFrom("ranking_snapshot_batch")
+      .selectAll()
+      .execute();
+    expect(snapshotBatch.length).toBe(1);
+    expect(snapshotBatch[0]!.type_code).toBe("ROLLING_YEAR");
+
+    const events = await dbClient
+      .selectFrom("ranking_snapshot_event")
+      .innerJoin(
+        "ranking_snapshot_batch",
+        "ranking_snapshot_event.batch_id",
+        "ranking_snapshot_batch.id"
+      )
+      .innerJoin("player", "ranking_snapshot_event.player_id", "player.id")
+      .where("ranking_snapshot_batch.id", "=", snapshotBatch[0]!.id)
+      .selectAll()
+      .execute();
+
+    // Charlie first
+
+    const charlieEvents = events.filter((e) => e.name === "Charlie");
+
+    expect(charlieEvents.length, "caps events at two").toBe(2);
+    expect(charlieEvents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ tourney_id: 2 }), // from tourney3
+        expect.objectContaining({ tourney_id: 3 }), // from tourney2
+      ])
+    );
+
+    // then bob (who has same points for two)
+
+    const bobEvents = events.filter((e) => e.name === "Bob");
+    expect(bobEvents.length, "caps events at two").toBe(2);
+    const bobTourneyIds = bobEvents.map((e) => e.tourney_id);
+    expect(bobTourneyIds).toContain(2);
+    expect(bobTourneyIds.some((id) => id === 1 || id === 3)).toBe(true); // from tourney2
+
+    const eveEvents = events.filter((e) => e.name === "Eve");
+    expect(eveEvents.length, "only one event for eve").toBe(1);
+    expect(eveEvents[0]!.tourney_id).toBe(2); // from tourney2
   });
 });
