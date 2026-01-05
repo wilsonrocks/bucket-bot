@@ -1,6 +1,7 @@
 import { DiscordLookup } from '@/components/discord-lookup'
 import { useGetPlayersWithNoDiscordId } from '@/hooks/useApi'
-import { Pagination, Stack, Table } from '@mantine/core'
+import { Pagination, Stack, Table, useMantineTheme } from '@mantine/core'
+import { useMediaQuery } from '@mantine/hooks'
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 
@@ -21,7 +22,8 @@ function RouteComponent() {
   const unmappedPlayers = useGetPlayersWithNoDiscordId()
   const pageSize = 5
   const [page, setPage] = useState(1)
-
+  const theme = useMantineTheme()
+  const isXs = useMediaQuery(`(max-width: ${theme.breakpoints.xs})`)
   return (
     <div>
       {unmappedPlayers.isLoading && <div>Loading...</div>}
@@ -36,27 +38,38 @@ function RouteComponent() {
           />
 
           <Table
+            variant="vertical"
+            maw="md"
             data={{
-              head: ['Our Name', 'Longshanks ID', 'Event Results', 'Map to?'],
+              head: [
+                'Our Name',
+                isXs ? undefined : 'Longshanks ID',
+                'Event Results',
+                'Map to?',
+              ].filter((x) => x !== undefined),
               body: unmappedPlayers.data
                 .slice((page - 1) * pageSize, page * pageSize)
-                .map(({ player_id, player_name, longshanks_id, results }) => [
-                  player_name,
-                  longshanks_id,
-                  <Stack gap="xs" style={{ maxWidth: '200px' }}>
-                    {results.map(({ tourney_name, place, faction }, index) => (
-                      <div key={index}>
-                        <b>{toOrdinal(place)}</b> place at{' '}
-                        <em>{tourney_name}</em> playing <b>{faction}</b>
-                      </div>
-                    ))}
-                  </Stack>,
-                  <DiscordLookup
-                    playerId={player_id}
-                    playerName={player_name}
-                    initialText={player_name}
-                  />,
-                ]),
+                .map(({ player_id, player_name, longshanks_id, results }) =>
+                  [
+                    player_name,
+                    isXs ? undefined : longshanks_id,
+                    <Stack gap="xs" style={{ maxWidth: '200px' }}>
+                      {results.map(
+                        ({ tourney_name, place, faction }, index) => (
+                          <div key={index}>
+                            <b>{toOrdinal(place)}</b> place at{' '}
+                            <em>{tourney_name}</em> playing <b>{faction}</b>
+                          </div>
+                        ),
+                      )}
+                    </Stack>,
+                    <DiscordLookup
+                      playerId={player_id}
+                      playerName={player_name}
+                      initialText={player_name}
+                    />,
+                  ].filter((x) => x !== undefined),
+                ),
             }}
           />
         </>
