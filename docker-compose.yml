@@ -1,7 +1,7 @@
 version: "3.8"
 services:
   postgres:
-    image: postgres:15
+    image: postgis/postgis:17-3.5
     container_name: postgres
     restart: unless-stopped
     environment:

@@ -452,3 +452,90 @@ export const usePostMessageToDiscordChannel = () => {
   })
   return mutation
 }
+
+export const useGetVenues = () => {
+  const auth = useAuth()
+  const venues = useQuery({
+    queryKey: ['venues'],
+    enabled: !!auth,
+    queryFn: async (): Promise<
+      Array<{
+        id: number
+        name: string
+        town: string
+        post_code: string
+      }>
+    > => {
+      const url = `${import.meta.env.VITE_BACKEND_URL}/v1/venues`
+      const res = await fetch(url, {
+        headers: auth!.headers, // is checked on enabled
+      })
+      if (!res.ok) {
+        notifications.show({
+          title: 'Error',
+          message: `Failed to fetch venues: ${res.statusText}`,
+          color: 'red',
+        })
+        throw new Error('Failed to fetch venues')
+      }
+      return res.json()
+    },
+  })
+  return venues
+}
+
+export const useCreateVenueMutation = () => {
+  const auth = useAuth()
+  const queryClient = useQueryClient()
+  const mutation = useMutation({
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['venues'],
+      })
+      notifications.show({
+        title: 'Success',
+        message: 'Venue created successfully.',
+        color: 'green',
+      })
+    },
+    onError: (error: any) => {
+      console.error('Error creating venue:', error)
+      notifications.show({
+        title: 'Error',
+        message: `Failed to create venue: ${error.message || 'Unknown error'}`,
+        color: 'red',
+      })
+    },
+    mutationFn: async (data: {
+      name: string
+      town: string
+      postCode: string
+    }) => {
+      const url = `${import.meta.env.VITE_BACKEND_URL}/v1/create-venue`
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          ...auth!.headers, // is checked on use
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: data.name,
+          town: data.town,
+          postCode: data.postCode,
+        }),
+      })
+      if (!res.ok) {
+        const errorData = await res.json()
+        console.error('Error creating venue:', errorData)
+        notifications.show({
+          title: 'Error',
+          message: `Failed to create venue: ${errorData.message || res.statusText}`,
+          color: 'red',
+        })
+        throw new Error('Failed to create venue')
+      }
+      return res.json()
+    },
+  })
+  return mutation
+}
