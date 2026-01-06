@@ -394,3 +394,61 @@ export const usePostRankingsToDiscordMutation = () => {
   })
   return mutation
 }
+
+export const useGetDiscordBotChannels = () => {
+  const auth = useAuth()
+  const botChannels = useQuery({
+    queryKey: ['discord-bot-channels'],
+    enabled: !!auth,
+    queryFn: async (): Promise<
+      Array<{
+        id: string
+        name: string
+      }>
+    > => {
+      const url = `${import.meta.env.VITE_BACKEND_URL}/v1/bot-chat/channels`
+      const res = await fetch(url, {
+        headers: auth!.headers, // is checked on enabled
+      })
+      if (!res.ok) {
+        throw new Error('Failed to fetch Discord bot channels')
+      }
+      return res.json()
+    },
+  })
+  return botChannels
+}
+
+export const usePostMessageToDiscordChannel = () => {
+  const auth = useAuth()
+  const mutation = useMutation({
+    mutationFn: async (data: { channelId: string; message: string }) => {
+      const url = `${import.meta.env.VITE_BACKEND_URL}/v1/bot-chat/post-message`
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          ...auth!.headers, // is checked on use
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      })
+      if (!res.ok) {
+        const errorData = await res.json()
+        notifications.show({
+          title: 'Error',
+          message: `Failed to post message to Discord channel: ${errorData.message || res.statusText}`,
+          color: 'red',
+        })
+        console.error('Error posting message to Discord channel:', errorData)
+        throw new Error('Failed to post message to Discord channel')
+      }
+      notifications.show({
+        title: 'Success',
+        message: `Posted ${data.message}`,
+        color: 'green',
+      })
+      return res.json()
+    },
+  })
+  return mutation
+}

@@ -4,14 +4,7 @@ import z from "zod";
 import { newLongshanksEvent } from "./v1-routes/new-longshanks-event.js";
 import { hasRankingReporterRole } from "./v1-routes/roles.js";
 
-import { DefaultContext } from "koa";
 import koaJwt from "koa-jwt";
-import { allTourneys, detailTourney } from "./v1-routes/tourney.js";
-import { generate } from "kysely-codegen";
-import { generateRankingsHandler } from "./v1-routes/generate-rankings.js";
-import { rankingTypesHandler } from "./v1-routes/ranking-types.js";
-import { rankingsHandler } from "./v1-routes/rankings.js";
-import { rankingsPlayerHandler } from "./v1-routes/rankings-player.js";
 import {
   fetchAndStoreDiscordUserIds,
   matchPlayerToDiscordUser,
@@ -19,6 +12,12 @@ import {
   searchDiscordUsersByName,
 } from "./v1-routes/discord-id.js";
 import { postDiscordRankingsHandler } from "./v1-routes/discord-rankings.js";
+import { generateRankingsHandler } from "./v1-routes/generate-rankings.js";
+import { rankingTypesHandler } from "./v1-routes/ranking-types.js";
+import { rankingsPlayerHandler } from "./v1-routes/rankings-player.js";
+import { rankingsHandler } from "./v1-routes/rankings.js";
+import { allTourneys, detailTourney } from "./v1-routes/tourney.js";
+import { botChatRouter } from "../../logic/discord/bot-chat.js";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -45,11 +44,6 @@ if (!DISCORD_CLIENT_SECRET) {
 const basicAuth = Buffer.from(
   `${DISCORD_CLIENT_ID}:${DISCORD_CLIENT_SECRET}`
 ).toString("base64");
-
-async function getRows(ctx: DefaultContext) {
-  const rows = await ctx.state.db.selectFrom("tourney").selectAll().execute();
-  return rows;
-}
 
 export const v1Router = new Router({ prefix: "/v1" });
 
@@ -141,3 +135,6 @@ v1Router.post(
 );
 
 v1Router.post("/post-discord-rankings", postDiscordRankingsHandler);
+
+v1Router.use("/bot-chat", botChatRouter.routes());
+v1Router.use("/bot-chat", botChatRouter.allowedMethods());
