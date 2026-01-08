@@ -1,8 +1,13 @@
-import { useGetTourneyDetail } from '@/hooks/useApi'
+import {
+  useGetPlayers,
+  useGetTourneyDetail,
+  useGetVenues,
+} from '@/hooks/useApi'
 import {
   ActionIcon,
   Button,
   Grid,
+  NumberInput,
   Paper,
   Select,
   TextInput,
@@ -25,6 +30,12 @@ function RouteComponent() {
   const tourneyDetail = useGetTourneyDetail(id)
 
   const form = useForm<{
+    eventName: string
+    organiserId: string
+    venueId: string
+    rounds: number
+    days: number
+    tier: string
     categories: {
       name: string
       winners: {
@@ -34,25 +45,84 @@ function RouteComponent() {
     }[]
   }>({
     initialValues: {
+      eventName: '',
+      organiserId: '',
+      venueId: '',
+      rounds: 3,
+      days: 1,
+      tier: 'Local',
       categories: [{ name: 'Totem', winners: [] }],
     },
   })
+
+  const playerOptions = useGetPlayers()
+  const venues = useGetVenues()
+
   if (!tourneyDetail.data) {
     return <div>Loading...</div>
   }
   return (
     <div>
       <Title order={1} mb="md">
-        {tourneyDetail.data ? tourneyDetail.data.tourney.name : `Event #${id}`}
+        {tourneyDetail.data.tourney.name}
       </Title>
 
-      <Paper>
-        <Title order={3} mb="md">
-          Best Painted
-        </Title>
+      <Title order={3} mb="md">
+        Details
+      </Title>
 
+      <Paper p="md" m="md">
+        <Grid gutter="sm">
+          <Grid.Col span={{ base: 12, sm: 4 }}>
+            <TextInput
+              label="Event Name"
+              defaultValue={tourneyDetail.data.tourney.name}
+            />
+          </Grid.Col>
+          <Grid.Col span={{ base: 12, sm: 4 }}>
+            <Select
+              label="Organiser"
+              data={
+                playerOptions.data?.map((player) => ({
+                  value: player.id.toString(),
+                  label: player.name,
+                })) ?? []
+              }
+            />
+          </Grid.Col>
+
+          <Grid.Col span={{ base: 12, sm: 4 }}>
+            <Select
+              label="Venue"
+              data={
+                venues.data?.map((venue) => ({
+                  value: venue.id.toString(),
+                  label: venue.name,
+                })) ?? []
+              }
+            />
+          </Grid.Col>
+
+          <Grid.Col span={{ base: 4, sm: 2 }}>
+            <NumberInput label="Rounds" min={1} allowDecimal={false} />
+          </Grid.Col>
+
+          <Grid.Col span={{ base: 4, sm: 2 }}>
+            <NumberInput label="Days" min={1} allowDecimal={false} />
+          </Grid.Col>
+
+          <Grid.Col span={{ base: 6, sm: 2 }}>
+            <Select label="Tier" />
+          </Grid.Col>
+        </Grid>
+      </Paper>
+
+      <Title order={3} mb="md">
+        Best Painted
+      </Title>
+      <Paper p="md">
         {form.values.categories.map((category, catIndex) => (
-          <Paper key={catIndex} withBorder mb="md" p="md">
+          <Paper key={catIndex} withBorder m="md" p="md">
             <Grid align="flex-end">
               <Grid.Col span={{ base: 10, xs: 4 }}>
                 <TextInput
@@ -132,7 +202,7 @@ function RouteComponent() {
             </Grid>
           </Paper>
         ))}
-        <Paper>
+        <Paper p="xl">
           <Grid>
             <Grid.Col span={{ base: 12, xs: 2 }}>
               <Button

@@ -1,6 +1,6 @@
 import {
   useMatchPlayerToDiscordUser,
-  useSearchDiscordUsers,
+  useGetDiscordUsersByText,
 } from '@/hooks/useApi'
 import {
   Box,
@@ -25,7 +25,7 @@ export const DiscordLookup: React.FC<{
   useEffect(() => {
     setText(initialText)
   }, [initialText])
-  const options = useSearchDiscordUsers(text)
+  const options = useGetDiscordUsersByText(text)
   const matchMutation = useMatchPlayerToDiscordUser()
   return (
     <div>

@@ -19,6 +19,7 @@ import { rankingsHandler } from "./v1-routes/rankings.js";
 import { allTourneys, detailTourney } from "./v1-routes/tourney.js";
 import { botChatRouter } from "../../logic/discord/bot-chat.js";
 import { createVenueHandler, getAllVenuesHandler } from "./v1-routes/venues.js";
+import { getPlayers } from "./v1-routes/players.js";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -120,6 +121,8 @@ v1Router.get("/rankings/:typeCode", rankingsHandler);
 v1Router.get("/rankings/:playerId/:typeCode", rankingsPlayerHandler);
 v1Router.get("/tourney", allTourneys);
 v1Router.get("/tourney/:id", detailTourney);
+v1Router.get("/venues", getAllVenuesHandler);
+v1Router.get("/players", getPlayers);
 
 // now these need authentication
 v1Router.use(koaJwt({ secret: process.env.JWT_SECRET! }));
@@ -128,7 +131,6 @@ v1Router.post("/longshanks-event/:id", newLongshanksEvent);
 v1Router.get("/has-role", hasRankingReporterRole);
 v1Router.post("/generate-rankings", generateRankingsHandler);
 
-v1Router.get("/venues", getAllVenuesHandler);
 v1Router.post("/create-venue", createVenueHandler);
 
 v1Router.post("/fetch-discord-user-ids", fetchAndStoreDiscordUserIds); // THIS is a weird hack because we in a lambda and this rate limits severely

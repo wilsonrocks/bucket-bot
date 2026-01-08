@@ -10,7 +10,7 @@ export const allTourneys = async (ctx: Context) => {
       "tourney.name",
       "tourney.date",
       "tourney.venue",
-      "tourney.level_code",
+      "tourney.tier_code",
       ctx.state.db.fn.count("result.id").as("players"),
       "tourney.longshanks_id",
     ])

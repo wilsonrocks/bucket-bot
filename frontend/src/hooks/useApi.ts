@@ -70,10 +70,8 @@ export const useCreateLongshanksEventMutation = () => {
 }
 
 export const useGetAllTourneys = () => {
-  const auth = useAuth()
   const allTourneys = useQuery({
     queryKey: ['all-tourneys'],
-    enabled: !!auth,
     queryFn: async (): Promise<
       Array<{
         id: number
@@ -86,9 +84,7 @@ export const useGetAllTourneys = () => {
       }>
     > => {
       const url = `${import.meta.env.VITE_BACKEND_URL}/v1/tourney`
-      const res = await fetch(url, {
-        headers: auth!.headers, // is checked on enabled
-      })
+      const res = await fetch(url, {})
       if (!res.ok) {
         throw new Error('Failed to fetch tourneys')
       }
@@ -99,10 +95,8 @@ export const useGetAllTourneys = () => {
 }
 
 export const useGetTourneyDetail = (id: number) => {
-  const auth = useAuth()
   const tourneyDetail = useQuery({
     queryKey: ['tourney-detail', 'id'],
-    enabled: !!auth,
     queryFn: async (): Promise<{
       tourney: {
         id: number
@@ -120,9 +114,7 @@ export const useGetTourneyDetail = (id: number) => {
       }[]
     }> => {
       const url = `${import.meta.env.VITE_BACKEND_URL}/v1/tourney/${id}`
-      const res = await fetch(url, {
-        headers: auth!.headers, // is checked on enabled
-      })
+      const res = await fetch(url, {})
       if (!res.ok) {
         throw new Error('Failed to fetch tourney detail')
       }
@@ -133,10 +125,8 @@ export const useGetTourneyDetail = (id: number) => {
 }
 
 export const useGetRankingTypes = () => {
-  const auth = useAuth()
   const allTourneys = useQuery({
     queryKey: ['all-ranking-types'],
-    enabled: !!auth,
     queryFn: async (): Promise<
       Array<{
         code: string
@@ -145,9 +135,7 @@ export const useGetRankingTypes = () => {
       }>
     > => {
       const url = `${import.meta.env.VITE_BACKEND_URL}/v1/ranking-types`
-      const res = await fetch(url, {
-        headers: auth!.headers, // is checked on enabled
-      })
+      const res = await fetch(url, {})
       if (!res.ok) {
         throw new Error('Failed to fetch ranking types')
       }
@@ -158,10 +146,8 @@ export const useGetRankingTypes = () => {
 }
 
 export const useGetRankings = (typeCode: string | undefined) => {
-  const auth = useAuth()
   const allTourneys = useQuery({
     queryKey: ['rankings', typeCode],
-    enabled: !!auth,
     queryFn: async (): Promise<
       Array<{
         batch_id: number
@@ -176,9 +162,7 @@ export const useGetRankings = (typeCode: string | undefined) => {
         return []
       }
       const url = `${import.meta.env.VITE_BACKEND_URL}/v1/rankings/${typeCode}`
-      const res = await fetch(url, {
-        headers: auth!.headers, // is checked on enabled
-      })
+      const res = await fetch(url, {})
       if (!res.ok) {
         throw new Error('Failed to fetch ranking types')
       }
@@ -189,10 +173,8 @@ export const useGetRankings = (typeCode: string | undefined) => {
 }
 
 export const useGetRankingsForPlayer = (playerId: number, typeCode: string) => {
-  const auth = useAuth()
   const playerRankings = useQuery({
     queryKey: ['rankings-player', playerId, typeCode],
-    enabled: !!auth,
     queryFn: async (): Promise<{
       metadata: { number_of_players: number }
       rankings: {
@@ -204,9 +186,7 @@ export const useGetRankingsForPlayer = (playerId: number, typeCode: string) => {
       }[]
     }> => {
       const url = `${import.meta.env.VITE_BACKEND_URL}/v1/rankings/${playerId}/${typeCode}`
-      const res = await fetch(url, {
-        headers: auth!.headers, // is checked on enabled
-      })
+      const res = await fetch(url, {})
       if (!res.ok) {
         throw new Error('Failed to fetch player rankings')
       }
