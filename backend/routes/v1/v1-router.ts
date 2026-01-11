@@ -16,10 +16,16 @@ import { generateRankingsHandler } from "./v1-routes/generate-rankings.js";
 import { rankingTypesHandler } from "./v1-routes/ranking-types.js";
 import { rankingsPlayerHandler } from "./v1-routes/rankings-player.js";
 import { rankingsHandler } from "./v1-routes/rankings.js";
-import { allTourneys, detailTourney } from "./v1-routes/tourney.js";
+import {
+  allTourneys,
+  detailTourney,
+  getTourneysForPlayerHandler,
+  updateTourney,
+} from "./v1-routes/tourney.js";
 import { botChatRouter } from "../../logic/discord/bot-chat.js";
 import { createVenueHandler, getAllVenuesHandler } from "./v1-routes/venues.js";
-import { getPlayers } from "./v1-routes/players.js";
+import { getPlayerById, getPlayers } from "./v1-routes/players.js";
+import { getAllTiers } from "./v1-routes/tiers.js";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -121,8 +127,11 @@ v1Router.get("/rankings/:typeCode", rankingsHandler);
 v1Router.get("/rankings/:playerId/:typeCode", rankingsPlayerHandler);
 v1Router.get("/tourney", allTourneys);
 v1Router.get("/tourney/:id", detailTourney);
+v1Router.get("/tourneys/player/:playerId", getTourneysForPlayerHandler);
 v1Router.get("/venues", getAllVenuesHandler);
 v1Router.get("/players", getPlayers);
+v1Router.get("/player/:id", getPlayerById);
+v1Router.get("/tiers", getAllTiers);
 
 // now these need authentication
 v1Router.use(koaJwt({ secret: process.env.JWT_SECRET! }));
@@ -144,3 +153,4 @@ v1Router.post("/post-discord-rankings", postDiscordRankingsHandler);
 
 v1Router.use("/bot-chat", botChatRouter.routes());
 v1Router.use("/bot-chat", botChatRouter.allowedMethods());
+v1Router.post("/tourney/:id", updateTourney);

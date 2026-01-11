@@ -103,14 +103,23 @@ export const useGetTourneyDetail = (id: number) => {
         name: string
         date: string
         venue: string
-        level_code: string
+        tier_code: string
+        days: number | null
+        rounds: number | null
+        organiser_id: number | null
+        venue_id: number | null
       }
       players: {
+        factionHexCode: string
         playerId: number
         factionName: string
         playerName: string
         place: number
         points: number
+      }[]
+      paintingCategories: {
+        name: string
+        winners: { player_id: number; position: number; model: string }[]
       }[]
     }> => {
       const url = `${import.meta.env.VITE_BACKEND_URL}/v1/tourney/${id}`
@@ -172,7 +181,10 @@ export const useGetRankings = (typeCode: string | undefined) => {
   return allTourneys
 }
 
-export const useGetRankingsForPlayer = (playerId: number, typeCode: string) => {
+export const useGetRankingsForPlayer = (
+  playerId: number,
+  typeCode: string | undefined,
+) => {
   const playerRankings = useQuery({
     queryKey: ['rankings-player', playerId, typeCode],
     queryFn: async (): Promise<{
@@ -185,6 +197,9 @@ export const useGetRankingsForPlayer = (playerId: number, typeCode: string) => {
         name: string
       }[]
     }> => {
+      if (!typeCode) {
+        return { metadata: { number_of_players: 0 }, rankings: [] }
+      }
       const url = `${import.meta.env.VITE_BACKEND_URL}/v1/rankings/${playerId}/${typeCode}`
       const res = await fetch(url, {})
       if (!res.ok) {
@@ -518,4 +533,159 @@ export const useCreateVenueMutation = () => {
     },
   })
   return mutation
+}
+
+export const useGetPlayerById = (playerId: number) => {
+  const playerData = useQuery({
+    queryKey: ['player-by-id', playerId],
+    queryFn: async (): Promise<{
+      id: number
+      name: string
+      discord_user_id: string | null
+      longshanks_id: number | null
+      longshanks_name: string | null
+    }> => {
+      const url = `${import.meta.env.VITE_BACKEND_URL}/v1/player/${playerId}`
+      const res = await fetch(url, {})
+      if (!res.ok) {
+        throw new Error('Failed to fetch player data')
+      }
+      return res.json()
+    },
+  })
+  return playerData
+}
+
+export const useGetTourneysForPlayer = (playerId: number) => {
+  const allTourneys = useQuery({
+    queryKey: ['tourneys-for-player', playerId],
+    queryFn: async (): Promise<
+      Array<{
+        tourneyId: number
+        tourneyName: string
+        tourneyDate: string
+        tourneyVenue: string
+        tourneyTierCode: string
+        place: number
+        points: number
+        factionName: string
+        date: string
+      }>
+    > => {
+      const url = `${import.meta.env.VITE_BACKEND_URL}/v1/tourneys/player/${playerId}`
+      const res = await fetch(url, {})
+      if (!res.ok) {
+        notifications.show({
+          title: 'Error',
+          message: `Failed to fetch tourneys for player: ${res.statusText}`,
+          color: 'red',
+        })
+        throw new Error('Failed to fetch tourneys for player')
+      }
+      return res.json()
+    },
+  })
+  return allTourneys
+}
+
+export const useGetPlayers = () => {
+  const allPlayers = useQuery({
+    queryKey: ['players'],
+    queryFn: async (): Promise<
+      Array<{
+        id: number
+        name: string
+      }>
+    > => {
+      const url = `${import.meta.env.VITE_BACKEND_URL}/v1/players`
+      const res = await fetch(url, {})
+      if (!res.ok) {
+        throw new Error('Failed to fetch players')
+      }
+      return res.json()
+    },
+  })
+  return allPlayers
+}
+
+export const useUpdateTourneyMutation = () => {
+  const auth = useAuth()
+  const queryClient = useQueryClient()
+  const mutation = useMutation({
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ['tourney-detail', variables.id],
+      })
+      notifications.show({
+        title: 'Success',
+        message: 'Tourney updated successfully.',
+        color: 'green',
+      })
+    },
+    onError: (error: any) => {
+      console.error('Error updating tourney:', error)
+      notifications.show({
+        title: 'Error',
+        message: `Failed to update tourney - check console for details`,
+        color: 'red',
+      })
+    },
+    mutationFn: async (data: {
+      id: number
+      organiserId?: number
+      venueId?: number
+      name: string
+      rounds: number
+      days: number
+      tierCode: string
+      paintingCategories: {
+        name: string
+        winners: { playerId: number; model: string }[]
+      }[]
+    }) => {
+      const url = `${import.meta.env.VITE_BACKEND_URL}/v1/tourney/${data.id}`
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          ...auth!.headers, // is checked on use
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: data.id,
+          organiserId: data.organiserId,
+          venueId: data.venueId,
+          name: data.name,
+          rounds: data.rounds,
+          days: data.days,
+          paintingCategories: data.paintingCategories,
+          tierCode: data.tierCode,
+        }),
+      })
+      if (!res.ok) {
+        throw new Error(await res.json())
+      }
+      return res.json()
+    },
+  })
+  return mutation
+}
+
+export const useGetTiers = () => {
+  const tiers = useQuery({
+    queryKey: ['tiers'],
+    queryFn: async (): Promise<
+      Array<{
+        code: string
+        name: string
+      }>
+    > => {
+      const url = `${import.meta.env.VITE_BACKEND_URL}/v1/tiers`
+      const res = await fetch(url, {})
+      if (!res.ok) {
+        throw new Error('Failed to fetch tiers')
+      }
+      return res.json()
+    },
+  })
+  return tiers
 }
