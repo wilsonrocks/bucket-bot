@@ -1,0 +1,2 @@
+ALTER TABLE result ADD COLUMN rounds_played INT DEFAULT 0 NOT NULL;
+ALTER TABLE result ALTER COLUMN rounds_played DROP DEFAULT;

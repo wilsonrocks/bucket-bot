@@ -1,8 +1,11 @@
+import { Link } from '@/components/link'
+
 import {
   useGetPlayers,
   useGetTiers,
   useGetTourneyDetail,
   useGetVenues,
+  usePostEventToDiscordMutation,
   useUpdateTourneyMutation,
 } from '@/hooks/useApi'
 import {
@@ -96,9 +99,14 @@ function RouteComponent() {
 
   const tiers = useGetTiers()
   const updateTourney = useUpdateTourneyMutation()
+  const postToDiscord = usePostEventToDiscordMutation()
+
   if (!tourneyDetail.data) {
     return <div>Loading...</div>
   }
+
+  // TODO can these tab panels be their own components?
+
   return (
     <div>
       <Title order={1} mb="md">
@@ -110,6 +118,7 @@ function RouteComponent() {
           <Tabs.Tab value="details">Details</Tabs.Tab>
           <Tabs.Tab value="bestPainted">Best Painted</Tabs.Tab>
           <Tabs.Tab value="players">Players</Tabs.Tab>
+          <Tabs.Tab value="discord">Discord</Tabs.Tab>
         </Tabs.List>
         <Paper p="md" m="md">
           <Tabs.Panel value="details">
@@ -332,6 +341,26 @@ function RouteComponent() {
             people run tournaments manually on paper... which they are perfectly
             fine doing.
           </Alert>
+        </Tabs.Panel>
+
+        <Tabs.Panel value="discord">
+          <Title order={3} mb="md">
+            Discord
+          </Title>
+          <Button
+            disabled={tourneyDetail.data.tourney.discord_post_id !== null}
+            onClick={() => {
+              postToDiscord.mutate(id)
+            }}
+          >
+            Post Results to Discord
+          </Button>
+
+          {tourneyDetail.data.tourney.discord_post_id && (
+            <Link to={`${tourneyDetail.data.tourney.discord_post_id}`}>
+              View Discord Message
+            </Link>
+          )}
         </Tabs.Panel>
       </Tabs>
     </div>

@@ -108,6 +108,7 @@ export const useGetTourneyDetail = (id: number) => {
         rounds: number | null
         organiser_id: number | null
         venue_id: number | null
+        discord_post_id: number | null
       }
       players: {
         factionHexCode: string
@@ -643,7 +644,7 @@ export const useUpdateTourneyMutation = () => {
         winners: { playerId: number; model: string }[]
       }[]
     }) => {
-      const url = `${import.meta.env.VITE_BACKEND_URL}/v1/tourney/${data.id}`
+      const url = `${import.meta.env.VITE_BACKEND_URL}/v1/tourney`
       const res = await fetch(url, {
         method: 'POST',
         headers: {
@@ -688,4 +689,38 @@ export const useGetTiers = () => {
     },
   })
   return tiers
+}
+
+export const usePostEventToDiscordMutation = () => {
+  const auth = useAuth()
+  const mutation = useMutation({
+    mutationFn: async (eventId: number) => {
+      const url = `${import.meta.env.VITE_BACKEND_URL}/v1/post-discord-event/${eventId}`
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          ...auth!.headers, // is checked on use
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ eventId }),
+      })
+      if (!res.ok) {
+        const errorData = await res.json()
+        notifications.show({
+          title: 'Error',
+          message: `Failed to post event to Discord: ${errorData.message || res.statusText}`,
+          color: 'red',
+        })
+        console.error('Error posting event to Discord:', errorData)
+        throw new Error('Failed to post event to Discord')
+      }
+      notifications.show({
+        title: 'Success',
+        message: `Event posted to Discord successfully.`,
+        color: 'green',
+      })
+      return res.json()
+    },
+  })
+  return mutation
 }

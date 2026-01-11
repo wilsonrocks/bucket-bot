@@ -1,9 +1,10 @@
 import { Router } from "@koa/router";
-import { discordClient, UK_MALIFAUX_SERVER_ID } from "../discord-client";
+import { getDiscordClient, UK_MALIFAUX_SERVER_ID } from "../discord-client";
 
 export const botChatRouter = new Router();
 
 botChatRouter.get("/channels", async (ctx) => {
+  const discordClient = await getDiscordClient();
   const guildId = UK_MALIFAUX_SERVER_ID;
   const guild = await discordClient.guilds.fetch(guildId);
 
@@ -18,6 +19,7 @@ botChatRouter.get("/channels", async (ctx) => {
 });
 
 botChatRouter.post("/post-message", async (ctx) => {
+  const discordClient = await getDiscordClient();
   const body = ctx.request.body as { channelId: string; message: string };
   const channelId = body.channelId;
   const message = body.message;

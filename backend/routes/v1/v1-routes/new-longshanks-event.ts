@@ -115,6 +115,7 @@ export const newLongshanksEvent = async (ctx: Context) => {
             place: player.rank,
             faction_code,
             points,
+            rounds_played: player.roundsPlayed,
           })
           .execute();
         // then add player results

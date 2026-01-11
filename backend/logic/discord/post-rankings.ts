@@ -2,11 +2,13 @@ import { formatDate } from "date-fns";
 import { ColorResolvable, EmbedBuilder, TextChannel } from "discord.js";
 import { Kysely } from "kysely";
 import { DB } from "kysely-codegen";
-import { discordClient } from "../discord-client";
+import { getDiscordClient } from "../discord-client";
 import { mostRecentSnapshot } from "../most-recent-snapshot";
 
 const TOP_X_PLAYERS = 16;
-function mentionIfPossible(player: {
+
+// TODO move to own file
+export function mentionIfPossible(player: {
   discord_user_id: string | null | undefined;
   name: string;
 }): string {
@@ -75,6 +77,7 @@ export const postDiscordRankings = async (db: Kysely<DB>) => {
       );
       continue;
     }
+    const discordClient = await getDiscordClient();
     const channel = await discordClient.channels.fetch(discord_channel_id);
 
     if (!(channel instanceof TextChannel)) {

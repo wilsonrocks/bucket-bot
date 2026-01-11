@@ -1,11 +1,12 @@
 import { Context } from "koa";
 import {
-  discordClient,
+  getDiscordClient,
   RANKING_REPORTER_ROLE_ID,
   UK_MALIFAUX_SERVER_ID,
 } from "../../../logic/discord-client";
 
 export const hasRankingReporterRole = async (ctx: Context) => {
+  const discordClient = await getDiscordClient();
   const { id: userId } = ctx.state.user;
 
   if (typeof userId !== "string") {

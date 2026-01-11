@@ -20,6 +20,7 @@ import {
   allTourneys,
   detailTourney,
   getTourneysForPlayerHandler,
+  postEventSummaryToDiscord,
   updateTourney,
 } from "./v1-routes/tourney.js";
 import { botChatRouter } from "../../logic/discord/bot-chat.js";
@@ -150,7 +151,7 @@ v1Router.post(
   matchPlayerToDiscordUser
 );
 v1Router.post("/post-discord-rankings", postDiscordRankingsHandler);
-
+v1Router.post("/post-discord-event/:tourneyId", postEventSummaryToDiscord);
+v1Router.post("/tourney", updateTourney);
 v1Router.use("/bot-chat", botChatRouter.routes());
 v1Router.use("/bot-chat", botChatRouter.allowedMethods());
-v1Router.post("/tourney/:id", updateTourney);
