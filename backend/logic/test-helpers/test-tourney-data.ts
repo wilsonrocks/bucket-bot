@@ -10,7 +10,7 @@ interface TestPlayer {
   name: string;
 }
 
-type TestResult = [number, TestPlayer, number, Faction];
+type TestResult = [number, TestPlayer, number, Faction, number];
 
 const monthsAgo = (months: number): string => {
   const now = new Date();
@@ -69,29 +69,29 @@ export async function addTestTourneyData(db: Kysely<DB>) {
     .execute();
 
   const tourney1Results: TestResult[] = [
-    [1, Alice, 15, Faction.RESSERS],
-    [2, Bob, 10, Faction.GUILD],
-    [3, Charlie, 5, Faction.NEVERBORN],
+    [1, Alice, 15, Faction.RESSERS, 3],
+    [2, Bob, 10, Faction.GUILD, 3],
+    [3, Charlie, 5, Faction.NEVERBORN, 3],
   ];
 
   const tourney2Results: TestResult[] = [
-    [1, Bob, 19, Faction.GUILD],
-    [2, Charlie, 14, Faction.NEVERBORN],
-    [3, David, 9, Faction.RESSERS],
-    [4, Eve, 4, Faction.RESSERS],
+    [1, Bob, 19, Faction.GUILD, 4],
+    [2, Charlie, 14, Faction.NEVERBORN, 4],
+    [3, David, 9, Faction.RESSERS, 4],
+    [4, Eve, 4, Faction.RESSERS, 4],
   ];
 
   const tourney3Results: TestResult[] = [
-    [1, Charlie, 20, Faction.NEVERBORN],
-    [2, Alice, 15, Faction.EXPLORER],
-    [3, Bob, 10, Faction.GUILD],
-    [4, David, 5, Faction.NEVERBORN],
+    [1, Charlie, 20, Faction.NEVERBORN, 4],
+    [2, Alice, 15, Faction.EXPLORER, 4],
+    [3, Bob, 10, Faction.GUILD, 4],
+    [4, David, 5, Faction.NEVERBORN, 4],
   ];
 
   const tourney4Results: TestResult[] = [
-    [1, Alice, 12, Faction.GUILD],
-    [2, David, 8, Faction.NEVERBORN],
-    [3, Eve, 4, Faction.RESSERS],
+    [1, Alice, 12, Faction.GUILD, 3],
+    [2, David, 8, Faction.NEVERBORN, 3],
+    [3, Eve, 4, Faction.RESSERS, 3],
   ];
 
   await Promise.all([
@@ -115,12 +115,13 @@ export async function addTestTourneyData(db: Kysely<DB>) {
     return db
       .insertInto("result")
       .values(
-        results.map(([place, player, points, faction_code]) => ({
+        results.map(([place, player, points, faction_code, rounds_played]) => ({
           tourney_id: tourney.id,
           player_id: player.id,
           points,
           place,
           faction_code,
+          rounds_played,
         }))
       )
       .returningAll()

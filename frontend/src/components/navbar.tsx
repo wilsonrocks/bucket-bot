@@ -10,6 +10,9 @@ import { Route as EventsSiteRoute } from '@/routes/site/events'
 import { Route as EventsAppRoute } from '@/routes/app/_app-pages/events/index.tsx'
 import { Route as RankingsRoute } from '@/routes/site/rankings'
 import { Route as DiscordMappingRoute } from '@/routes/app/discord-mapping'
+import { Route as VenuesRoute } from '@/routes/app/_app-pages/venues'
+import { Route as BotChat } from '@/routes/app/_app-pages/bot-chat'
+
 import { modals } from '@mantine/modals'
 
 export const Navbar = () => {
@@ -27,6 +30,8 @@ export const Navbar = () => {
           <Divider />
           <AppNavLink to={EventsAppRoute.path} label="Edit Events" />
           <AppNavLink to={DiscordMappingRoute.path} label="Discord Mapping" />
+          <AppNavLink to={VenuesRoute.path} label="Venue" />
+          <AppNavLink to={BotChat.path} label="Bot Chat" />
           <Button
             disabled={generateRankings.isPending}
             onClick={() => {

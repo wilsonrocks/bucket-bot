@@ -5,6 +5,7 @@ import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/app/_app-pages/venues')({
   component: RouteComponent,
+  staticData: { title: 'Venues' },
 })
 
 function RouteComponent() {

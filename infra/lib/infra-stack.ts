@@ -53,6 +53,8 @@ export class InfraStack extends cdk.Stack {
         DISCORD_BOT_TOKEN: process.env.DISCORD_BOT_TOKEN,
         FRONTEND_URL: process.env.FRONTEND_URL,
         NODE_EXTRA_CA_CERTS: "/var/task/certs/ca.pem", // make sure this is copied across
+        DISCORD_EVENTS_CHANNEL_ID:
+          process.env.PROD_DISCORD_EVENTS_CHANNEL_ID || "",
       },
     });
 

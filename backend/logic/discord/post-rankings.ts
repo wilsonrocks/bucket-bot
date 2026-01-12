@@ -104,17 +104,16 @@ export const postDiscordRankings = async (db: Kysely<DB>) => {
     const embed = new EmbedBuilder()
       .setTitle(`${name} as of ${formatDate(new Date(), "EEEE d MMM yyyy")}`)
       .setColor(hex_code as ColorResolvable)
+      .setDescription(description)
       .addFields(
         {
           name: "Note",
-          value:
-            "This is a weird set of data collate from SOME games from the past (including MWS🙃) so it does not reflect real rankings. Real data will start after 10 Jan with the first event of the year at Element!",
+          value: `***BEEP BOOP!***
+Here is your weekly breakfast of rankings that I have cooked from data. I hope that it is tasty and nutritious and sustains you until you can next play in an event and generate more data for me. Enjoy!
+
+There's only a maximum of ${TOP_X_PLAYERS} players shown here. But you can see the full rankings [on the website](${process.env.FRONTEND_URL}/site/rankings?typeCode=${typeCode})!`,
         },
-        { name: "Players", value: topPlayersText },
-        {
-          name: "See the rest",
-          value: `[here](${process.env.FRONTEND_URL}/site/rankings?typeCode=${typeCode})`,
-        }
+        { name: "Players", value: topPlayersText }
       );
 
     await channel.send({ embeds: [embed] });

@@ -107,6 +107,7 @@ export const getTourneysForPlayerHandler = async (ctx: Context) => {
     .innerJoin("tourney", "result.tourney_id", "tourney.id")
     .innerJoin("faction", "result.faction_code", "faction.name_code")
     .where("result.player_id", "=", playerId)
+    // @ts-ignore
     .select([
       "tourney.id as tourneyId",
       "tourney.name as tourneyName",
@@ -300,6 +301,7 @@ export const postEventSummaryToDiscord = async (ctx: Context) => {
 
   for (const faction of factionSummary) {
     embed.addFields({
+      // @ts-ignore
       name: faction.faction_name,
       value: `- ${faction.player_count} player${
         faction.player_count == 1 ? "" : "s"
