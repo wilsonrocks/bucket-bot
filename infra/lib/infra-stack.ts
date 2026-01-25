@@ -39,6 +39,14 @@ export class InfraStack extends cdk.Stack {
       throw new Error("DISCORD_BOT_TOKEN env var is not set");
     }
 
+    if (!process.env.PROD_DISCORD_EVENTS_CHANNEL_ID) {
+      throw new Error("PROD_DISCORD_EVENTS_CHANNEL_ID env var is not set");
+    }
+
+    if (!process.env.DISCORD_TEST_CHANNEL_ID) {
+      throw new Error("DISCORD_TEST_CHANNEL_ID env var is not set");
+    }
+
     const backendLambda = new lambda.Function(this, "BucketBotHandler", {
       code: lambda.Code.fromAsset("../backend/dist"),
       handler: "handler.handler",
@@ -53,8 +61,8 @@ export class InfraStack extends cdk.Stack {
         DISCORD_BOT_TOKEN: process.env.DISCORD_BOT_TOKEN,
         FRONTEND_URL: process.env.FRONTEND_URL,
         NODE_EXTRA_CA_CERTS: "/var/task/certs/ca.pem", // make sure this is copied across
-        DISCORD_EVENTS_CHANNEL_ID:
-          process.env.PROD_DISCORD_EVENTS_CHANNEL_ID || "",
+        DISCORD_EVENTS_CHANNEL_ID: process.env.PROD_DISCORD_EVENTS_CHANNEL_ID,
+        DISCORD_TEST_CHANNEL_ID: process.env.DISCORD_TEST_CHANNEL_ID,
       },
     });
 
@@ -99,10 +107,10 @@ export class InfraStack extends cdk.Stack {
         resources: [frontendBucket.arnForObjects("*")],
         principals: [
           new iam.CanonicalUserPrincipal(
-            oai.cloudFrontOriginAccessIdentityS3CanonicalUserId
+            oai.cloudFrontOriginAccessIdentityS3CanonicalUserId,
           ),
         ],
-      })
+      }),
     );
 
     const distribution = new cloudfront.Distribution(
@@ -124,7 +132,7 @@ export class InfraStack extends cdk.Stack {
             ttl: cdk.Duration.minutes(5),
           },
         ],
-      }
+      },
     );
 
     new s3deploy.BucketDeployment(this, "DeployFrontend", {

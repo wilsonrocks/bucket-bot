@@ -5,6 +5,7 @@ import { newLongshanksEvent } from "./v1-routes/new-longshanks-event.js";
 import { hasRankingReporterRole } from "./v1-routes/roles.js";
 
 import koaJwt from "koa-jwt";
+import { botChatRouter } from "./v1-routes/bot-chat.js";
 import {
   fetchAndStoreDiscordUserIds,
   matchPlayerToDiscordUser,
@@ -12,10 +13,17 @@ import {
   searchDiscordUsersByName,
 } from "./v1-routes/discord-id.js";
 import { postDiscordRankingsHandler } from "./v1-routes/discord-rankings.js";
+import {
+  generateFactionRankingsHandler,
+  getFactionRankings,
+  postFactionRankingsHandler,
+} from "./v1-routes/faction-rankings.js";
 import { generateRankingsHandler } from "./v1-routes/generate-rankings.js";
+import { getPlayerById, getPlayers } from "./v1-routes/players.js";
 import { rankingTypesHandler } from "./v1-routes/ranking-types.js";
 import { rankingsPlayerHandler } from "./v1-routes/rankings-player.js";
 import { rankingsHandler } from "./v1-routes/rankings.js";
+import { getAllTiers } from "./v1-routes/tiers.js";
 import {
   allTourneys,
   detailTourney,
@@ -23,15 +31,7 @@ import {
   postEventSummaryToDiscord,
   updateTourney,
 } from "./v1-routes/tourney.js";
-import { botChatRouter } from "./v1-routes/bot-chat.js";
 import { createVenueHandler, getAllVenuesHandler } from "./v1-routes/venues.js";
-import { getPlayerById, getPlayers } from "./v1-routes/players.js";
-import { getAllTiers } from "./v1-routes/tiers.js";
-import {
-  factionRankingRouter,
-  generateFactionRankingsHandler,
-  getFactionRankings,
-} from "./v1-routes/faction-rankings.js";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -163,3 +163,5 @@ v1Router.post("/tourney", updateTourney);
 v1Router.use("/bot-chat", botChatRouter.routes());
 v1Router.use("/bot-chat", botChatRouter.allowedMethods());
 v1Router.post("/faction-rankings", generateFactionRankingsHandler);
+
+v1Router.post("/post-faction-rankings", postFactionRankingsHandler);
