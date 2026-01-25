@@ -1,4 +1,5 @@
 export const RANKING_REPORTER_ROLE_ID = "1449009972339015862";
+export const EVENT_ENTHUSIAST_ROLE_ID = "1079826009727193188";
 export const UK_MALIFAUX_SERVER_ID = "820257369379962881";
 
 import { Client, GatewayIntentBits, Events } from "discord.js";

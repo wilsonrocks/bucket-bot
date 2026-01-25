@@ -1,7 +1,10 @@
 import { Context } from "koa";
 import { generateFactionRankings } from "../../../logic/rankings/generate-faction-rankings";
 import { ColorResolvable, EmbedBuilder, Emoji, TextChannel } from "discord.js";
-import { getDiscordClient } from "../../../logic/discord-client";
+import {
+  EVENT_ENTHUSIAST_ROLE_ID,
+  getDiscordClient,
+} from "../../../logic/discord-client";
 
 const { DISCORD_FACTION_CHANNEL_ID, DISCORD_TEST_CHANNEL_ID } = process.env;
 if (!DISCORD_FACTION_CHANNEL_ID) {
@@ -111,7 +114,7 @@ export const postFactionRankingsHandler = async (ctx: Context) => {
   const introEmbed = new EmbedBuilder()
     .setTitle(`Faction Rankings ${snapshot.map((f) => f.emoji).join("")}`)
     .setDescription(
-      `***BEEP BOOP!*** I have eaten the delicious data from all the UK Malifaux rankings and here some yummy faction standings for you to enjoy!`,
+      `***BEEP BOOP!*** I have eaten the delicious data from all the UK Malifaux rankings and here some yummy faction standings for you to enjoy!\n<@&${EVENT_ENTHUSIAST_ROLE_ID}>`,
     );
 
   const factionEmbeds = snapshot.map(
