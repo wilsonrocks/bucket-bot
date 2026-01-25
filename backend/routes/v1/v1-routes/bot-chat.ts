@@ -1,5 +1,8 @@
 import { Router } from "@koa/router";
-import { getDiscordClient, UK_MALIFAUX_SERVER_ID } from "../discord-client";
+import {
+  getDiscordClient,
+  UK_MALIFAUX_SERVER_ID,
+} from "../../../logic/discord-client";
 
 export const botChatRouter = new Router();
 

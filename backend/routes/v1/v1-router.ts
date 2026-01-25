@@ -23,10 +23,15 @@ import {
   postEventSummaryToDiscord,
   updateTourney,
 } from "./v1-routes/tourney.js";
-import { botChatRouter } from "../../logic/discord/bot-chat.js";
+import { botChatRouter } from "./v1-routes/bot-chat.js";
 import { createVenueHandler, getAllVenuesHandler } from "./v1-routes/venues.js";
 import { getPlayerById, getPlayers } from "./v1-routes/players.js";
 import { getAllTiers } from "./v1-routes/tiers.js";
+import {
+  factionRankingRouter,
+  generateFactionRankingsHandler,
+  getFactionRankings,
+} from "./v1-routes/faction-rankings.js";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -51,7 +56,7 @@ if (!DISCORD_CLIENT_SECRET) {
 }
 
 const basicAuth = Buffer.from(
-  `${DISCORD_CLIENT_ID}:${DISCORD_CLIENT_SECRET}`
+  `${DISCORD_CLIENT_ID}:${DISCORD_CLIENT_SECRET}`,
 ).toString("base64");
 
 export const v1Router = new Router({ prefix: "/v1" });
@@ -84,13 +89,13 @@ v1Router.post("/token", async (ctx) => {
     console.error(
       "Discord token response not ok:",
       tokenResponse.statusText,
-      JSON.stringify(tokenResponse)
+      JSON.stringify(tokenResponse),
     );
     return ctx.throw(
       502,
       "Error fetching token from Discord",
       tokenResponse.statusText,
-      JSON.stringify(tokenResponse)
+      JSON.stringify(tokenResponse),
     );
   }
 
@@ -108,7 +113,7 @@ v1Router.post("/token", async (ctx) => {
     return ctx.throw(
       502,
       "Error fetching user id from Discord",
-      idResponse.statusText
+      idResponse.statusText,
     );
   }
 
@@ -133,6 +138,7 @@ v1Router.get("/venues", getAllVenuesHandler);
 v1Router.get("/players", getPlayers);
 v1Router.get("/player/:id", getPlayerById);
 v1Router.get("/tiers", getAllTiers);
+v1Router.get("/faction-rankings", getFactionRankings);
 
 // now these need authentication
 v1Router.use(koaJwt({ secret: process.env.JWT_SECRET! }));
@@ -148,10 +154,12 @@ v1Router.get("/search-discord-users", searchDiscordUsersByName);
 v1Router.get("/players-with-no-discord-id", playersWithNoDiscordId);
 v1Router.post(
   "/match-player-to-discord-user/:playerId/:discordUserId",
-  matchPlayerToDiscordUser
+  matchPlayerToDiscordUser,
 );
 v1Router.post("/post-discord-rankings", postDiscordRankingsHandler);
 v1Router.post("/post-discord-event/:tourneyId", postEventSummaryToDiscord);
 v1Router.post("/tourney", updateTourney);
+
 v1Router.use("/bot-chat", botChatRouter.routes());
 v1Router.use("/bot-chat", botChatRouter.allowedMethods());
+v1Router.post("/faction-rankings", generateFactionRankingsHandler);
