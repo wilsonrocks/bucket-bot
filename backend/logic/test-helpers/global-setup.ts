@@ -22,7 +22,14 @@ export default async function setup() {
     migrationLocations: ["filesystem:../db/migrations"],
   });
 
-  await flyway.migrate();
+  const flywayResponse = await flyway.migrate();
+
+  if (!flywayResponse.success) {
+    throw new Error(
+      `Database migration failed, ${flywayResponse.error?.message}`,
+    );
+  }
+
   process.env.DATABASE_URL = container.getConnectionUri();
   process.env.DB_HOST = container.getHost();
   process.env.DB_PORT = String(container.getPort());

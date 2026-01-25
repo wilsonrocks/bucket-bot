@@ -1,0 +1,1 @@
+ALTER TABLE faction_snapshot ALTER COLUMN points_per_declaration TYPE DOUBLE PRECISION;

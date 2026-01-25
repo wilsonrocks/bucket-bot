@@ -1,0 +1,1 @@
+ALTER TABLE faction_snapshot ADD COLUMN points_per_declaration INT;

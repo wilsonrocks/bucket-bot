@@ -1,22 +1,21 @@
 import { ExpressionBuilder, Kysely, sql } from "kysely";
 import { DB } from "kysely-codegen";
 import { Faction, RankingType } from "../fixtures";
-import { GenerateRankingsConfig } from "./generate-rankings";
-import { th } from "zod/v4/locales";
 
 const oneYearAgoSql = sql<Date>`current_date - interval '1 year'`;
-const oneYearAgo = (eb: ExpressionBuilder<DB, "tourney">) =>
+
+export const withinLastYaer = (eb: ExpressionBuilder<DB, "tourney">) =>
   eb("tourney.date", ">=", oneYearAgoSql);
 
 const checkRankingType = (
-  rankingsType: string
+  rankingsType: string,
 ): rankingsType is RankingType => {
   return Object.values(RankingType).includes(rankingsType as RankingType);
 };
 
 export const getRankingTypeWhereSql = (
   rankingsType: string,
-  playersNeededToBeMastersRanked: number
+  playersNeededToBeMastersRanked: number,
 ) => {
   if (!checkRankingType(rankingsType)) {
     throw new Error(`Invalid rankings type: ${rankingsType}`);
@@ -27,57 +26,57 @@ export const getRankingTypeWhereSql = (
       return [
         (eb: ExpressionBuilder<DB, "faction">) =>
           eb(eb.ref("faction.name_code"), "=", Faction.RESSERS),
-        oneYearAgo,
+        withinLastYaer,
       ];
     case "BEST_GUILD":
       return [
         (eb: ExpressionBuilder<DB, "faction">) =>
           eb(eb.ref("faction.name_code"), "=", Faction.GUILD),
-        oneYearAgo,
+        withinLastYaer,
       ];
     case "BEST_ARCANIST":
       return [
         (eb: ExpressionBuilder<DB, "faction">) =>
           eb(eb.ref("faction.name_code"), "=", Faction.ARCANISTS),
-        oneYearAgo,
+        withinLastYaer,
       ];
     case "BEST_OUTCAST":
       return [
         (eb: ExpressionBuilder<DB, "faction">) =>
           eb(eb.ref("faction.name_code"), "=", Faction.OUTCASTS),
-        oneYearAgo,
+        withinLastYaer,
       ];
     case "BEST_THUNDERS":
       return [
         (eb: ExpressionBuilder<DB, "faction">) =>
           eb(eb.ref("faction.name_code"), "=", Faction.THUNDERS),
-        oneYearAgo,
+        withinLastYaer,
       ];
     case "BEST_NEVERBORN":
       return [
         (eb: ExpressionBuilder<DB, "faction">) =>
           eb(eb.ref("faction.name_code"), "=", Faction.NEVERBORN),
-        oneYearAgo,
+        withinLastYaer,
       ];
     case "BEST_BAYOU":
       return [
         (eb: ExpressionBuilder<DB, "faction">) =>
           eb(eb.ref("faction.name_code"), "=", Faction.BAYOU),
-        oneYearAgo,
+        withinLastYaer,
       ];
     case "BEST_EXPLORERS":
       return [
         (eb: ExpressionBuilder<DB, "faction">) =>
           eb(eb.ref("faction.name_code"), "=", Faction.EXPLORER),
-        oneYearAgo,
+        withinLastYaer,
       ];
     case "ROLLING_YEAR":
-      return [oneYearAgo];
+      return [withinLastYaer];
     case "MASTERS":
       return [
         (eb: ExpressionBuilder<DB, "tourney">) =>
           eb("tourney.number_of_players", ">=", playersNeededToBeMastersRanked),
-        oneYearAgo,
+        withinLastYaer,
       ];
     case RankingType.BEST_FOREVER:
       return [
@@ -89,7 +88,7 @@ export const getRankingTypeWhereSql = (
 
 export const shouldGenerateRankings = async (
   rankingsType: string,
-  db: Kysely<DB>
+  db: Kysely<DB>,
 ): Promise<boolean> => {
   const rankingSnapshotType = await db
     .selectFrom("ranking_snapshot_type")

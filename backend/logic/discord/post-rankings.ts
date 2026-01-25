@@ -1,8 +1,13 @@
 import { formatDate } from "date-fns";
-import { ColorResolvable, EmbedBuilder, TextChannel } from "discord.js";
+import {
+  ColorResolvable,
+  EmbedBuilder,
+  TextChannel,
+  userMention,
+} from "discord.js";
 import { Kysely } from "kysely";
 import { DB } from "kysely-codegen";
-import { getDiscordClient } from "../discord-client";
+import { getDiscordClient, UK_MALIFAUX_SERVER_ID } from "../discord-client";
 import { mostRecentSnapshot } from "../most-recent-snapshot";
 
 const TOP_X_PLAYERS = 16;
@@ -91,13 +96,17 @@ export const postDiscordRankings = async (db: Kysely<DB>) => {
       );
       continue;
     }
+    const guild = await discordClient.guilds.fetch(UK_MALIFAUX_SERVER_ID);
+    for (const r of rankings) {
+      await guild.members.fetch(r.discord_user_id!);
+    }
 
     const topPlayersText = rankings
       .map(
         (r) =>
-          `#${r.rank} - ${mentionIfPossible(r)} (${r.total_points.toFixed(
-            2
-          )} pts)`
+          `#${r.rank} - ${
+            r.discord_user_id ? userMention(r.discord_user_id) : r.name
+          } (${r.total_points.toFixed(2)} pts)`
       )
       .join("\n");
 

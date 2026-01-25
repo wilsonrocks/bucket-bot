@@ -88,6 +88,7 @@ export async function addTestTourneyData(db: Kysely<DB>) {
     [4, David, 5, Faction.NEVERBORN, 4],
   ];
 
+  // tourney 4 is over a year ago and should not be included in recent rankings
   const tourney4Results: TestResult[] = [
     [1, Alice, 12, Faction.GUILD, 3],
     [2, David, 8, Faction.NEVERBORN, 3],
@@ -104,11 +105,11 @@ export async function addTestTourneyData(db: Kysely<DB>) {
   async function insertResults(
     tourney: TestTourney,
     results: TestResult[],
-    db: Kysely<DB>
+    db: Kysely<DB>,
   ) {
     if (tourney.number_of_players !== results.length) {
       throw new Error(
-        `Tourney ${tourney.name} should have ${tourney.number_of_players} results but has ${results.length}`
+        `Tourney ${tourney.name} should have ${tourney.number_of_players} results but has ${results.length}`,
       );
     }
 
@@ -122,7 +123,7 @@ export async function addTestTourneyData(db: Kysely<DB>) {
           place,
           faction_code,
           rounds_played,
-        }))
+        })),
       )
       .returningAll()
       .execute();

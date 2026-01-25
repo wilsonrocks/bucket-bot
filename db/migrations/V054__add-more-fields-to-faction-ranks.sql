@@ -1,0 +1,1 @@
+ALTER TABLE faction_snapshot ADD COLUMN declarations INT NOT NULL DEFAULT 0;

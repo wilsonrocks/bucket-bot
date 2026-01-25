@@ -1,57 +1,16 @@
 import { afterAll, beforeEach, describe, expect, test } from "vitest";
-import { dbClient } from "../db-client";
-import { Faction, RankingType } from "./fixtures";
-import { generateRankings } from "./rankings/generate-rankings";
-import { addTestTourneyData } from "./test-helpers/test-tourney-data";
+import { dbClient } from "../../db-client";
+import { generateRankings } from "../rankings/generate-player-rankings";
+import { addTestDataToDb } from "../test-helpers/add-test-data-to-db";
 
 beforeEach(async () => {
-  await dbClient.deleteFrom("ranking_snapshot_event").execute();
-  await dbClient.deleteFrom("ranking_snapshot_batch").execute();
-  await dbClient.deleteFrom("ranking_snapshot").execute();
-  await dbClient.deleteFrom("result").execute();
-  await dbClient.deleteFrom("tourney").execute();
-  await dbClient.deleteFrom("player").execute();
-  await addTestTourneyData(dbClient);
+  await addTestDataToDb(dbClient);
 });
 
-afterAll(async () => {
-  // Any teardown after all tests run
-});
-
-describe.sequential("testing with containers exciting", () => {
-  test.sequential("Faction enum has correct values", async () => {
-    for (const code of Object.values(Faction)) {
-      expect(typeof code).toBe("string");
-      const dbFaction = await dbClient
-        .selectFrom("faction")
-        .where("name_code", "=", code)
-        .select("name_code")
-        .execute();
-      expect(
-        dbFaction.length,
-        `Faction ${code} should exist in the database`
-      ).toBe(1);
-    }
-  });
-
-  test.sequential("RankingType enum has correct values", async () => {
-    for (const code of Object.values(RankingType)) {
-      expect(typeof code).toBe("string");
-      const dbRankingType = await dbClient
-        .selectFrom("ranking_snapshot_type")
-        .where("code", "=", code)
-        .select("code")
-        .execute();
-      expect(
-        dbRankingType.length,
-        `RankingType ${code} should exist in the database`
-      ).toBe(1);
-    }
-  });
-
+describe.sequential("generating player rankings", () => {
   test.sequential("throws for invalid rankings type", async () => {
     await expect(
-      generateRankings(dbClient, "NOT_A_REAL_TYPE")
+      generateRankings(dbClient, "NOT_A_REAL_TYPE"),
     ).rejects.toThrowError("Invalid rankings type");
   });
 
@@ -223,7 +182,7 @@ describe.sequential("testing with containers exciting", () => {
       .innerJoin(
         "ranking_snapshot_batch",
         "ranking_snapshot_event.batch_id",
-        "ranking_snapshot_batch.id"
+        "ranking_snapshot_batch.id",
       )
       .innerJoin("player", "ranking_snapshot_event.player_id", "player.id")
       .where("ranking_snapshot_batch.id", "=", snapshotBatch[0]!.id)
@@ -239,7 +198,7 @@ describe.sequential("testing with containers exciting", () => {
       expect.arrayContaining([
         expect.objectContaining({ tourney_id: 2 }), // from tourney3
         expect.objectContaining({ tourney_id: 3 }), // from tourney2
-      ])
+      ]),
     );
 
     // then bob (who has same points for two)
