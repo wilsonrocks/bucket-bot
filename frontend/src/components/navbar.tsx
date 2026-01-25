@@ -2,6 +2,7 @@ import { Button, Divider, Stack, Text } from '@mantine/core'
 import { AppNavLink } from './app-nav-link'
 import {
   useFetchDiscordUsersMutation,
+  useGenerateFactionRankingsMutation,
   useGenerateRankingsSnapshotMutation,
   useHasRole,
   usePostRankingsToDiscordMutation,
@@ -18,6 +19,7 @@ import { modals } from '@mantine/modals'
 export const Navbar = () => {
   const hasRole = useHasRole()
   const generateRankings = useGenerateRankingsSnapshotMutation()
+  const generateFactionRankings = useGenerateFactionRankingsMutation()
   const fetchDiscordUsers = useFetchDiscordUsersMutation()
   const postToDiscord = usePostRankingsToDiscordMutation()
 
@@ -32,6 +34,7 @@ export const Navbar = () => {
           <AppNavLink to={DiscordMappingRoute.path} label="Discord Mapping" />
           <AppNavLink to={VenuesRoute.path} label="Venue" />
           <AppNavLink to={BotChat.path} label="Bot Chat" />
+
           <Button
             disabled={generateRankings.isPending}
             onClick={() => {
@@ -53,6 +56,29 @@ export const Navbar = () => {
             }}
           >
             Generate a rankings snapshot
+          </Button>
+
+          <Button
+            disabled={generateFactionRankings.isPending}
+            onClick={() => {
+              modals.openConfirmModal({
+                onConfirm: () => {
+                  generateFactionRankings.mutate()
+                },
+                title: 'Generate Faction Rankings',
+                children: (
+                  <div>
+                    Are you sure you want to generate faction rankings?
+                    Eventually this will be done automatically each week. You
+                    probably only need to do this if there's been a new event
+                    imported.
+                  </div>
+                ),
+                labels: { confirm: 'Generate', cancel: 'Cancel' },
+              })
+            }}
+          >
+            Generate Faction Rankings
           </Button>
 
           <Button

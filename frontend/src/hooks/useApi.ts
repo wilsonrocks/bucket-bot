@@ -724,3 +724,35 @@ export const usePostEventToDiscordMutation = () => {
   })
   return mutation
 }
+
+export const useGenerateFactionRankingsMutation = () => {
+  const auth = useAuth()
+
+  const mutation = useMutation({
+    mutationFn: async () => {
+      const url = `${import.meta.env.VITE_BACKEND_URL}/v1/faction-rankings`
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          ...auth!.headers, // is checked on use
+          'Content-Type': 'application/json',
+        },
+      })
+      if (!res.ok) {
+        notifications.show({
+          title: 'Error',
+          message: `Failed to generate faction rankings: ${res.statusText}`,
+          color: 'red',
+        })
+        throw new Error('Failed to generate faction rankings')
+      }
+      notifications.show({
+        title: 'Success',
+        message: 'Faction rankings generated successfully.',
+        color: 'green',
+      })
+      return res.json()
+    },
+  })
+  return mutation
+}

@@ -3,6 +3,18 @@ import { generateFactionRankings } from "../../../logic/rankings/generate-factio
 import { success } from "zod";
 
 export const getFactionRankings = async (ctx: Context) => {
+  const newestBatch = await ctx.state.db
+    .selectFrom("faction_snapshot_batch")
+    .select("id")
+    .orderBy("created_at", "desc")
+    .limit(1)
+    .executeTakeFirst();
+
+  if (!newestBatch) {
+    ctx.response.body = [];
+    return;
+  }
+
   const data = await ctx.state.db
     .selectFrom("faction_snapshot")
     .innerJoin(
@@ -20,6 +32,7 @@ export const getFactionRankings = async (ctx: Context) => {
       "faction_snapshot.declarations as declarations",
       "faction_snapshot.points_per_declaration as points_per_declaration",
     ])
+    .where("faction_snapshot.batch_id", "=", newestBatch.id)
     .orderBy("rank")
     .execute();
 
