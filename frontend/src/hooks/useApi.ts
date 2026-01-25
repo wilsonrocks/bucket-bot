@@ -793,3 +793,40 @@ export const useGetFactionRankings = () => {
   })
   return factionRankings
 }
+
+export const usePostFactionRankingsToDiscordMutation = () => {
+  const auth = useAuth()
+  const mutation = useMutation({
+    onSuccess: () => {
+      notifications.show({
+        title: 'Success',
+        message: 'Faction rankings have been posted to Discord successfully.',
+        color: 'green',
+      })
+    },
+    onError: (error: any) => {
+      console.error('Error posting faction rankings to Discord:', error)
+      notifications.show({
+        title: 'Error',
+        message: `Failed to post faction rankings to Discord: ${error.message || 'Unknown error'}`,
+        color: 'red',
+      })
+    },
+    mutationFn: async (live: boolean) => {
+      const url = `${import.meta.env.VITE_BACKEND_URL}/v1/post-faction-rankings${live ? '?live=true' : ''}`
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          ...auth!.headers, // is checked on use
+          'Content-Type': 'application/json',
+        },
+      })
+      if (!res.ok) {
+        throw new Error(
+          `Failed to post faction rankings to Discord: ${res.statusText}`,
+        )
+      }
+    },
+  })
+  return mutation
+}

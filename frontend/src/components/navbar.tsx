@@ -1,10 +1,11 @@
-import { Button, Divider, Stack, Text } from '@mantine/core'
+import { Button, Divider, Stack, Switch, Text } from '@mantine/core'
 import { AppNavLink } from './app-nav-link'
 import {
   useFetchDiscordUsersMutation,
   useGenerateFactionRankingsMutation,
   useGenerateRankingsSnapshotMutation,
   useHasRole,
+  usePostFactionRankingsToDiscordMutation,
   usePostRankingsToDiscordMutation,
 } from '@/hooks/useApi'
 import { Route as EventsSiteRoute } from '@/routes/site/events'
@@ -22,7 +23,9 @@ export const Navbar = () => {
   const generateRankings = useGenerateRankingsSnapshotMutation()
   const generateFactionRankings = useGenerateFactionRankingsMutation()
   const fetchDiscordUsers = useFetchDiscordUsersMutation()
-  const postToDiscord = usePostRankingsToDiscordMutation()
+  const postPlayerRankingsToDiscord = usePostRankingsToDiscordMutation()
+
+  const postFactionRankingsToDiscord = usePostFactionRankingsToDiscordMutation()
 
   return (
     <Stack>
@@ -87,6 +90,33 @@ export const Navbar = () => {
           <Button
             onClick={() => {
               modals.openConfirmModal({
+                title: 'Post Faction Rankings to Discord',
+                children: (
+                  <div>
+                    <Text>
+                      Are you sure you want to post faction rankings to Discord?
+                    </Text>
+
+                    <Text>
+                      This will ping the Event Enthusiast role and might be
+                      spammy if you do it a lot. Eventually this will be
+                      automated to be done every Monday morning.
+                    </Text>
+                  </div>
+                ),
+                onConfirm: () => {
+                  postFactionRankingsToDiscord.mutate(true)
+                },
+                labels: { confirm: 'Make it so', cancel: 'Wait...' },
+              })
+            }}
+          >
+            Post Faction Rankings
+          </Button>
+
+          <Button
+            onClick={() => {
+              modals.openConfirmModal({
                 title: 'Fetch Discord Users from the UK Discord server',
                 children: (
                   <div>
@@ -125,7 +155,7 @@ export const Navbar = () => {
                   </div>
                 ),
                 onConfirm: () => {
-                  postToDiscord.mutate()
+                  postPlayerRankingsToDiscord.mutate()
                 },
                 labels: { confirm: 'Make it so', cancel: 'Wait...' },
               })
