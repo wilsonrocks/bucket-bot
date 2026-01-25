@@ -13,6 +13,7 @@ import { Route as RankingsRoute } from '@/routes/site/rankings'
 import { Route as DiscordMappingRoute } from '@/routes/app/discord-mapping'
 import { Route as VenuesRoute } from '@/routes/app/_app-pages/venues'
 import { Route as BotChat } from '@/routes/app/_app-pages/bot-chat'
+import { Route as FactionRankingsRoute } from '@/routes/site/faction-rankings'
 
 import { modals } from '@mantine/modals'
 
@@ -26,7 +27,9 @@ export const Navbar = () => {
   return (
     <Stack>
       <AppNavLink to={EventsSiteRoute.path} label="Events" />
-      <AppNavLink to={RankingsRoute.path} label="Rankings" />
+      <AppNavLink to={RankingsRoute.path} label="Player Rankings" />
+      <AppNavLink to={FactionRankingsRoute.path} label="Faction Rankings" />
+
       {hasRole && (
         <>
           <Divider />

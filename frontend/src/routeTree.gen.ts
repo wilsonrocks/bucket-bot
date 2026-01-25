@@ -13,6 +13,7 @@ import { Route as LoggedInRouteImport } from './routes/logged-in'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app/index'
 import { Route as SiteRankingsRouteImport } from './routes/site/rankings'
+import { Route as SiteFactionRankingsRouteImport } from './routes/site/faction-rankings'
 import { Route as SiteEventsRouteImport } from './routes/site/events'
 import { Route as DemoTanstackQueryRouteImport } from './routes/demo/tanstack-query'
 import { Route as AppDiscordMappingRouteImport } from './routes/app/discord-mapping'
@@ -44,6 +45,11 @@ const AppIndexRoute = AppIndexRouteImport.update({
 const SiteRankingsRoute = SiteRankingsRouteImport.update({
   id: '/site/rankings',
   path: '/site/rankings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SiteFactionRankingsRoute = SiteFactionRankingsRouteImport.update({
+  id: '/site/faction-rankings',
+  path: '/site/faction-rankings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SiteEventsRoute = SiteEventsRouteImport.update({
@@ -115,6 +121,7 @@ export interface FileRoutesByFullPath {
   '/app/discord-mapping': typeof AppDiscordMappingRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/site/events': typeof SiteEventsRoute
+  '/site/faction-rankings': typeof SiteFactionRankingsRoute
   '/site/rankings': typeof SiteRankingsRoute
   '/app': typeof AppIndexRoute
   '/app/bot-chat': typeof AppAppPagesBotChatRoute
@@ -133,6 +140,7 @@ export interface FileRoutesByTo {
   '/app/discord-mapping': typeof AppDiscordMappingRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/site/events': typeof SiteEventsRoute
+  '/site/faction-rankings': typeof SiteFactionRankingsRoute
   '/site/rankings': typeof SiteRankingsRoute
   '/app': typeof AppIndexRoute
   '/app/bot-chat': typeof AppAppPagesBotChatRoute
@@ -152,6 +160,7 @@ export interface FileRoutesById {
   '/app/discord-mapping': typeof AppDiscordMappingRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/site/events': typeof SiteEventsRoute
+  '/site/faction-rankings': typeof SiteFactionRankingsRoute
   '/site/rankings': typeof SiteRankingsRoute
   '/app/': typeof AppIndexRoute
   '/app/_app-pages/bot-chat': typeof AppAppPagesBotChatRoute
@@ -172,6 +181,7 @@ export interface FileRouteTypes {
     | '/app/discord-mapping'
     | '/demo/tanstack-query'
     | '/site/events'
+    | '/site/faction-rankings'
     | '/site/rankings'
     | '/app'
     | '/app/bot-chat'
@@ -190,6 +200,7 @@ export interface FileRouteTypes {
     | '/app/discord-mapping'
     | '/demo/tanstack-query'
     | '/site/events'
+    | '/site/faction-rankings'
     | '/site/rankings'
     | '/app'
     | '/app/bot-chat'
@@ -208,6 +219,7 @@ export interface FileRouteTypes {
     | '/app/discord-mapping'
     | '/demo/tanstack-query'
     | '/site/events'
+    | '/site/faction-rankings'
     | '/site/rankings'
     | '/app/'
     | '/app/_app-pages/bot-chat'
@@ -227,6 +239,7 @@ export interface RootRouteChildren {
   AppDiscordMappingRoute: typeof AppDiscordMappingRoute
   DemoTanstackQueryRoute: typeof DemoTanstackQueryRoute
   SiteEventsRoute: typeof SiteEventsRoute
+  SiteFactionRankingsRoute: typeof SiteFactionRankingsRoute
   SiteRankingsRoute: typeof SiteRankingsRoute
   AppIndexRoute: typeof AppIndexRoute
   AppAppPagesBotChatRoute: typeof AppAppPagesBotChatRoute
@@ -268,6 +281,13 @@ declare module '@tanstack/react-router' {
       path: '/site/rankings'
       fullPath: '/site/rankings'
       preLoaderRoute: typeof SiteRankingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/site/faction-rankings': {
+      id: '/site/faction-rankings'
+      path: '/site/faction-rankings'
+      fullPath: '/site/faction-rankings'
+      preLoaderRoute: typeof SiteFactionRankingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/site/events': {
@@ -363,6 +383,7 @@ const rootRouteChildren: RootRouteChildren = {
   AppDiscordMappingRoute: AppDiscordMappingRoute,
   DemoTanstackQueryRoute: DemoTanstackQueryRoute,
   SiteEventsRoute: SiteEventsRoute,
+  SiteFactionRankingsRoute: SiteFactionRankingsRoute,
   SiteRankingsRoute: SiteRankingsRoute,
   AppIndexRoute: AppIndexRoute,
   AppAppPagesBotChatRoute: AppAppPagesBotChatRoute,

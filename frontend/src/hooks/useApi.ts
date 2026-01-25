@@ -729,6 +729,17 @@ export const useGenerateFactionRankingsMutation = () => {
   const auth = useAuth()
 
   const mutation = useMutation({
+    onSuccess: () => {
+      notifications.show({
+        title: 'Success',
+        message: 'Faction rankings generated successfully.',
+        color: 'green',
+      })
+      const queryClient = useQueryClient()
+      queryClient.invalidateQueries({
+        queryKey: ['faction-rankings'],
+      })
+    },
     mutationFn: async () => {
       const url = `${import.meta.env.VITE_BACKEND_URL}/v1/faction-rankings`
       const res = await fetch(url, {
@@ -746,13 +757,39 @@ export const useGenerateFactionRankingsMutation = () => {
         })
         throw new Error('Failed to generate faction rankings')
       }
-      notifications.show({
-        title: 'Success',
-        message: 'Faction rankings generated successfully.',
-        color: 'green',
-      })
       return res.json()
     },
   })
   return mutation
+}
+
+export const useGetFactionRankings = () => {
+  const factionRankings = useQuery({
+    queryKey: ['faction-rankings'],
+    queryFn: async (): Promise<
+      Array<{
+        snapshot_date: string
+        faction_name: string
+        rank: number
+        faction_code: string
+        total_points: number
+        declarations: number
+        points_per_declaration: number
+        hex_code: string
+      }>
+    > => {
+      const url = `${import.meta.env.VITE_BACKEND_URL}/v1/faction-rankings`
+      const res = await fetch(url, {})
+      if (!res.ok) {
+        notifications.show({
+          title: 'Error',
+          message: `Failed to fetch faction rankings: ${res.statusText}`,
+          color: 'red',
+        })
+        throw new Error('Failed to fetch faction rankings')
+      }
+      return res.json()
+    },
+  })
+  return factionRankings
 }

@@ -31,6 +31,7 @@ export const getFactionRankings = async (ctx: Context) => {
       "faction_snapshot.total_points as total_points",
       "faction_snapshot.declarations as declarations",
       "faction_snapshot.points_per_declaration as points_per_declaration",
+      "faction.hex_code as hex_code",
     ])
     .where("faction_snapshot.batch_id", "=", newestBatch.id)
     .orderBy("rank")
