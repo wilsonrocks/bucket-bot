@@ -47,6 +47,10 @@ export class InfraStack extends cdk.Stack {
       throw new Error("DISCORD_TEST_CHANNEL_ID env var is not set");
     }
 
+    if (!process.env.DISCORD_FACTION_CHANNEL_ID) {
+      throw new Error("DISCORD_FACTION_CHANNEL_ID env var is not set");
+    }
+
     const backendLambda = new lambda.Function(this, "BucketBotHandler", {
       code: lambda.Code.fromAsset("../backend/dist"),
       handler: "handler.handler",
@@ -63,6 +67,7 @@ export class InfraStack extends cdk.Stack {
         NODE_EXTRA_CA_CERTS: "/var/task/certs/ca.pem", // make sure this is copied across
         DISCORD_EVENTS_CHANNEL_ID: process.env.PROD_DISCORD_EVENTS_CHANNEL_ID,
         DISCORD_TEST_CHANNEL_ID: process.env.DISCORD_TEST_CHANNEL_ID,
+        DISCORD_FACTION_CHANNEL_ID: process.env.DISCORD_FACTION_CHANNEL_ID,
       },
     });
 

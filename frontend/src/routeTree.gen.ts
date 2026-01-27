@@ -20,6 +20,7 @@ import { Route as AppDiscordMappingRouteImport } from './routes/app/discord-mapp
 import { Route as SitePlayerIdRouteImport } from './routes/site/player.$id'
 import { Route as SiteEventIdRouteImport } from './routes/site/event.$id'
 import { Route as AppAppPagesVenuesRouteImport } from './routes/app/_app-pages/venues'
+import { Route as AppAppPagesImportBotRouteImport } from './routes/app/_app-pages/import-bot'
 import { Route as AppAppPagesBotChatRouteImport } from './routes/app/_app-pages/bot-chat'
 import { Route as AppAppPagesEventsIndexRouteImport } from './routes/app/_app-pages/events/index'
 import { Route as AppAppPagesEventsNewManualRouteImport } from './routes/app/_app-pages/events/new-manual'
@@ -82,6 +83,11 @@ const AppAppPagesVenuesRoute = AppAppPagesVenuesRouteImport.update({
   path: '/app/venues',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppAppPagesImportBotRoute = AppAppPagesImportBotRouteImport.update({
+  id: '/app/_app-pages/import-bot',
+  path: '/app/import-bot',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppAppPagesBotChatRoute = AppAppPagesBotChatRouteImport.update({
   id: '/app/_app-pages/bot-chat',
   path: '/app/bot-chat',
@@ -125,6 +131,7 @@ export interface FileRoutesByFullPath {
   '/site/rankings': typeof SiteRankingsRoute
   '/app': typeof AppIndexRoute
   '/app/bot-chat': typeof AppAppPagesBotChatRoute
+  '/app/import-bot': typeof AppAppPagesImportBotRoute
   '/app/venues': typeof AppAppPagesVenuesRoute
   '/site/event/$id': typeof SiteEventIdRoute
   '/site/player/$id': typeof SitePlayerIdRoute
@@ -144,6 +151,7 @@ export interface FileRoutesByTo {
   '/site/rankings': typeof SiteRankingsRoute
   '/app': typeof AppIndexRoute
   '/app/bot-chat': typeof AppAppPagesBotChatRoute
+  '/app/import-bot': typeof AppAppPagesImportBotRoute
   '/app/venues': typeof AppAppPagesVenuesRoute
   '/site/event/$id': typeof SiteEventIdRoute
   '/site/player/$id': typeof SitePlayerIdRoute
@@ -164,6 +172,7 @@ export interface FileRoutesById {
   '/site/rankings': typeof SiteRankingsRoute
   '/app/': typeof AppIndexRoute
   '/app/_app-pages/bot-chat': typeof AppAppPagesBotChatRoute
+  '/app/_app-pages/import-bot': typeof AppAppPagesImportBotRoute
   '/app/_app-pages/venues': typeof AppAppPagesVenuesRoute
   '/site/event/$id': typeof SiteEventIdRoute
   '/site/player/$id': typeof SitePlayerIdRoute
@@ -185,6 +194,7 @@ export interface FileRouteTypes {
     | '/site/rankings'
     | '/app'
     | '/app/bot-chat'
+    | '/app/import-bot'
     | '/app/venues'
     | '/site/event/$id'
     | '/site/player/$id'
@@ -204,6 +214,7 @@ export interface FileRouteTypes {
     | '/site/rankings'
     | '/app'
     | '/app/bot-chat'
+    | '/app/import-bot'
     | '/app/venues'
     | '/site/event/$id'
     | '/site/player/$id'
@@ -223,6 +234,7 @@ export interface FileRouteTypes {
     | '/site/rankings'
     | '/app/'
     | '/app/_app-pages/bot-chat'
+    | '/app/_app-pages/import-bot'
     | '/app/_app-pages/venues'
     | '/site/event/$id'
     | '/site/player/$id'
@@ -243,6 +255,7 @@ export interface RootRouteChildren {
   SiteRankingsRoute: typeof SiteRankingsRoute
   AppIndexRoute: typeof AppIndexRoute
   AppAppPagesBotChatRoute: typeof AppAppPagesBotChatRoute
+  AppAppPagesImportBotRoute: typeof AppAppPagesImportBotRoute
   AppAppPagesVenuesRoute: typeof AppAppPagesVenuesRoute
   SiteEventIdRoute: typeof SiteEventIdRoute
   SitePlayerIdRoute: typeof SitePlayerIdRoute
@@ -332,6 +345,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAppPagesVenuesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/_app-pages/import-bot': {
+      id: '/app/_app-pages/import-bot'
+      path: '/app/import-bot'
+      fullPath: '/app/import-bot'
+      preLoaderRoute: typeof AppAppPagesImportBotRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/app/_app-pages/bot-chat': {
       id: '/app/_app-pages/bot-chat'
       path: '/app/bot-chat'
@@ -387,6 +407,7 @@ const rootRouteChildren: RootRouteChildren = {
   SiteRankingsRoute: SiteRankingsRoute,
   AppIndexRoute: AppIndexRoute,
   AppAppPagesBotChatRoute: AppAppPagesBotChatRoute,
+  AppAppPagesImportBotRoute: AppAppPagesImportBotRoute,
   AppAppPagesVenuesRoute: AppAppPagesVenuesRoute,
   SiteEventIdRoute: SiteEventIdRoute,
   SitePlayerIdRoute: SitePlayerIdRoute,

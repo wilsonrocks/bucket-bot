@@ -15,7 +15,7 @@ import { Route as DiscordMappingRoute } from '@/routes/app/discord-mapping'
 import { Route as VenuesRoute } from '@/routes/app/_app-pages/venues'
 import { Route as BotChat } from '@/routes/app/_app-pages/bot-chat'
 import { Route as FactionRankingsRoute } from '@/routes/site/faction-rankings'
-
+import { Route as ImportBotRoute } from '@/routes/app/_app-pages/import-bot'
 import { modals } from '@mantine/modals'
 
 export const Navbar = () => {
@@ -40,7 +40,7 @@ export const Navbar = () => {
           <AppNavLink to={DiscordMappingRoute.path} label="Discord Mapping" />
           <AppNavLink to={VenuesRoute.path} label="Venue" />
           <AppNavLink to={BotChat.path} label="Bot Chat" />
-
+          <AppNavLink to={ImportBotRoute.path} label="Import BOT event" />
           <Button
             disabled={generateRankings.isPending}
             onClick={() => {

@@ -112,7 +112,7 @@ export const postFactionRankingsHandler = async (ctx: Context) => {
   }
 
   const introEmbed = new EmbedBuilder()
-    .setTitle(`Faction Rankings ${snapshot.map((f) => f.emoji).join("")}`)
+    .setTitle(`Faction Rankings`)
     .setDescription(
       `***BEEP BOOP!*** I have eaten the delicious data from all the UK Malifaux rankings and here some yummy faction standings for you to enjoy!\n<@&${EVENT_ENTHUSIAST_ROLE_ID}>`,
     );
