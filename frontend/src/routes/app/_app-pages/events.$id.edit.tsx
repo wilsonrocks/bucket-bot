@@ -1,3 +1,4 @@
+import { EventEditPlayerList } from '@/components/event-edit-player-list'
 import { Link } from '@/components/link'
 
 import {
@@ -61,8 +62,6 @@ function RouteComponent() {
       categories: [{ name: 'Totem', winners: [] }],
     },
   })
-
-  console.log(detailsForm.values)
 
   // TODO implement this, it's being done manually at the moment
   // const bestPaintedForm = useForm<{
@@ -333,14 +332,9 @@ function RouteComponent() {
         </Tabs.Panel>
         <Tabs.Panel value="players">
           <Title order={3} mb="md">
-            Best Painted
+            Players
           </Title>
-          <Alert title="Coming Soon">
-            This is a work in progress. Assuming Longshanks and Bag of Tools
-            importing works okay we might not need an edit form here, unless
-            people run tournaments manually on paper... which they are perfectly
-            fine doing.
-          </Alert>
+          <EventEditPlayerList players={tourneyDetail.data.players} />
         </Tabs.Panel>
 
         <Tabs.Panel value="discord">
