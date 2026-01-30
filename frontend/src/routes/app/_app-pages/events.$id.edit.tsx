@@ -108,8 +108,6 @@ function RouteComponent() {
     return <div>Loading...</div>
   }
 
-  console.log(discordUsers.data)
-
   // TODO can these tab panels be their own components?
 
   return (

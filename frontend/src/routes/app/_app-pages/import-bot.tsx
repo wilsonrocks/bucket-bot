@@ -1,5 +1,5 @@
 import { BookmarkletCode } from '@/components/bookmarklet-code'
-import { useGetPlayers, useGetVenues } from '@/hooks/useApi'
+import { useGetAllDiscordUsers, useGetVenues } from '@/hooks/useApi'
 import {
   Box,
   Button,
@@ -15,7 +15,7 @@ import {
 } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { createFileRoute } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import z from 'zod'
 
 export const Route = createFileRoute('/app/_app-pages/import-bot')({
@@ -56,7 +56,7 @@ function RouteComponent() {
 
   const detailsForm = useForm<{
     eventName: string
-    organiserId: string
+    organiserDiscordId: string
     venueId: string
     rounds: number | null
     days: number | null
@@ -64,15 +64,24 @@ function RouteComponent() {
   }>({
     initialValues: {
       eventName: '',
-      organiserId: '',
+      organiserDiscordId: '',
       venueId: '',
       rounds: 3,
       days: 1,
       tier: 'Event',
     },
   })
-  const playerOptions = useGetPlayers()
   const venues = useGetVenues()
+  const discordUsers = useGetAllDiscordUsers()
+
+  useEffect(() => {
+    if (botJson) {
+      detailsForm.setFieldValue('eventName', botJson.eventName)
+    }
+  }, [status])
+
+  if (discordUsers.error) return <div>Error loading discord users</div>
+  if (!discordUsers.data) return <div>Loading...</div>
 
   if (status === 'AWAITING_DATA')
     // TODO split this into different components and pass state through with tanstack router
@@ -136,7 +145,7 @@ function RouteComponent() {
 
             <form
               onSubmit={detailsForm.onSubmit((values) => {
-                console.log({ tournament: values, results: botJson })
+                console.log({ ...values, results: botJson })
               })}
             >
               <TextInput
@@ -147,13 +156,14 @@ function RouteComponent() {
               <Select
                 searchable
                 label="Organiser"
-                data={
-                  playerOptions.data?.map((player) => ({
-                    value: player.id.toString(),
-                    label: player.name,
-                  })) ?? []
-                }
-                {...detailsForm.getInputProps('organiserId')}
+                data={discordUsers.data.map((user) => ({
+                  value: String(user.discord_user_id),
+                  label:
+                    user.name ||
+                    user.discord_display_name ||
+                    user.discord_username,
+                }))}
+                {...detailsForm.getInputProps('organiserDiscordId')}
               />
               <Select
                 label="Venue"
@@ -173,13 +183,7 @@ function RouteComponent() {
                 label="Number of Days"
                 {...detailsForm.getInputProps('days')}
               />
-              <Button
-                type="submit"
-                mt="md"
-                onClick={() => {
-                  console.log(detailsForm.values)
-                }}
-              >
+              <Button type="submit" mt="md">
                 Create Event
               </Button>
             </form>
