@@ -7,7 +7,7 @@ beforeEach(async () => {
   await addTestDataToDb(dbClient);
 });
 
-describe.sequential("Faction Rankings generation", () => {
+describe("Faction Rankings generation", () => {
   test("Generates faction rankings correctly", async () => {
     await generateFactionRankings(dbClient);
 

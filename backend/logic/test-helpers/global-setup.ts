@@ -2,33 +2,24 @@ import {
   PostgreSqlContainer,
   StartedPostgreSqlContainer,
 } from "@testcontainers/postgresql";
-import { Flyway } from "node-flyway";
+
+import { spawnSync } from "node:child_process";
 
 let container: StartedPostgreSqlContainer | undefined;
 
 export default async function setup() {
   if (container) return container;
 
-  container = await new PostgreSqlContainer("postgres:15")
+  console.log("Starting PostgreSQL test container...");
+  container = await new PostgreSqlContainer("postgis/postgis:17-3.5")
     .withDatabase("testdb")
     .withUsername("test")
     .withPassword("test")
     .start();
 
-  const flyway = new Flyway({
-    url: `jdbc:postgresql://${container.getHost()}:${container.getPort()}/${container.getDatabase()}`,
-    user: container.getUsername(),
-    password: container.getPassword(),
-    migrationLocations: ["filesystem:../db/migrations"],
-  });
-
-  const flywayResponse = await flyway.migrate();
-
-  if (!flywayResponse.success) {
-    throw new Error(
-      `Database migration failed, ${flywayResponse.error?.message}`,
-    );
-  }
+  const jdbcUrl = `jdbc:postgresql://${container.getHost()}:${container.getPort()}/${container.getDatabase()}`;
+  console.log("Running Flyway migrations...");
+  await runFlyway(jdbcUrl, container.getUsername(), container.getPassword());
 
   process.env.DATABASE_URL = container.getConnectionUri();
   process.env.DB_HOST = container.getHost();
@@ -43,4 +34,27 @@ export default async function setup() {
       container = undefined;
     }
   };
+}
+
+async function runFlyway(jdbcUrl: string, user: string, password: string) {
+  return new Promise<void>((resolve, reject) => {
+    const flywayResult = spawnSync(
+      "flyway",
+      [
+        "migrate",
+        `-url=${jdbcUrl}`,
+        `-user=${user}`,
+        `-password=${password}`,
+        "-locations=filesystem:./migrations",
+      ],
+      { stdio: "inherit", cwd: "../db" },
+    );
+    if (flywayResult.status === 0) {
+      resolve();
+      return;
+    } else if (flywayResult.error) {
+      reject(flywayResult.error);
+      return;
+    }
+  });
 }

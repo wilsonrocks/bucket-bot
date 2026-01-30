@@ -7,8 +7,8 @@ beforeEach(async () => {
   await addTestDataToDb(dbClient);
 });
 
-describe.sequential("generating player rankings", () => {
-  test.sequential("throws for invalid rankings type", async () => {
+describe("generating player rankings", () => {
+  test("throws for invalid rankings type", async () => {
     await expect(
       generateRankings(dbClient, "NOT_A_REAL_TYPE"),
     ).rejects.toThrowError("Invalid rankings type");
