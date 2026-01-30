@@ -1,10 +1,8 @@
 import { Context } from "koa";
-import { parseHTML } from "linkedom";
 import z from "zod";
-import { calculatePoints, maxPoints } from "../../../logic/points";
 import { extractPlayersFromLongshanksHTML } from "../../../logic/longshanks/extract-longshanks-players";
 import { extractTourneyFromLongshanksHtml } from "../../../logic/longshanks/extract-longshanks-tourney-data";
-import { allTourneys } from "./tourney";
+import { calculatePoints, maxPoints } from "../../../logic/points";
 
 const otherDataValidator = z.object({
   longshanksId: z.string(),
@@ -64,6 +62,18 @@ export const newLongshanksEvent = async (ctx: Context) => {
   await ctx.state.db.transaction().execute(async (trx) => {
     // first make the event
 
+    const alreadyExistingTourney = await trx
+      .selectFrom("tourney")
+      .where("longshanks_id", "=", parsedOtherData.longshanksId)
+      .select("id")
+      .executeTakeFirst();
+
+    if (alreadyExistingTourney) {
+      ctx.throw(
+        400,
+        `Tourney with longshanks id ${parsedOtherData.longshanksId} already exists with id ${alreadyExistingTourney.id}`,
+      );
+    }
     const tourney = await trx
       .insertInto("tourney")
       .values({
@@ -78,31 +88,56 @@ export const newLongshanksEvent = async (ctx: Context) => {
       .executeTakeFirstOrThrow();
 
     await Promise.all(
-      players.map(async (player) => {
-        // upsert each player
-        const faction_code = factionMap[player.faction];
+      players.map(async (longshanksPlayer) => {
+        // check faction is valid
+        const faction_code = factionMap[longshanksPlayer.faction];
         if (!faction_code) {
-          throw new Error(`Can't derive faction code for ${player.faction}`);
+          throw new Error(
+            `Can't derive faction code for ${longshanksPlayer.faction}`,
+          );
         }
-        const dbPlayer = await trx
-          .insertInto("player")
-          .values({
-            longshanks_id: player.longshanksId,
-            name: player.name,
-            longshanks_name: player.name,
-          })
-          .onConflict((oc) =>
-            oc
-              .column("longshanks_id")
-              .doUpdateSet({ longshanks_name: player.name })
-          )
-          .returning("id")
-          .executeTakeFirstOrThrow();
+
+        let dbPlayer;
+
+        // do we already have a longshanks player for this ID?
+        const dbPlayerIdentity = await trx
+          .selectFrom("player_identity")
+          .where("identity_provider_id", "=", "LONGSHANKS")
+          .where("external_id", "=", longshanksPlayer.longshanksId)
+          .selectAll()
+          .executeTakeFirst();
+
+        if (dbPlayerIdentity !== undefined) {
+          // yes so use it
+          dbPlayer = await trx
+            .selectFrom("player")
+            .where("id", "=", dbPlayerIdentity.player_id)
+            .selectAll()
+            .executeTakeFirstOrThrow();
+        } else {
+          // no so make one
+          dbPlayer = await trx
+            .insertInto("player")
+            .values({
+              name: longshanksPlayer.name,
+            })
+            .returningAll()
+            .executeTakeFirstOrThrow();
+
+          await trx
+            .insertInto("player_identity")
+            .values({
+              player_id: dbPlayer.id,
+              identity_provider_id: "LONGSHANKS",
+              external_id: longshanksPlayer.longshanksId,
+            })
+            .execute();
+        }
 
         const points = calculatePoints(
           players.length,
-          maxPoints("Local", Math.max(...players.map((x) => x.roundsPlayed))) // TODO not hard code to local
-        ).points[player.rank - 1];
+          maxPoints("Local", Math.max(...players.map((x) => x.roundsPlayed))), // TODO not hard code to local
+        ).points[longshanksPlayer.rank - 1];
 
         if (!points)
           ctx.throw(400, "Not enough players to award points/rankings");
@@ -112,14 +147,14 @@ export const newLongshanksEvent = async (ctx: Context) => {
           .values({
             tourney_id: tourney.id,
             player_id: dbPlayer.id,
-            place: player.rank,
+            place: longshanksPlayer.rank,
             faction_code,
             points,
-            rounds_played: player.roundsPlayed,
+            rounds_played: longshanksPlayer.roundsPlayed,
           })
           .execute();
         // then add player results
-      })
+      }),
     );
   });
 

@@ -1,10 +1,9 @@
 import { Context } from "koa";
+import { sql } from "kysely";
 import {
   UK_MALIFAUX_SERVER_ID,
   getDiscordClient,
 } from "../../../logic/discord-client";
-import { z } from "zod";
-import { sql } from "kysely";
 
 export const fetchAndStoreDiscordUserIds = async (ctx: Context) => {
   const guildId = UK_MALIFAUX_SERVER_ID;
@@ -30,7 +29,7 @@ export const fetchAndStoreDiscordUserIds = async (ctx: Context) => {
         discord_display_name: eb.ref("excluded.discord_display_name"),
         discord_avatar_url: eb.ref("excluded.discord_avatar_url"),
         discord_nickname: eb.ref("excluded.discord_nickname"),
-      }))
+      })),
     )
     .returningAll()
     .execute();
@@ -51,7 +50,7 @@ export const searchDiscordUsersByName = async (ctx: Context) => {
     .leftJoin("player", "discord_user.discord_user_id", "player.discord_id")
     .where("player.id", "is", null) // Exclude already linked users
     .where(
-      sql<boolean>`discord_user.discord_username % ${text} OR discord_display_name % ${text} OR discord_nickname % ${text}`
+      sql<boolean>`discord_user.discord_username % ${text} OR discord_display_name % ${text} OR discord_nickname % ${text}`,
     )
     .orderBy(
       sql<number>`GREATEST(
@@ -59,7 +58,7 @@ export const searchDiscordUsersByName = async (ctx: Context) => {
       similarity(discord_display_name, ${text}),
       similarity(discord_nickname, ${text})
     )`,
-      "desc"
+      "desc",
     )
     .execute();
 
@@ -72,12 +71,13 @@ export const playersWithNoDiscordId = async (ctx: Context) => {
     .innerJoin("result", "player.id", "result.player_id")
     .innerJoin("tourney", "result.tourney_id", "tourney.id")
     .innerJoin("faction", "result.faction_code", "faction.name_code")
+    .innerJoin("player_identity", "player.id", "player_identity.player_id")
     .where("discord_id", "is", null)
     .select([
       "player.id as player_id",
       "player.name as player_name",
       "player.longshanks_name",
-      "player.longshanks_id",
+      "player_identity.external_id as longshanks_id",
       "tourney.name as tourney_name",
       "result.place",
       "faction.name as faction_name",
