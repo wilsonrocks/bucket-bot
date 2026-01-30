@@ -9,8 +9,8 @@ import {
   Select,
   Table,
   Text,
-  Textarea,
   TextInput,
+  Textarea,
   Title,
 } from '@mantine/core'
 import { useForm } from '@mantine/form'
@@ -23,14 +23,19 @@ export const Route = createFileRoute('/app/_app-pages/import-bot')({
   staticData: { title: 'Import BOT Event' },
 })
 
-const resultValidator = z.object({
-  name: z.string(),
-  place: z.number().int(),
-  played: z.number().int(),
-  faction: z.string(),
+const newBotEventValidator = z.object({
+  eventName: z.string(),
+  eventId: z.string(),
+  dateString: z.string(),
+  results: z.array(
+    z.object({
+      name: z.string(),
+      place: z.number(),
+      played: z.number(),
+      faction: z.string(),
+    }),
+  ),
 })
-
-const pastedTextValidator = z.array(resultValidator)
 
 function RouteComponent() {
   const [status, setStatus] = useState<'AWAITING_DATA' | 'HAS_DATA'>(
@@ -38,15 +43,15 @@ function RouteComponent() {
   )
   const [pastedData, setPastedData] = useState<string>('')
 
-  let data: z.infer<typeof pastedTextValidator>
+  let botJson: z.infer<typeof newBotEventValidator> | null
   let isValid = false
   try {
     const json = JSON.parse(pastedData)
-    data = pastedTextValidator.parse(json)
+    botJson = newBotEventValidator.parse(json)
     isValid = true
   } catch {
     isValid = false
-    data = []
+    botJson = null
   }
 
   const detailsForm = useForm<{
@@ -104,8 +109,8 @@ function RouteComponent() {
           style={{ input: { fontFamily: 'monospace' } }}
           onChange={(event) => setPastedData(event.currentTarget.value)}
         />
-        {isValid
-          ? `Valid data ${data.length} results: ${data
+        {isValid && botJson !== null
+          ? `Valid data ${botJson.results.length} results: ${botJson.results
               .slice(0, 3)
               .map((d) => d.name)
               .join(', ')}...`
@@ -131,8 +136,7 @@ function RouteComponent() {
 
             <form
               onSubmit={detailsForm.onSubmit((values) => {
-                // TODO submit the data
-                console.log('Submitting', values, data)
+                console.log({ tournament: values, results: botJson })
               })}
             >
               <TextInput
@@ -169,7 +173,13 @@ function RouteComponent() {
                 label="Number of Days"
                 {...detailsForm.getInputProps('days')}
               />
-              <Button type="submit" mt="md">
+              <Button
+                type="submit"
+                mt="md"
+                onClick={() => {
+                  console.log(detailsForm.values)
+                }}
+              >
                 Create Event
               </Button>
             </form>
@@ -180,7 +190,13 @@ function RouteComponent() {
               title="Results"
               data={{
                 head: ['Place', 'Name', 'Played', 'Faction'],
-                body: data.map((d) => [d.place, d.name, d.played, d.faction]),
+                body:
+                  botJson?.results.map((d) => [
+                    d.place,
+                    d.name,
+                    d.played,
+                    d.faction,
+                  ]) ?? [],
               }}
             />
           </Grid.Col>
