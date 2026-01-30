@@ -61,7 +61,7 @@ export const detailTourney = async (ctx: Context) => {
     .innerJoin(
       "painting_winner",
       "painting_category.id",
-      "painting_winner.category_id"
+      "painting_winner.category_id",
     )
     .where("tourney_id", "=", ctx.params.id)
     .execute();
@@ -86,7 +86,7 @@ export const detailTourney = async (ctx: Context) => {
       });
       return acc;
     },
-    []
+    [],
   );
 
   ctx.response.body = {
@@ -128,7 +128,7 @@ export const getTourneysForPlayerHandler = async (ctx: Context) => {
 
 const tourneyUpdateValidator = z.object({
   id: z.number(),
-  organiserId: z.number().optional(),
+  organiserDiscordId: z.string().optional(),
   venueId: z.number().optional(),
   name: z.string(),
   rounds: z.number().int().min(1),
@@ -153,7 +153,7 @@ export const updateTourney = async (ctx: Context) => {
       .updateTable("tourney")
       .set({
         name: validatedParams.name,
-        organiser_id: validatedParams.organiserId || null,
+        organiser_discord_id: validatedParams.organiserDiscordId || null,
         venue_id: validatedParams.venueId || null,
         rounds: validatedParams.rounds,
         days: validatedParams.days,
@@ -177,13 +177,12 @@ export const postEventSummaryToDiscord = async (ctx: Context) => {
   const tourneyData = await ctx.state.db
     .selectFrom("tourney")
     .where("tourney.id", "=", tourneyId)
-    .innerJoin("player", "tourney.organiser_id", "player.id")
     .innerJoin("venue", "tourney.venue_id", "venue.id")
     .select([
       "tourney.name as tourneyName",
       "venue.name as venueName",
       "venue.town as venueTown",
-      "player.discord_id as organiserDiscordId",
+      "tourney.organiser_discord_id as organiserDiscordId",
       "tourney.date as tourneyDate",
     ])
     .executeTakeFirstOrThrow();
@@ -212,7 +211,7 @@ export const postEventSummaryToDiscord = async (ctx: Context) => {
       "r.faction_code",
       "r.points",
       sql<number>`ROW_NUMBER() OVER (PARTITION BY r.faction_code ORDER BY r.points DESC)`.as(
-        "rn"
+        "rn",
       ),
     ])
     .as("top_players");
@@ -235,7 +234,7 @@ export const postEventSummaryToDiscord = async (ctx: Context) => {
     .innerJoin(
       factionTotalsSubquery,
       "top_players.faction_code",
-      "faction_totals.faction_code"
+      "faction_totals.faction_code",
     )
     .innerJoin("player", "top_players.player_id", "player.id")
     .leftJoin("faction as f", "top_players.faction_code", "f.name_code")
@@ -281,7 +280,7 @@ export const postEventSummaryToDiscord = async (ctx: Context) => {
   
   I can confirm that it was delicious!
   
-  Shout out to <@${tourneyData.organiserDiscordId}> for organising it! ❤️ `
+  Shout out to <@${tourneyData.organiserDiscordId}> for organising it! ❤️ `,
     )
     .addFields(
       {
@@ -292,10 +291,10 @@ export const postEventSummaryToDiscord = async (ctx: Context) => {
               `#${r.place} - ${mentionIfPossible({
                 discord_user_id: r.discord_id,
                 name: r.playerName,
-              })} (${r.factionName}) - ${r.points.toFixed(2)} pts`
+              })} (${r.factionName}) - ${r.points.toFixed(2)} pts`,
           )
           .join("\n"),
-      }
+      },
       // { name: "Painting", value: "Painting stuff" }
     );
 
