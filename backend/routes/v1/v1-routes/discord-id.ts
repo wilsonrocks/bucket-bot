@@ -37,6 +37,17 @@ export const fetchAndStoreDiscordUserIds = async (ctx: Context) => {
   ctx.response.body = { updated: upserted.length };
 };
 
+export const getAllDiscordUsers = async (ctx: Context) => {
+  const users = await ctx.state.db
+    .selectFrom("discord_user")
+    .leftJoin("player", "player.discord_id", "discord_user.discord_user_id")
+    .selectAll()
+    .orderBy("discord_username", "asc")
+    .execute();
+
+  ctx.response.body = users;
+};
+
 export const searchDiscordUsersByName = async (ctx: Context) => {
   const { text } = ctx.query;
   if (typeof text !== "string" || text.trim() === "") {
@@ -47,8 +58,8 @@ export const searchDiscordUsersByName = async (ctx: Context) => {
   const candidates = await ctx.state.db
     .selectFrom("discord_user")
     .selectAll()
-    .leftJoin("player", "discord_user.discord_user_id", "player.discord_id")
-    .where("player.id", "is", null) // Exclude already linked users
+    // .leftJoin("player", "discord_user.discord_user_id", "player.discord_id")
+    // .where("player.id", "is", null) // Exclude already linked users
     .where(
       sql<boolean>`discord_user.discord_username % ${text} OR discord_display_name % ${text} OR discord_nickname % ${text}`,
     )

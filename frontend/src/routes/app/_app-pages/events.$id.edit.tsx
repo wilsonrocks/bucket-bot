@@ -2,7 +2,7 @@ import { EventEditPlayerList } from '@/components/event-edit-player-list'
 import { Link } from '@/components/link'
 
 import {
-  useGetPlayers,
+  useGetAllDiscordUsers,
   useGetTiers,
   useGetTourneyDetail,
   useGetVenues,
@@ -10,7 +10,6 @@ import {
   useUpdateTourneyMutation,
 } from '@/hooks/useApi'
 import {
-  ActionIcon,
   Alert,
   Button,
   Grid,
@@ -22,7 +21,6 @@ import {
   Title,
 } from '@mantine/core'
 import { useForm } from '@mantine/form'
-import { IconTrash } from '@tabler/icons-react'
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect } from 'react'
 import z from 'zod'
@@ -39,10 +37,10 @@ function RouteComponent() {
 
   const detailsForm = useForm<{
     eventName: string
-    organiserId: string
+    organiserDiscordId: string
     venueId: string
-    rounds: number | null
-    days: number | null
+    rounds: number
+    days: number
     tier: string
     categories: {
       name: string
@@ -54,7 +52,7 @@ function RouteComponent() {
   }>({
     initialValues: {
       eventName: '',
-      organiserId: '',
+      organiserDiscordId: '',
       venueId: '',
       rounds: 3,
       days: 1,
@@ -63,7 +61,7 @@ function RouteComponent() {
     },
   })
 
-  // TODO implement this, it's being done manually at the moment
+  // TODO implement this, it's being done manually at the momen
   // const bestPaintedForm = useForm<{
   //   categories: {
   //     name: string
@@ -84,25 +82,33 @@ function RouteComponent() {
     if (tourneyDetail.data) {
       detailsForm.setValues({
         eventName: tourneyDetail.data.tourney.name,
-        organiserId: tourneyDetail.data.tourney.organiser_id?.toString() || '',
+        organiserDiscordId:
+          tourneyDetail.data.tourney.organiser_discord_id || '',
         venueId: tourneyDetail.data.tourney.venue_id?.toString() || '',
-        rounds: tourneyDetail.data.tourney.rounds,
-        days: tourneyDetail.data.tourney.days,
+        rounds: tourneyDetail.data.tourney.rounds ?? undefined,
+        days: tourneyDetail.data.tourney.days ?? undefined,
         tier: tourneyDetail.data.tourney.tier_code,
       })
     }
   }, [tourneyDetail.isFetched])
 
-  const playerOptions = useGetPlayers()
+  const discordUsers = useGetAllDiscordUsers()
   const venues = useGetVenues()
 
   const tiers = useGetTiers()
   const updateTourney = useUpdateTourneyMutation()
   const postToDiscord = usePostEventToDiscordMutation()
 
-  if (!tourneyDetail.data) {
+  if (
+    !tourneyDetail.data ||
+    !tiers.data ||
+    !venues.data ||
+    !discordUsers.data
+  ) {
     return <div>Loading...</div>
   }
+
+  console.log(discordUsers.data)
 
   // TODO can these tab panels be their own components?
 
@@ -125,9 +131,7 @@ function RouteComponent() {
               onSubmit={detailsForm.onSubmit((values) => {
                 const payload = {
                   id,
-                  organiserId: values.organiserId
-                    ? Number(values.organiserId)
-                    : undefined,
+                  organiserDiscordId: values.organiserDiscordId,
                   venueId: values.venueId ? Number(values.venueId) : undefined,
                   name: values.eventName,
                   rounds: values.rounds,
@@ -152,12 +156,13 @@ function RouteComponent() {
                   <Select
                     searchable
                     label="Organiser"
-                    data={
-                      playerOptions.data?.map((player) => ({
-                        value: player.id.toString(),
-                        label: player.name,
-                      })) ?? []
-                    }
+                    data={discordUsers.data.map((user) => ({
+                      value: String(user.discord_user_id),
+                      label:
+                        user.name ||
+                        user.discord_display_name ||
+                        user.discord_username,
+                    }))}
                     {...detailsForm.getInputProps('organiserId')}
                   />
                 </Grid.Col>
@@ -165,12 +170,10 @@ function RouteComponent() {
                 <Grid.Col span={{ base: 12, sm: 4 }}>
                   <Select
                     label="Venue"
-                    data={
-                      venues.data?.map((venue) => ({
-                        value: venue.id.toString(),
-                        label: venue.name,
-                      })) ?? []
-                    }
+                    data={venues.data.map((venue) => ({
+                      value: venue.id.toString(),
+                      label: venue.name,
+                    }))}
                     {...detailsForm.getInputProps('venueId')}
                   />
                 </Grid.Col>
@@ -196,12 +199,10 @@ function RouteComponent() {
                 <Grid.Col span={{ base: 6, sm: 2 }}>
                   <Select
                     label="Tier"
-                    data={
-                      tiers.data?.map((tier) => ({
-                        value: tier.code,
-                        label: tier.name,
-                      })) ?? []
-                    }
+                    data={tiers.data.map((tier) => ({
+                      value: tier.code,
+                      label: tier.name,
+                    }))}
                     {...detailsForm.getInputProps('tier')}
                   />
                 </Grid.Col>
@@ -220,7 +221,7 @@ function RouteComponent() {
             This is a work in progress. For the moment speak to James about
             doing this manually in the database.
           </Alert>
-          {false && (
+          {/* {false && (
             <Paper p="md">
               {detailsForm.values.categories.map((category, catIndex) => (
                 <Paper key={catIndex} withBorder m="md" p="md">
@@ -328,7 +329,7 @@ function RouteComponent() {
                 </Grid>
               </Paper>
             </Paper>
-          )}
+          )} */}
         </Tabs.Panel>
         <Tabs.Panel value="players">
           <Title order={3} mb="md">

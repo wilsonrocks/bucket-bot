@@ -106,7 +106,7 @@ export const useGetTourneyDetail = (id: number) => {
         tier_code: string
         days: number | null
         rounds: number | null
-        organiser_id: number | null
+        organiser_discord_id: string | null
         venue_id: number | null
         discord_post_id: number | null
       }
@@ -633,16 +633,16 @@ export const useUpdateTourneyMutation = () => {
     },
     mutationFn: async (data: {
       id: number
-      organiserId?: number
+      organiserDiscordId?: string
       venueId?: number
       name: string
       rounds: number
       days: number
       tierCode: string
-      paintingCategories: {
-        name: string
-        winners: { playerId: number; model: string }[]
-      }[]
+      // paintingCategories: {
+      //   name: string
+      //   winners: { playerId: number; model: string }[]
+      // }[]
     }) => {
       const url = `${import.meta.env.VITE_BACKEND_URL}/v1/tourney`
       const res = await fetch(url, {
@@ -653,12 +653,12 @@ export const useUpdateTourneyMutation = () => {
         },
         body: JSON.stringify({
           id: data.id,
-          organiserId: data.organiserId,
+          organiserDiscordId: data.organiserDiscordId,
           venueId: data.venueId,
           name: data.name,
           rounds: data.rounds,
           days: data.days,
-          paintingCategories: data.paintingCategories,
+          // paintingCategories: data.paintingCategories,
           tierCode: data.tierCode,
         }),
       })
@@ -829,4 +829,40 @@ export const usePostFactionRankingsToDiscordMutation = () => {
     },
   })
   return mutation
+}
+
+export const useGetAllDiscordUsers = () => {
+  const auth = useAuth()
+  const allDiscordUsers = useQuery({
+    queryKey: ['all-discord-users'],
+    enabled: !!auth,
+
+    queryFn: async (): Promise<
+      {
+        discord_user_id: string
+        discord_display_name: string
+        discord_nickname: string
+        discord_avatar_url: string
+        created_at: string
+        discord_username: string
+        name: string | null
+        longshanks_name: string | null
+      }[]
+    > => {
+      const url = `${import.meta.env.VITE_BACKEND_URL}/v1/all-discord-users`
+      const res = await fetch(url, {
+        headers: auth!.headers, // is checked on enabled
+      })
+      if (!res.ok) {
+        notifications.show({
+          title: 'Error',
+          message: `Failed to fetch all discord users: ${res.statusText}`,
+          color: 'red',
+        })
+        throw new Error('Failed to fetch all discord users')
+      }
+      return res.json()
+    },
+  })
+  return allDiscordUsers
 }

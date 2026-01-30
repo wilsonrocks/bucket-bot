@@ -8,6 +8,7 @@ import koaJwt from "koa-jwt";
 import { botChatRouter } from "./v1-routes/bot-chat.js";
 import {
   fetchAndStoreDiscordUserIds,
+  getAllDiscordUsers,
   matchPlayerToDiscordUser,
   playersWithNoDiscordId,
   searchDiscordUsersByName,
@@ -151,6 +152,7 @@ v1Router.post("/create-venue", createVenueHandler);
 
 v1Router.post("/fetch-discord-user-ids", fetchAndStoreDiscordUserIds); // THIS is a weird hack because we in a lambda and this rate limits severely
 v1Router.get("/search-discord-users", searchDiscordUsersByName);
+v1Router.get("/all-discord-users", getAllDiscordUsers);
 v1Router.get("/players-with-no-discord-id", playersWithNoDiscordId);
 v1Router.post(
   "/match-player-to-discord-user/:playerId/:discordUserId",
