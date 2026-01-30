@@ -3,6 +3,8 @@
 set -euo pipefail
 : "${PROD_DATABASE_URL:?Error: PROD_DATABASE_URL is not set.}"
 : "${DATABASE_URL:?Error: DATABASE_URL is not set.}"
+: "${DISCORD_TEST_CHANNEL_ID:?Error: DISCORD_TEST_CHANNEL_ID is not set.}"
+
 
 echo "Wiping local database schema..."
 psql "$DATABASE_URL" -c "DROP SCHEMA public CASCADE;"
@@ -18,3 +20,6 @@ psql "$DATABASE_URL" -c "CREATE EXTENSION IF NOT EXISTS pg_trgm;"
 
 echo "Ensuring postgis extension exists..."
 psql "$DATABASE_URL" -c "CREATE EXTENSION IF NOT EXISTS postgis;"
+
+echo "Overwriting player channel IDs to use test channel ID..."
+psql "$DATABASE_URL" -c "UPDATE ranking_snapshot_type SET discord_channel_id = '$DISCORD_TEST_CHANNEL_ID';"
