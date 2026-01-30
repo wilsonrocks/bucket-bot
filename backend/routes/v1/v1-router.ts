@@ -5,7 +5,7 @@ import { newLongshanksEvent } from "./v1-routes/new-longshanks-event.js";
 import { hasRankingReporterRole } from "./v1-routes/roles.js";
 
 import koaJwt from "koa-jwt";
-import { botChatRouter } from "./v1-routes/bot-chat.js";
+import { botChatRouter } from "./v1-routes/discord-bot-chat.js";
 import {
   fetchAndStoreDiscordUserIds,
   getAllDiscordUsers,
