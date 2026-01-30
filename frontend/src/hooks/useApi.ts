@@ -1,8 +1,6 @@
+import { notifications } from '@mantine/notifications'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from './useAuth'
-import { notifications } from '@mantine/notifications'
-import type { newBotEventValidator } from '@/routes/app/_app-pages/import-bot'
-import type z from 'zod'
 
 export const useHasRole = () => {
   const auth = useAuth()
@@ -351,7 +349,6 @@ export const useFetchDiscordUsersMutation = () => {
 
 export const usePostRankingsToDiscordMutation = () => {
   const auth = useAuth()
-  const queryClient = useQueryClient()
   const mutation = useMutation({
     onSuccess: () => {
       notifications.show({
@@ -891,7 +888,22 @@ export const useCreateBotEventMutation = () => {
         color: 'red',
       })
     },
-    mutationFn: async (data: z.infer<typeof newBotEventValidator>) => {
+    mutationFn: async (data: {
+      eventId: string
+      eventName: string
+      organiserDiscordId: string
+      venueId: number | null
+      rounds: number | null
+      days: number | null
+      tier: string
+      dateString: string
+      results: Array<{
+        name: string
+        place: number
+        played: number
+        faction: string
+      }>
+    }) => {
       const url = `${import.meta.env.VITE_BACKEND_URL}/v1/bot-event`
       const res = await fetch(url, {
         method: 'POST',

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test } from "vitest";
 import { dbClient } from "../../db-client";
-import { Faction, RankingType } from "../fixtures";
+import { Faction, IdentityProvider, RankingType } from "../fixtures";
 import { addTestDataToDb } from "../test-helpers/add-test-data-to-db";
 
 beforeEach(async () => {
@@ -34,6 +34,21 @@ describe("Testing the typescript enum values are represented properly in the db"
       expect(
         dbRankingType.length,
         `RankingType ${code} should exist in the database`,
+      ).toBe(1);
+    }
+  });
+
+  test("IdentityProvider enum has correct values", async () => {
+    for (const providerType of Object.values(IdentityProvider)) {
+      expect(typeof providerType).toBe("string");
+      const dbIdentityProvider = await dbClient
+        .selectFrom("identity_provider")
+        .where("id", "=", providerType)
+        .select("id")
+        .execute();
+      expect(
+        dbIdentityProvider.length,
+        `IdentityProvider ${providerType} should exist in the database`,
       ).toBe(1);
     }
   });

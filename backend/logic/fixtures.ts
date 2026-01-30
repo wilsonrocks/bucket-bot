@@ -22,3 +22,8 @@ export enum RankingType {
   BEST_BAYOU = "BEST_BAYOU",
   BEST_EXPLORER = "BEST_EXPLORERS",
 }
+
+export enum IdentityProvider {
+  LONGSHANKS = "LONGSHANKS",
+  BOT = "BOT",
+}

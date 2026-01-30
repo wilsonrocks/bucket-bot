@@ -61,7 +61,7 @@ function RouteComponent() {
   const detailsForm = useForm<{
     eventName: string
     organiserDiscordId: string
-    venueId: string
+    venueId: number | null
     rounds: number | null
     days: number | null
     tier: string
@@ -69,7 +69,7 @@ function RouteComponent() {
     initialValues: {
       eventName: '',
       organiserDiscordId: '',
-      venueId: '',
+      venueId: null,
       rounds: 3,
       days: 1,
       tier: 'Event',
@@ -156,6 +156,7 @@ function RouteComponent() {
                     eventId: botJson.eventId,
                     dateString: botJson.dateString,
                     results: botJson.results,
+                    venueId: Number(values.venueId),
                   })
               })}
             >

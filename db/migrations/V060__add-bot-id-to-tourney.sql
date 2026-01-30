@@ -1,0 +1,2 @@
+ALTER TABLE tourney
+ADD COLUMN bot_id TEXT;

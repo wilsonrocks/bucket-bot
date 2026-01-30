@@ -60,7 +60,7 @@ export const newLongshanksEvent = async (ctx: Context) => {
   });
 
   await ctx.state.db.transaction().execute(async (trx) => {
-    // first make the event
+    // first check if it already exists
 
     const alreadyExistingTourney = await trx
       .selectFrom("tourney")
