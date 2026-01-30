@@ -2,14 +2,12 @@ import { Context } from "koa";
 import { z } from "zod";
 
 const newBotEventValidator = z.object({
-  tournament: z.object({
-    eventName: z.string(),
-    organiserId: z.string(),
-    venueId: z.string(),
-    rounds: z.number(),
-    days: z.number(),
-    tier: z.string(),
-  }),
+  eventName: z.string(),
+  organiserDiscordId: z.string(),
+  venueId: z.string(),
+  rounds: z.number(),
+  days: z.number(),
+  tier: z.string(),
   results: z.array(
     z.object({
       name: z.string(),
@@ -20,4 +18,17 @@ const newBotEventValidator = z.object({
   ),
 });
 
-export const newBotEventHandler = async (context: Context) => {};
+export const newBotEventHandler = async (ctx: Context) => {
+  let parsedData;
+  try {
+    const body = ctx.request.body;
+    parsedData = newBotEventValidator.parse(body);
+  } catch (err) {
+    ctx.throw(400, `Invalid request body ${err}`);
+  }
+
+  ctx.response.body = {
+    message: "BOT event received successfully",
+    data: parsedData,
+  };
+};

@@ -1,5 +1,9 @@
 import { BookmarkletCode } from '@/components/bookmarklet-code'
-import { useGetAllDiscordUsers, useGetVenues } from '@/hooks/useApi'
+import {
+  useCreateBotEventMutation,
+  useGetAllDiscordUsers,
+  useGetVenues,
+} from '@/hooks/useApi'
 import {
   Box,
   Button,
@@ -23,7 +27,7 @@ export const Route = createFileRoute('/app/_app-pages/import-bot')({
   staticData: { title: 'Import BOT Event' },
 })
 
-const newBotEventValidator = z.object({
+export const newBotEventValidator = z.object({
   eventName: z.string(),
   eventId: z.string(),
   dateString: z.string(),
@@ -73,6 +77,7 @@ function RouteComponent() {
   })
   const venues = useGetVenues()
   const discordUsers = useGetAllDiscordUsers()
+  const createBotEventMutation = useCreateBotEventMutation()
 
   useEffect(() => {
     if (botJson) {
@@ -145,7 +150,13 @@ function RouteComponent() {
 
             <form
               onSubmit={detailsForm.onSubmit((values) => {
-                console.log({ ...values, results: botJson })
+                if (botJson !== null)
+                  createBotEventMutation.mutate({
+                    ...values,
+                    eventId: botJson.eventId,
+                    dateString: botJson.dateString,
+                    results: botJson.results,
+                  })
               })}
             >
               <TextInput

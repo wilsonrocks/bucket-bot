@@ -20,10 +20,11 @@ import {
   postFactionRankingsHandler,
 } from "./v1-routes/faction-rankings";
 import { generateRankingsHandler } from "./v1-routes/generate-rankings";
+import { newBotEventHandler } from "./v1-routes/new-bot-event";
 import { getPlayerById, getPlayers } from "./v1-routes/players";
 import { rankingTypesHandler } from "./v1-routes/ranking-types";
-import { rankingsPlayerHandler } from "./v1-routes/rankings-player";
 import { rankingsHandler } from "./v1-routes/rankings";
+import { rankingsPlayerHandler } from "./v1-routes/rankings-player";
 import { getAllTiers } from "./v1-routes/tiers";
 import {
   allTourneys,
@@ -145,7 +146,7 @@ v1Router.get("/faction-rankings", getFactionRankings);
 v1Router.use(koaJwt({ secret: process.env.JWT_SECRET! }));
 
 v1Router.post("/longshanks-event/:id", newLongshanksEvent);
-v1Router.post("/bot-event/:botId", async (ctx) => {});
+v1Router.post("/bot-event", newBotEventHandler);
 
 v1Router.get("/has-role", hasRankingReporterRole);
 v1Router.post("/generate-rankings", generateRankingsHandler);

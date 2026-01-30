@@ -1,6 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from './useAuth'
 import { notifications } from '@mantine/notifications'
+import type { newBotEventValidator } from '@/routes/app/_app-pages/import-bot'
+import type z from 'zod'
 
 export const useHasRole = () => {
   const auth = useAuth()
@@ -865,4 +867,44 @@ export const useGetAllDiscordUsers = () => {
     },
   })
   return allDiscordUsers
+}
+
+export const useCreateBotEventMutation = () => {
+  const auth = useAuth()
+  const queryClient = useQueryClient()
+  const mutation = useMutation({
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['events'],
+      })
+      notifications.show({
+        title: 'Success',
+        message: 'BOT Event created successfully.',
+        color: 'green',
+      })
+    },
+    onError: (error: any) => {
+      console.error('Error creating BOT event:', error)
+      notifications.show({
+        title: 'Error',
+        message: `Failed to create BOT event - check console for details`,
+        color: 'red',
+      })
+    },
+    mutationFn: async (data: z.infer<typeof newBotEventValidator>) => {
+      const url = `${import.meta.env.VITE_BACKEND_URL}/v1/bot-event`
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          ...auth!.headers, // is checked on use
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      })
+      if (!res.ok) {
+        throw new Error(await res.json())
+      }
+    },
+  })
+  return mutation
 }
