@@ -1,7 +1,10 @@
 import { Context } from "koa";
-import z, { ZodError } from "zod";
-import { getDiscordClient } from "../../../logic/discord-client";
-import { EmbedBuilder } from "discord.js";
+import z, { hex, ZodError } from "zod";
+import {
+  EVENT_ENTHUSIAST_ROLE_ID,
+  getDiscordClient,
+} from "../../../logic/discord-client";
+import { ColorResolvable, EmbedBuilder } from "discord.js";
 import { formatDate } from "date-fns/format";
 import { mentionIfPossible } from "../../../logic/discord/post-rankings";
 import { sql } from "kysely";
@@ -71,6 +74,8 @@ export const detailTourney = async (ctx: Context) => {
     tourneyInfoPromise,
     paintingCategoriesPromise,
   ]);
+
+  console.log(players);
 
   const formattedPaintingCategories = paintingCategories.reduce(
     (acc: any[], row: any) => {
@@ -173,7 +178,6 @@ export const postEventSummaryToDiscord = async (ctx: Context) => {
   if (!tourneyId || isNaN(tourneyId)) {
     ctx.throw(400, "Invalid tourney ID");
   }
-
   const tourneyData = await ctx.state.db
     .selectFrom("tourney")
     .where("tourney.id", "=", tourneyId)
@@ -237,17 +241,19 @@ export const postEventSummaryToDiscord = async (ctx: Context) => {
       "faction_totals.faction_code",
     )
     .innerJoin("player", "top_players.player_id", "player.id")
-    .leftJoin("faction as f", "top_players.faction_code", "f.name_code")
+    .leftJoin("faction", "top_players.faction_code", "faction.name_code")
     .where("top_players.rn", "=", 1)
     .select([
       "player.discord_id",
       "player.name as player_name",
-      "f.name as faction_name",
+      "faction.name as faction_name",
       "top_players.points as top_points",
       "faction_totals.player_count",
       "faction_totals.total_ranking_points",
+      "faction.emoji as emoji",
+      "faction.hex_code as hex_code",
     ])
-    .orderBy("total_ranking_points", "desc")
+    .orderBy("faction.name", "asc")
     .execute();
 
   const totals = await ctx.state.db
@@ -270,10 +276,10 @@ export const postEventSummaryToDiscord = async (ctx: Context) => {
     ctx.throw(500, "Discord events channel not found or not text-based");
   }
 
-  const embed = new EmbedBuilder()
+  const introEmbed = new EmbedBuilder()
     .setTitle(`${tourneyData.tourneyName}`)
     .setDescription(
-      `***BEEP BOOP!***
+      `***BEEP BOOP!*** <@&${EVENT_ENTHUSIAST_ROLE_ID}>
       I have eaten the data for the **${tourneyData.tourneyName}** event in ${
         tourneyData.venueTown
       } on ${formatDate(tourneyData.tourneyDate, "EEEE, d MMMM yyyy")}.
@@ -282,49 +288,59 @@ export const postEventSummaryToDiscord = async (ctx: Context) => {
   
   Shout out to <@${tourneyData.organiserDiscordId}> for organising it! ❤️ `,
     )
-    .addFields(
-      {
-        name: "Results",
-        value: resultsTableData
-          .map(
-            (r) =>
-              `#${r.place} - ${mentionIfPossible({
-                discord_user_id: r.discord_id,
-                name: r.playerName,
-              })} (${r.factionName}) - ${r.points.toFixed(2)} pts`,
-          )
-          .join("\n"),
-      },
-      // { name: "Painting", value: "Painting stuff" }
-    );
-
-  for (const faction of factionSummary) {
-    embed.addFields({
-      // @ts-ignore
-      name: faction.faction_name,
-      value: `- ${faction.player_count} player${
-        faction.player_count == 1 ? "" : "s"
-      }
-- ${faction.total_ranking_points.toFixed(2)} points
-- Best player ${mentionIfPossible({
-        discord_user_id: faction.discord_id,
-        name: faction.player_name,
-      })}${faction.player_count == 1 ? "(DEFAULT)" : ""}
-      `,
+    .addFields({
+      name: "Results",
+      value: resultsTableData
+        .map(
+          (r) =>
+            `#${r.place} - ${mentionIfPossible({
+              discord_user_id: r.discord_id,
+              name: r.playerName,
+            })} (${r.factionName}) - ${r.points.toFixed(2)} pts`,
+        )
+        .join("\n"),
     });
-  }
 
-  embed.addFields({
-    name: "Community Stats",
-    value: `***BEEP BOOP!***\n
+  const factionEmbeds = factionSummary.map((faction) => {
+    return new EmbedBuilder()
+      .setTitle(`${faction.emoji} ${faction.faction_name}`)
+      .setColor(faction.hex_code as ColorResolvable)
+      .addFields(
+        {
+          name: "Players",
+          value: faction.player_count.toString(),
+          inline: true,
+        },
+        {
+          name: "Total Ranking Points",
+          value: faction.total_ranking_points.toFixed(2),
+          inline: true,
+        },
+        {
+          name: "Best Player",
+          value: mentionIfPossible({
+            discord_user_id: faction.discord_id,
+            name: faction.player_name,
+          }),
+          inline: true,
+        },
+      );
+  });
+
+  const communityEmbed = new EmbedBuilder()
+    .setTitle("Community Stats")
+    .setDescription(
+      `***BEEP BOOP!***\n
     **${totals.total_players}** people have played **${
       totals.games_played
     }** games at **${totals.total_events}** event${
       totals.total_events == 1 ? "" : "s"
     } so far! This is really good, let's make it more! 🚀 🤖 🪣`,
-  });
+    );
 
-  const sentMessage = await channel.send({ embeds: [embed] });
+  const sentMessage = await channel.send({
+    embeds: [introEmbed, ...factionEmbeds, communityEmbed],
+  });
 
   await ctx.state.db
     .updateTable("tourney")
