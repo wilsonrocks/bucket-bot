@@ -1,0 +1,14 @@
+#!/bin/bash
+
+set -euo pipefail
+: "${PROD_DATABASE_URL:?Error: PROD_DATABASE_URL is not set.}"
+: "${DATABASE_URL:?Error: DATABASE_URL is not set.}"
+
+echo "Overwriting local database with production database..."
+pg_dump --clean --if-exists "$PROD_DATABASE_URL" | psql "$DATABASE_URL"
+
+echo "Ensuring pg_trgm extension exists..."
+psql "$DATABASE_URL" -c "CREATE EXTENSION IF NOT EXISTS pg_trgm;"
+
+echo "Ensuring postgis extension exists..."
+psql "$DATABASE_URL" -c "CREATE EXTENSION IF NOT EXISTS postgis;"
