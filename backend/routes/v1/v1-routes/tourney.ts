@@ -142,7 +142,6 @@ const tourneyUpdateValidator = z.object({
 });
 
 export const updateTourney = async (ctx: Context) => {
-  console.log(ctx.request.body);
   let validatedParams;
   try {
     validatedParams = tourneyUpdateValidator.parse(ctx.request.body);
@@ -263,7 +262,6 @@ export const postEventSummaryToDiscord = async (ctx: Context) => {
       sql`COUNT(DISTINCT tourney_id)`.as("total_events"),
       sql`COUNT(DISTINCT player_id)`.as("total_players"),
     ])
-    .where("tourney_id", "=", tourneyId)
     .executeTakeFirstOrThrow();
 
   const channelId = process.env.DISCORD_EVENTS_CHANNEL_ID;

@@ -163,7 +163,7 @@ function RouteComponent() {
                         user.discord_display_name ||
                         user.discord_username,
                     }))}
-                    {...detailsForm.getInputProps('organiserId')}
+                    {...detailsForm.getInputProps('organiserDiscordId')}
                   />
                 </Grid.Col>
 
