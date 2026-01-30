@@ -4,6 +4,12 @@ set -euo pipefail
 : "${PROD_DATABASE_URL:?Error: PROD_DATABASE_URL is not set.}"
 : "${DATABASE_URL:?Error: DATABASE_URL is not set.}"
 
+echo "Wiping local database schema..."
+psql "$DATABASE_URL" -c "DROP SCHEMA public CASCADE;"
+psql "$DATABASE_URL" -c "CREATE SCHEMA public;"
+psql "$DATABASE_URL" -c "GRANT ALL ON SCHEMA public TO CURRENT_USER;"
+psql "$DATABASE_URL" -c "GRANT ALL ON SCHEMA public TO public;"
+
 echo "Overwriting local database with production database..."
 pg_dump --clean --if-exists "$PROD_DATABASE_URL" | psql "$DATABASE_URL"
 
