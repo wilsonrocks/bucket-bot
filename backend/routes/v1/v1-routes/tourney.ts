@@ -44,13 +44,15 @@ export const detailTourney = async (ctx: Context) => {
       "player_identity.id",
       "result.player_identity_id",
     )
-    .innerJoin("player", "player_identity.player_id", "player.id")
+    .leftJoin("player", "player_identity.player_id", "player.id")
     .innerJoin("faction", "result.faction_code", "faction.name_code")
     .where("tourney.id", "=", ctx.params.id)
     .select([
       "player.id as playerId",
       "faction.name as factionName",
-      "player.name as playerName",
+      sql<string>`coalesce(${sql.ref("player.name")}, ${sql.ref("player_identity.provider_name")})`.as(
+        "playerName",
+      ),
       "result.place",
       "result.points",
       "faction.hex_code as factionHexCode",
@@ -79,8 +81,6 @@ export const detailTourney = async (ctx: Context) => {
     tourneyInfoPromise,
     paintingCategoriesPromise,
   ]);
-
-  console.log(players);
 
   const formattedPaintingCategories = paintingCategories.reduce(
     (acc: any[], row: any) => {
@@ -188,8 +188,6 @@ export const postEventSummaryToDiscord = async (ctx: Context) => {
     ctx.throw(400, "Invalid tourney ID");
   }
 
-  console.table({ tourneyId });
-
   const tourneyData = await ctx.state.db
     .selectFrom("tourney")
     .where("tourney.id", "=", tourneyId)
@@ -211,10 +209,12 @@ export const postEventSummaryToDiscord = async (ctx: Context) => {
       "result.player_identity_id",
       "player_identity.id",
     )
-    .innerJoin("player", "player_identity.player_id", "player.id")
+    .leftJoin("player", "player_identity.player_id", "player.id")
     .innerJoin("faction", "result.faction_code", "faction.name_code")
     .select([
-      "player.name as playerName",
+      sql<string>`coalesce(${sql.ref("player.name")}, ${sql.ref("player_identity.provider_name")})`.as(
+        "playerName",
+      ),
       "player.discord_id as discord_id",
       "result.place as place",
       "result.points as points",
@@ -233,7 +233,7 @@ export const postEventSummaryToDiscord = async (ctx: Context) => {
     )
     .where("result.tourney_id", "=", tourneyId)
     .select([
-      "player_identity.player_id",
+      "player_identity.id",
       "result.faction_code",
       "result.points",
       sql<number>`ROW_NUMBER() OVER (PARTITION BY result.faction_code ORDER BY result.points DESC)`.as(
@@ -262,12 +262,15 @@ export const postEventSummaryToDiscord = async (ctx: Context) => {
       "top_players.faction_code",
       "faction_totals.faction_code",
     )
-    .innerJoin("player", "top_players.player_id", "player.id")
+    .innerJoin("player_identity", "top_players.id", "player_identity.id")
+    .leftJoin("player", "player_identity.player_id", "player.id")
     .leftJoin("faction", "top_players.faction_code", "faction.name_code")
     .where("top_players.rn", "=", 1)
     .select([
       "player.discord_id",
-      "player.name as player_name",
+      sql<string>`coalesce(${sql.ref("player.name")}, ${sql.ref("player_identity.provider_name")})`.as(
+        "player_name",
+      ),
       "faction.name as faction_name",
       "top_players.points as top_points",
       "faction_totals.player_count",
