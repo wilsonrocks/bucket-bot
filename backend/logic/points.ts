@@ -15,7 +15,7 @@ interface CalculatePointsOutput {
  */
 export const calculatePoints = (
   players: number,
-  maxPoints: number
+  maxPoints: number,
 ): CalculatePointsOutput => {
   const mastersEligible = players >= 12;
   // need at least 8 players to earn points
@@ -52,8 +52,8 @@ export const maxPoints = (level: string, rounds: number): number => {
 
   if (rounds === 3) return 100;
   if (rounds === 4) return 110;
-  if (rounds === 5) return 120;
+  if (rounds >= 5) return 120;
   throw new Error(
-    `issue calculating max points for event level ${level} and rounds ${rounds}`
+    `issue calculating max points for event level ${level} and rounds ${rounds}`,
   );
 };

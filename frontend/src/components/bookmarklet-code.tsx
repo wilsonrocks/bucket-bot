@@ -57,7 +57,7 @@ const codeBlock = `(function () {
       if (bubbleclass.classList.contains('arcanists')) faction = 'arcanists';
       if (bubbleclass.classList.contains('explorers')) faction = 'explorers';
       if (bubbleclass.classList.contains('neverborn')) faction = 'neverborn';
-      if (bubbleclass.classList.contains('thunders')) faction = 'explorers';
+      if (bubbleclass.classList.contains('thunders')) faction = 'thunders';
       if (bubbleclass.classList.contains('resurrectionists')) faction = 'resurrectionists';
     }
 
