@@ -920,3 +920,33 @@ export const useCreateBotEventMutation = () => {
   })
   return mutation
 }
+
+export const useGetUnmappedIdentities = () => {
+  const auth = useAuth()
+  const unmappedIdentities = useQuery({
+    queryKey: ['unmapped-identities'],
+    enabled: !!auth,
+    queryFn: async (): Promise<
+      Array<{
+        id: number
+        external_id: string
+        created_at: string
+      }>
+    > => {
+      const url = `${import.meta.env.VITE_BACKEND_URL}/v1/unmapped-identities`
+      const res = await fetch(url, {
+        headers: auth!.headers, // is checked on enabled
+      })
+      if (!res.ok) {
+        notifications.show({
+          title: 'Error',
+          message: `Failed to fetch unmapped identities: ${res.statusText}`,
+          color: 'red',
+        })
+        throw new Error('Failed to fetch unmapped identities')
+      }
+      return res.json()
+    },
+  })
+  return unmappedIdentities
+}

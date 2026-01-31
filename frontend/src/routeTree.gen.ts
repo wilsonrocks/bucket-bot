@@ -16,6 +16,7 @@ import { Route as SiteRankingsRouteImport } from './routes/site/rankings'
 import { Route as SiteFactionRankingsRouteImport } from './routes/site/faction-rankings'
 import { Route as SiteEventsRouteImport } from './routes/site/events'
 import { Route as DemoTanstackQueryRouteImport } from './routes/demo/tanstack-query'
+import { Route as AppIdentitiesRouteImport } from './routes/app/identities'
 import { Route as AppDiscordMappingRouteImport } from './routes/app/discord-mapping'
 import { Route as SitePlayerIdRouteImport } from './routes/site/player.$id'
 import { Route as SiteEventIdRouteImport } from './routes/site/event.$id'
@@ -61,6 +62,11 @@ const SiteEventsRoute = SiteEventsRouteImport.update({
 const DemoTanstackQueryRoute = DemoTanstackQueryRouteImport.update({
   id: '/demo/tanstack-query',
   path: '/demo/tanstack-query',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppIdentitiesRoute = AppIdentitiesRouteImport.update({
+  id: '/app/identities',
+  path: '/app/identities',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppDiscordMappingRoute = AppDiscordMappingRouteImport.update({
@@ -125,6 +131,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/logged-in': typeof LoggedInRoute
   '/app/discord-mapping': typeof AppDiscordMappingRoute
+  '/app/identities': typeof AppIdentitiesRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/site/events': typeof SiteEventsRoute
   '/site/faction-rankings': typeof SiteFactionRankingsRoute
@@ -145,6 +152,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/logged-in': typeof LoggedInRoute
   '/app/discord-mapping': typeof AppDiscordMappingRoute
+  '/app/identities': typeof AppIdentitiesRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/site/events': typeof SiteEventsRoute
   '/site/faction-rankings': typeof SiteFactionRankingsRoute
@@ -166,6 +174,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/logged-in': typeof LoggedInRoute
   '/app/discord-mapping': typeof AppDiscordMappingRoute
+  '/app/identities': typeof AppIdentitiesRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/site/events': typeof SiteEventsRoute
   '/site/faction-rankings': typeof SiteFactionRankingsRoute
@@ -188,6 +197,7 @@ export interface FileRouteTypes {
     | '/'
     | '/logged-in'
     | '/app/discord-mapping'
+    | '/app/identities'
     | '/demo/tanstack-query'
     | '/site/events'
     | '/site/faction-rankings'
@@ -208,6 +218,7 @@ export interface FileRouteTypes {
     | '/'
     | '/logged-in'
     | '/app/discord-mapping'
+    | '/app/identities'
     | '/demo/tanstack-query'
     | '/site/events'
     | '/site/faction-rankings'
@@ -228,6 +239,7 @@ export interface FileRouteTypes {
     | '/'
     | '/logged-in'
     | '/app/discord-mapping'
+    | '/app/identities'
     | '/demo/tanstack-query'
     | '/site/events'
     | '/site/faction-rankings'
@@ -249,6 +261,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LoggedInRoute: typeof LoggedInRoute
   AppDiscordMappingRoute: typeof AppDiscordMappingRoute
+  AppIdentitiesRoute: typeof AppIdentitiesRoute
   DemoTanstackQueryRoute: typeof DemoTanstackQueryRoute
   SiteEventsRoute: typeof SiteEventsRoute
   SiteFactionRankingsRoute: typeof SiteFactionRankingsRoute
@@ -315,6 +328,13 @@ declare module '@tanstack/react-router' {
       path: '/demo/tanstack-query'
       fullPath: '/demo/tanstack-query'
       preLoaderRoute: typeof DemoTanstackQueryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/identities': {
+      id: '/app/identities'
+      path: '/app/identities'
+      fullPath: '/app/identities'
+      preLoaderRoute: typeof AppIdentitiesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app/discord-mapping': {
@@ -401,6 +421,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoggedInRoute: LoggedInRoute,
   AppDiscordMappingRoute: AppDiscordMappingRoute,
+  AppIdentitiesRoute: AppIdentitiesRoute,
   DemoTanstackQueryRoute: DemoTanstackQueryRoute,
   SiteEventsRoute: SiteEventsRoute,
   SiteFactionRankingsRoute: SiteFactionRankingsRoute,

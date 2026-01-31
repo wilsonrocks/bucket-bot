@@ -34,6 +34,7 @@ import {
   updateTourney,
 } from "./v1-routes/tourney";
 import { createVenueHandler, getAllVenuesHandler } from "./v1-routes/venues";
+import { getUnmappedIdentities } from "./v1-routes/identities";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -170,3 +171,5 @@ v1Router.use("/bot-chat", botChatRouter.allowedMethods());
 v1Router.post("/faction-rankings", generateFactionRankingsHandler);
 
 v1Router.post("/post-faction-rankings", postFactionRankingsHandler);
+
+v1Router.get("/unmapped-identities", getUnmappedIdentities);
