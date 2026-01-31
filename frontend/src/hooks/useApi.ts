@@ -872,7 +872,7 @@ export const useCreateBotEventMutation = () => {
   const mutation = useMutation({
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['events'],
+        queryKey: ['events', 'unmapped-identities'],
       })
       notifications.show({
         title: 'Success',
@@ -927,11 +927,19 @@ export const useGetUnmappedIdentities = () => {
     queryKey: ['unmapped-identities'],
     enabled: !!auth,
     queryFn: async (): Promise<
-      Array<{
-        id: number
+      {
+        player_identity_id: number
         external_id: string
-        created_at: string
-      }>
+        name: string
+        provider_name: string
+        provider_id: string
+        results: Array<{
+          tourney_id: number
+          tourney_name: string
+          place: number
+          faction: string
+        }>
+      }[]
     > => {
       const url = `${import.meta.env.VITE_BACKEND_URL}/v1/unmapped-identities`
       const res = await fetch(url, {

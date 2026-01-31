@@ -130,6 +130,7 @@ export const newLongshanksEvent = async (ctx: Context) => {
               player_id: dbPlayer.id,
               identity_provider_id: "LONGSHANKS",
               external_id: longshanksPlayer.longshanksId,
+              provider_name: longshanksPlayer.name,
             })
             .returningAll()
             .executeTakeFirstOrThrow();

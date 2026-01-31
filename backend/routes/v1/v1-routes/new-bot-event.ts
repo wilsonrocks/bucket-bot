@@ -88,6 +88,7 @@ export const newBotEventHandler = async (ctx: Context) => {
             .values({
               identity_provider_id: IdentityProvider.BOT,
               external_id: result.name,
+              provider_name: result.name,
             })
             .returningAll()
             .executeTakeFirstOrThrow();

@@ -71,6 +71,7 @@ export async function addTestTourneyData(db: Kysely<DB>) {
           identity_provider_id: "LONGSHANKS",
           player_id: player.id,
           external_id: `LS-${idx}`,
+          provider_name: player.name,
         })
         .execute();
     }),
