@@ -97,9 +97,7 @@ export const newLongshanksEvent = async (ctx: Context) => {
           );
         }
 
-        let dbPlayer;
-
-        // do we already have a longshanks player for this ID?
+        // do we already have a longshanks player identity for this ID?
         let dbPlayerIdentity = await trx
           .selectFrom("player_identity")
           .where("identity_provider_id", "=", "LONGSHANKS")
@@ -107,27 +105,10 @@ export const newLongshanksEvent = async (ctx: Context) => {
           .selectAll()
           .executeTakeFirst();
 
-        if (dbPlayerIdentity !== undefined) {
-          // yes so use it
-          dbPlayer = await trx
-            .selectFrom("player")
-            .where("id", "=", dbPlayerIdentity.player_id)
-            .selectAll()
-            .executeTakeFirstOrThrow();
-        } else {
-          // no so make one
-          dbPlayer = await trx
-            .insertInto("player")
-            .values({
-              name: longshanksPlayer.name,
-            })
-            .returningAll()
-            .executeTakeFirstOrThrow();
-
+        if (dbPlayerIdentity === undefined) {
           dbPlayerIdentity = await trx
             .insertInto("player_identity")
             .values({
-              player_id: dbPlayer.id,
               identity_provider_id: "LONGSHANKS",
               external_id: longshanksPlayer.longshanksId,
               provider_name: longshanksPlayer.name,
@@ -155,7 +136,6 @@ export const newLongshanksEvent = async (ctx: Context) => {
             rounds_played: longshanksPlayer.roundsPlayed,
           })
           .execute();
-        // then add player results
       }),
     );
   });

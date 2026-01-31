@@ -11,7 +11,7 @@ export const getUnmappedIdentities = async (ctx: Context) => {
     .innerJoin("result", "result.player_identity_id", "player_identity.id")
     .innerJoin("tourney", "result.tourney_id", "tourney.id")
     .innerJoin("faction", "result.faction_code", "faction.name_code")
-    .where("player_id", "is", null)
+    .where("player_identity.player_id", "is", null)
     .select([
       "player_identity.id as player_identity_id",
       "player_identity.external_id",

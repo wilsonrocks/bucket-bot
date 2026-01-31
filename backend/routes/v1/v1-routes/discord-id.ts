@@ -5,6 +5,7 @@ import {
   UK_MALIFAUX_SERVER_ID,
   getDiscordClient,
 } from "../../../logic/discord-client";
+import { pl } from "zod/v4/locales";
 
 export const fetchAndStoreDiscordUserIds = async (ctx: Context) => {
   const guildId = UK_MALIFAUX_SERVER_ID;
@@ -157,8 +158,6 @@ export const matchPlayerToDiscordUser = async (ctx: Context) => {
     return ctx.throw(404, "Discord user not found");
   }
 
-  // is there a player with this discord id?
-
   await ctx.state.db.transaction().execute(async (trx) => {
     let player = await trx
       .selectFrom("player")
@@ -166,26 +165,22 @@ export const matchPlayerToDiscordUser = async (ctx: Context) => {
       .selectAll()
       .executeTakeFirst();
 
-    const name =
-      discordUser.discord_display_name ||
-      discordUser.discord_username ||
-      discordUser.discord_nickname ||
-      "Unknown User";
-
-    // if not, then create one
-    if (player === undefined) {
+    if (!player) {
       player = await trx
         .insertInto("player")
         .values({
-          name,
           discord_id: discordUserId,
+          name:
+            discordUser.discord_display_name ||
+            discordUser.discord_username ||
+            discordUser.discord_nickname ||
+            "Unknown User",
         })
         .returningAll()
         .executeTakeFirstOrThrow();
     }
 
     // now create the mapping
-
     await trx
       .updateTable("player_identity")
       .set({

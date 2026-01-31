@@ -49,8 +49,16 @@ export const useGenerateRankingsSnapshotMutation = () => {
 
 export const useCreateLongshanksEventMutation = () => {
   const auth = useAuth()
-
+  const queryClient = useQueryClient()
   const mutation = useMutation({
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['all-tourneys'],
+      })
+      queryClient.invalidateQueries({
+        queryKey: ['unmapped-identities'],
+      })
+    },
     mutationFn: async (longshanksId: number) => {
       const url = `${import.meta.env.VITE_BACKEND_URL}/v1/longshanks-event/${longshanksId}`
       const res = await fetch(url, {
@@ -884,7 +892,10 @@ export const useCreateBotEventMutation = () => {
   const mutation = useMutation({
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['events', 'unmapped-identities'],
+        queryKey: ['events'],
+      })
+      queryClient.invalidateQueries({
+        queryKey: ['unmapped-identities'],
       })
       notifications.show({
         title: 'Success',

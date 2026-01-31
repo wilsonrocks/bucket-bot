@@ -49,6 +49,20 @@ export const Navbar = () => {
         {hasRole && (
           <>
             <Divider />
+            <AppNavLink
+              to={IdentitiesRoute.path}
+              label={
+                <Group gap={3}>
+                  <span>Identities</span>
+                  {((unmappedIdentities.data &&
+                    unmappedIdentities.data.length) ||
+                    0) > 0 && (
+                    <Badge color="red">{unmappedIdentities.data?.length}</Badge>
+                  )}
+                </Group>
+              }
+            />
+
             <AppNavLink to={EventsAppRoute.path} label="Edit Events" />
             <AppNavLink to={DiscordMappingRoute.path} label="Discord Mapping" />
             <AppNavLink to={VenuesRoute.path} label="Venue" />
@@ -177,19 +191,6 @@ export const Navbar = () => {
             >
               Post Discord Rankings
             </Button>
-            <AppNavLink
-              to={IdentitiesRoute.path}
-              label={
-                <Group gap={3}>
-                  <span>Identities</span>
-                  {((unmappedIdentities.data &&
-                    unmappedIdentities.data.length) ||
-                    0) > 0 && (
-                    <Badge color="red">{unmappedIdentities.data?.length}</Badge>
-                  )}
-                </Group>
-              }
-            />
           </>
         )}
       </Stack>

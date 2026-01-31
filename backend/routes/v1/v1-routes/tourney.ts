@@ -187,6 +187,9 @@ export const postEventSummaryToDiscord = async (ctx: Context) => {
   if (!tourneyId || isNaN(tourneyId)) {
     ctx.throw(400, "Invalid tourney ID");
   }
+
+  console.table({ tourneyId });
+
   const tourneyData = await ctx.state.db
     .selectFrom("tourney")
     .where("tourney.id", "=", tourneyId)
