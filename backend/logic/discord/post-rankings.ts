@@ -34,7 +34,7 @@ export const postDiscordRankings = async (db: Kysely<DB>) => {
     const batch = await mostRecentSnapshot(db, typeCode);
     if (!batch) {
       console.warn(
-        `No snapshot found for ranking type: ${typeCode}, skipping Discord post.`
+        `No snapshot found for ranking type: ${typeCode}, skipping Discord post.`,
       );
       continue;
     }
@@ -45,17 +45,17 @@ export const postDiscordRankings = async (db: Kysely<DB>) => {
       .innerJoin(
         "ranking_snapshot_batch",
         "ranking_snapshot.batch_id",
-        "ranking_snapshot_batch.id"
+        "ranking_snapshot_batch.id",
       )
       .innerJoin(
         "ranking_snapshot_type",
         "ranking_snapshot_batch.type_code",
-        "ranking_snapshot_type.code"
+        "ranking_snapshot_type.code",
       )
       .leftJoin(
         "discord_user",
         "player.discord_id",
-        "discord_user.discord_user_id"
+        "discord_user.discord_user_id",
       )
       .where("batch_id", "=", batch.id)
       .select([
@@ -78,7 +78,7 @@ export const postDiscordRankings = async (db: Kysely<DB>) => {
     const { discord_channel_id } = batch;
     if (!discord_channel_id) {
       console.warn(
-        `No Discord channel ID configured for ranking type: ${typeCode}, skipping Discord post.`
+        `No Discord channel ID configured for ranking type: ${typeCode}, skipping Discord post.`,
       );
       continue;
     }
@@ -92,21 +92,18 @@ export const postDiscordRankings = async (db: Kysely<DB>) => {
     const isSendable = channel?.isSendable;
     if (!isSendable) {
       console.warn(
-        `Channel is not sendable for type: ${typeCode}, skipping Discord post.`
+        `Channel is not sendable for type: ${typeCode}, skipping Discord post.`,
       );
       continue;
     }
     const guild = await discordClient.guilds.fetch(UK_MALIFAUX_SERVER_ID);
-    for (const r of rankings) {
-      await guild.members.fetch(r.discord_user_id!);
-    }
 
     const topPlayersText = rankings
       .map(
         (r) =>
           `#${r.rank} - ${
             r.discord_user_id ? userMention(r.discord_user_id) : r.name
-          } (${r.total_points.toFixed(2)} pts)`
+          } (${r.total_points.toFixed(2)} pts)`,
       )
       .join("\n");
 
@@ -122,7 +119,7 @@ Here is your weekly breakfast of rankings that I have cooked from data. I hope t
 
 There's only a maximum of ${TOP_X_PLAYERS} players shown here. But you can see the full rankings [on the website](${process.env.FRONTEND_URL}/site/rankings?typeCode=${typeCode})!`,
         },
-        { name: "Players", value: topPlayersText }
+        { name: "Players", value: topPlayersText },
       );
 
     await channel.send({ embeds: [embed] });

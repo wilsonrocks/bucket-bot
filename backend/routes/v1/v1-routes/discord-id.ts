@@ -83,7 +83,6 @@ export const playersWithNoDiscordId = async (ctx: Context) => {
     .innerJoin("result", "player_identity.id", "result.player_identity_id")
     .innerJoin("tourney", "result.tourney_id", "tourney.id")
     .innerJoin("faction", "result.faction_code", "faction.name_code")
-    .innerJoin("player_identity", "player.id", "player_identity.player_id")
     .where("discord_id", "is", null)
     .select([
       "player.id as player_id",

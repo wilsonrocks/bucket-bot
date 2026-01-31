@@ -277,10 +277,15 @@ export const postEventSummaryToDiscord = async (ctx: Context) => {
 
   const totals = await ctx.state.db
     .selectFrom("result")
+    .innerJoin(
+      "player_identity",
+      "result.player_identity_id",
+      "player_identity.id",
+    )
     .select((eb) => [
       eb.fn.sum("rounds_played").as("games_played"),
       sql`COUNT(DISTINCT tourney_id)`.as("total_events"),
-      sql`COUNT(DISTINCT player_id)`.as("total_players"),
+      sql`COUNT(DISTINCT player_identity.player_id)`.as("total_players"),
     ])
     .executeTakeFirstOrThrow();
 
