@@ -79,7 +79,8 @@ export const searchDiscordUsersByName = async (ctx: Context) => {
 export const playersWithNoDiscordId = async (ctx: Context) => {
   const players = await ctx.state.db
     .selectFrom("player")
-    .innerJoin("result", "player.id", "result.player_id")
+    .innerJoin("player_identity", "player.id", "player_identity.player_id")
+    .innerJoin("result", "player_identity.id", "result.player_identity_id")
     .innerJoin("tourney", "result.tourney_id", "tourney.id")
     .innerJoin("faction", "result.faction_code", "faction.name_code")
     .innerJoin("player_identity", "player.id", "player_identity.player_id")

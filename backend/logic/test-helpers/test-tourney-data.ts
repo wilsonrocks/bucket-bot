@@ -63,6 +63,19 @@ export async function addTestTourneyData(db: Kysely<DB>) {
     .returningAll()
     .execute();
 
+  await Promise.all(
+    players.map(async (player, idx) => {
+      await db
+        .insertInto("player_identity")
+        .values({
+          identity_provider_id: "LONGSHANKS",
+          player_id: player.id,
+          external_id: `LS-${idx}`,
+        })
+        .execute();
+    }),
+  );
+
   const tourneys = await db
     .insertInto("tourney")
     .values(testTourneys)
@@ -113,19 +126,29 @@ export async function addTestTourneyData(db: Kysely<DB>) {
       );
     }
 
-    return db
-      .insertInto("result")
-      .values(
-        results.map(([place, player, points, faction_code, rounds_played]) => ({
+    for (const [
+      place,
+      player,
+      points,
+      faction_code,
+      rounds_played,
+    ] of results) {
+      const player_identity = await db
+        .selectFrom("player_identity")
+        .where("player_id", "=", player.id)
+        .select("id")
+        .executeTakeFirstOrThrow();
+
+      db.insertInto("result")
+        .values({
           tourney_id: tourney.id,
-          player_id: player.id,
+          player_identity_id: player_identity.id,
           points,
           place,
           faction_code,
           rounds_played,
-        })),
-      )
-      .returningAll()
-      .execute();
+        })
+        .execute();
+    }
   }
 }

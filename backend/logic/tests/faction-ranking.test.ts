@@ -1,7 +1,7 @@
-import { afterAll, beforeEach, describe, expect, test } from "vitest";
+import { beforeEach, describe, expect, test } from "vitest";
 import { dbClient } from "../../db-client";
-import { addTestDataToDb } from "../test-helpers/add-test-data-to-db";
 import { generateFactionRankings } from "../rankings/generate-faction-rankings";
+import { addTestDataToDb } from "../test-helpers/add-test-data-to-db";
 
 beforeEach(async () => {
   await addTestDataToDb(dbClient);

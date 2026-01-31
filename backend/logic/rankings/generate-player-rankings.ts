@@ -17,12 +17,12 @@ export const generateRankings = async (
   config: GenerateRankingsConfig = {
     playersNeededToBeMastersRanked: 12,
     numberOfTourneysToConsider: 5,
-  }
+  },
 ) => {
   if (!(await shouldGenerateRankings(rankingsType, db))) return;
   const rankingTypeWhereSql = getRankingTypeWhereSql(
     rankingsType,
-    config.playersNeededToBeMastersRanked
+    config.playersNeededToBeMastersRanked,
   );
 
   if (!rankingTypeWhereSql) {
@@ -46,7 +46,16 @@ export const generateRankings = async (
           .selectFrom(
             trx
               .selectFrom("player")
-              .innerJoin("result", "player.id", "result.player_id")
+              .innerJoin(
+                "player_identity",
+                "player.id",
+                "player_identity.player_id",
+              )
+              .innerJoin(
+                "result",
+                "player_identity.id",
+                "result.player_identity_id",
+              )
               .innerJoin("tourney", "result.tourney_id", "tourney.id")
               .innerJoin("faction", "result.faction_code", "faction.name_code")
               .select([
@@ -56,13 +65,13 @@ export const generateRankings = async (
                 "result.points as points",
                 sql<number>`
                   row_number() over (
-                    partition by result.player_id
+                    partition by player_identity.player_id
                     order by result.points desc
                 )
                 `.as("rn"),
               ])
               .where((eb) => eb.and(rankingTypeWhereSql.map((fn) => fn(eb))))
-              .as("ranked_results")
+              .as("ranked_results"),
           )
           .select([
             "batch_id",
@@ -74,7 +83,7 @@ export const generateRankings = async (
           .groupBy("id")
           .groupBy("name")
           .groupBy("batch_id")
-          .orderBy("best_tourneys_points", "desc")
+          .orderBy("best_tourneys_points", "desc"),
       )
       .returningAll();
 
@@ -86,7 +95,16 @@ export const generateRankings = async (
           .selectFrom(
             trx
               .selectFrom("player")
-              .innerJoin("result", "player.id", "result.player_id")
+              .innerJoin(
+                "player_identity",
+                "player.id",
+                "player_identity.player_id",
+              )
+              .innerJoin(
+                "result",
+                "player_identity.id",
+                "result.player_identity_id",
+              )
               .innerJoin("faction", "result.faction_code", "faction.name_code")
               .innerJoin("tourney", "result.tourney_id", "tourney.id")
               .select([
@@ -95,16 +113,16 @@ export const generateRankings = async (
                 "result.tourney_id as tourney_id",
                 sql<number>`
                 row_number() over (
-                  partition by result.player_id
+                  partition by player_identity.player_id
                   order by result.points desc
                 )
             `.as("rn"),
               ])
               .where((eb) => eb.and(rankingTypeWhereSql.map((fn) => fn(eb))))
-              .as("ranked_results_events")
+              .as("ranked_results_events"),
           )
           .select(["batch_id", "player_id", "tourney_id"])
-          .where("rn", "<=", config.numberOfTourneysToConsider)
+          .where("rn", "<=", config.numberOfTourneysToConsider),
       )
       .returningAll();
 

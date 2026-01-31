@@ -100,7 +100,7 @@ export const newLongshanksEvent = async (ctx: Context) => {
         let dbPlayer;
 
         // do we already have a longshanks player for this ID?
-        const dbPlayerIdentity = await trx
+        let dbPlayerIdentity = await trx
           .selectFrom("player_identity")
           .where("identity_provider_id", "=", "LONGSHANKS")
           .where("external_id", "=", longshanksPlayer.longshanksId)
@@ -124,14 +124,15 @@ export const newLongshanksEvent = async (ctx: Context) => {
             .returningAll()
             .executeTakeFirstOrThrow();
 
-          await trx
+          dbPlayerIdentity = await trx
             .insertInto("player_identity")
             .values({
               player_id: dbPlayer.id,
               identity_provider_id: "LONGSHANKS",
               external_id: longshanksPlayer.longshanksId,
             })
-            .execute();
+            .returningAll()
+            .executeTakeFirstOrThrow();
         }
 
         const points = calculatePoints(
@@ -146,7 +147,7 @@ export const newLongshanksEvent = async (ctx: Context) => {
           .insertInto("result")
           .values({
             tourney_id: tourney.id,
-            player_id: dbPlayer.id,
+            player_identity_id: dbPlayerIdentity.id,
             place: longshanksPlayer.rank,
             faction_code,
             points,

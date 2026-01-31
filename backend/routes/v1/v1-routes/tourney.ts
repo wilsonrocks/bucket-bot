@@ -39,7 +39,12 @@ export const detailTourney = async (ctx: Context) => {
   const playerDataPromise = ctx.state.db
     .selectFrom("tourney")
     .innerJoin("result", "tourney.id", "result.tourney_id")
-    .innerJoin("player", "result.player_id", "player.id")
+    .innerJoin(
+      "player_identity",
+      "player_identity.id",
+      "result.player_identity_id",
+    )
+    .innerJoin("player", "player_identity.player_id", "player.id")
     .innerJoin("faction", "result.faction_code", "faction.name_code")
     .where("tourney.id", "=", ctx.params.id)
     .select([
@@ -111,7 +116,12 @@ export const getTourneysForPlayerHandler = async (ctx: Context) => {
     .selectFrom("result")
     .innerJoin("tourney", "result.tourney_id", "tourney.id")
     .innerJoin("faction", "result.faction_code", "faction.name_code")
-    .where("result.player_id", "=", playerId)
+    .innerJoin(
+      "player_identity",
+      "result.player_identity_id",
+      "player_identity.id",
+    )
+    .where("player_identity.player_id", "=", playerId)
     // @ts-ignore
     .select([
       "tourney.id as tourneyId",
@@ -193,7 +203,12 @@ export const postEventSummaryToDiscord = async (ctx: Context) => {
   const resultsTableData = await ctx.state.db
     .selectFrom("result")
     .where("result.tourney_id", "=", tourneyId)
-    .innerJoin("player", "result.player_id", "player.id")
+    .innerJoin(
+      "player_identity",
+      "result.player_identity_id",
+      "player_identity.id",
+    )
+    .innerJoin("player", "player_identity.player_id", "player.id")
     .innerJoin("faction", "result.faction_code", "faction.name_code")
     .select([
       "player.name as playerName",
@@ -207,13 +222,18 @@ export const postEventSummaryToDiscord = async (ctx: Context) => {
 
   // Step 1: Get top player per faction using ROW_NUMBER
   const topPlayersSubquery = ctx.state.db
-    .selectFrom("result as r")
-    .where("r.tourney_id", "=", tourneyId)
+    .selectFrom("result")
+    .innerJoin(
+      "player_identity",
+      "result.player_identity_id",
+      "player_identity.id",
+    )
+    .where("result.tourney_id", "=", tourneyId)
     .select([
-      "r.player_id",
-      "r.faction_code",
-      "r.points",
-      sql<number>`ROW_NUMBER() OVER (PARTITION BY r.faction_code ORDER BY r.points DESC)`.as(
+      "player_identity.player_id",
+      "result.faction_code",
+      "result.points",
+      sql<number>`ROW_NUMBER() OVER (PARTITION BY result.faction_code ORDER BY result.points DESC)`.as(
         "rn",
       ),
     ])
