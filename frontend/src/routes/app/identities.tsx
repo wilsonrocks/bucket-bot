@@ -1,8 +1,9 @@
-import { useGetUnmappedIdentities } from '@/hooks/useApi'
-import { createFileRoute } from '@tanstack/react-router'
-import { Box, List, Pagination, Stack, Table, Text } from '@mantine/core'
-import { useState } from 'react'
+import { DiscordLookup } from '@/components/discord-lookup'
 import { toOrdinal } from '@/helpers/to-ordinal'
+import { useGetUnmappedIdentities } from '@/hooks/useApi'
+import { List, Pagination, Table } from '@mantine/core'
+import { createFileRoute } from '@tanstack/react-router'
+import { useState } from 'react'
 
 export const Route = createFileRoute('/app/identities')({
   component: RouteComponent,
@@ -32,8 +33,9 @@ function RouteComponent() {
         onChange={setCurrentPage}
       />
       <Table
+        layout="fixed"
         data={{
-          head: ['Provider', 'Name', 'Results'],
+          head: ['Provider', 'Name', 'Results', 'Map to?'],
           body: [
             [
               currentIdentity.provider_name,
@@ -47,6 +49,10 @@ function RouteComponent() {
                   ),
                 )}
               </List>,
+              <DiscordLookup
+                playerIdentityId={currentIdentity.player_identity_id}
+                initialText={currentIdentity.name}
+              />,
             ],
           ],
         }}

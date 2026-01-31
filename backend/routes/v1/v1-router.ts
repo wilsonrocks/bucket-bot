@@ -20,6 +20,7 @@ import {
   postFactionRankingsHandler,
 } from "./v1-routes/faction-rankings";
 import { generateRankingsHandler } from "./v1-routes/generate-rankings";
+import { getUnmappedIdentities } from "./v1-routes/identities";
 import { newBotEventHandler } from "./v1-routes/new-bot-event";
 import { getPlayerById, getPlayers } from "./v1-routes/players";
 import { rankingTypesHandler } from "./v1-routes/ranking-types";
@@ -34,7 +35,6 @@ import {
   updateTourney,
 } from "./v1-routes/tourney";
 import { createVenueHandler, getAllVenuesHandler } from "./v1-routes/venues";
-import { getUnmappedIdentities } from "./v1-routes/identities";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -158,10 +158,7 @@ v1Router.post("/fetch-discord-user-ids", fetchAndStoreDiscordUserIds); // THIS i
 v1Router.get("/search-discord-users", searchDiscordUsersByName);
 v1Router.get("/all-discord-users", getAllDiscordUsers);
 v1Router.get("/players-with-no-discord-id", playersWithNoDiscordId);
-v1Router.post(
-  "/match-player-to-discord-user/:playerId/:discordUserId",
-  matchPlayerToDiscordUser,
-);
+v1Router.post("/match-player-to-discord-user", matchPlayerToDiscordUser);
 v1Router.post("/post-discord-rankings", postDiscordRankingsHandler);
 v1Router.post("/post-discord-event/:tourneyId", postEventSummaryToDiscord);
 v1Router.post("/tourney", updateTourney);

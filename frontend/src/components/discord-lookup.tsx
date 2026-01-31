@@ -5,23 +5,22 @@ import {
 import {
   Box,
   Button,
-  Container,
   Divider,
   Group,
-  Select,
   Stack,
   Text,
   TextInput,
 } from '@mantine/core'
-import { useEffect, useState } from 'react'
 import { modals } from '@mantine/modals'
+import { useEffect, useState } from 'react'
 
 export const DiscordLookup: React.FC<{
   initialText: string
-  playerId: number
-  playerName: string
-}> = ({ initialText, playerId, playerName }) => {
-  const [text, setText] = useState('')
+  playerIdentityId: number
+}> = ({ initialText, playerIdentityId }) => {
+  const [text, setText] = useState(initialText)
+
+  // because this component will have prop changes and not be remounted we need this
   useEffect(() => {
     setText(initialText)
   }, [initialText])
@@ -65,15 +64,16 @@ export const DiscordLookup: React.FC<{
                       labels: { confirm: 'Make it so', cancel: 'Wait...' },
                       onConfirm: () => {
                         matchMutation.mutate({
-                          playerId,
+                          playerIdentityId,
                           discordUserId: option.discord_user_id,
                         })
                       },
                       children: (
                         <Box>
                           <Text>
-                            Are you sure you want to match <em>{playerName}</em>{' '}
-                            to {option.discord_display_name}(
+                            Are you sure you want to match{' '}
+                            <em>{initialText}</em> to{' '}
+                            {option.discord_display_name}(
                             <b>@{option.discord_username}</b>
                             )?
                           </Text>

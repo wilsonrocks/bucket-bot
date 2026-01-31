@@ -1,5 +1,6 @@
 import { Context } from "koa";
 import { sql } from "kysely";
+import z from "zod";
 import {
   UK_MALIFAUX_SERVER_ID,
   getDiscordClient,
@@ -118,42 +119,83 @@ export const playersWithNoDiscordId = async (ctx: Context) => {
   ctx.response.body = Array.from(grouped.values());
 };
 
-export const matchPlayerToDiscordUser = async (ctx: Context) => {
-  const { playerId, discordUserId } = ctx.params;
+const matchPlayerValidator = z.object({
+  playerIdentityId: z.number().int().positive(),
+  discordUserId: z.string().min(1),
+});
 
-  // Validate playerId and discordUserId
-  if (!playerId || isNaN(Number(playerId))) {
+export const matchPlayerToDiscordUser = async (ctx: Context) => {
+  let parsedPayload;
+  try {
+    parsedPayload = matchPlayerValidator.parse(ctx.request.body);
+  } catch (err) {
     ctx.status = 400;
-    return ctx.throw(400, "Invalid or missing 'playerId' parameter");
+    return ctx.throw(400, "Invalid request body" + (err as any).message);
+  }
+
+  const { playerIdentityId, discordUserId } = parsedPayload;
+
+  // Validate playerIdentityId and discordUserId
+
+  if (!playerIdentityId || isNaN(Number(playerIdentityId))) {
+    ctx.status = 400;
+    return ctx.throw(400, "Invalid or missing 'playerIdentity Id' parameter");
   }
   if (!discordUserId || typeof discordUserId !== "string") {
     ctx.status = 400;
     return ctx.throw(400, "Invalid or missing 'discordUserId' parameter");
   }
 
-  try {
-    await Promise.all([
-      ctx.state.db
-        .selectFrom("player")
-        .where("id", "=", Number(playerId))
-        .executeTakeFirstOrThrow(),
-      ctx.state.db
-        .selectFrom("discord_user")
-        .where("discord_user_id", "=", discordUserId)
-        .executeTakeFirstOrThrow(),
-    ]);
-  } catch (err) {
-    console.error(err);
-    throw ctx.throw(404, `Player or Discord user not found ${err}`);
+  const discordUser = await ctx.state.db
+    .selectFrom("discord_user")
+    .where("discord_user.discord_user_id", "=", discordUserId)
+    .selectAll()
+    .executeTakeFirst();
+
+  if (!discordUser) {
+    ctx.status = 404;
+    return ctx.throw(404, "Discord user not found");
   }
 
-  await ctx.state.db
-    .updateTable("player")
-    .set({ discord_id: discordUserId })
-    .where("id", "=", playerId)
-    .execute();
+  // is there a player with this discord id?
 
-  ctx.response.body = {
-    message: "Player matched to Discord user successfully",
-  };
+  await ctx.state.db.transaction().execute(async (trx) => {
+    let player = await trx
+      .selectFrom("player")
+      .where("discord_id", "=", discordUserId)
+      .selectAll()
+      .executeTakeFirst();
+
+    const name =
+      discordUser.discord_display_name ||
+      discordUser.discord_username ||
+      discordUser.discord_nickname ||
+      "Unknown User";
+
+    // if not, then create one
+    if (player === undefined) {
+      player = await trx
+        .insertInto("player")
+        .values({
+          name,
+          discord_id: discordUserId,
+        })
+        .returningAll()
+        .executeTakeFirstOrThrow();
+    }
+
+    // now create the mapping
+
+    await trx
+      .updateTable("player_identity")
+      .set({
+        player_id: player.id,
+      })
+      .where("id", "=", playerIdentityId)
+      .executeTakeFirst();
+
+    ctx.response.body = {
+      message: "Player matched to Discord user successfully",
+    };
+  });
 };

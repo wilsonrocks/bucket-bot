@@ -278,21 +278,33 @@ export const useMatchPlayerToDiscordUser = () => {
       queryClient.invalidateQueries({
         queryKey: ['search-discord-users'],
       })
+      queryClient.invalidateQueries({
+        queryKey: ['unmapped-identities'],
+      })
+      notifications.show({
+        title: 'Success',
+        message: 'Player matched to Discord user successfully.',
+        color: 'green',
+      })
     },
     mutationFn: async ({
-      playerId,
+      playerIdentityId,
       discordUserId,
     }: {
-      playerId: number
+      playerIdentityId: number
       discordUserId: string
     }) => {
-      const url = `${import.meta.env.VITE_BACKEND_URL}/v1/match-player-to-discord-user/${playerId}/${discordUserId}`
+      const url = `${import.meta.env.VITE_BACKEND_URL}/v1/match-player-to-discord-user`
       const res = await fetch(url, {
         method: 'POST',
         headers: {
           ...auth!.headers, // is checked on use
           'Content-Type': 'application/json',
         },
+        body: JSON.stringify({
+          playerIdentityId,
+          discordUserId,
+        }),
       })
       if (!res.ok) {
         const errorData = await res.json()
