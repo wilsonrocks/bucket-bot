@@ -39,8 +39,8 @@ function RouteComponent() {
     eventName: string
     organiserDiscordId: string
     venueId: string
-    rounds: number
-    days: number
+    rounds: number | null
+    days: number | null
     tier: string
     categories: {
       name: string
@@ -85,8 +85,8 @@ function RouteComponent() {
         organiserDiscordId:
           tourneyDetail.data.tourney.organiser_discord_id || '',
         venueId: tourneyDetail.data.tourney.venue_id?.toString() || '',
-        rounds: tourneyDetail.data.tourney.rounds ?? undefined,
-        days: tourneyDetail.data.tourney.days ?? undefined,
+        rounds: tourneyDetail.data.tourney.rounds ?? null,
+        days: tourneyDetail.data.tourney.days ?? null,
         tier: tourneyDetail.data.tourney.tier_code,
       })
     }
@@ -146,7 +146,6 @@ function RouteComponent() {
                 <Grid.Col span={{ base: 12, sm: 4 }}>
                   <TextInput
                     label="Event Name"
-                    defaultValue={tourneyDetail.data.tourney.name}
                     {...detailsForm.getInputProps('eventName')}
                   />
                 </Grid.Col>
