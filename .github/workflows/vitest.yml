@@ -28,4 +28,4 @@ jobs:
           sudo ln -s $PWD/flyway-10.8.1/flyway /usr/local/bin/flyway
 
       - name: Run Vitest
-        run: npx vitest
+        run: npx vitest run --reporter=github-actions

@@ -39,6 +39,7 @@ describe("Testing the typescript enum values are represented properly in the db"
   });
 
   test("IdentityProvider enum has correct values", async () => {
+    expect(5).toBe(6); // Intentional failure to test GH actions reporting
     for (const providerType of Object.values(IdentityProvider)) {
       expect(typeof providerType).toBe("string");
       const dbIdentityProvider = await dbClient
