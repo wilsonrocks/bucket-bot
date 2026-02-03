@@ -44,11 +44,16 @@ jobs:
           done
 
       - name: Dump prod DB using Postgres 17
+        env:
+          PROD_DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
         run: |
           docker run --rm \
-            -e PGPASSWORD="$PROD_DB_PASSWORD" \
             postgres:17 \
-            pg_dump --clean --if-exists "$PROD_DATABASE_URL" > prod_dump.sql
+            pg_dump \
+              --clean \
+              --if-exists \
+              "$PROD_DATABASE_URL" \
+            > prod_dump.sql
 
       - name: Run migrations
         run: flyway migrate
