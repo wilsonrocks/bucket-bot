@@ -38,13 +38,17 @@ jobs:
       - name: Install Flyway
         uses: ./.github/actions/install-flyway
 
+      - name: Wait for Postgres
+        run: |
+          until pg_isready -h localhost -U "$PGUSER"; do
+            sleep 2
+          done
+
       - name: Copy Production Database Dump
-        if: job.services.postgres.health == 'healthy'
         env:
           PROD_DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
           DATABASE_URL: "postgresql://${{ env.PGUSER }}:${{ env.PGPASSWORD }}@${{ env.PGHOST }}:${{ env.PGPORT }}/${{ env.PGDATABASE }}"
         run: pg_dump --clean --if-exists "$PROD_DATABASE_URL" | psql "$DATABASE_URL"
 
       - name: Run migrations
-        if: job.services.postgres.health == 'healthy'
         run: flyway migrate
