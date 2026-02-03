@@ -55,4 +55,8 @@ jobs:
           FLYWAY_URL: jdbc:postgresql://$PGHOST:$PGPORT/$PGDATABASE
           FLYWAY_USER: $PGUSER
           FLYWAY_PASSWORD: $PGPASSWORD
-        run: flyway migrate
+        run: |
+          export FLYWAY_URL="jdbc:postgresql://$PGHOST:$PGPORT/$PGDATABASE"
+          export FLYWAY_USER="$PGUSER"
+          export FLYWAY_PASSWORD="$PGPASSWORD"
+          flyway migrate
