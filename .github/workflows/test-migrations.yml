@@ -1,0 +1,49 @@
+name: Test Migrations on Copy of Prod
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "backend/db/migrations/**"
+      - ".github/workflows/test-migrations.yml"
+
+jobs:
+  test-migrations:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpass
+          POSTGRES_DB: testdb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U testuser" --health-interval=10s --health-timeout=5s --health-retries=5
+    env:
+      PGHOST: localhost
+      PGUSER: testuser
+      PGPASSWORD: testpass
+      PGDATABASE: testdb
+      PGPORT: 5432
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: Install Flyway
+        uses: ./.github/actions/install-flyway
+
+      - name: Copy Production Database Dump
+        if: job.services.postgres.health == 'healthy'
+        env:
+          PROD_DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
+          DATABASE_URL: "postgresql://${{ env.PGUSER }}:${{ env.PGPASSWORD }}@${{ env.PGHOST }}:${{ env.PGPORT }}/${{ env.PGDATABASE }}"
+        run: pg_dump --clean --if-exists "$PROD_DATABASE_URL" | psql "$DATABASE_URL"
+
+      - name: Run migrations
+        if: job.services.postgres.health == 'healthy'
+        run: flyway migrate
