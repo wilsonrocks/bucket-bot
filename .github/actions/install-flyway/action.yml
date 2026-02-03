@@ -1,0 +1,11 @@
+# action.yml for installing Flyway CLI
+name: "Install Flyway CLI"
+description: "Downloads and installs Flyway CLI for use in workflows."
+runs:
+  using: "composite"
+  steps:
+    - name: Download Flyway
+      run: |
+        curl -L https://repo1.maven.org/maven2/org/flywaydb/flyway-commandline/10.8.1/flyway-commandline-10.8.1-linux-x64.tar.gz | tar xz
+        sudo ln -s $PWD/flyway-10.8.1/flyway /usr/local/bin/flyway
+      shell: bash

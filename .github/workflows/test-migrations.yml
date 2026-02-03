@@ -1,0 +1,64 @@
+name: Test SQL migrations
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "backend/db/migrations/**"
+      - ".github/workflows/test-migrations.yml"
+
+jobs:
+  test-migrations:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgis/postgis:16-3.5
+        env:
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpass
+          POSTGRES_DB: testdb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U testuser" --health-interval=10s --health-timeout=5s --health-retries=5
+    env:
+      PGHOST: localhost
+      PGUSER: testuser
+      PGPASSWORD: testpass
+      PGDATABASE: testdb
+      PGPORT: 5432
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: Install Flyway
+        uses: ./.github/actions/install-flyway
+
+      - name: Wait for Postgres
+        run: |
+          until pg_isready -h localhost -U "$PGUSER"; do
+            sleep 2
+          done
+
+      - name: Dump prod DB using Postgres 17
+        env:
+          PROD_DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
+        run: |
+          : "${PROD_DATABASE_URL:?PROD_DATABASE_URL is not set}"
+          export DATABASE_URL="postgresql://$PGUSER:$PGPASSWORD@$PGHOST:$PGPORT/$PGDATABASE"
+          pg_dump --clean --if-exists "$PROD_DATABASE_URL" | psql "$DATABASE_URL"
+
+      - name: Run migrations
+        env:
+          FLYWAY_URL: jdbc:postgresql://$PGHOST:$PGPORT/$PGDATABASE
+          FLYWAY_USER: $PGUSER
+          FLYWAY_PASSWORD: $PGPASSWORD
+        run: |
+          export FLYWAY_URL="jdbc:postgresql://$PGHOST:$PGPORT/$PGDATABASE"
+          export FLYWAY_USER="$PGUSER"
+          export FLYWAY_PASSWORD="$PGPASSWORD"
+          export FLYWAY_LOCATIONS=filesystem:db/migrations
+          flyway migrate

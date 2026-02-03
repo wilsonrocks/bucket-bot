@@ -1,0 +1,27 @@
+name: Test Business Logic
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  vitest:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24.11.1"
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Flyway
+        uses: ./.github/actions/install-flyway
+
+      - name: Run Vitest
+        run: npx vitest run --reporter=github-actions
