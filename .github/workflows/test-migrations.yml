@@ -47,13 +47,8 @@ jobs:
         env:
           PROD_DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
         run: |
-          docker run --rm \
-            postgres:17 \
-            pg_dump \
-              --clean \
-              --if-exists \
-              "$PROD_DATABASE_URL" \
-            > prod_dump.sql
+          export DATABASE_URL="postgresql://$PGUSER:$PGPASSWORD@$PGHOST:$PGPORT/$PGDATABASE"
+          pg_dump --clean --if-exists "$PROD_DATABASE_URL" | psql "$DATABASE_URL"
 
       - name: Run migrations
         run: flyway migrate
