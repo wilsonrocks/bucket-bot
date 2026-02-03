@@ -1,8 +1,9 @@
 name: Test Migrations on Copy of Prod
 
 on:
-  workflow_dispatch:
-  push:
+  pull_request:
+    branches:
+      - main
     paths:
       - "backend/db/migrations/**"
       - ".github/workflows/test-migrations.yml"
