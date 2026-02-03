@@ -43,11 +43,12 @@ jobs:
             sleep 2
           done
 
-      - name: Copy Production Database Dump
-        env:
-          PROD_DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
-          DATABASE_URL: "postgresql://${{ env.PGUSER }}:${{ env.PGPASSWORD }}@${{ env.PGHOST }}:${{ env.PGPORT }}/${{ env.PGDATABASE }}"
-        run: pg_dump --clean --if-exists "$PROD_DATABASE_URL" | psql "$DATABASE_URL"
+      - name: Dump prod DB using Postgres 17
+        run: |
+          docker run --rm \
+            -e PGPASSWORD="$PROD_DB_PASSWORD" \
+            postgres:17 \
+            pg_dump --clean --if-exists "$PROD_DATABASE_URL" > prod_dump.sql
 
       - name: Run migrations
         run: flyway migrate
