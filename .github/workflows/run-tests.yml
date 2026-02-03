@@ -1,8 +1,6 @@
-name: Run Tests
+name: Test Business Logic
 
 on:
-  push:
-    branches: [main]
   pull_request:
     branches: [main]
 

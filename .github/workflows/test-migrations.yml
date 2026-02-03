@@ -1,5 +1,4 @@
-name: Test Migrations on Copy of Prod
-
+name: Test SQL migrations
 on:
   pull_request:
     branches:
