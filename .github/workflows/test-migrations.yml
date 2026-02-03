@@ -51,4 +51,8 @@ jobs:
           pg_dump --clean --if-exists "$PROD_DATABASE_URL" | psql "$DATABASE_URL"
 
       - name: Run migrations
+        env:
+          FLYWAY_URL: jdbc:postgresql://$PGHOST:$PGPORT/$PGDATABASE
+          FLYWAY_USER: $PGUSER
+          FLYWAY_PASSWORD: $PGPASSWORD
         run: flyway migrate
