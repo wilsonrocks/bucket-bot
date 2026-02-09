@@ -11,7 +11,6 @@ import { Route as BotChat } from '@/routes/app/_app-pages/bot-chat'
 import { Route as EventsAppRoute } from '@/routes/app/_app-pages/events/index.tsx'
 import { Route as ImportBotRoute } from '@/routes/app/_app-pages/import-bot'
 import { Route as VenuesRoute } from '@/routes/app/_app-pages/venues'
-import { Route as DiscordMappingRoute } from '@/routes/app/discord-mapping'
 import { Route as IdentitiesRoute } from '@/routes/app/identities'
 import { Route as EventsSiteRoute } from '@/routes/site/events'
 import { Route as FactionRankingsRoute } from '@/routes/site/faction-rankings'
@@ -64,7 +63,6 @@ export const Navbar = () => {
             />
 
             <AppNavLink to={EventsAppRoute.path} label="Edit Events" />
-            <AppNavLink to={DiscordMappingRoute.path} label="Discord Mapping" />
             <AppNavLink to={VenuesRoute.path} label="Venue" />
             <AppNavLink to={BotChat.path} label="Bot Chat" />
             <AppNavLink to={ImportBotRoute.path} label="Import BOT event" />

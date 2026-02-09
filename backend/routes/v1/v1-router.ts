@@ -10,7 +10,6 @@ import {
   fetchAndStoreDiscordUserIds,
   getAllDiscordUsers,
   matchPlayerToDiscordUser,
-  playersWithNoDiscordId,
   searchDiscordUsersByName,
 } from "./v1-routes/discord-id";
 import { postDiscordRankingsHandler } from "./v1-routes/discord-rankings";
@@ -157,7 +156,6 @@ v1Router.post("/create-venue", createVenueHandler);
 v1Router.post("/fetch-discord-user-ids", fetchAndStoreDiscordUserIds); // THIS is a weird hack because we in a lambda and this rate limits severely
 v1Router.get("/search-discord-users", searchDiscordUsersByName);
 v1Router.get("/all-discord-users", getAllDiscordUsers);
-v1Router.get("/players-with-no-discord-id", playersWithNoDiscordId);
 v1Router.post("/match-player-to-discord-user", matchPlayerToDiscordUser);
 v1Router.post("/post-discord-rankings", postDiscordRankingsHandler);
 v1Router.post("/post-discord-event/:tourneyId", postEventSummaryToDiscord);
