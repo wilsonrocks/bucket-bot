@@ -17,7 +17,6 @@ import { Route as SiteFactionRankingsRouteImport } from './routes/site/faction-r
 import { Route as SiteEventsRouteImport } from './routes/site/events'
 import { Route as DemoTanstackQueryRouteImport } from './routes/demo/tanstack-query'
 import { Route as AppIdentitiesRouteImport } from './routes/app/identities'
-import { Route as AppDiscordMappingRouteImport } from './routes/app/discord-mapping'
 import { Route as SitePlayerIdRouteImport } from './routes/site/player.$id'
 import { Route as SiteEventIdRouteImport } from './routes/site/event.$id'
 import { Route as AppAppPagesVenuesRouteImport } from './routes/app/_app-pages/venues'
@@ -67,11 +66,6 @@ const DemoTanstackQueryRoute = DemoTanstackQueryRouteImport.update({
 const AppIdentitiesRoute = AppIdentitiesRouteImport.update({
   id: '/app/identities',
   path: '/app/identities',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AppDiscordMappingRoute = AppDiscordMappingRouteImport.update({
-  id: '/app/discord-mapping',
-  path: '/app/discord-mapping',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SitePlayerIdRoute = SitePlayerIdRouteImport.update({
@@ -130,7 +124,6 @@ const AppAppPagesEventsIdEditRoute = AppAppPagesEventsIdEditRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/logged-in': typeof LoggedInRoute
-  '/app/discord-mapping': typeof AppDiscordMappingRoute
   '/app/identities': typeof AppIdentitiesRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/site/events': typeof SiteEventsRoute
@@ -151,7 +144,6 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/logged-in': typeof LoggedInRoute
-  '/app/discord-mapping': typeof AppDiscordMappingRoute
   '/app/identities': typeof AppIdentitiesRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/site/events': typeof SiteEventsRoute
@@ -173,7 +165,6 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/logged-in': typeof LoggedInRoute
-  '/app/discord-mapping': typeof AppDiscordMappingRoute
   '/app/identities': typeof AppIdentitiesRoute
   '/demo/tanstack-query': typeof DemoTanstackQueryRoute
   '/site/events': typeof SiteEventsRoute
@@ -196,7 +187,6 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/logged-in'
-    | '/app/discord-mapping'
     | '/app/identities'
     | '/demo/tanstack-query'
     | '/site/events'
@@ -217,7 +207,6 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/logged-in'
-    | '/app/discord-mapping'
     | '/app/identities'
     | '/demo/tanstack-query'
     | '/site/events'
@@ -238,7 +227,6 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/logged-in'
-    | '/app/discord-mapping'
     | '/app/identities'
     | '/demo/tanstack-query'
     | '/site/events'
@@ -260,7 +248,6 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LoggedInRoute: typeof LoggedInRoute
-  AppDiscordMappingRoute: typeof AppDiscordMappingRoute
   AppIdentitiesRoute: typeof AppIdentitiesRoute
   DemoTanstackQueryRoute: typeof DemoTanstackQueryRoute
   SiteEventsRoute: typeof SiteEventsRoute
@@ -335,13 +322,6 @@ declare module '@tanstack/react-router' {
       path: '/app/identities'
       fullPath: '/app/identities'
       preLoaderRoute: typeof AppIdentitiesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/app/discord-mapping': {
-      id: '/app/discord-mapping'
-      path: '/app/discord-mapping'
-      fullPath: '/app/discord-mapping'
-      preLoaderRoute: typeof AppDiscordMappingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/site/player/$id': {
@@ -420,7 +400,6 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoggedInRoute: LoggedInRoute,
-  AppDiscordMappingRoute: AppDiscordMappingRoute,
   AppIdentitiesRoute: AppIdentitiesRoute,
   DemoTanstackQueryRoute: DemoTanstackQueryRoute,
   SiteEventsRoute: SiteEventsRoute,

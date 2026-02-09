@@ -27,6 +27,7 @@ import type { QueryClient } from '@tanstack/react-query'
 
 import { LoginButton } from '@/components/LoginButton'
 import { Navbar } from '@/components/navbar'
+import { NetworkIndicator } from '@/components/network-indicator'
 
 interface MyRouterContext {
   queryClient: QueryClient
@@ -74,6 +75,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
                   b(<b>UK</b>)et bot
                 </Link>
               </Text>
+              <NetworkIndicator />
 
               <div style={{ marginLeft: 'auto' }}>
                 <LoginButton />
