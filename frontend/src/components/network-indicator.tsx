@@ -8,8 +8,8 @@ export const NetworkIndicator = () => {
 
   return (
     <Group>
-      {isFetching && <IconDownload />}
-      {isMutating && <IconUpload />}
+      {isFetching && <IconDownload size="1rem" />}
+      {isMutating && <IconUpload size="1rem" />}
     </Group>
   )
 }
