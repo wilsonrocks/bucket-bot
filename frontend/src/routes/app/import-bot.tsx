@@ -22,7 +22,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import z from 'zod'
 
-export const Route = createFileRoute('/app/_app-pages/import-bot')({
+export const Route = createFileRoute('/app/import-bot')({
   component: RouteComponent,
   staticData: { title: 'Import BOT Event' },
 })

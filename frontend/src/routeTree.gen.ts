@@ -10,37 +10,36 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoggedInRouteImport } from './routes/logged-in'
+import { Route as AppRouteRouteImport } from './routes/app/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AppIndexRouteImport } from './routes/app/index'
 import { Route as SiteRankingsRouteImport } from './routes/site/rankings'
 import { Route as SiteFactionRankingsRouteImport } from './routes/site/faction-rankings'
 import { Route as SiteEventsRouteImport } from './routes/site/events'
-import { Route as DemoTanstackQueryRouteImport } from './routes/demo/tanstack-query'
+import { Route as AppVenuesRouteImport } from './routes/app/venues'
+import { Route as AppImportBotRouteImport } from './routes/app/import-bot'
 import { Route as AppIdentitiesRouteImport } from './routes/app/identities'
+import { Route as AppBotChatRouteImport } from './routes/app/bot-chat'
+import { Route as AppEventsIndexRouteImport } from './routes/app/events/index'
 import { Route as SitePlayerIdRouteImport } from './routes/site/player.$id'
 import { Route as SiteEventIdRouteImport } from './routes/site/event.$id'
-import { Route as AppAppPagesVenuesRouteImport } from './routes/app/_app-pages/venues'
-import { Route as AppAppPagesImportBotRouteImport } from './routes/app/_app-pages/import-bot'
-import { Route as AppAppPagesBotChatRouteImport } from './routes/app/_app-pages/bot-chat'
-import { Route as AppAppPagesEventsIndexRouteImport } from './routes/app/_app-pages/events/index'
-import { Route as AppAppPagesEventsNewManualRouteImport } from './routes/app/_app-pages/events/new-manual'
-import { Route as AppAppPagesEventsNewLongshanksRouteImport } from './routes/app/_app-pages/events/new-longshanks'
-import { Route as AppAppPagesEventsNewBotRouteImport } from './routes/app/_app-pages/events/new-bot'
-import { Route as AppAppPagesEventsIdEditRouteImport } from './routes/app/_app-pages/events.$id.edit'
+import { Route as AppEventsNewManualRouteImport } from './routes/app/events/new-manual'
+import { Route as AppEventsNewLongshanksRouteImport } from './routes/app/events/new-longshanks'
+import { Route as AppEventsNewBotRouteImport } from './routes/app/events/new-bot'
+import { Route as AppEventsIdEditRouteImport } from './routes/app/events.$id.edit'
 
 const LoggedInRoute = LoggedInRouteImport.update({
   id: '/logged-in',
   path: '/logged-in',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppRouteRoute = AppRouteRouteImport.update({
+  id: '/app',
+  path: '/app',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AppIndexRoute = AppIndexRouteImport.update({
-  id: '/app/',
-  path: '/app/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SiteRankingsRoute = SiteRankingsRouteImport.update({
@@ -58,15 +57,30 @@ const SiteEventsRoute = SiteEventsRouteImport.update({
   path: '/site/events',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DemoTanstackQueryRoute = DemoTanstackQueryRouteImport.update({
-  id: '/demo/tanstack-query',
-  path: '/demo/tanstack-query',
-  getParentRoute: () => rootRouteImport,
+const AppVenuesRoute = AppVenuesRouteImport.update({
+  id: '/venues',
+  path: '/venues',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppImportBotRoute = AppImportBotRouteImport.update({
+  id: '/import-bot',
+  path: '/import-bot',
+  getParentRoute: () => AppRouteRoute,
 } as any)
 const AppIdentitiesRoute = AppIdentitiesRouteImport.update({
-  id: '/app/identities',
-  path: '/app/identities',
-  getParentRoute: () => rootRouteImport,
+  id: '/identities',
+  path: '/identities',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppBotChatRoute = AppBotChatRouteImport.update({
+  id: '/bot-chat',
+  path: '/bot-chat',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppEventsIndexRoute = AppEventsIndexRouteImport.update({
+  id: '/events/',
+  path: '/events/',
+  getParentRoute: () => AppRouteRoute,
 } as any)
 const SitePlayerIdRoute = SitePlayerIdRouteImport.update({
   id: '/site/player/$id',
@@ -78,192 +92,154 @@ const SiteEventIdRoute = SiteEventIdRouteImport.update({
   path: '/site/event/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppAppPagesVenuesRoute = AppAppPagesVenuesRouteImport.update({
-  id: '/app/_app-pages/venues',
-  path: '/app/venues',
-  getParentRoute: () => rootRouteImport,
+const AppEventsNewManualRoute = AppEventsNewManualRouteImport.update({
+  id: '/events/new-manual',
+  path: '/events/new-manual',
+  getParentRoute: () => AppRouteRoute,
 } as any)
-const AppAppPagesImportBotRoute = AppAppPagesImportBotRouteImport.update({
-  id: '/app/_app-pages/import-bot',
-  path: '/app/import-bot',
-  getParentRoute: () => rootRouteImport,
+const AppEventsNewLongshanksRoute = AppEventsNewLongshanksRouteImport.update({
+  id: '/events/new-longshanks',
+  path: '/events/new-longshanks',
+  getParentRoute: () => AppRouteRoute,
 } as any)
-const AppAppPagesBotChatRoute = AppAppPagesBotChatRouteImport.update({
-  id: '/app/_app-pages/bot-chat',
-  path: '/app/bot-chat',
-  getParentRoute: () => rootRouteImport,
+const AppEventsNewBotRoute = AppEventsNewBotRouteImport.update({
+  id: '/events/new-bot',
+  path: '/events/new-bot',
+  getParentRoute: () => AppRouteRoute,
 } as any)
-const AppAppPagesEventsIndexRoute = AppAppPagesEventsIndexRouteImport.update({
-  id: '/app/_app-pages/events/',
-  path: '/app/events/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AppAppPagesEventsNewManualRoute =
-  AppAppPagesEventsNewManualRouteImport.update({
-    id: '/app/_app-pages/events/new-manual',
-    path: '/app/events/new-manual',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const AppAppPagesEventsNewLongshanksRoute =
-  AppAppPagesEventsNewLongshanksRouteImport.update({
-    id: '/app/_app-pages/events/new-longshanks',
-    path: '/app/events/new-longshanks',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const AppAppPagesEventsNewBotRoute = AppAppPagesEventsNewBotRouteImport.update({
-  id: '/app/_app-pages/events/new-bot',
-  path: '/app/events/new-bot',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AppAppPagesEventsIdEditRoute = AppAppPagesEventsIdEditRouteImport.update({
-  id: '/app/_app-pages/events/$id/edit',
-  path: '/app/events/$id/edit',
-  getParentRoute: () => rootRouteImport,
+const AppEventsIdEditRoute = AppEventsIdEditRouteImport.update({
+  id: '/events/$id/edit',
+  path: '/events/$id/edit',
+  getParentRoute: () => AppRouteRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/app': typeof AppRouteRouteWithChildren
   '/logged-in': typeof LoggedInRoute
+  '/app/bot-chat': typeof AppBotChatRoute
   '/app/identities': typeof AppIdentitiesRoute
-  '/demo/tanstack-query': typeof DemoTanstackQueryRoute
+  '/app/import-bot': typeof AppImportBotRoute
+  '/app/venues': typeof AppVenuesRoute
   '/site/events': typeof SiteEventsRoute
   '/site/faction-rankings': typeof SiteFactionRankingsRoute
   '/site/rankings': typeof SiteRankingsRoute
-  '/app': typeof AppIndexRoute
-  '/app/bot-chat': typeof AppAppPagesBotChatRoute
-  '/app/import-bot': typeof AppAppPagesImportBotRoute
-  '/app/venues': typeof AppAppPagesVenuesRoute
+  '/app/events/new-bot': typeof AppEventsNewBotRoute
+  '/app/events/new-longshanks': typeof AppEventsNewLongshanksRoute
+  '/app/events/new-manual': typeof AppEventsNewManualRoute
   '/site/event/$id': typeof SiteEventIdRoute
   '/site/player/$id': typeof SitePlayerIdRoute
-  '/app/events/new-bot': typeof AppAppPagesEventsNewBotRoute
-  '/app/events/new-longshanks': typeof AppAppPagesEventsNewLongshanksRoute
-  '/app/events/new-manual': typeof AppAppPagesEventsNewManualRoute
-  '/app/events': typeof AppAppPagesEventsIndexRoute
-  '/app/events/$id/edit': typeof AppAppPagesEventsIdEditRoute
+  '/app/events': typeof AppEventsIndexRoute
+  '/app/events/$id/edit': typeof AppEventsIdEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/app': typeof AppRouteRouteWithChildren
   '/logged-in': typeof LoggedInRoute
+  '/app/bot-chat': typeof AppBotChatRoute
   '/app/identities': typeof AppIdentitiesRoute
-  '/demo/tanstack-query': typeof DemoTanstackQueryRoute
+  '/app/import-bot': typeof AppImportBotRoute
+  '/app/venues': typeof AppVenuesRoute
   '/site/events': typeof SiteEventsRoute
   '/site/faction-rankings': typeof SiteFactionRankingsRoute
   '/site/rankings': typeof SiteRankingsRoute
-  '/app': typeof AppIndexRoute
-  '/app/bot-chat': typeof AppAppPagesBotChatRoute
-  '/app/import-bot': typeof AppAppPagesImportBotRoute
-  '/app/venues': typeof AppAppPagesVenuesRoute
+  '/app/events/new-bot': typeof AppEventsNewBotRoute
+  '/app/events/new-longshanks': typeof AppEventsNewLongshanksRoute
+  '/app/events/new-manual': typeof AppEventsNewManualRoute
   '/site/event/$id': typeof SiteEventIdRoute
   '/site/player/$id': typeof SitePlayerIdRoute
-  '/app/events/new-bot': typeof AppAppPagesEventsNewBotRoute
-  '/app/events/new-longshanks': typeof AppAppPagesEventsNewLongshanksRoute
-  '/app/events/new-manual': typeof AppAppPagesEventsNewManualRoute
-  '/app/events': typeof AppAppPagesEventsIndexRoute
-  '/app/events/$id/edit': typeof AppAppPagesEventsIdEditRoute
+  '/app/events': typeof AppEventsIndexRoute
+  '/app/events/$id/edit': typeof AppEventsIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/app': typeof AppRouteRouteWithChildren
   '/logged-in': typeof LoggedInRoute
+  '/app/bot-chat': typeof AppBotChatRoute
   '/app/identities': typeof AppIdentitiesRoute
-  '/demo/tanstack-query': typeof DemoTanstackQueryRoute
+  '/app/import-bot': typeof AppImportBotRoute
+  '/app/venues': typeof AppVenuesRoute
   '/site/events': typeof SiteEventsRoute
   '/site/faction-rankings': typeof SiteFactionRankingsRoute
   '/site/rankings': typeof SiteRankingsRoute
-  '/app/': typeof AppIndexRoute
-  '/app/_app-pages/bot-chat': typeof AppAppPagesBotChatRoute
-  '/app/_app-pages/import-bot': typeof AppAppPagesImportBotRoute
-  '/app/_app-pages/venues': typeof AppAppPagesVenuesRoute
+  '/app/events/new-bot': typeof AppEventsNewBotRoute
+  '/app/events/new-longshanks': typeof AppEventsNewLongshanksRoute
+  '/app/events/new-manual': typeof AppEventsNewManualRoute
   '/site/event/$id': typeof SiteEventIdRoute
   '/site/player/$id': typeof SitePlayerIdRoute
-  '/app/_app-pages/events/new-bot': typeof AppAppPagesEventsNewBotRoute
-  '/app/_app-pages/events/new-longshanks': typeof AppAppPagesEventsNewLongshanksRoute
-  '/app/_app-pages/events/new-manual': typeof AppAppPagesEventsNewManualRoute
-  '/app/_app-pages/events/': typeof AppAppPagesEventsIndexRoute
-  '/app/_app-pages/events/$id/edit': typeof AppAppPagesEventsIdEditRoute
+  '/app/events/': typeof AppEventsIndexRoute
+  '/app/events/$id/edit': typeof AppEventsIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/app'
     | '/logged-in'
+    | '/app/bot-chat'
     | '/app/identities'
-    | '/demo/tanstack-query'
+    | '/app/import-bot'
+    | '/app/venues'
     | '/site/events'
     | '/site/faction-rankings'
     | '/site/rankings'
-    | '/app'
-    | '/app/bot-chat'
-    | '/app/import-bot'
-    | '/app/venues'
-    | '/site/event/$id'
-    | '/site/player/$id'
     | '/app/events/new-bot'
     | '/app/events/new-longshanks'
     | '/app/events/new-manual'
+    | '/site/event/$id'
+    | '/site/player/$id'
     | '/app/events'
     | '/app/events/$id/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/app'
     | '/logged-in'
+    | '/app/bot-chat'
     | '/app/identities'
-    | '/demo/tanstack-query'
+    | '/app/import-bot'
+    | '/app/venues'
     | '/site/events'
     | '/site/faction-rankings'
     | '/site/rankings'
-    | '/app'
-    | '/app/bot-chat'
-    | '/app/import-bot'
-    | '/app/venues'
-    | '/site/event/$id'
-    | '/site/player/$id'
     | '/app/events/new-bot'
     | '/app/events/new-longshanks'
     | '/app/events/new-manual'
+    | '/site/event/$id'
+    | '/site/player/$id'
     | '/app/events'
     | '/app/events/$id/edit'
   id:
     | '__root__'
     | '/'
+    | '/app'
     | '/logged-in'
+    | '/app/bot-chat'
     | '/app/identities'
-    | '/demo/tanstack-query'
+    | '/app/import-bot'
+    | '/app/venues'
     | '/site/events'
     | '/site/faction-rankings'
     | '/site/rankings'
-    | '/app/'
-    | '/app/_app-pages/bot-chat'
-    | '/app/_app-pages/import-bot'
-    | '/app/_app-pages/venues'
+    | '/app/events/new-bot'
+    | '/app/events/new-longshanks'
+    | '/app/events/new-manual'
     | '/site/event/$id'
     | '/site/player/$id'
-    | '/app/_app-pages/events/new-bot'
-    | '/app/_app-pages/events/new-longshanks'
-    | '/app/_app-pages/events/new-manual'
-    | '/app/_app-pages/events/'
-    | '/app/_app-pages/events/$id/edit'
+    | '/app/events/'
+    | '/app/events/$id/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AppRouteRoute: typeof AppRouteRouteWithChildren
   LoggedInRoute: typeof LoggedInRoute
-  AppIdentitiesRoute: typeof AppIdentitiesRoute
-  DemoTanstackQueryRoute: typeof DemoTanstackQueryRoute
   SiteEventsRoute: typeof SiteEventsRoute
   SiteFactionRankingsRoute: typeof SiteFactionRankingsRoute
   SiteRankingsRoute: typeof SiteRankingsRoute
-  AppIndexRoute: typeof AppIndexRoute
-  AppAppPagesBotChatRoute: typeof AppAppPagesBotChatRoute
-  AppAppPagesImportBotRoute: typeof AppAppPagesImportBotRoute
-  AppAppPagesVenuesRoute: typeof AppAppPagesVenuesRoute
   SiteEventIdRoute: typeof SiteEventIdRoute
   SitePlayerIdRoute: typeof SitePlayerIdRoute
-  AppAppPagesEventsNewBotRoute: typeof AppAppPagesEventsNewBotRoute
-  AppAppPagesEventsNewLongshanksRoute: typeof AppAppPagesEventsNewLongshanksRoute
-  AppAppPagesEventsNewManualRoute: typeof AppAppPagesEventsNewManualRoute
-  AppAppPagesEventsIndexRoute: typeof AppAppPagesEventsIndexRoute
-  AppAppPagesEventsIdEditRoute: typeof AppAppPagesEventsIdEditRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -275,18 +251,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoggedInRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app': {
+      id: '/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof AppRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/app/': {
-      id: '/app/'
-      path: '/app'
-      fullPath: '/app'
-      preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/site/rankings': {
@@ -310,19 +286,40 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SiteEventsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/demo/tanstack-query': {
-      id: '/demo/tanstack-query'
-      path: '/demo/tanstack-query'
-      fullPath: '/demo/tanstack-query'
-      preLoaderRoute: typeof DemoTanstackQueryRouteImport
-      parentRoute: typeof rootRouteImport
+    '/app/venues': {
+      id: '/app/venues'
+      path: '/venues'
+      fullPath: '/app/venues'
+      preLoaderRoute: typeof AppVenuesRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/app/import-bot': {
+      id: '/app/import-bot'
+      path: '/import-bot'
+      fullPath: '/app/import-bot'
+      preLoaderRoute: typeof AppImportBotRouteImport
+      parentRoute: typeof AppRouteRoute
     }
     '/app/identities': {
       id: '/app/identities'
-      path: '/app/identities'
+      path: '/identities'
       fullPath: '/app/identities'
       preLoaderRoute: typeof AppIdentitiesRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/app/bot-chat': {
+      id: '/app/bot-chat'
+      path: '/bot-chat'
+      fullPath: '/app/bot-chat'
+      preLoaderRoute: typeof AppBotChatRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/app/events/': {
+      id: '/app/events/'
+      path: '/events'
+      fullPath: '/app/events'
+      preLoaderRoute: typeof AppEventsIndexRouteImport
+      parentRoute: typeof AppRouteRoute
     }
     '/site/player/$id': {
       id: '/site/player/$id'
@@ -338,84 +335,74 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SiteEventIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/app/_app-pages/venues': {
-      id: '/app/_app-pages/venues'
-      path: '/app/venues'
-      fullPath: '/app/venues'
-      preLoaderRoute: typeof AppAppPagesVenuesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/app/_app-pages/import-bot': {
-      id: '/app/_app-pages/import-bot'
-      path: '/app/import-bot'
-      fullPath: '/app/import-bot'
-      preLoaderRoute: typeof AppAppPagesImportBotRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/app/_app-pages/bot-chat': {
-      id: '/app/_app-pages/bot-chat'
-      path: '/app/bot-chat'
-      fullPath: '/app/bot-chat'
-      preLoaderRoute: typeof AppAppPagesBotChatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/app/_app-pages/events/': {
-      id: '/app/_app-pages/events/'
-      path: '/app/events'
-      fullPath: '/app/events'
-      preLoaderRoute: typeof AppAppPagesEventsIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/app/_app-pages/events/new-manual': {
-      id: '/app/_app-pages/events/new-manual'
-      path: '/app/events/new-manual'
+    '/app/events/new-manual': {
+      id: '/app/events/new-manual'
+      path: '/events/new-manual'
       fullPath: '/app/events/new-manual'
-      preLoaderRoute: typeof AppAppPagesEventsNewManualRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AppEventsNewManualRouteImport
+      parentRoute: typeof AppRouteRoute
     }
-    '/app/_app-pages/events/new-longshanks': {
-      id: '/app/_app-pages/events/new-longshanks'
-      path: '/app/events/new-longshanks'
+    '/app/events/new-longshanks': {
+      id: '/app/events/new-longshanks'
+      path: '/events/new-longshanks'
       fullPath: '/app/events/new-longshanks'
-      preLoaderRoute: typeof AppAppPagesEventsNewLongshanksRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AppEventsNewLongshanksRouteImport
+      parentRoute: typeof AppRouteRoute
     }
-    '/app/_app-pages/events/new-bot': {
-      id: '/app/_app-pages/events/new-bot'
-      path: '/app/events/new-bot'
+    '/app/events/new-bot': {
+      id: '/app/events/new-bot'
+      path: '/events/new-bot'
       fullPath: '/app/events/new-bot'
-      preLoaderRoute: typeof AppAppPagesEventsNewBotRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AppEventsNewBotRouteImport
+      parentRoute: typeof AppRouteRoute
     }
-    '/app/_app-pages/events/$id/edit': {
-      id: '/app/_app-pages/events/$id/edit'
-      path: '/app/events/$id/edit'
+    '/app/events/$id/edit': {
+      id: '/app/events/$id/edit'
+      path: '/events/$id/edit'
       fullPath: '/app/events/$id/edit'
-      preLoaderRoute: typeof AppAppPagesEventsIdEditRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AppEventsIdEditRouteImport
+      parentRoute: typeof AppRouteRoute
     }
   }
 }
 
+interface AppRouteRouteChildren {
+  AppBotChatRoute: typeof AppBotChatRoute
+  AppIdentitiesRoute: typeof AppIdentitiesRoute
+  AppImportBotRoute: typeof AppImportBotRoute
+  AppVenuesRoute: typeof AppVenuesRoute
+  AppEventsNewBotRoute: typeof AppEventsNewBotRoute
+  AppEventsNewLongshanksRoute: typeof AppEventsNewLongshanksRoute
+  AppEventsNewManualRoute: typeof AppEventsNewManualRoute
+  AppEventsIndexRoute: typeof AppEventsIndexRoute
+  AppEventsIdEditRoute: typeof AppEventsIdEditRoute
+}
+
+const AppRouteRouteChildren: AppRouteRouteChildren = {
+  AppBotChatRoute: AppBotChatRoute,
+  AppIdentitiesRoute: AppIdentitiesRoute,
+  AppImportBotRoute: AppImportBotRoute,
+  AppVenuesRoute: AppVenuesRoute,
+  AppEventsNewBotRoute: AppEventsNewBotRoute,
+  AppEventsNewLongshanksRoute: AppEventsNewLongshanksRoute,
+  AppEventsNewManualRoute: AppEventsNewManualRoute,
+  AppEventsIndexRoute: AppEventsIndexRoute,
+  AppEventsIdEditRoute: AppEventsIdEditRoute,
+}
+
+const AppRouteRouteWithChildren = AppRouteRoute._addFileChildren(
+  AppRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AppRouteRoute: AppRouteRouteWithChildren,
   LoggedInRoute: LoggedInRoute,
-  AppIdentitiesRoute: AppIdentitiesRoute,
-  DemoTanstackQueryRoute: DemoTanstackQueryRoute,
   SiteEventsRoute: SiteEventsRoute,
   SiteFactionRankingsRoute: SiteFactionRankingsRoute,
   SiteRankingsRoute: SiteRankingsRoute,
-  AppIndexRoute: AppIndexRoute,
-  AppAppPagesBotChatRoute: AppAppPagesBotChatRoute,
-  AppAppPagesImportBotRoute: AppAppPagesImportBotRoute,
-  AppAppPagesVenuesRoute: AppAppPagesVenuesRoute,
   SiteEventIdRoute: SiteEventIdRoute,
   SitePlayerIdRoute: SitePlayerIdRoute,
-  AppAppPagesEventsNewBotRoute: AppAppPagesEventsNewBotRoute,
-  AppAppPagesEventsNewLongshanksRoute: AppAppPagesEventsNewLongshanksRoute,
-  AppAppPagesEventsNewManualRoute: AppAppPagesEventsNewManualRoute,
-  AppAppPagesEventsIndexRoute: AppAppPagesEventsIndexRoute,
-  AppAppPagesEventsIdEditRoute: AppAppPagesEventsIdEditRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

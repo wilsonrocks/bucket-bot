@@ -1,6 +1,6 @@
-import { createFileRoute, redirect } from '@tanstack/react-router'
+import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
 
-export const Route = createFileRoute('/app/')({
+export const Route = createFileRoute('/app')({
   beforeLoad() {
     const authString = localStorage.getItem('auth')
 
@@ -14,5 +14,8 @@ export const Route = createFileRoute('/app/')({
       console.error('Bad auth in storage', authString)
       throw redirect({ to: '/' })
     }
+  },
+  component: () => {
+    return <Outlet />
   },
 })

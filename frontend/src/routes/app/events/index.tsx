@@ -6,7 +6,7 @@ import { Route as NewLongshanksRoute } from './new-longshanks'
 import { useGetAllTourneys } from '@/hooks/useApi'
 import { Link } from '@/components/link'
 
-export const Route = createFileRoute('/app/_app-pages/events/')({
+export const Route = createFileRoute('/app/events/')({
   component: RouteComponent,
 })
 

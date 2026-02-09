@@ -7,10 +7,10 @@ import {
   usePostFactionRankingsToDiscordMutation,
   usePostRankingsToDiscordMutation,
 } from '@/hooks/useApi'
-import { Route as BotChat } from '@/routes/app/_app-pages/bot-chat'
-import { Route as EventsAppRoute } from '@/routes/app/_app-pages/events/index.tsx'
-import { Route as ImportBotRoute } from '@/routes/app/_app-pages/import-bot'
-import { Route as VenuesRoute } from '@/routes/app/_app-pages/venues'
+import { Route as BotChat } from '@/routes/app/bot-chat'
+import { Route as EventsAppRoute } from '@/routes/app/events'
+import { Route as ImportBotRoute } from '@/routes/app/import-bot'
+import { Route as VenuesRoute } from '@/routes/app/venues'
 import { Route as IdentitiesRoute } from '@/routes/app/identities'
 import { Route as EventsSiteRoute } from '@/routes/site/events'
 import { Route as FactionRankingsRoute } from '@/routes/site/faction-rankings'
@@ -41,15 +41,15 @@ export const Navbar = () => {
   return (
     <ScrollArea>
       <Stack>
-        <AppNavLink to={EventsSiteRoute.path} label="Events" />
-        <AppNavLink to={RankingsRoute.path} label="Player Rankings" />
-        <AppNavLink to={FactionRankingsRoute.path} label="Faction Rankings" />
+        <AppNavLink to={EventsSiteRoute.to} label="Events" />
+        <AppNavLink to={RankingsRoute.to} label="Player Rankings" />
+        <AppNavLink to={FactionRankingsRoute.to} label="Faction Rankings" />
 
         {hasRole && (
           <>
             <Divider />
             <AppNavLink
-              to={IdentitiesRoute.path}
+              to={IdentitiesRoute.to}
               label={
                 <Group gap={3}>
                   <span>Identities</span>
@@ -62,10 +62,10 @@ export const Navbar = () => {
               }
             />
 
-            <AppNavLink to={EventsAppRoute.path} label="Edit Events" />
-            <AppNavLink to={VenuesRoute.path} label="Venue" />
-            <AppNavLink to={BotChat.path} label="Bot Chat" />
-            <AppNavLink to={ImportBotRoute.path} label="Import BOT event" />
+            <AppNavLink to={EventsAppRoute.to} label="Edit Events" />
+            <AppNavLink to={VenuesRoute.to} label="Venue" />
+            <AppNavLink to={BotChat.to} label="Bot Chat" />
+            <AppNavLink to={ImportBotRoute.to} label="Import BOT event" />
             <Button
               disabled={generateRankings.isPending}
               onClick={() => {

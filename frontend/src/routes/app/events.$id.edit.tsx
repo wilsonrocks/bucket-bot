@@ -27,7 +27,7 @@ import z from 'zod'
 
 const eventParamsValidator = z.object({ id: z.coerce.number() })
 
-export const Route = createFileRoute('/app/_app-pages/events/$id/edit')({
+export const Route = createFileRoute('/app/events/$id/edit')({
   component: RouteComponent,
   params: eventParamsValidator,
 })
