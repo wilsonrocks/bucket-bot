@@ -7,14 +7,14 @@ import {
   usePostFactionRankingsToDiscordMutation,
   usePostRankingsToDiscordMutation,
 } from '@/hooks/useApi'
-import { Route as BotChat } from '@/routes/app/bot-chat'
-import { Route as EventsAppRoute } from '@/routes/app/events'
-import { Route as ImportBotRoute } from '@/routes/app/import-bot'
-import { Route as VenuesRoute } from '@/routes/app/venues'
-import { Route as IdentitiesRoute } from '@/routes/app/identities'
-import { Route as EventsSiteRoute } from '@/routes/site/events'
-import { Route as FactionRankingsRoute } from '@/routes/site/faction-rankings'
-import { Route as RankingsRoute } from '@/routes/site/rankings'
+import { Route as BotChat } from '@/routes/app/_app-pages/bot-chat'
+import { Route as EventsAppRoute } from '@/routes/app/_app-pages/events'
+import { Route as ImportBotRoute } from '@/routes/app/_app-pages/import-bot'
+import { Route as VenuesRoute } from '@/routes/app/_app-pages/venues'
+import { Route as IdentitiesRoute } from '@/routes/app/_app-pages/identities'
+import { Route as EventsSiteRoute } from '@/routes/site/_site-pages/events'
+import { Route as FactionRankingsRoute } from '@/routes/site/_site-pages/faction-rankings'
+import { Route as RankingsRoute } from '@/routes/site/_site-pages/rankings'
 import {
   Badge,
   Button,

@@ -1,5 +1,5 @@
 import { Link } from '@/components/link'
-import { Route as RankingsRoute } from '@/routes/site/rankings'
+import { Route as RankingsRoute } from '@/routes/site/_site-pages/rankings'
 import { Divider, Text } from '@mantine/core'
 import { createFileRoute } from '@tanstack/react-router'
 

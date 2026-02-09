@@ -10,26 +10,32 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoggedInRouteImport } from './routes/logged-in'
+import { Route as SiteRouteRouteImport } from './routes/site/route'
 import { Route as AppRouteRouteImport } from './routes/app/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as SiteRankingsRouteImport } from './routes/site/rankings'
-import { Route as SiteFactionRankingsRouteImport } from './routes/site/faction-rankings'
-import { Route as SiteEventsRouteImport } from './routes/site/events'
-import { Route as AppVenuesRouteImport } from './routes/app/venues'
-import { Route as AppImportBotRouteImport } from './routes/app/import-bot'
-import { Route as AppIdentitiesRouteImport } from './routes/app/identities'
-import { Route as AppBotChatRouteImport } from './routes/app/bot-chat'
-import { Route as AppEventsIndexRouteImport } from './routes/app/events/index'
-import { Route as SitePlayerIdRouteImport } from './routes/site/player.$id'
-import { Route as SiteEventIdRouteImport } from './routes/site/event.$id'
-import { Route as AppEventsNewManualRouteImport } from './routes/app/events/new-manual'
-import { Route as AppEventsNewLongshanksRouteImport } from './routes/app/events/new-longshanks'
-import { Route as AppEventsNewBotRouteImport } from './routes/app/events/new-bot'
-import { Route as AppEventsIdEditRouteImport } from './routes/app/events.$id.edit'
+import { Route as SiteSitePagesRankingsRouteImport } from './routes/site/_site-pages/rankings'
+import { Route as SiteSitePagesFactionRankingsRouteImport } from './routes/site/_site-pages/faction-rankings'
+import { Route as SiteSitePagesEventsRouteImport } from './routes/site/_site-pages/events'
+import { Route as AppAppPagesVenuesRouteImport } from './routes/app/_app-pages/venues'
+import { Route as AppAppPagesImportBotRouteImport } from './routes/app/_app-pages/import-bot'
+import { Route as AppAppPagesIdentitiesRouteImport } from './routes/app/_app-pages/identities'
+import { Route as AppAppPagesBotChatRouteImport } from './routes/app/_app-pages/bot-chat'
+import { Route as AppAppPagesEventsIndexRouteImport } from './routes/app/_app-pages/events/index'
+import { Route as SiteSitePagesPlayerIdRouteImport } from './routes/site/_site-pages/player.$id'
+import { Route as SiteSitePagesEventIdRouteImport } from './routes/site/_site-pages/event.$id'
+import { Route as AppAppPagesEventsNewManualRouteImport } from './routes/app/_app-pages/events/new-manual'
+import { Route as AppAppPagesEventsNewLongshanksRouteImport } from './routes/app/_app-pages/events/new-longshanks'
+import { Route as AppAppPagesEventsNewBotRouteImport } from './routes/app/_app-pages/events/new-bot'
+import { Route as AppAppPagesEventsIdEditRouteImport } from './routes/app/_app-pages/events.$id.edit'
 
 const LoggedInRoute = LoggedInRouteImport.update({
   id: '/logged-in',
   path: '/logged-in',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SiteRouteRoute = SiteRouteRouteImport.update({
+  id: '/site',
+  path: '/site',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppRouteRoute = AppRouteRouteImport.update({
@@ -42,73 +48,76 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SiteRankingsRoute = SiteRankingsRouteImport.update({
-  id: '/site/rankings',
-  path: '/site/rankings',
-  getParentRoute: () => rootRouteImport,
+const SiteSitePagesRankingsRoute = SiteSitePagesRankingsRouteImport.update({
+  id: '/_site-pages/rankings',
+  path: '/rankings',
+  getParentRoute: () => SiteRouteRoute,
 } as any)
-const SiteFactionRankingsRoute = SiteFactionRankingsRouteImport.update({
-  id: '/site/faction-rankings',
-  path: '/site/faction-rankings',
-  getParentRoute: () => rootRouteImport,
+const SiteSitePagesFactionRankingsRoute =
+  SiteSitePagesFactionRankingsRouteImport.update({
+    id: '/_site-pages/faction-rankings',
+    path: '/faction-rankings',
+    getParentRoute: () => SiteRouteRoute,
+  } as any)
+const SiteSitePagesEventsRoute = SiteSitePagesEventsRouteImport.update({
+  id: '/_site-pages/events',
+  path: '/events',
+  getParentRoute: () => SiteRouteRoute,
 } as any)
-const SiteEventsRoute = SiteEventsRouteImport.update({
-  id: '/site/events',
-  path: '/site/events',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AppVenuesRoute = AppVenuesRouteImport.update({
-  id: '/venues',
+const AppAppPagesVenuesRoute = AppAppPagesVenuesRouteImport.update({
+  id: '/_app-pages/venues',
   path: '/venues',
   getParentRoute: () => AppRouteRoute,
 } as any)
-const AppImportBotRoute = AppImportBotRouteImport.update({
-  id: '/import-bot',
+const AppAppPagesImportBotRoute = AppAppPagesImportBotRouteImport.update({
+  id: '/_app-pages/import-bot',
   path: '/import-bot',
   getParentRoute: () => AppRouteRoute,
 } as any)
-const AppIdentitiesRoute = AppIdentitiesRouteImport.update({
-  id: '/identities',
+const AppAppPagesIdentitiesRoute = AppAppPagesIdentitiesRouteImport.update({
+  id: '/_app-pages/identities',
   path: '/identities',
   getParentRoute: () => AppRouteRoute,
 } as any)
-const AppBotChatRoute = AppBotChatRouteImport.update({
-  id: '/bot-chat',
+const AppAppPagesBotChatRoute = AppAppPagesBotChatRouteImport.update({
+  id: '/_app-pages/bot-chat',
   path: '/bot-chat',
   getParentRoute: () => AppRouteRoute,
 } as any)
-const AppEventsIndexRoute = AppEventsIndexRouteImport.update({
-  id: '/events/',
+const AppAppPagesEventsIndexRoute = AppAppPagesEventsIndexRouteImport.update({
+  id: '/_app-pages/events/',
   path: '/events/',
   getParentRoute: () => AppRouteRoute,
 } as any)
-const SitePlayerIdRoute = SitePlayerIdRouteImport.update({
-  id: '/site/player/$id',
-  path: '/site/player/$id',
-  getParentRoute: () => rootRouteImport,
+const SiteSitePagesPlayerIdRoute = SiteSitePagesPlayerIdRouteImport.update({
+  id: '/_site-pages/player/$id',
+  path: '/player/$id',
+  getParentRoute: () => SiteRouteRoute,
 } as any)
-const SiteEventIdRoute = SiteEventIdRouteImport.update({
-  id: '/site/event/$id',
-  path: '/site/event/$id',
-  getParentRoute: () => rootRouteImport,
+const SiteSitePagesEventIdRoute = SiteSitePagesEventIdRouteImport.update({
+  id: '/_site-pages/event/$id',
+  path: '/event/$id',
+  getParentRoute: () => SiteRouteRoute,
 } as any)
-const AppEventsNewManualRoute = AppEventsNewManualRouteImport.update({
-  id: '/events/new-manual',
-  path: '/events/new-manual',
-  getParentRoute: () => AppRouteRoute,
-} as any)
-const AppEventsNewLongshanksRoute = AppEventsNewLongshanksRouteImport.update({
-  id: '/events/new-longshanks',
-  path: '/events/new-longshanks',
-  getParentRoute: () => AppRouteRoute,
-} as any)
-const AppEventsNewBotRoute = AppEventsNewBotRouteImport.update({
-  id: '/events/new-bot',
+const AppAppPagesEventsNewManualRoute =
+  AppAppPagesEventsNewManualRouteImport.update({
+    id: '/_app-pages/events/new-manual',
+    path: '/events/new-manual',
+    getParentRoute: () => AppRouteRoute,
+  } as any)
+const AppAppPagesEventsNewLongshanksRoute =
+  AppAppPagesEventsNewLongshanksRouteImport.update({
+    id: '/_app-pages/events/new-longshanks',
+    path: '/events/new-longshanks',
+    getParentRoute: () => AppRouteRoute,
+  } as any)
+const AppAppPagesEventsNewBotRoute = AppAppPagesEventsNewBotRouteImport.update({
+  id: '/_app-pages/events/new-bot',
   path: '/events/new-bot',
   getParentRoute: () => AppRouteRoute,
 } as any)
-const AppEventsIdEditRoute = AppEventsIdEditRouteImport.update({
-  id: '/events/$id/edit',
+const AppAppPagesEventsIdEditRoute = AppAppPagesEventsIdEditRouteImport.update({
+  id: '/_app-pages/events/$id/edit',
   path: '/events/$id/edit',
   getParentRoute: () => AppRouteRoute,
 } as any)
@@ -116,66 +125,70 @@ const AppEventsIdEditRoute = AppEventsIdEditRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteRouteWithChildren
+  '/site': typeof SiteRouteRouteWithChildren
   '/logged-in': typeof LoggedInRoute
-  '/app/bot-chat': typeof AppBotChatRoute
-  '/app/identities': typeof AppIdentitiesRoute
-  '/app/import-bot': typeof AppImportBotRoute
-  '/app/venues': typeof AppVenuesRoute
-  '/site/events': typeof SiteEventsRoute
-  '/site/faction-rankings': typeof SiteFactionRankingsRoute
-  '/site/rankings': typeof SiteRankingsRoute
-  '/app/events/new-bot': typeof AppEventsNewBotRoute
-  '/app/events/new-longshanks': typeof AppEventsNewLongshanksRoute
-  '/app/events/new-manual': typeof AppEventsNewManualRoute
-  '/site/event/$id': typeof SiteEventIdRoute
-  '/site/player/$id': typeof SitePlayerIdRoute
-  '/app/events': typeof AppEventsIndexRoute
-  '/app/events/$id/edit': typeof AppEventsIdEditRoute
+  '/app/bot-chat': typeof AppAppPagesBotChatRoute
+  '/app/identities': typeof AppAppPagesIdentitiesRoute
+  '/app/import-bot': typeof AppAppPagesImportBotRoute
+  '/app/venues': typeof AppAppPagesVenuesRoute
+  '/site/events': typeof SiteSitePagesEventsRoute
+  '/site/faction-rankings': typeof SiteSitePagesFactionRankingsRoute
+  '/site/rankings': typeof SiteSitePagesRankingsRoute
+  '/app/events/new-bot': typeof AppAppPagesEventsNewBotRoute
+  '/app/events/new-longshanks': typeof AppAppPagesEventsNewLongshanksRoute
+  '/app/events/new-manual': typeof AppAppPagesEventsNewManualRoute
+  '/site/event/$id': typeof SiteSitePagesEventIdRoute
+  '/site/player/$id': typeof SiteSitePagesPlayerIdRoute
+  '/app/events': typeof AppAppPagesEventsIndexRoute
+  '/app/events/$id/edit': typeof AppAppPagesEventsIdEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/app': typeof AppRouteRouteWithChildren
+  '/site': typeof SiteRouteRouteWithChildren
   '/logged-in': typeof LoggedInRoute
-  '/app/bot-chat': typeof AppBotChatRoute
-  '/app/identities': typeof AppIdentitiesRoute
-  '/app/import-bot': typeof AppImportBotRoute
-  '/app/venues': typeof AppVenuesRoute
-  '/site/events': typeof SiteEventsRoute
-  '/site/faction-rankings': typeof SiteFactionRankingsRoute
-  '/site/rankings': typeof SiteRankingsRoute
-  '/app/events/new-bot': typeof AppEventsNewBotRoute
-  '/app/events/new-longshanks': typeof AppEventsNewLongshanksRoute
-  '/app/events/new-manual': typeof AppEventsNewManualRoute
-  '/site/event/$id': typeof SiteEventIdRoute
-  '/site/player/$id': typeof SitePlayerIdRoute
-  '/app/events': typeof AppEventsIndexRoute
-  '/app/events/$id/edit': typeof AppEventsIdEditRoute
+  '/app/bot-chat': typeof AppAppPagesBotChatRoute
+  '/app/identities': typeof AppAppPagesIdentitiesRoute
+  '/app/import-bot': typeof AppAppPagesImportBotRoute
+  '/app/venues': typeof AppAppPagesVenuesRoute
+  '/site/events': typeof SiteSitePagesEventsRoute
+  '/site/faction-rankings': typeof SiteSitePagesFactionRankingsRoute
+  '/site/rankings': typeof SiteSitePagesRankingsRoute
+  '/app/events/new-bot': typeof AppAppPagesEventsNewBotRoute
+  '/app/events/new-longshanks': typeof AppAppPagesEventsNewLongshanksRoute
+  '/app/events/new-manual': typeof AppAppPagesEventsNewManualRoute
+  '/site/event/$id': typeof SiteSitePagesEventIdRoute
+  '/site/player/$id': typeof SiteSitePagesPlayerIdRoute
+  '/app/events': typeof AppAppPagesEventsIndexRoute
+  '/app/events/$id/edit': typeof AppAppPagesEventsIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/app': typeof AppRouteRouteWithChildren
+  '/site': typeof SiteRouteRouteWithChildren
   '/logged-in': typeof LoggedInRoute
-  '/app/bot-chat': typeof AppBotChatRoute
-  '/app/identities': typeof AppIdentitiesRoute
-  '/app/import-bot': typeof AppImportBotRoute
-  '/app/venues': typeof AppVenuesRoute
-  '/site/events': typeof SiteEventsRoute
-  '/site/faction-rankings': typeof SiteFactionRankingsRoute
-  '/site/rankings': typeof SiteRankingsRoute
-  '/app/events/new-bot': typeof AppEventsNewBotRoute
-  '/app/events/new-longshanks': typeof AppEventsNewLongshanksRoute
-  '/app/events/new-manual': typeof AppEventsNewManualRoute
-  '/site/event/$id': typeof SiteEventIdRoute
-  '/site/player/$id': typeof SitePlayerIdRoute
-  '/app/events/': typeof AppEventsIndexRoute
-  '/app/events/$id/edit': typeof AppEventsIdEditRoute
+  '/app/_app-pages/bot-chat': typeof AppAppPagesBotChatRoute
+  '/app/_app-pages/identities': typeof AppAppPagesIdentitiesRoute
+  '/app/_app-pages/import-bot': typeof AppAppPagesImportBotRoute
+  '/app/_app-pages/venues': typeof AppAppPagesVenuesRoute
+  '/site/_site-pages/events': typeof SiteSitePagesEventsRoute
+  '/site/_site-pages/faction-rankings': typeof SiteSitePagesFactionRankingsRoute
+  '/site/_site-pages/rankings': typeof SiteSitePagesRankingsRoute
+  '/app/_app-pages/events/new-bot': typeof AppAppPagesEventsNewBotRoute
+  '/app/_app-pages/events/new-longshanks': typeof AppAppPagesEventsNewLongshanksRoute
+  '/app/_app-pages/events/new-manual': typeof AppAppPagesEventsNewManualRoute
+  '/site/_site-pages/event/$id': typeof SiteSitePagesEventIdRoute
+  '/site/_site-pages/player/$id': typeof SiteSitePagesPlayerIdRoute
+  '/app/_app-pages/events/': typeof AppAppPagesEventsIndexRoute
+  '/app/_app-pages/events/$id/edit': typeof AppAppPagesEventsIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/app'
+    | '/site'
     | '/logged-in'
     | '/app/bot-chat'
     | '/app/identities'
@@ -195,6 +208,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/app'
+    | '/site'
     | '/logged-in'
     | '/app/bot-chat'
     | '/app/identities'
@@ -214,32 +228,29 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/app'
+    | '/site'
     | '/logged-in'
-    | '/app/bot-chat'
-    | '/app/identities'
-    | '/app/import-bot'
-    | '/app/venues'
-    | '/site/events'
-    | '/site/faction-rankings'
-    | '/site/rankings'
-    | '/app/events/new-bot'
-    | '/app/events/new-longshanks'
-    | '/app/events/new-manual'
-    | '/site/event/$id'
-    | '/site/player/$id'
-    | '/app/events/'
-    | '/app/events/$id/edit'
+    | '/app/_app-pages/bot-chat'
+    | '/app/_app-pages/identities'
+    | '/app/_app-pages/import-bot'
+    | '/app/_app-pages/venues'
+    | '/site/_site-pages/events'
+    | '/site/_site-pages/faction-rankings'
+    | '/site/_site-pages/rankings'
+    | '/app/_app-pages/events/new-bot'
+    | '/app/_app-pages/events/new-longshanks'
+    | '/app/_app-pages/events/new-manual'
+    | '/site/_site-pages/event/$id'
+    | '/site/_site-pages/player/$id'
+    | '/app/_app-pages/events/'
+    | '/app/_app-pages/events/$id/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRouteRoute: typeof AppRouteRouteWithChildren
+  SiteRouteRoute: typeof SiteRouteRouteWithChildren
   LoggedInRoute: typeof LoggedInRoute
-  SiteEventsRoute: typeof SiteEventsRoute
-  SiteFactionRankingsRoute: typeof SiteFactionRankingsRoute
-  SiteRankingsRoute: typeof SiteRankingsRoute
-  SiteEventIdRoute: typeof SiteEventIdRoute
-  SitePlayerIdRoute: typeof SitePlayerIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -249,6 +260,13 @@ declare module '@tanstack/react-router' {
       path: '/logged-in'
       fullPath: '/logged-in'
       preLoaderRoute: typeof LoggedInRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/site': {
+      id: '/site'
+      path: '/site'
+      fullPath: '/site'
+      preLoaderRoute: typeof SiteRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app': {
@@ -265,144 +283,160 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/site/rankings': {
-      id: '/site/rankings'
-      path: '/site/rankings'
+    '/site/_site-pages/rankings': {
+      id: '/site/_site-pages/rankings'
+      path: '/rankings'
       fullPath: '/site/rankings'
-      preLoaderRoute: typeof SiteRankingsRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof SiteSitePagesRankingsRouteImport
+      parentRoute: typeof SiteRouteRoute
     }
-    '/site/faction-rankings': {
-      id: '/site/faction-rankings'
-      path: '/site/faction-rankings'
+    '/site/_site-pages/faction-rankings': {
+      id: '/site/_site-pages/faction-rankings'
+      path: '/faction-rankings'
       fullPath: '/site/faction-rankings'
-      preLoaderRoute: typeof SiteFactionRankingsRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof SiteSitePagesFactionRankingsRouteImport
+      parentRoute: typeof SiteRouteRoute
     }
-    '/site/events': {
-      id: '/site/events'
-      path: '/site/events'
+    '/site/_site-pages/events': {
+      id: '/site/_site-pages/events'
+      path: '/events'
       fullPath: '/site/events'
-      preLoaderRoute: typeof SiteEventsRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof SiteSitePagesEventsRouteImport
+      parentRoute: typeof SiteRouteRoute
     }
-    '/app/venues': {
-      id: '/app/venues'
+    '/app/_app-pages/venues': {
+      id: '/app/_app-pages/venues'
       path: '/venues'
       fullPath: '/app/venues'
-      preLoaderRoute: typeof AppVenuesRouteImport
+      preLoaderRoute: typeof AppAppPagesVenuesRouteImport
       parentRoute: typeof AppRouteRoute
     }
-    '/app/import-bot': {
-      id: '/app/import-bot'
+    '/app/_app-pages/import-bot': {
+      id: '/app/_app-pages/import-bot'
       path: '/import-bot'
       fullPath: '/app/import-bot'
-      preLoaderRoute: typeof AppImportBotRouteImport
+      preLoaderRoute: typeof AppAppPagesImportBotRouteImport
       parentRoute: typeof AppRouteRoute
     }
-    '/app/identities': {
-      id: '/app/identities'
+    '/app/_app-pages/identities': {
+      id: '/app/_app-pages/identities'
       path: '/identities'
       fullPath: '/app/identities'
-      preLoaderRoute: typeof AppIdentitiesRouteImport
+      preLoaderRoute: typeof AppAppPagesIdentitiesRouteImport
       parentRoute: typeof AppRouteRoute
     }
-    '/app/bot-chat': {
-      id: '/app/bot-chat'
+    '/app/_app-pages/bot-chat': {
+      id: '/app/_app-pages/bot-chat'
       path: '/bot-chat'
       fullPath: '/app/bot-chat'
-      preLoaderRoute: typeof AppBotChatRouteImport
+      preLoaderRoute: typeof AppAppPagesBotChatRouteImport
       parentRoute: typeof AppRouteRoute
     }
-    '/app/events/': {
-      id: '/app/events/'
+    '/app/_app-pages/events/': {
+      id: '/app/_app-pages/events/'
       path: '/events'
       fullPath: '/app/events'
-      preLoaderRoute: typeof AppEventsIndexRouteImport
+      preLoaderRoute: typeof AppAppPagesEventsIndexRouteImport
       parentRoute: typeof AppRouteRoute
     }
-    '/site/player/$id': {
-      id: '/site/player/$id'
-      path: '/site/player/$id'
+    '/site/_site-pages/player/$id': {
+      id: '/site/_site-pages/player/$id'
+      path: '/player/$id'
       fullPath: '/site/player/$id'
-      preLoaderRoute: typeof SitePlayerIdRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof SiteSitePagesPlayerIdRouteImport
+      parentRoute: typeof SiteRouteRoute
     }
-    '/site/event/$id': {
-      id: '/site/event/$id'
-      path: '/site/event/$id'
+    '/site/_site-pages/event/$id': {
+      id: '/site/_site-pages/event/$id'
+      path: '/event/$id'
       fullPath: '/site/event/$id'
-      preLoaderRoute: typeof SiteEventIdRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof SiteSitePagesEventIdRouteImport
+      parentRoute: typeof SiteRouteRoute
     }
-    '/app/events/new-manual': {
-      id: '/app/events/new-manual'
+    '/app/_app-pages/events/new-manual': {
+      id: '/app/_app-pages/events/new-manual'
       path: '/events/new-manual'
       fullPath: '/app/events/new-manual'
-      preLoaderRoute: typeof AppEventsNewManualRouteImport
+      preLoaderRoute: typeof AppAppPagesEventsNewManualRouteImport
       parentRoute: typeof AppRouteRoute
     }
-    '/app/events/new-longshanks': {
-      id: '/app/events/new-longshanks'
+    '/app/_app-pages/events/new-longshanks': {
+      id: '/app/_app-pages/events/new-longshanks'
       path: '/events/new-longshanks'
       fullPath: '/app/events/new-longshanks'
-      preLoaderRoute: typeof AppEventsNewLongshanksRouteImport
+      preLoaderRoute: typeof AppAppPagesEventsNewLongshanksRouteImport
       parentRoute: typeof AppRouteRoute
     }
-    '/app/events/new-bot': {
-      id: '/app/events/new-bot'
+    '/app/_app-pages/events/new-bot': {
+      id: '/app/_app-pages/events/new-bot'
       path: '/events/new-bot'
       fullPath: '/app/events/new-bot'
-      preLoaderRoute: typeof AppEventsNewBotRouteImport
+      preLoaderRoute: typeof AppAppPagesEventsNewBotRouteImport
       parentRoute: typeof AppRouteRoute
     }
-    '/app/events/$id/edit': {
-      id: '/app/events/$id/edit'
+    '/app/_app-pages/events/$id/edit': {
+      id: '/app/_app-pages/events/$id/edit'
       path: '/events/$id/edit'
       fullPath: '/app/events/$id/edit'
-      preLoaderRoute: typeof AppEventsIdEditRouteImport
+      preLoaderRoute: typeof AppAppPagesEventsIdEditRouteImport
       parentRoute: typeof AppRouteRoute
     }
   }
 }
 
 interface AppRouteRouteChildren {
-  AppBotChatRoute: typeof AppBotChatRoute
-  AppIdentitiesRoute: typeof AppIdentitiesRoute
-  AppImportBotRoute: typeof AppImportBotRoute
-  AppVenuesRoute: typeof AppVenuesRoute
-  AppEventsNewBotRoute: typeof AppEventsNewBotRoute
-  AppEventsNewLongshanksRoute: typeof AppEventsNewLongshanksRoute
-  AppEventsNewManualRoute: typeof AppEventsNewManualRoute
-  AppEventsIndexRoute: typeof AppEventsIndexRoute
-  AppEventsIdEditRoute: typeof AppEventsIdEditRoute
+  AppAppPagesBotChatRoute: typeof AppAppPagesBotChatRoute
+  AppAppPagesIdentitiesRoute: typeof AppAppPagesIdentitiesRoute
+  AppAppPagesImportBotRoute: typeof AppAppPagesImportBotRoute
+  AppAppPagesVenuesRoute: typeof AppAppPagesVenuesRoute
+  AppAppPagesEventsNewBotRoute: typeof AppAppPagesEventsNewBotRoute
+  AppAppPagesEventsNewLongshanksRoute: typeof AppAppPagesEventsNewLongshanksRoute
+  AppAppPagesEventsNewManualRoute: typeof AppAppPagesEventsNewManualRoute
+  AppAppPagesEventsIndexRoute: typeof AppAppPagesEventsIndexRoute
+  AppAppPagesEventsIdEditRoute: typeof AppAppPagesEventsIdEditRoute
 }
 
 const AppRouteRouteChildren: AppRouteRouteChildren = {
-  AppBotChatRoute: AppBotChatRoute,
-  AppIdentitiesRoute: AppIdentitiesRoute,
-  AppImportBotRoute: AppImportBotRoute,
-  AppVenuesRoute: AppVenuesRoute,
-  AppEventsNewBotRoute: AppEventsNewBotRoute,
-  AppEventsNewLongshanksRoute: AppEventsNewLongshanksRoute,
-  AppEventsNewManualRoute: AppEventsNewManualRoute,
-  AppEventsIndexRoute: AppEventsIndexRoute,
-  AppEventsIdEditRoute: AppEventsIdEditRoute,
+  AppAppPagesBotChatRoute: AppAppPagesBotChatRoute,
+  AppAppPagesIdentitiesRoute: AppAppPagesIdentitiesRoute,
+  AppAppPagesImportBotRoute: AppAppPagesImportBotRoute,
+  AppAppPagesVenuesRoute: AppAppPagesVenuesRoute,
+  AppAppPagesEventsNewBotRoute: AppAppPagesEventsNewBotRoute,
+  AppAppPagesEventsNewLongshanksRoute: AppAppPagesEventsNewLongshanksRoute,
+  AppAppPagesEventsNewManualRoute: AppAppPagesEventsNewManualRoute,
+  AppAppPagesEventsIndexRoute: AppAppPagesEventsIndexRoute,
+  AppAppPagesEventsIdEditRoute: AppAppPagesEventsIdEditRoute,
 }
 
 const AppRouteRouteWithChildren = AppRouteRoute._addFileChildren(
   AppRouteRouteChildren,
 )
 
+interface SiteRouteRouteChildren {
+  SiteSitePagesEventsRoute: typeof SiteSitePagesEventsRoute
+  SiteSitePagesFactionRankingsRoute: typeof SiteSitePagesFactionRankingsRoute
+  SiteSitePagesRankingsRoute: typeof SiteSitePagesRankingsRoute
+  SiteSitePagesEventIdRoute: typeof SiteSitePagesEventIdRoute
+  SiteSitePagesPlayerIdRoute: typeof SiteSitePagesPlayerIdRoute
+}
+
+const SiteRouteRouteChildren: SiteRouteRouteChildren = {
+  SiteSitePagesEventsRoute: SiteSitePagesEventsRoute,
+  SiteSitePagesFactionRankingsRoute: SiteSitePagesFactionRankingsRoute,
+  SiteSitePagesRankingsRoute: SiteSitePagesRankingsRoute,
+  SiteSitePagesEventIdRoute: SiteSitePagesEventIdRoute,
+  SiteSitePagesPlayerIdRoute: SiteSitePagesPlayerIdRoute,
+}
+
+const SiteRouteRouteWithChildren = SiteRouteRoute._addFileChildren(
+  SiteRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRouteRoute: AppRouteRouteWithChildren,
+  SiteRouteRoute: SiteRouteRouteWithChildren,
   LoggedInRoute: LoggedInRoute,
-  SiteEventsRoute: SiteEventsRoute,
-  SiteFactionRankingsRoute: SiteFactionRankingsRoute,
-  SiteRankingsRoute: SiteRankingsRoute,
-  SiteEventIdRoute: SiteEventIdRoute,
-  SitePlayerIdRoute: SitePlayerIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

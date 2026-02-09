@@ -3,7 +3,7 @@ import { Button, Grid, Paper, Table, TextInput } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { createFileRoute } from '@tanstack/react-router'
 
-export const Route = createFileRoute('/app/venues')({
+export const Route = createFileRoute('/app/_app-pages/venues')({
   component: RouteComponent,
   staticData: { title: 'Venues' },
 })

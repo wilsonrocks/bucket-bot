@@ -6,7 +6,7 @@ import { Link } from '@/components/link'
 
 const eventParamsValidator = z.object({ id: z.coerce.number() })
 
-export const Route = createFileRoute('/site/event/$id')({
+export const Route = createFileRoute('/site/_site-pages/event/$id')({
   component: RouteComponent,
   params: eventParamsValidator,
 })

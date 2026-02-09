@@ -5,7 +5,7 @@ import { Route as EventIdRoute } from '../events.$id.edit.tsx'
 import { Route as IndexRoute } from './index.tsx'
 import { useCreateLongshanksEventMutation } from '@/hooks/useApi.ts'
 
-export const Route = createFileRoute('/app/events/new-longshanks')({
+export const Route = createFileRoute('/app/_app-pages/events/new-longshanks')({
   component: RouteComponent,
 })
 

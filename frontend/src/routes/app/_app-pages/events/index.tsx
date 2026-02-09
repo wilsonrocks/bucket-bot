@@ -1,20 +1,23 @@
-import { Link } from '@/components/link'
-import { useGetAllTourneys, useGetRankingTypes } from '@/hooks/useApi'
-import { Alert, Anchor, Input, Select, Table, Title } from '@mantine/core'
-import { useInputState } from '@mantine/hooks'
+import { Anchor, Button, Table, Title } from '@mantine/core'
 import { createFileRoute } from '@tanstack/react-router'
 import { format, parseISO } from 'date-fns'
-import { Route as EventIdRoute } from './event.$id'
+import { Route as EventIdRoute } from '../events.$id.edit'
+import { Route as NewLongshanksRoute } from './new-longshanks'
+import { useGetAllTourneys } from '@/hooks/useApi'
+import { Link } from '@/components/link'
 
-export const Route = createFileRoute('/site/events')({
+export const Route = createFileRoute('/app/_app-pages/events/')({
   component: RouteComponent,
-  staticData: { title: 'Events' },
 })
 
 function RouteComponent() {
   const tourneys = useGetAllTourneys()
   return (
     <div>
+      <Title order={1} mb="md">
+        Events
+      </Title>
+
       {tourneys.data ? (
         <Table
           data={{
@@ -34,6 +37,10 @@ function RouteComponent() {
       ) : (
         <div>Loading...</div>
       )}
+
+      <Button component={Link} to={NewLongshanksRoute.path} mt="md">
+        New Longshanks Event
+      </Button>
     </div>
   )
 }

@@ -14,7 +14,7 @@ import {
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 
-export const Route = createFileRoute('/app/bot-chat')({
+export const Route = createFileRoute('/app/_app-pages/bot-chat')({
   component: RouteComponent,
   staticData: {
     title: 'Bot Chat',
