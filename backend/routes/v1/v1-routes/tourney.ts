@@ -121,6 +121,7 @@ export const getTourneysForPlayerHandler = async (ctx: Context) => {
       "result.player_identity_id",
       "player_identity.id",
     )
+    .innerJoin("player", "player_identity.player_id", "player.id")
     .where("player_identity.player_id", "=", playerId)
     // @ts-ignore
     .select([
