@@ -4,7 +4,6 @@ import {
   getRankingTypeWhereSql,
   shouldGenerateRankings,
 } from "./ranking-type-logic";
-import { playersWithNoDiscordId } from "../../routes/v1/v1-routes/discord-id";
 
 export interface GenerateRankingsConfig {
   playersNeededToBeMastersRanked: number;
