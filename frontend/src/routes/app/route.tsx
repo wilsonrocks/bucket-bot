@@ -1,12 +1,14 @@
-import { LoginButton } from '@/components/LoginButton'
+import { LogoutButton } from '@/components/LoginButton'
 import { AppNavbar } from '@/components/app-navbar'
 import { NetworkIndicator } from '@/components/network-indicator'
+import { useAuth } from '@/hooks/useAuth'
 import {
   AppShell,
   Burger,
   Container,
   Group,
   Image,
+  MantineProvider,
   Text,
   Title,
 } from '@mantine/core'
@@ -22,19 +24,21 @@ import {
 } from '@tanstack/react-router'
 import { useEffect } from 'react'
 
+import { Route as LoginRoute } from '@/routes/site/login'
+
 export const Route = createFileRoute('/app')({
   beforeLoad() {
     const authString = localStorage.getItem('auth')
 
     if (!authString) {
-      throw redirect({ to: '/' })
+      throw redirect({ to: LoginRoute.to })
     }
 
     try {
       JSON.parse(authString)
     } catch (e) {
       console.error('Bad auth in storage', authString)
-      throw redirect({ to: '/' })
+      throw redirect({ to: LoginRoute.to })
     }
   },
   component: () => {
@@ -50,8 +54,10 @@ export const Route = createFileRoute('/app')({
     const matches = useMatches()
     const title = matches.at(-1)?.staticData.title
 
+    const auth = useAuth()
+
     return (
-      <>
+      <MantineProvider theme={{ defaultColorScheme: 'dark' }}>
         <HeadContent />
         <AppShell
           padding="md"
@@ -78,10 +84,11 @@ export const Route = createFileRoute('/app')({
                   b(<b>UK</b>)et bot
                 </Link>
               </Text>
-              <NetworkIndicator />
 
+              <Text>Hi, {auth?.global_name ?? auth?.username}</Text>
+              <NetworkIndicator />
               <div style={{ marginLeft: 'auto' }}>
-                <LoginButton />
+                <LogoutButton />
               </div>
             </Group>
           </AppShell.Header>
@@ -100,7 +107,7 @@ export const Route = createFileRoute('/app')({
             </Container>
           </AppShell.Main>
         </AppShell>
-      </>
+      </MantineProvider>
     )
   },
 })

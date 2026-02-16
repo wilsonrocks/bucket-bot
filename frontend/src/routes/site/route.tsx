@@ -64,10 +64,6 @@ export const Route = createFileRoute('/site')({
                 </Link>
               </Text>
               <NetworkIndicator />
-
-              <div style={{ marginLeft: 'auto' }}>
-                <LoginButton />
-              </div>
             </Group>
           </AppShell.Header>
           <AppShell.Navbar p="md" bg="gradient(white, lightgrey)">

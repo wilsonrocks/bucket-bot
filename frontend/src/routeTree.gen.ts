@@ -14,6 +14,7 @@ import { Route as SiteRouteRouteImport } from './routes/site/route'
 import { Route as AppRouteRouteImport } from './routes/app/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SiteIndexRouteImport } from './routes/site/index'
+import { Route as SiteLoginRouteImport } from './routes/site/login'
 import { Route as SiteSitePagesRankingsRouteImport } from './routes/site/_site-pages/rankings'
 import { Route as SiteSitePagesFactionRankingsRouteImport } from './routes/site/_site-pages/faction-rankings'
 import { Route as SiteSitePagesEventsRouteImport } from './routes/site/_site-pages/events'
@@ -52,6 +53,11 @@ const IndexRoute = IndexRouteImport.update({
 const SiteIndexRoute = SiteIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => SiteRouteRoute,
+} as any)
+const SiteLoginRoute = SiteLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => SiteRouteRoute,
 } as any)
 const SiteSitePagesRankingsRoute = SiteSitePagesRankingsRouteImport.update({
@@ -133,6 +139,7 @@ export interface FileRoutesByFullPath {
   '/app': typeof AppRouteRouteWithChildren
   '/site': typeof SiteRouteRouteWithChildren
   '/logged-in': typeof LoggedInRoute
+  '/site/login': typeof SiteLoginRoute
   '/site/': typeof SiteIndexRoute
   '/app/bot-chat': typeof AppAppPagesBotChatRoute
   '/app/identities': typeof AppAppPagesIdentitiesRoute
@@ -153,6 +160,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/app': typeof AppRouteRouteWithChildren
   '/logged-in': typeof LoggedInRoute
+  '/site/login': typeof SiteLoginRoute
   '/site': typeof SiteIndexRoute
   '/app/bot-chat': typeof AppAppPagesBotChatRoute
   '/app/identities': typeof AppAppPagesIdentitiesRoute
@@ -175,6 +183,7 @@ export interface FileRoutesById {
   '/app': typeof AppRouteRouteWithChildren
   '/site': typeof SiteRouteRouteWithChildren
   '/logged-in': typeof LoggedInRoute
+  '/site/login': typeof SiteLoginRoute
   '/site/': typeof SiteIndexRoute
   '/app/_app-pages/bot-chat': typeof AppAppPagesBotChatRoute
   '/app/_app-pages/identities': typeof AppAppPagesIdentitiesRoute
@@ -198,6 +207,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/site'
     | '/logged-in'
+    | '/site/login'
     | '/site/'
     | '/app/bot-chat'
     | '/app/identities'
@@ -218,6 +228,7 @@ export interface FileRouteTypes {
     | '/'
     | '/app'
     | '/logged-in'
+    | '/site/login'
     | '/site'
     | '/app/bot-chat'
     | '/app/identities'
@@ -239,6 +250,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/site'
     | '/logged-in'
+    | '/site/login'
     | '/site/'
     | '/app/_app-pages/bot-chat'
     | '/app/_app-pages/identities'
@@ -298,6 +310,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/site/'
       preLoaderRoute: typeof SiteIndexRouteImport
+      parentRoute: typeof SiteRouteRoute
+    }
+    '/site/login': {
+      id: '/site/login'
+      path: '/login'
+      fullPath: '/site/login'
+      preLoaderRoute: typeof SiteLoginRouteImport
       parentRoute: typeof SiteRouteRoute
     }
     '/site/_site-pages/rankings': {
@@ -430,6 +449,7 @@ const AppRouteRouteWithChildren = AppRouteRoute._addFileChildren(
 )
 
 interface SiteRouteRouteChildren {
+  SiteLoginRoute: typeof SiteLoginRoute
   SiteIndexRoute: typeof SiteIndexRoute
   SiteSitePagesEventsRoute: typeof SiteSitePagesEventsRoute
   SiteSitePagesFactionRankingsRoute: typeof SiteSitePagesFactionRankingsRoute
@@ -439,6 +459,7 @@ interface SiteRouteRouteChildren {
 }
 
 const SiteRouteRouteChildren: SiteRouteRouteChildren = {
+  SiteLoginRoute: SiteLoginRoute,
   SiteIndexRoute: SiteIndexRoute,
   SiteSitePagesEventsRoute: SiteSitePagesEventsRoute,
   SiteSitePagesFactionRankingsRoute: SiteSitePagesFactionRankingsRoute,

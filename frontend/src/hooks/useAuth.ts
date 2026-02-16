@@ -1,7 +1,9 @@
 import { useLocalStorage } from '@mantine/hooks'
+import { Route as HomeRoute } from '../routes/index'
 
 export const useAuth = () => {
-  const [authData, setAuthData] = useLocalStorage<
+  const navigate = HomeRoute.useNavigate()
+  const [authData, _setAuthData, removeAuthData] = useLocalStorage<
     | {
         jwt: string
         username: string
@@ -13,7 +15,10 @@ export const useAuth = () => {
   if (!authData) return null
   return {
     ...authData,
-    logout: () => setAuthData(undefined),
+    logout: () => {
+      removeAuthData()
+      navigate({})
+    },
     headers: {
       Authorization: `Bearer ${authData.jwt}`,
     },
