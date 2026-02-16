@@ -3,7 +3,7 @@ import { Box, Group, Select, Table, Text } from '@mantine/core'
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import z from 'zod'
 
-export const Route = createFileRoute('/site/rankings')({
+export const Route = createFileRoute('/site/_site-pages/rankings')({
   component: RouteComponent,
   validateSearch: z.object({ typeCode: z.string().optional().catch('') }),
   staticData: { title: 'Rankings' },

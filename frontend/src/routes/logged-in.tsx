@@ -2,6 +2,7 @@ import { useLocalStorage } from '@mantine/hooks'
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { useEffect } from 'react'
 import z from 'zod'
+import { Route as AppRoute } from './app/route'
 
 const LoggedInSearchParams = z.object({
   code: z.string(),
@@ -26,7 +27,7 @@ export const Route = createFileRoute('/logged-in')({
 
     const json = await response.json()
     localStorage.setItem('auth', JSON.stringify(json))
-    throw redirect({ to: '/' })
+    throw redirect({ to: AppRoute.to })
   },
 })
 

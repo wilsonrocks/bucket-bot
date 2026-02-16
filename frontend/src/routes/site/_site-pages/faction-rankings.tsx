@@ -2,7 +2,7 @@ import { useGetFactionRankings } from '@/hooks/useApi'
 import { Table } from '@mantine/core'
 import { createFileRoute } from '@tanstack/react-router'
 
-export const Route = createFileRoute('/site/faction-rankings')({
+export const Route = createFileRoute('/site/_site-pages/faction-rankings')({
   component: RouteComponent,
   staticData: {
     title: 'Faction Rankings',

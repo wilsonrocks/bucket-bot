@@ -12,9 +12,9 @@ import {
 } from '@/hooks/useApi'
 import { formatDate } from 'date-fns'
 import { Link } from '@/components/link'
-import { Route as EventRoute } from '@/routes/site/event.$id'
+import { Route as EventRoute } from '@/routes/site/_site-pages/event.$id'
 
-export const Route = createFileRoute('/site/player/$id')({
+export const Route = createFileRoute('/site/_site-pages/player/$id')({
   validateSearch: z.object({
     typeCode: z.string().default('ROLLING_YEAR'),
     tab: z.string().default('events'),
