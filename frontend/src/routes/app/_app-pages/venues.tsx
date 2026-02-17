@@ -25,11 +25,18 @@ function RouteComponent() {
       <Paper withBorder p="md">
         <form
           onSubmit={form.onSubmit((values) => {
-            createVenueMutation.mutate({
-              name: values.name,
-              town: values.town,
-              postCode: values.postCode,
-            })
+            createVenueMutation.mutate(
+              {
+                name: values.name,
+                town: values.town,
+                postCode: values.postCode,
+              },
+              {
+                onSuccess: () => {
+                  form.reset()
+                },
+              },
+            )
           })}
         >
           <Grid>
