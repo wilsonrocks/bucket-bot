@@ -1,0 +1,30 @@
+name: Deploy Backend
+on:
+  push:
+    branches:
+      - main
+      - switch-to-terra
+    paths:
+      - "backend/**"
+      - ".github/workflows/deploy-backend.yml"
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          project_id: ${{ secrets.GCP_PROJECT }}
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          export_default_credentials: true
+
+      - name: Configure Docker
+        run: gcloud auth configure-docker europe-west2-docker.pkg.dev
+
+      - name: Build Docker image for backend and push to Artifact Registry
+        run: |
+          GIT_SHA=$(git rev-parse --short HEAD)
+          docker build -t europe-west2-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/docker/bucket-bot:$GIT_SHA .
+          docker push europe-west2-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/docker/bucket-bot:$GIT_SHA

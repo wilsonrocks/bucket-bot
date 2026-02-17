@@ -34,9 +34,6 @@ resource "aws_s3_bucket" "user_uploads_bucket" {
 	bucket = "bucket-bot-user-uploads"
 }
 
-resource "aws_s3_bucket" "old_frontend_bucket" {
-  
-}
 
 resource "aws_s3_bucket" "frontend_bucket" {}   
 
@@ -51,13 +48,25 @@ resource "google_artifact_registry_repository" "app" {
   format        = "DOCKER"
 }
 
-resource "google_cloud_run_v2_service" "app" {
-  name     = "app"
+
+
+resource "google_project_service" "artifactregistry" {
+  service = "artifactregistry.googleapis.com"
+}
+resource "google_project_service" "run" {
+  service = "run.googleapis.com"
+}
+
+resource "google_cloud_run_v2_service" "backend" {
+  name     = "bucket-bot"
   location = var.gcp_region
 
   template {
     containers {
-      image = var.image_url
+      image = "gcr.io/cloudrun/hello"
+      ports {
+        container_port = 9999
+      }
     }
 
     scaling {
@@ -65,4 +74,29 @@ resource "google_cloud_run_v2_service" "app" {
       max_instance_count = 1
     }
   }
+
+
+  lifecycle {
+    ignore_changes = [
+      template[0].containers[0].image
+    ]
+  }
+}
+
+
+
+resource "google_cloud_run_v2_service_iam_member" "public" {
+  name   = google_cloud_run_v2_service.backend.id  # full resource name
+  role   = "roles/run.invoker"
+  member = "allUsers"
+}
+
+output "backend_service_url" {
+  description = "The public URL of the backend Cloud Run service"
+  value       = google_cloud_run_v2_service.backend.uri
+}
+
+output "backend_service_id" {
+  description = "The full resource name of the backend Cloud Run service"
+  value       = google_cloud_run_v2_service.backend.id
 }
