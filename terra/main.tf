@@ -100,3 +100,25 @@ output "backend_service_id" {
   description = "The full resource name of the backend Cloud Run service"
   value       = google_cloud_run_v2_service.backend.id
 }
+
+
+resource "google_service_account" "ci" {
+  account_id   = "github-actions"
+  display_name = "GitHub Actions CI Service Account"
+}
+resource "google_project_iam_member" "ci_roles" {
+  project = var.gcp_project
+  role    = "roles/run.admin"   # e.g., for Cloud Run deploy
+  member  = "serviceAccount:${google_service_account.ci.email}"
+}
+
+resource "google_service_account_key" "ci_key" {
+  service_account_id = google_service_account.ci.name
+  key_algorithm      = "KEY_ALG_RSA_2048"
+  private_key_type   = "TYPE_GOOGLE_CREDENTIALS_FILE"
+}
+
+output "ci_sa_key" {
+  value     = google_service_account_key.ci_key.private_key
+  sensitive = true
+}
