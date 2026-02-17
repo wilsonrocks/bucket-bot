@@ -220,6 +220,10 @@ export const useGetRankingsForPlayer = (
   return playerRankings
 }
 
+export type GetRankingsForPlayerResponse = Awaited<
+  ReturnType<typeof useGetRankingsForPlayer>['data']
+>
+
 export const useSearchDiscordUsers = (text: string) => {
   const auth = useAuth()
   const playerRankings = useQuery({

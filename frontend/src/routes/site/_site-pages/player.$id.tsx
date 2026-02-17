@@ -1,18 +1,18 @@
 import { Select, Table, Tabs, Title } from '@mantine/core'
 import { createFileRoute } from '@tanstack/react-router'
 import z from 'zod'
-import { LineChart } from '@mantine/charts'
 
+import { LazyPlayerRankingOverTimeChart } from '@/components/charts'
+import { Link } from '@/components/link'
 import {
-  useGetAllTourneys,
   useGetPlayerById,
   useGetRankingTypes,
   useGetRankingsForPlayer,
   useGetTourneysForPlayer,
 } from '@/hooks/useApi'
-import { formatDate } from 'date-fns'
-import { Link } from '@/components/link'
 import { Route as EventRoute } from '@/routes/site/_site-pages/event.$id'
+import { formatDate } from 'date-fns'
+import { Suspense } from 'react'
 
 export const Route = createFileRoute('/site/_site-pages/player/$id')({
   validateSearch: z.object({
@@ -96,28 +96,11 @@ function RouteComponent() {
           />
 
           {rankingsData.data && rankingsData.data.rankings.length > 0 ? (
-            <LineChart
-              h={300}
-              dataKey="date"
-              data={rankingsData.data.rankings.map((row) => ({
-                date: formatDate(new Date(row.created_at), 'MM/dd/yyyy'),
-                rank: row.rank,
-              }))}
-              series={[{ name: 'rank', label: 'Rank' }]}
-              yAxisProps={{
-                domain: [1, rankingsData.data.metadata.number_of_players],
-                reversed: true,
-                ticks: [
-                  1,
-                  ...Array.from(
-                    {
-                      length: rankingsData.data.metadata.number_of_players / 10,
-                    },
-                    (_, i) => (i + 1) * 10,
-                  ),
-                ],
-              }}
-            />
+            <Suspense fallback={<div>Loading chart...</div>}>
+              <LazyPlayerRankingOverTimeChart
+                rankingsData={rankingsData.data}
+              />
+            </Suspense>
           ) : (
             <div>
               No ranking data available for{' '}
