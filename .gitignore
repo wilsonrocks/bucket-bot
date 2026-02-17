@@ -39,6 +39,22 @@ cdk.out/
 *.bak
 *.tmp
 
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfvars
+terraform.tfvars
+terraform.tfvars.json
+crash.log
+.terraform.lock.hcl
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+plan.out
+terraform.plan
+
 # Test/coverage
 coverage/
 *.cover
