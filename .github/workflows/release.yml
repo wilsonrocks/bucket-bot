@@ -30,6 +30,17 @@ jobs:
       - name: Configure Docker
         run: gcloud auth configure-docker europe-west2-docker.pkg.dev
 
+      - name: Set up Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Build Backend
+        run: |
+          cd backend
+          npm ci
+          ./build-for-prod.sh
+
       - name: Build Docker image for backend and push to Artifact Registry
         run: |
           GIT_SHA=$(git rev-parse --short HEAD)
