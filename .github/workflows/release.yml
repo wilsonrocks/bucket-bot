@@ -33,5 +33,6 @@ jobs:
       - name: Build Docker image for backend and push to Artifact Registry
         run: |
           GIT_SHA=$(git rev-parse --short HEAD)
+          cd backend
           docker build -t europe-west2-docker.pkg.dev/${{ vars.GCP_PROJECT }}/docker/bucket-bot:$GIT_SHA .
           docker push europe-west2-docker.pkg.dev/${{ vars.GCP_PROJECT }}/docker/bucket-bot:$GIT_SHA
