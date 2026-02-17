@@ -1,6 +1,7 @@
 #!/bin/bash
 set -e
 echo "Building backend for production..."
+npx kysely-codegen
 npx tsc
 cp package*.json dist
 cd dist
