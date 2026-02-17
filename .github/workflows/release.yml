@@ -4,9 +4,7 @@ on:
     branches:
       - main
       - switch-to-terra
-    paths:
-      - "backend/**"
-      - ".github/workflows/deploy-backend.yml"
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
