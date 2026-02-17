@@ -9,6 +9,13 @@ provider "aws" {
 }
 
 
+# Google Cloud provider configuration
+provider "google" {
+  project = var.gcp_project
+  region  = var.gcp_region
+}
+
+
 terraform {
 	backend "s3" {
 		bucket         = "bucket-bot-terraform-state"
@@ -33,20 +40,29 @@ resource "aws_s3_bucket" "old_frontend_bucket" {
 
 resource "aws_s3_bucket" "frontend_bucket" {}   
 
-resource "aws_lambda_function" "backend_lambda" {
-	function_name = "bucket-bot-backend-lambda"
-    role          = aws_iam_role.lambda_exec_role.arn
-    handler       = "index.handler"
-    runtime       = "nodejs22.x"
-    filename      = "placeholders/lambda-placeholder.zip"
 
 
-  # Terraform will ignore code updates after creation
-  # because we will be doing this with CLI commands in github actions
-  lifecycle {
-    ignore_changes = [
-      filename,
-      source_code_hash,  # optional, safer to include
-    ]
+# GOOGLE STUFF
+
+resource "google_artifact_registry_repository" "app" {
+  location      = var.gcp_region
+  repository_id = "docker"
+  description   = "Docker images for Cloud Run"
+  format        = "DOCKER"
+}
+
+resource "google_cloud_run_v2_service" "app" {
+  name     = "app"
+  location = var.gcp_region
+
+  template {
+    containers {
+      image = var.image_url
+    }
+
+    scaling {
+      min_instance_count = 0
+      max_instance_count = 1
+    }
   }
 }
