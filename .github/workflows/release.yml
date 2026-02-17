@@ -36,7 +36,7 @@ jobs:
       - name: Set up CA Certificate
         run: |
           mkdir -p backend/dist/certs
-          echo ${{secrets.DB_CA_CERT}} > backend/dist/certs/ca.pem
+          printf "%s\n" "${{ secrets.DB_CA_CERT }}" > backend/dist/certs/ca.pem
 
       - name: Build Backend
         env:
