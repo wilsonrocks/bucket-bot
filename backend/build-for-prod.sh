@@ -1,9 +1,9 @@
 #!/bin/bash
 set -e
 echo "Building backend for production..."
-mkdir -p certs
+mkdir -p dist/certs
 echo "Copying CA certificate..."
-cp ../../certs/ca.pem certs
+cp ../certs/ca.pem dist/certs
 npx kysely-codegen
 npx tsc
 cp package*.json dist
