@@ -68,3 +68,6 @@ backend/report.html
 backend/report.json
 
 dumps
+
+# Ignore generated credentials from google-github-actions/auth
+gha-creds-*.json

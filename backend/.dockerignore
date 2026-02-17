@@ -28,3 +28,6 @@ coverage
 build-for-prod.sh
 report.html
 report.json
+
+# Ignore generated credentials from google-github-actions/auth
+gha-creds-*.json
