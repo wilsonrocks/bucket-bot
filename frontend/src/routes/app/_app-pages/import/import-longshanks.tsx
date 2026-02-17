@@ -1,16 +1,17 @@
-import { Button, Loader, Modal, TextInput } from '@mantine/core'
-import { useForm } from '@mantine/form'
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { Route as EventIdRoute } from '../events.$id.edit.tsx'
-import { Route as IndexRoute } from './index.tsx'
 import { useCreateLongshanksEventMutation } from '@/hooks/useApi.ts'
+import { Button, Loader, TextInput } from '@mantine/core'
+import { useForm } from '@mantine/form'
+import { createFileRoute } from '@tanstack/react-router'
+import { Route as EventIdRoute } from '../events.$id.edit.tsx'
 
-export const Route = createFileRoute('/app/_app-pages/events/new-longshanks')({
+export const Route = createFileRoute(
+  '/app/_app-pages/import/import-longshanks',
+)({
   component: RouteComponent,
+  staticData: { title: 'Import Longshanks Event' },
 })
 
 function RouteComponent() {
-  const navigate = useNavigate()
   const form = useForm({
     initialValues: { longshanksIdOrUrl: '' },
     validate: {
@@ -30,14 +31,9 @@ function RouteComponent() {
   })
   const navigateToEventPage = EventIdRoute.useNavigate()
   const newLongshanksEventMutation = useCreateLongshanksEventMutation()
+
   return (
-    <Modal
-      opened={true}
-      onClose={() => {
-        navigate({ to: IndexRoute.path, from: '/' })
-      }}
-    >
-      {form.getValues().longshanksIdOrUrl.match(/([0-9]+)/)?.[1]}
+    <div>
       <form
         onSubmit={form.onSubmit((values) => {
           newLongshanksEventMutation.mutate(values.longshanksId, {
@@ -51,15 +47,17 @@ function RouteComponent() {
         })}
       >
         <TextInput
+          mb="md"
           label="Longshanks ID or URL"
           placeholder="Enter Longshanks ID or URL"
           {...form.getInputProps('longshanksIdOrUrl')}
         />
         <Button type="submit" disabled={newLongshanksEventMutation.isPending}>
-          'Create Event'
+          Create event
         </Button>
-        {newLongshanksEventMutation.isPending && <Loader type="bars" />}
+
+        {newLongshanksEventMutation.isPending && <Loader />}
       </form>
-    </Modal>
+    </div>
   )
 }

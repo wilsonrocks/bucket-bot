@@ -5,6 +5,7 @@ import {
   useGetVenues,
 } from '@/hooks/useApi'
 import {
+  Alert,
   Box,
   Button,
   Card,
@@ -22,7 +23,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import z from 'zod'
 
-export const Route = createFileRoute('/app/_app-pages/import-bot')({
+export const Route = createFileRoute('/app/_app-pages/import/import-bot')({
   component: RouteComponent,
   staticData: { title: 'Import BOT Event' },
 })
@@ -136,7 +137,7 @@ function RouteComponent() {
               setStatus('HAS_DATA')
             }}
           >
-            Create new event with this data
+            Use this data
           </Button>
         </Box>
       </div>
@@ -144,6 +145,11 @@ function RouteComponent() {
   else
     return (
       <div>
+        <Alert mb="md">
+          This is what was imported from your Bag of Tools data. Please make
+          sure organiser and venue are correct. The event has not been created
+          yet.
+        </Alert>
         <Grid>
           <Grid.Col span={{ base: 12, sm: 6 }}>
             <Title order={4}>Tourney Data</Title>

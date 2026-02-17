@@ -1,7 +1,7 @@
 import { DiscordLookup } from '@/components/discord-lookup'
 import { toOrdinal } from '@/helpers/to-ordinal'
 import { useGetUnmappedIdentities } from '@/hooks/useApi'
-import { List, Pagination, Table } from '@mantine/core'
+import { List, Pagination, Table, Text } from '@mantine/core'
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 
@@ -34,6 +34,16 @@ function RouteComponent() {
 
   return (
     <div>
+      <Text mb="md">
+        An identity is a player's account with either Longshanks or Bag of
+        Tools. A player can have several identities - many players will have one
+        for Longshanks <em>and</em> Bag of Tools. It's possible to have more
+        than two - in the case of someone making a new Longshanks account.
+      </Text>
+      <Text mb="md">
+        Here is where we can take unassigned identities and map them to a player
+        on the UK Malifaux Discord.
+      </Text>
       <Pagination
         total={unmappedIdentities.data.length || 0}
         value={currentPage}
