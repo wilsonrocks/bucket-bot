@@ -1,5 +1,6 @@
 #!/bin/bash
-set -e
+set -ex
+pwd
 echo "Building backend for production..."
 mkdir -p dist/certs
 echo "Copying CA certificate..."
