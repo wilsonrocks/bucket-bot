@@ -33,6 +33,11 @@ jobs:
         with:
           node-version: 24
 
+      - name: Set up CA Certificate
+        run: |
+          mkdir -p backend/dist/certs
+          echo ${{secrets.DB_CA_CERT}} > backend/dist/certs/ca.pem
+
       - name: Build Backend
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}

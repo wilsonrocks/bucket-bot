@@ -2,9 +2,6 @@
 set -ex
 pwd
 echo "Building backend for production..."
-mkdir -p dist/certs
-echo "Copying CA certificate..."
-cp ../certs/ca.pem dist/certs
 npx kysely-codegen
 npx tsc
 cp package*.json dist
