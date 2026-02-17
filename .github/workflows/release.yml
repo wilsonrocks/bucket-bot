@@ -8,6 +8,8 @@ on:
 jobs:
   deploy:
     environment: prod
+    env:
+      GCP_PROJECT: ${{ vars.GCP_PROJECT }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -21,7 +23,7 @@ jobs:
       - name: Set up gcloud
         uses: google-github-actions/setup-gcloud@v1
         with:
-          project_id: buket-bot
+          project_id: ${{ vars.GCP_PROJECT }}
           service_account_key: ${{ secrets.GCP_SA_KEY }}
           export_default_credentials: true
 
@@ -31,5 +33,5 @@ jobs:
       - name: Build Docker image for backend and push to Artifact Registry
         run: |
           GIT_SHA=$(git rev-parse --short HEAD)
-          docker build -t europe-west2-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/docker/bucket-bot:$GIT_SHA .
-          docker push europe-west2-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/docker/bucket-bot:$GIT_SHA
+          docker build -t europe-west2-docker.pkg.dev/${{ vars.GCP_PROJECT }}/docker/bucket-bot:$GIT_SHA .
+          docker push europe-west2-docker.pkg.dev/${{ vars.GCP_PROJECT }}/docker/bucket-bot:$GIT_SHA
