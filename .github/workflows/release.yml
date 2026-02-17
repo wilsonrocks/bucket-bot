@@ -35,14 +35,14 @@ jobs:
 
       - name: Set up CA Certificate
         run: |
-          mkdir -p backend/dist/certs
-          printf "%s\n" "${{ secrets.DB_CA_CERT }}" > backend/dist/certs/ca.pem
+          printf "%s\n" "${{ secrets.DB_CA_CERT }}" > backend/ca.pem
 
       - name: Build Backend
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          NODE_EXTRA_CA_CERTS: ca.pem
+        working-directory: backend
         run: |
-          cd backend
           npm ci
           ./build-for-prod.sh
 
