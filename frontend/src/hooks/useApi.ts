@@ -59,6 +59,14 @@ export const useCreateLongshanksEventMutation = () => {
         queryKey: ['unmapped-identities'],
       })
     },
+    onError: (error: any) => {
+      console.error('Error creating Longshanks event:', error)
+      notifications.show({
+        title: 'Error',
+        message: `Failed to create Longshanks event - check console for details`,
+        color: 'red',
+      })
+    },
     mutationFn: async (longshanksId: number) => {
       const url = `${import.meta.env.VITE_BACKEND_URL}/v1/longshanks-event/${longshanksId}`
       const res = await fetch(url, {
