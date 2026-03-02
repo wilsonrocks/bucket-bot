@@ -1,5 +1,5 @@
 import { useCreateVenueMutation, useGetVenues } from '@/hooks/useApi'
-import { Button, Grid, Paper, Table, TextInput } from '@mantine/core'
+import { Box, Button, Grid, Paper, Table, TextInput } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { createFileRoute } from '@tanstack/react-router'
 
@@ -57,10 +57,10 @@ function RouteComponent() {
                 mb="md"
               />
             </Grid.Col>
-            <Grid.Col span={{ base: 12, xs: 3 }}>
-              <Button type="submit">Create Venue</Button>
-            </Grid.Col>
           </Grid>
+          <Box>
+            <Button type="submit">Create Venue</Button>
+          </Box>
         </form>
       </Paper>
       {venuesData && (
