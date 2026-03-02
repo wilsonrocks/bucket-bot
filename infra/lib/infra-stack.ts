@@ -146,6 +146,7 @@ export class InfraStack extends cdk.Stack {
       distribution,
       distributionPaths: ["/*"],
       prune: true,
+      waitForDistributionInvalidation: false,
     });
 
     // Output the API Gateway URL
