@@ -1,5 +1,9 @@
 name: Test Deploy
-on: workflow_dispatch
+on:
+  push:
+    branches:
+      - main
+      - switch-to-terra
 
 jobs:
   hello-world:
