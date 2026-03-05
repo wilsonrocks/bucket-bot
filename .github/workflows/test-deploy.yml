@@ -12,8 +12,22 @@ jobs:
       SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
       BACKEND_IP: ${{ vars.BACKEND_IP }}
       BACKEND_USER: deploy
-      runs-on: ubuntu-latest
     steps:
       - name: Hello world action
         shell: bash
-        run: ssh -o "StrictHostKeyChecking=no" -i <(echo "$SSH_PRIVATE_KEY") $BACKEND_USER@$BACKEND_IP "echo Hello world from the backend!"
+        run: |
+          eval "$(ssh-agent -s)"
+          echo "$SSH_PRIVATE_KEY" | ssh-add -
+          ssh -o "StrictHostKeyChecking=no" $BACKEND_USER@$BACKEND_IP "echo Hello world from the backend!"
+
+#   hello-world:
+#     runs-on: ubuntu-latest
+#     env:
+#       SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+#       BACKEND_IP: ${{ vars.BACKEND_IP }}
+#       BACKEND_USER: deploy
+#       runs-on: ubuntu-latest
+#     steps:
+#       - name: Hello world action
+#         shell: bash
+#         run: ssh -o "StrictHostKeyChecking=no" -i <(echo "$SSH_PRIVATE_KEY") $BACKEND_USER@$BACKEND_IP "echo Hello world from the backend!"
