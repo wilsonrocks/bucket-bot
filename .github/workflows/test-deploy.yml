@@ -1,0 +1,13 @@
+name: Test Deploy
+on: workflow_dispatch
+
+jobs:
+  hello-world:
+    env:
+      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      BACKEND_IP: ${{ vars.BACKEND_IP }}
+      BACKEND_USER: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Hello world action
+        run: ssh -o "StrictHostKeyChecking=no" -i <(echo "$SSH_PRIVATE_KEY") $BACKEND_USER@$BACKEND_IP "echo Hello world from the backend!"
