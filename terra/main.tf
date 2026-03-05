@@ -8,14 +8,6 @@ provider "aws" {
 	}
 }
 
-
-# Google Cloud provider configuration
-provider "google" {
-  project = var.gcp_project
-  region  = var.gcp_region
-}
-
-
 terraform {
 	backend "s3" {
 		bucket         = "bucket-bot-terraform-state"
@@ -30,95 +22,90 @@ resource "aws_s3_bucket" "terraform_state_bucket" {
 	bucket = "bucket-bot-terraform-state"
 }
 
-resource "aws_s3_bucket" "user_uploads_bucket" {
-	bucket = "bucket-bot-user-uploads"
+resource "aws_s3_bucket" "frontend" {
+  bucket = "bucket-bot-frontend"
 }
 
+resource "aws_s3_bucket_public_access_block" "frontend" {
+  bucket = aws_s3_bucket.frontend.id
 
-resource "aws_s3_bucket" "frontend_bucket" {}   
-
-
-
-# GOOGLE STUFF
-
-resource "google_artifact_registry_repository" "app" {
-  location      = var.gcp_region
-  repository_id = "docker"
-  description   = "Docker images for Cloud Run"
-  format        = "DOCKER"
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
 }
 
-
-
-resource "google_project_service" "artifactregistry" {
-  service = "artifactregistry.googleapis.com"
-}
-resource "google_project_service" "run" {
-  service = "run.googleapis.com"
+resource "aws_cloudfront_origin_access_control" "frontend" {
+  name                              = "bucket-bot-frontend"
+  origin_access_control_origin_type = "s3"
+  signing_behavior                  = "always"
+  signing_protocol                  = "sigv4"
 }
 
-resource "google_cloud_run_v2_service" "backend" {
-  name     = "bucket-bot"
-  location = var.gcp_region
+resource "aws_cloudfront_distribution" "frontend" {
+  enabled             = true
+  default_root_object = "index.html"
 
-  template {
-    containers {
-      image = "gcr.io/cloudrun/hello"
-      ports {
-        container_port = 9999
+  origin {
+    domain_name              = aws_s3_bucket.frontend.bucket_regional_domain_name
+    origin_id                = "frontend"
+    origin_access_control_id = aws_cloudfront_origin_access_control.frontend.id
+  }
+
+  default_cache_behavior {
+    target_origin_id       = "frontend"
+    viewer_protocol_policy = "redirect-to-https"
+
+    allowed_methods = ["GET", "HEAD"]
+    cached_methods  = ["GET", "HEAD"]
+
+    forwarded_values {
+      query_string = false
+      cookies {
+        forward = "none"
       }
     }
+  }
 
-    scaling {
-      min_instance_count = 0
-      max_instance_count = 1
+  # SPA routing
+  custom_error_response {
+    error_code         = 404
+    response_code      = 200
+    response_page_path = "/index.html"
+  }
+
+  restrictions {
+    geo_restriction {
+      restriction_type = "none"
     }
   }
 
-
-  lifecycle {
-    ignore_changes = [
-      template[0].containers[0].image
-    ]
+  viewer_certificate {
+    cloudfront_default_certificate = true
   }
 }
 
+resource "aws_s3_bucket_policy" "frontend" {
+  bucket = aws_s3_bucket.frontend.id
 
-
-resource "google_cloud_run_v2_service_iam_member" "public" {
-  name   = google_cloud_run_v2_service.backend.id  # full resource name
-  role   = "roles/run.invoker"
-  member = "allUsers"
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Principal = {
+        Service = "cloudfront.amazonaws.com"
+      }
+      Action   = "s3:GetObject"
+      Resource = "${aws_s3_bucket.frontend.arn}/*"
+      Condition = {
+        StringEquals = {
+          "AWS:SourceArn" = aws_cloudfront_distribution.frontend.arn
+        }
+      }
+    }]
+  })
 }
 
-output "backend_service_url" {
-  description = "The public URL of the backend Cloud Run service"
-  value       = google_cloud_run_v2_service.backend.uri
-}
-
-output "backend_service_id" {
-  description = "The full resource name of the backend Cloud Run service"
-  value       = google_cloud_run_v2_service.backend.id
-}
-
-
-resource "google_service_account" "ci" {
-  account_id   = "github-actions"
-  display_name = "GitHub Actions CI Service Account"
-}
-resource "google_project_iam_member" "ci_roles" {
-  project = var.gcp_project
-  role    = "roles/run.admin"   # e.g., for Cloud Run deploy
-  member  = "serviceAccount:${google_service_account.ci.email}"
-}
-
-resource "google_service_account_key" "ci_key" {
-  service_account_id = google_service_account.ci.name
-  key_algorithm      = "KEY_ALG_RSA_2048"
-  private_key_type   = "TYPE_GOOGLE_CREDENTIALS_FILE"
-}
-
-output "ci_sa_key" {
-  value     = google_service_account_key.ci_key.private_key
-  sensitive = true
+output "frontend_distribution_domain_name" {
+  value = aws_cloudfront_distribution.frontend.domain_name
 }
