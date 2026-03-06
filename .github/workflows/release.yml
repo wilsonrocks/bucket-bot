@@ -46,6 +46,17 @@ jobs:
           npm ci
           ./build-for-prod.sh
 
+      - name: Login to GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Build image
+        run: |
+          IMAGE=ghcr.io/${{ github.repository }}
+          TAG=${{ github.sha }}
+          cd backend
+          docker build -t $IMAGE:$TAG .
+          docker push $IMAGE:$TAG
+
       - name: Build Docker image for backend and push to Artifact Registry
         run: |
           GIT_SHA=$(git rev-parse --short HEAD)
