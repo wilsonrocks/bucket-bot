@@ -5,6 +5,10 @@ on:
       - main
       - switch-to-terra
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   deploy:
     environment: prod
