@@ -12,21 +12,7 @@ jobs:
       GCP_PROJECT: ${{ vars.GCP_PROJECT }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-
-      - id: "auth"
-        name: "Authenticate to Google Cloud"
-        uses: "google-github-actions/auth@v2"
-        with:
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
-
-      - name: Set up gcloud
-        uses: google-github-actions/setup-gcloud@v1
-        with:
-          project_id: ${{ vars.GCP_PROJECT }}
-
-      - name: Configure Docker
-        run: gcloud auth configure-docker europe-west2-docker.pkg.dev
+      - uses: actions/checkout@v4
 
       - name: Set up Node.js 24
         uses: actions/setup-node@v4
