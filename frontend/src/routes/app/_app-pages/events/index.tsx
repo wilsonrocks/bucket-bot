@@ -22,7 +22,7 @@ function RouteComponent() {
           data={{
             body: tourneys.data.map(
               ({ id, name, date, players, level_code }) => [
-                <Anchor component={Link} to={EventIdRoute.path} params={{ id }}>
+                <Anchor component={Link} to={EventIdRoute.to} params={{ id }}>
                   {name}
                 </Anchor>,
                 format(parseISO(date), 'dd MMM yyyy'),
