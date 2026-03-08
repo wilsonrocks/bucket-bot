@@ -43,6 +43,21 @@ export const useGenerateRankingsSnapshotMutation = () => {
       }
       return res.json()
     },
+    onSuccess: () => {
+      notifications.show({
+        title: 'Success',
+        message: 'Rankings snapshot generated successfully',
+        color: 'green',
+      })
+    },
+    onError: (error: any) => {
+      console.error('Error generating rankings snapshot:', error)
+      notifications.show({
+        title: 'Error',
+        message: `Failed to generate rankings snapshot: ${error.message || 'Unknown error'}`,
+        color: 'red',
+      })
+    },
   })
   return mutation
 }
