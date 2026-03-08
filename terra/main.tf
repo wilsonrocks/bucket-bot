@@ -167,6 +167,14 @@ resource "aws_route53_record" "www" {
   }
 }
 
+resource "aws_route53_record" "api" {
+  zone_id = aws_route53_zone.primary.zone_id
+  name    = "api.malifaux.uk"
+  type    = "A"
+  ttl     = 300
+  records = ["212.227.84.191"]
+}
+
 resource "aws_cloudfront_function" "www_redirect" {
   name    = "bucket-bot-www-redirect-function"
   runtime = "cloudfront-js-1.0"
