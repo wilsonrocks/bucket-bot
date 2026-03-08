@@ -140,7 +140,8 @@ export async function addTestTourneyData(db: Kysely<DB>) {
         .select("id")
         .executeTakeFirstOrThrow();
 
-      db.insertInto("result")
+      await db
+        .insertInto("result")
         .values({
           tourney_id: tourney.id,
           player_identity_id: player_identity.id,
