@@ -14,7 +14,7 @@ export const generateRankings = async (
   db: Kysely<DB>,
   rankingsType: string, // don't need to narrow type as checking at runtime and this might come from DB
   config: GenerateRankingsConfig = {
-    playersNeededToBeMastersRanked: 12,
+    playersNeededToBeMastersRanked: 8,
     numberOfTourneysToConsider: 5,
   },
 ) => {
