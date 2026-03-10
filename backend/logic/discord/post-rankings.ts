@@ -7,7 +7,11 @@ import {
 } from "discord.js";
 import { Kysely } from "kysely";
 import { DB } from "kysely-codegen";
-import { getDiscordClient, UK_MALIFAUX_SERVER_ID } from "../discord-client";
+import {
+  EVENT_ENTHUSIAST_ROLE_ID,
+  getDiscordClient,
+  UK_MALIFAUX_SERVER_ID,
+} from "../discord-client";
 import { mostRecentSnapshot } from "../most-recent-snapshot";
 
 const TOP_X_PLAYERS = 16;
@@ -96,32 +100,28 @@ export const postDiscordRankings = async (db: Kysely<DB>) => {
       );
       continue;
     }
-    const guild = await discordClient.guilds.fetch(UK_MALIFAUX_SERVER_ID);
 
     const topPlayersText = rankings
-      .map(
-        (r) =>
-          `#${r.rank} - ${
-            r.discord_user_id ? userMention(r.discord_user_id) : r.name
-          } (${r.total_points.toFixed(2)} pts)`,
-      )
+      .map((r) => `#${r.rank} - ${r.name} (${r.total_points.toFixed(2)} pts)`)
       .join("\n");
 
     const embed = new EmbedBuilder()
       .setTitle(`${name} as of ${formatDate(new Date(), "EEEE d MMM yyyy")}`)
       .setColor(hex_code as ColorResolvable)
       .setDescription(description)
-      .addFields(
-        {
-          name: "Note",
-          value: `***BEEP BOOP!***
+      .addFields({ name: "Players", value: topPlayersText });
+
+    await channel.send({
+      content: `***BEEP BOOP!***
+<@&${EVENT_ENTHUSIAST_ROLE_ID}>
+
 Here is your weekly breakfast of rankings that I have cooked from data. I hope that it is tasty and nutritious and sustains you until you can next play in an event and generate more data for me. Enjoy!
 
-There's only a maximum of ${TOP_X_PLAYERS} players shown here. But you can see the full rankings [on the website](${process.env.FRONTEND_URL}/site/rankings?typeCode=${typeCode})!`,
-        },
-        { name: "Players", value: topPlayersText },
-      );
+There's only a maximum of ${TOP_X_PLAYERS} players shown here. But you can see the full rankings [on the website](${process.env.FRONTEND_URL}/site/rankings?typeCode=${typeCode})!
 
-    await channel.send({ embeds: [embed] });
+      `,
+
+      embeds: [embed],
+    });
   }
 };

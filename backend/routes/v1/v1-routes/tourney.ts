@@ -6,7 +6,6 @@ import {
 } from "../../../logic/discord-client";
 import { ColorResolvable, EmbedBuilder } from "discord.js";
 import { formatDate } from "date-fns/format";
-import { mentionIfPossible } from "../../../logic/discord/post-rankings";
 import { sql } from "kysely";
 
 export const allTourneys = async (ctx: Context) => {
@@ -308,7 +307,7 @@ export const postEventSummaryToDiscord = async (ctx: Context) => {
   const introEmbed = new EmbedBuilder()
     .setTitle(`${tourneyData.tourneyName}`)
     .setDescription(
-      `***BEEP BOOP!*** <@&${EVENT_ENTHUSIAST_ROLE_ID}>
+      `
       I have eaten the data for the **${tourneyData.tourneyName}** event in ${
         tourneyData.venueTown
       } on ${formatDate(tourneyData.tourneyDate, "EEEE, d MMMM yyyy")}.
@@ -322,10 +321,7 @@ export const postEventSummaryToDiscord = async (ctx: Context) => {
       value: resultsTableData
         .map(
           (r) =>
-            `#${r.place} - ${mentionIfPossible({
-              discord_user_id: r.discord_id,
-              name: r.playerName,
-            })} (${r.factionName}) - ${r.points.toFixed(2)} pts`,
+            `#${r.place} - ${r.playerName} (${r.factionName}) - ${r.points.toFixed(2)} pts`,
         )
         .join("\n"),
     });
@@ -347,10 +343,7 @@ export const postEventSummaryToDiscord = async (ctx: Context) => {
         },
         {
           name: "Best Player",
-          value: mentionIfPossible({
-            discord_user_id: faction.discord_id,
-            name: faction.player_name,
-          }),
+          value: faction.player_name,
           inline: true,
         },
       );
@@ -368,6 +361,7 @@ export const postEventSummaryToDiscord = async (ctx: Context) => {
     );
 
   const sentMessage = await channel.send({
+    content: `***BEEP BOOP!*** <@&${EVENT_ENTHUSIAST_ROLE_ID}>\n`,
     embeds: [introEmbed, ...factionEmbeds, communityEmbed],
   });
 
