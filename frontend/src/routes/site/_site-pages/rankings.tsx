@@ -1,7 +1,9 @@
 import { useGetRankingTypes, useGetRankings } from '@/hooks/useApi'
 import { Box, Group, Select, Table, Text } from '@mantine/core'
 import { createFileRoute, redirect } from '@tanstack/react-router'
+import { Route as PlayerRoute } from '@/routes/site/_site-pages/player.$id'
 import z from 'zod'
+import { Link } from '@/components/link'
 
 export const Route = createFileRoute('/site/_site-pages/rankings')({
   component: RouteComponent,
@@ -50,7 +52,11 @@ function RouteComponent() {
               head: ['Rank', 'Player', 'Total Points'],
               body: rankings.data.map((player) => [
                 <Box w={20}>{player.rank}</Box>,
-                <Box w={150}>{player.name}</Box>,
+                <Box w={150}>
+                  <Link to={PlayerRoute.to} params={{ id: player.player_id }}>
+                    {player.name}
+                  </Link>
+                </Box>,
                 <Box w={50}>{player.total_points.toFixed(2)}</Box>,
               ]),
             }}

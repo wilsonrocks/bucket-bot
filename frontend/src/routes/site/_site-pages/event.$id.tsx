@@ -3,6 +3,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import z from 'zod'
 import { useGetTourneyDetail } from '@/hooks/useApi'
 import { Link } from '@/components/link'
+import { Route as PlayerRoute } from '@/routes/site/_site-pages/player.$id'
 
 const eventParamsValidator = z.object({ id: z.coerce.number() })
 
@@ -28,8 +29,9 @@ function RouteComponent() {
           head: ['Place', 'Name', 'Points', 'Faction'],
           body: tourneyDetail.data.players.map((row) => [
             row.place,
-            <Link to={`/site/player/${row.playerId}`}>{row.playerName}</Link>,
-
+            <Link to={PlayerRoute.to} params={{ id: row.playerId }}>
+              {row.playerName}
+            </Link>,
             row.points.toFixed(2),
             row.factionName,
           ]),

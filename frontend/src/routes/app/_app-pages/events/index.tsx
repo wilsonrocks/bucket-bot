@@ -1,22 +1,19 @@
 import { Link } from '@/components/link'
 import { useGetAllTourneys } from '@/hooks/useApi'
-import { Anchor, Button, Table, Title } from '@mantine/core'
+import { Anchor, Table } from '@mantine/core'
 import { createFileRoute } from '@tanstack/react-router'
 import { format, parseISO } from 'date-fns'
 import { Route as EventIdRoute } from '../events.$id.edit'
 
 export const Route = createFileRoute('/app/_app-pages/events/')({
   component: RouteComponent,
+  staticData: { title: 'Edit Events' },
 })
 
 function RouteComponent() {
   const tourneys = useGetAllTourneys()
   return (
     <div>
-      <Title order={1} mb="md">
-        Events
-      </Title>
-
       {tourneys.data ? (
         <Table
           data={{
