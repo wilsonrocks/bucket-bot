@@ -37,7 +37,7 @@ function RouteComponent() {
   return (
     <div>
       <Title order={3} mb="md">
-        {playerData.data?.name}{' '}
+        {playerData.data.name}{' '}
       </Title>
       <Tabs
         defaultValue="events"
@@ -59,7 +59,7 @@ function RouteComponent() {
                 data={{
                   body: tourneys.data.map((tourney) => [
                     <Link
-                      to={EventRoute.path}
+                      to={EventRoute.to}
                       // params={{ id: String(tourney.tourneyId) }}
                     >
                       {tourney.tourneyName}
@@ -91,7 +91,11 @@ function RouteComponent() {
             }))}
             value={typeCode}
             onChange={(value) =>
-              navigate({ search: (prev) => ({ ...prev, typeCode: value }) })
+              navigate({
+                search: (
+                  prev: Record<string, unknown>,
+                ): Record<string, unknown> => ({ ...prev, typeCode: value }),
+              })
             }
           />
 
