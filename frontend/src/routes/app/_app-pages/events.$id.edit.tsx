@@ -169,7 +169,7 @@ function RouteComponent() {
                     label="Venue"
                     data={venues.data.map((venue) => ({
                       value: venue.id.toString(),
-                      label: venue.name,
+                      label: `${venue.name} - ${venue.town}`,
                     }))}
                     {...detailsForm.getInputProps('venueId')}
                   />
