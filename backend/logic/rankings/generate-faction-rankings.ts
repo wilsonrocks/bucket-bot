@@ -9,7 +9,7 @@ export const generateFactionRankings = async (dbClient: Kysely<DB>) => {
     .returningAll()
     .execute();
 
-  const rankings = await dbClient
+  await dbClient
     .with("stats", (queryBuilder) =>
       queryBuilder
         .selectFrom("result")
@@ -39,6 +39,7 @@ export const generateFactionRankings = async (dbClient: Kysely<DB>) => {
       "rank",
       "total_points",
       "declarations",
+      "declaration_rate",
       "points_per_declaration",
     ])
     .expression((eb) =>
@@ -52,6 +53,10 @@ export const generateFactionRankings = async (dbClient: Kysely<DB>) => {
           ),
           "total_points",
           "declarations",
+          sql<number>`declarations::float / SUM(declarations) OVER ()`.as(
+            "declaration_rate",
+          ),
+
           "points_per_declaration",
         ])
         .orderBy("points_per_declaration", "desc"),
@@ -59,20 +64,3 @@ export const generateFactionRankings = async (dbClient: Kysely<DB>) => {
     .returningAll()
     .execute();
 };
-
-/** `with stats as
-(select
-	faction_code,
-	COUNT(distinct player_id) as players,
-	COUNT(*) as declarations,
-	SUM(result.points) as total_points,
-SUM(result.points)/COUNT(distinct player_id) as points_per_player, SUM(result.points)/COUNT(*)  as points_per_declaration 
-from
-	result
-join tourney on result.tourney_id = tourney.id
-where tourney.date >= NOW() - INTERVAL '1 year'
-group by
-	faction_code
-)
-	select *, rank() over (order by points_per_declaration  desc) as rank from stats order by points_per_declaration DESC;`;
-*/

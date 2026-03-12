@@ -788,6 +788,7 @@ export const useGetFactionRankings = () => {
         total_points: number
         declarations: number
         points_per_declaration: number
+        declaration_rate: number
         hex_code: string
       }>
     > => {

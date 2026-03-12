@@ -24,9 +24,10 @@ function RouteComponent() {
           head: [
             'Rank',
             'Faction',
-            'Average Points',
-            'Times Declared',
+            'Declarations',
+            'Play rate',
             'Total Points',
+            'Average Points',
           ],
           body: factionRankingsQuery.data.map((faction) => [
             <div
@@ -38,9 +39,10 @@ function RouteComponent() {
               {faction.rank.toString()}
             </div>,
             faction.faction_name,
-            <strong>{faction.points_per_declaration.toFixed(2)}</strong>,
             faction.declarations,
+            `${(faction.declaration_rate * 100).toFixed(2)}%`,
             faction.total_points,
+            <strong>{faction.points_per_declaration.toFixed(2)}</strong>,
           ]),
         }}
       />
