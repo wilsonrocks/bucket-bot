@@ -1,10 +1,7 @@
 import { Context } from "koa";
 import { generateFactionRankings } from "../../../logic/rankings/generate-faction-rankings";
 import { ColorResolvable, EmbedBuilder, Emoji, TextChannel } from "discord.js";
-import {
-  EVENT_ENTHUSIAST_ROLE_ID,
-  getDiscordClient,
-} from "../../../logic/discord-client";
+import { getDiscordClient } from "../../../logic/discord-client";
 
 const { DISCORD_FACTION_CHANNEL_ID, DISCORD_TEST_CHANNEL_ID } = process.env;
 if (!DISCORD_FACTION_CHANNEL_ID) {
@@ -43,6 +40,7 @@ export const getFactionRankings = async (ctx: Context) => {
       "faction.name_code as faction_code",
       "faction_snapshot.total_points as total_points",
       "faction_snapshot.declarations as declarations",
+      "faction_snapshot.declaration_rate as declaration_rate",
       "faction_snapshot.points_per_declaration as points_per_declaration",
       "faction.hex_code as hex_code",
     ])
@@ -91,6 +89,7 @@ export const postFactionRankingsHandler = async (ctx: Context) => {
       "faction_snapshot.rank as rank",
       "faction_snapshot.total_points as total_points",
       "faction_snapshot.declarations as declarations",
+      "faction_snapshot.declaration_rate as declaration_rate",
       "faction_snapshot.points_per_declaration as points_per_declaration",
       "faction.hex_code as hex_code",
       "faction.emoji as emoji",
@@ -114,7 +113,7 @@ export const postFactionRankingsHandler = async (ctx: Context) => {
   const introEmbed = new EmbedBuilder()
     .setTitle(`Faction Rankings`)
     .setDescription(
-      `***BEEP BOOP!*** I have eaten the delicious data from all the UK Malifaux rankings and here some yummy faction standings for you to enjoy!\n<@&${EVENT_ENTHUSIAST_ROLE_ID}>`,
+      `***BEEP BOOP!*** I have eaten the delicious data from all the UK Malifaux rankings and here some yummy faction standings for you to enjoy!\n`,
     );
 
   const factionEmbeds = snapshot.map(
@@ -125,6 +124,7 @@ export const postFactionRankingsHandler = async (ctx: Context) => {
       total_points,
       declarations,
       points_per_declaration,
+      declaration_rate,
       emoji,
     }) =>
       new EmbedBuilder()
@@ -132,10 +132,8 @@ export const postFactionRankingsHandler = async (ctx: Context) => {
         .setColor(hex_code as ColorResolvable)
         .addFields(
           {
-            name: "Points per Declaration",
-            value: points_per_declaration
-              ? points_per_declaration.toFixed(2)
-              : "",
+            name: "Declarations",
+            value: declarations.toString(),
             inline: true,
           },
           {
@@ -143,9 +141,19 @@ export const postFactionRankingsHandler = async (ctx: Context) => {
             value: total_points.toString(),
             inline: true,
           },
+
           {
-            name: "Declarations",
-            value: declarations.toString(),
+            name: "Play Rate",
+            value: declaration_rate
+              ? (declaration_rate * 100).toFixed(2) + "%"
+              : "",
+            inline: true,
+          },
+          {
+            name: "Points per Declaration",
+            value: points_per_declaration
+              ? `**${points_per_declaration.toFixed(2)}**`
+              : "",
             inline: true,
           },
         ),
