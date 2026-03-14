@@ -220,9 +220,19 @@ export function FactionsBarRace() {
 
     merged
       .select('.value')
-      .attr('x', (d) => xScale(d.points_per_declaration) + 6)
+      .attr('x', (d) => {
+        const barW = Math.min(xScale(d.points_per_declaration), innerWidth)
+        return barW > innerWidth - 50 ? barW - 6 : barW + 6
+      })
       .attr('y', yScale.bandwidth() / 2)
-      .attr('text-anchor', 'start')
+      .attr('text-anchor', (d) => {
+        const barW = Math.min(xScale(d.points_per_declaration), innerWidth)
+        return barW > innerWidth - 50 ? 'end' : 'start'
+      })
+      .attr('fill', (d) => {
+        const barW = Math.min(xScale(d.points_per_declaration), innerWidth)
+        return barW > innerWidth - 50 ? 'white' : 'currentColor'
+      })
       .text((d) => d.points_per_declaration.toFixed(2))
 
     bars.exit().remove()
