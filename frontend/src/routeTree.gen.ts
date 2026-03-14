@@ -16,6 +16,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as SiteIndexRouteImport } from './routes/site/index'
 import { Route as SiteLoginRouteImport } from './routes/site/login'
 import { Route as SiteSitePagesRankingsRouteImport } from './routes/site/_site-pages/rankings'
+import { Route as SiteSitePagesHowItWorksRouteImport } from './routes/site/_site-pages/how-it-works'
 import { Route as SiteSitePagesFactionRankingsRouteImport } from './routes/site/_site-pages/faction-rankings'
 import { Route as SiteSitePagesEventsRouteImport } from './routes/site/_site-pages/events'
 import { Route as AppAppPagesVenuesRouteImport } from './routes/app/_app-pages/venues'
@@ -63,6 +64,11 @@ const SiteLoginRoute = SiteLoginRouteImport.update({
 const SiteSitePagesRankingsRoute = SiteSitePagesRankingsRouteImport.update({
   id: '/_site-pages/rankings',
   path: '/rankings',
+  getParentRoute: () => SiteRouteRoute,
+} as any)
+const SiteSitePagesHowItWorksRoute = SiteSitePagesHowItWorksRouteImport.update({
+  id: '/_site-pages/how-it-works',
+  path: '/how-it-works',
   getParentRoute: () => SiteRouteRoute,
 } as any)
 const SiteSitePagesFactionRankingsRoute =
@@ -147,6 +153,7 @@ export interface FileRoutesByFullPath {
   '/app/venues': typeof AppAppPagesVenuesRoute
   '/site/events': typeof SiteSitePagesEventsRoute
   '/site/faction-rankings': typeof SiteSitePagesFactionRankingsRoute
+  '/site/how-it-works': typeof SiteSitePagesHowItWorksRoute
   '/site/rankings': typeof SiteSitePagesRankingsRoute
   '/app/import/import-bot': typeof AppAppPagesImportImportBotRoute
   '/app/import/import-longshanks': typeof AppAppPagesImportImportLongshanksRoute
@@ -168,6 +175,7 @@ export interface FileRoutesByTo {
   '/app/venues': typeof AppAppPagesVenuesRoute
   '/site/events': typeof SiteSitePagesEventsRoute
   '/site/faction-rankings': typeof SiteSitePagesFactionRankingsRoute
+  '/site/how-it-works': typeof SiteSitePagesHowItWorksRoute
   '/site/rankings': typeof SiteSitePagesRankingsRoute
   '/app/import/import-bot': typeof AppAppPagesImportImportBotRoute
   '/app/import/import-longshanks': typeof AppAppPagesImportImportLongshanksRoute
@@ -191,6 +199,7 @@ export interface FileRoutesById {
   '/app/_app-pages/venues': typeof AppAppPagesVenuesRoute
   '/site/_site-pages/events': typeof SiteSitePagesEventsRoute
   '/site/_site-pages/faction-rankings': typeof SiteSitePagesFactionRankingsRoute
+  '/site/_site-pages/how-it-works': typeof SiteSitePagesHowItWorksRoute
   '/site/_site-pages/rankings': typeof SiteSitePagesRankingsRoute
   '/app/_app-pages/import/import-bot': typeof AppAppPagesImportImportBotRoute
   '/app/_app-pages/import/import-longshanks': typeof AppAppPagesImportImportLongshanksRoute
@@ -215,6 +224,7 @@ export interface FileRouteTypes {
     | '/app/venues'
     | '/site/events'
     | '/site/faction-rankings'
+    | '/site/how-it-works'
     | '/site/rankings'
     | '/app/import/import-bot'
     | '/app/import/import-longshanks'
@@ -236,6 +246,7 @@ export interface FileRouteTypes {
     | '/app/venues'
     | '/site/events'
     | '/site/faction-rankings'
+    | '/site/how-it-works'
     | '/site/rankings'
     | '/app/import/import-bot'
     | '/app/import/import-longshanks'
@@ -258,6 +269,7 @@ export interface FileRouteTypes {
     | '/app/_app-pages/venues'
     | '/site/_site-pages/events'
     | '/site/_site-pages/faction-rankings'
+    | '/site/_site-pages/how-it-works'
     | '/site/_site-pages/rankings'
     | '/app/_app-pages/import/import-bot'
     | '/app/_app-pages/import/import-longshanks'
@@ -325,6 +337,13 @@ declare module '@tanstack/react-router' {
       path: '/rankings'
       fullPath: '/site/rankings'
       preLoaderRoute: typeof SiteSitePagesRankingsRouteImport
+      parentRoute: typeof SiteRouteRoute
+    }
+    '/site/_site-pages/how-it-works': {
+      id: '/site/_site-pages/how-it-works'
+      path: '/how-it-works'
+      fullPath: '/site/how-it-works'
+      preLoaderRoute: typeof SiteSitePagesHowItWorksRouteImport
       parentRoute: typeof SiteRouteRoute
     }
     '/site/_site-pages/faction-rankings': {
@@ -455,6 +474,7 @@ interface SiteRouteRouteChildren {
   SiteIndexRoute: typeof SiteIndexRoute
   SiteSitePagesEventsRoute: typeof SiteSitePagesEventsRoute
   SiteSitePagesFactionRankingsRoute: typeof SiteSitePagesFactionRankingsRoute
+  SiteSitePagesHowItWorksRoute: typeof SiteSitePagesHowItWorksRoute
   SiteSitePagesRankingsRoute: typeof SiteSitePagesRankingsRoute
   SiteSitePagesEventIdRoute: typeof SiteSitePagesEventIdRoute
   SiteSitePagesPlayerIdRoute: typeof SiteSitePagesPlayerIdRoute
@@ -465,6 +485,7 @@ const SiteRouteRouteChildren: SiteRouteRouteChildren = {
   SiteIndexRoute: SiteIndexRoute,
   SiteSitePagesEventsRoute: SiteSitePagesEventsRoute,
   SiteSitePagesFactionRankingsRoute: SiteSitePagesFactionRankingsRoute,
+  SiteSitePagesHowItWorksRoute: SiteSitePagesHowItWorksRoute,
   SiteSitePagesRankingsRoute: SiteSitePagesRankingsRoute,
   SiteSitePagesEventIdRoute: SiteSitePagesEventIdRoute,
   SiteSitePagesPlayerIdRoute: SiteSitePagesPlayerIdRoute,
