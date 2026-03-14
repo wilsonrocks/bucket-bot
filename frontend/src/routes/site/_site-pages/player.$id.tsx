@@ -60,7 +60,8 @@ function RouteComponent() {
                   body: tourneys.data.map((tourney) => [
                     <Link
                       to={EventRoute.to}
-                      // params={{ id: String(tourney.tourneyId) }}
+                      params={{ id: tourney.tourneyId }}
+                      search={{}}
                     >
                       {tourney.tourneyName}
                     </Link>,
