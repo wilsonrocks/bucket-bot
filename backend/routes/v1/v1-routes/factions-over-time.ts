@@ -1,5 +1,4 @@
 import { Context } from "koa";
-import { p } from "vitest/dist/chunks/reporters.d.OXEK7y4s";
 
 export const getFactionsOverTime = async (ctx: Context) => {
   const factionData = await ctx.state.db
@@ -35,7 +34,6 @@ export const getFactionsOverTime = async (ctx: Context) => {
 
         acc[key].factions.push({
           faction_code: row.faction_code,
-          value: row.points_per_declaration,
           declarations: row.declarations,
           points_per_declaration: row.points_per_declaration,
           name: row.name,
@@ -48,5 +46,13 @@ export const getFactionsOverTime = async (ctx: Context) => {
     ),
   );
 
-  ctx.body = grouped;
+  const zeroRecord = {
+    date: new Date("2026-01-01"),
+    factions: grouped[0].factions.map((f: any) => ({
+      ...f,
+      declarations: 0,
+      points_per_declaration: 0,
+    })),
+  };
+  ctx.body = [zeroRecord, ...grouped];
 };
