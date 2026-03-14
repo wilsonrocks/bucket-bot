@@ -5,7 +5,7 @@ import {
   IconPlayerPlay,
   IconPlayerSkipBack,
 } from '@tabler/icons-react'
-import * as d3 from 'd3'
+import { max, scaleBand, scaleLinear, select } from 'd3'
 import { timeFormat } from 'd3-time-format'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 
@@ -28,8 +28,17 @@ type BarRaceProps<T extends BarDatum> = {
   duration?: number
 }
 
+const formatDate = timeFormat('%d %b %Y')
+
 function sortItems<T extends BarDatum>(items: T[]) {
   return [...items].sort((a, b) => b.value - a.value)
+}
+
+function makeYScale(items: BarDatum[], innerHeight: number) {
+  return scaleBand<string>()
+    .domain(sortItems(items).map((d) => d.id))
+    .range([0, innerHeight])
+    .padding(0.1)
 }
 
 function catmullRom(
@@ -74,22 +83,22 @@ function BarRaceInner<T extends BarDatum>({
   useEffect(() => {
     if (initialized.current || data.length === 0) return
     initialized.current = true
-    const t = (data.length - 1) * duration
-    offsetRef.current = t
-    setTimeElapsed(t)
+    const endTime = (data.length - 1) * duration
+    offsetRef.current = endTime
+    setTimeElapsed(endTime)
   }, [data])
 
   useEffect(() => {
     if (!isPlaying) return
-    const n = data.length
+    const frameCount = data.length
     let raf: number
     const start = performance.now() - offsetRef.current
 
     function tick(now: number) {
       const elapsed = now - start
       const rawFrame = elapsed / duration
-      if (rawFrame >= n - 1) {
-        const endTime = (n - 1) * duration
+      if (rawFrame >= frameCount - 1) {
+        const endTime = (frameCount - 1) * duration
         offsetRef.current = endTime
         setTimeElapsed(endTime)
         setIsPlaying(false)
@@ -111,7 +120,7 @@ function BarRaceInner<T extends BarDatum>({
       setTimeElapsed(0)
       setIsPlaying(true)
     } else {
-      setIsPlaying((p) => !p)
+      setIsPlaying((prev) => !prev)
     }
   }
 
@@ -123,95 +132,86 @@ function BarRaceInner<T extends BarDatum>({
 
   const fractionalFrame = useMemo(() => {
     if (data.length === 0) return { frame: 0, t: 0 }
-    const n = data.length
+    const frameCount = data.length
     const rawFrame = timeElapsed / duration
-    const frame = Math.min(Math.floor(rawFrame), n - 1)
-    const t = frame >= n - 1 ? 0 : rawFrame % 1
+    const frame = Math.min(Math.floor(rawFrame), frameCount - 1)
+    const t = frame >= frameCount - 1 ? 0 : rawFrame % 1
     return { frame, t }
   }, [timeElapsed, data])
 
   const interpolated = useMemo(() => {
     if (data.length === 0) return []
-    const { t } = fractionalFrame
-    const n = data.length
-    const rawFrame = timeElapsed / duration
-    const frame = Math.min(Math.floor(rawFrame), n - 1)
-    const i0 = Math.max(frame - 1, 0)
-    const i1 = frame
-    const i2 = Math.min(frame + 1, n - 1)
-    const i3 = Math.min(frame + 2, n - 1)
+    const { frame, t } = fractionalFrame
+    const frameCount = data.length
+    const iPrev = Math.max(frame - 1, 0)
+    const iCur = frame
+    const iNext = Math.min(frame + 1, frameCount - 1)
+    const iFar = Math.min(frame + 2, frameCount - 1)
 
-    if (!data[i1]) return []
+    if (!data[iCur]) return []
 
     const baseItems =
-      data[i1].items.length > 0 ? data[i1].items : data[i2].items
+      data[iCur].items.length > 0 ? data[iCur].items : data[iNext].items
 
-    return baseItems.map((f1) => {
-      const get = (snap: Snapshot<T>) =>
-        snap.items.find((f) => f.id === f1.id)?.value ?? 0
+    return baseItems.map((item) => {
+      const getValue = (snap: Snapshot<T>) =>
+        snap.items.find((candidate) => candidate.id === item.id)?.value ?? 0
       const animated = catmullRom(
-        get(data[i0]),
-        get(data[i1]),
-        get(data[i2]),
-        get(data[i3]),
+        getValue(data[iPrev]),
+        getValue(data[iCur]),
+        getValue(data[iNext]),
+        getValue(data[iFar]),
         t,
       )
-      return { ...f1, value: animated }
+      return { ...item, value: animated }
     })
   }, [fractionalFrame, data])
 
   const sorted = useMemo(() => sortItems(interpolated), [interpolated])
 
   const xScale = useMemo(() => {
-    const max = d3.max(data, (s) => d3.max(s.items, (f) => f.value)) || 1
-    return d3.scaleLinear().domain([0, max]).range([0, innerWidth])
+    const maxVal = max(data, (snapshot) => max(snapshot.items, (d) => d.value)) || 1
+    return scaleLinear().domain([0, maxVal]).range([0, innerWidth])
   }, [data, innerWidth])
 
-  const makeYScale = (items: BarDatum[]) =>
-    d3
-      .scaleBand<string>()
-      .domain(sortItems(items).map((d) => d.id))
-      .range([0, innerHeight])
-      .padding(0.1)
-
-  const yScale = useMemo(() => makeYScale(sorted), [sorted, innerHeight])
+  const yScale = useMemo(
+    () => makeYScale(sorted, innerHeight),
+    [sorted, innerHeight],
+  )
 
   const positions = useMemo(() => {
     if (data.length === 0) return []
-    const { t } = fractionalFrame
-    const n = data.length
-    const frame = Math.min(Math.floor(timeElapsed / duration), n - 1)
+    const { frame, t } = fractionalFrame
+    const frameCount = data.length
     if (!data[frame]) return []
-    const yA = makeYScale(data[frame].items)
-    const yB = makeYScale(data[Math.min(frame + 1, n - 1)].items)
+    const yScaleCur = makeYScale(data[frame].items, innerHeight)
+    const yScaleNext = makeYScale(data[Math.min(frame + 1, frameCount - 1)].items, innerHeight)
     return sorted.map((d) => {
-      const y0 = yA(d.id) ?? 0
-      const y1 = yB(d.id) ?? 0
+      const y0 = yScaleCur(d.id) ?? 0
+      const y1 = yScaleNext(d.id) ?? 0
       return { ...d, y: y0 + (y1 - y0) * t }
     })
   }, [fractionalFrame, sorted, data, innerHeight])
 
   const displayedDate = useMemo(() => {
     if (data.length === 0) return ''
-    const { t } = fractionalFrame
-    const n = data.length
-    const frame = Math.min(Math.floor(timeElapsed / duration), n - 1)
+    const { frame, t } = fractionalFrame
+    const frameCount = data.length
     if (!data[frame]) return ''
-    const a = new Date(data[frame].date)
-    const b = new Date(data[Math.min(frame + 1, n - 1)].date)
-    const interpTime = a.getTime() + (b.getTime() - a.getTime()) * t
-    const format = timeFormat('%d %b %Y')
-    return format(new Date(interpTime))
+    const dateA = new Date(data[frame].date)
+    const dateB = new Date(data[Math.min(frame + 1, frameCount - 1)].date)
+    const interpTime = dateA.getTime() + (dateB.getTime() - dateA.getTime()) * t
+    return formatDate(new Date(interpTime))
   }, [fractionalFrame, data])
 
   useEffect(() => {
     if (!svgRef.current) return
-    const svg = d3.select(svgRef.current)
+    const svg = select(svgRef.current)
     const g = svg.select<SVGGElement>('g.chart')
 
     const bars = g
       .selectAll<SVGGElement, BarDatum>('g.bar')
-      .data(positions, (d: any) => d.id)
+      .data(positions, (d: BarDatum) => d.id)
 
     const barsEnter = bars.enter().append('g').attr('class', 'bar')
     barsEnter.append('rect').attr('height', yScale.bandwidth())
@@ -237,17 +237,17 @@ function BarRaceInner<T extends BarDatum>({
     merged
       .select('.value')
       .attr('x', (d) => {
-        const barW = Math.min(xScale(d.value), innerWidth)
-        return barW > innerWidth - 50 ? barW - 6 : barW + 6
+        const barWidth = Math.min(xScale(d.value), innerWidth)
+        return barWidth > innerWidth - 50 ? barWidth - 6 : barWidth + 6
       })
       .attr('y', yScale.bandwidth() / 2)
       .attr('text-anchor', (d) => {
-        const barW = Math.min(xScale(d.value), innerWidth)
-        return barW > innerWidth - 50 ? 'end' : 'start'
+        const barWidth = Math.min(xScale(d.value), innerWidth)
+        return barWidth > innerWidth - 50 ? 'end' : 'start'
       })
       .attr('fill', (d) => {
-        const barW = Math.min(xScale(d.value), innerWidth)
-        return barW > innerWidth - 50 ? 'white' : 'currentColor'
+        const barWidth = Math.min(xScale(d.value), innerWidth)
+        return barWidth > innerWidth - 50 ? 'white' : 'currentColor'
       })
       .text((d) => formatValue(d.value))
 
