@@ -17,6 +17,7 @@ function RouteComponent() {
     'declarations' | 'points_per_declaration'
   >('points_per_declaration')
   const factionRankingsQuery = useGetFactionRankings()
+
   if (factionRankingsQuery.isLoading) {
     return <div>Loading...</div>
   } else if (factionRankingsQuery.isError || !factionRankingsQuery.data) {

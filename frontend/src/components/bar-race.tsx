@@ -67,10 +67,17 @@ function BarRaceInner<T extends BarDatum>({
   const svgRef = useRef<SVGSVGElement | null>(null)
 
   const [isPlaying, setIsPlaying] = useState(false)
-  const [startSignal, setStartSignal] = useState(0)
   const offsetRef = useRef(0)
-
   const [timeElapsed, setTimeElapsed] = useState(0)
+  const initialized = useRef(false)
+
+  useEffect(() => {
+    if (initialized.current || data.length === 0) return
+    initialized.current = true
+    const t = (data.length - 1) * duration
+    offsetRef.current = t
+    setTimeElapsed(t)
+  }, [data])
 
   useEffect(() => {
     if (!isPlaying) return
@@ -95,12 +102,23 @@ function BarRaceInner<T extends BarDatum>({
 
     raf = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(raf)
-  }, [data, isPlaying, startSignal])
+  }, [data, isPlaying])
+
+  function handlePlayPause() {
+    const endTime = (data.length - 1) * duration
+    if (!isPlaying && timeElapsed >= endTime) {
+      offsetRef.current = 0
+      setTimeElapsed(0)
+      setIsPlaying(true)
+    } else {
+      setIsPlaying((p) => !p)
+    }
+  }
 
   function handleReset() {
     offsetRef.current = 0
     setTimeElapsed(0)
-    if (isPlaying) setStartSignal((s) => s + 1)
+    setIsPlaying(false)
   }
 
   const fractionalFrame = useMemo(() => {
@@ -240,15 +258,15 @@ function BarRaceInner<T extends BarDatum>({
     <div ref={containerRef}>
       <Group mb={10} align="center">
         <strong>{displayedDate}</strong>
-        <ActionIcon onClick={() => setIsPlaying((p) => !p)} variant="subtle">
+        <ActionIcon onClick={handleReset} variant="subtle">
+          <IconPlayerSkipBack size={16} />
+        </ActionIcon>
+        <ActionIcon onClick={handlePlayPause} variant="subtle">
           {isPlaying ? (
             <IconPlayerPause size={16} />
           ) : (
             <IconPlayerPlay size={16} />
           )}
-        </ActionIcon>
-        <ActionIcon onClick={handleReset} variant="subtle">
-          <IconPlayerSkipBack size={16} />
         </ActionIcon>
       </Group>
       <svg
