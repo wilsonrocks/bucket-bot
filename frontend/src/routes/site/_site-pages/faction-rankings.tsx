@@ -1,7 +1,8 @@
 import { FactionsBarRace } from '@/components/animated-factions'
 import { useGetFactionRankings } from '@/hooks/useApi'
-import { Table, Tabs } from '@mantine/core'
+import { Table } from '@mantine/core'
 import { createFileRoute } from '@tanstack/react-router'
+import { Tabs } from '@/components/routed-tabs'
 
 export const Route = createFileRoute('/site/_site-pages/faction-rankings')({
   component: RouteComponent,
