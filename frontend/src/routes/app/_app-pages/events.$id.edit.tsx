@@ -16,7 +16,6 @@ import {
   NumberInput,
   Paper,
   Select,
-  Tabs,
   TextInput,
   Title,
 } from '@mantine/core'
@@ -24,6 +23,7 @@ import { useForm } from '@mantine/form'
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect } from 'react'
 import z from 'zod'
+import { Tabs } from '@/components/routed-tabs'
 
 const eventParamsValidator = z.object({ id: z.coerce.number() })
 

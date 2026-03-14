@@ -34,6 +34,7 @@ import {
   updateTourney,
 } from "./v1-routes/tourney";
 import { createVenueHandler, getAllVenuesHandler } from "./v1-routes/venues";
+import { getFactionsOverTime } from "./v1-routes/factions-over-time";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -141,6 +142,7 @@ v1Router.get("/players", getPlayers);
 v1Router.get("/player/:id", getPlayerById);
 v1Router.get("/tiers", getAllTiers);
 v1Router.get("/faction-rankings", getFactionRankings);
+v1Router.get("/factions-over-time", getFactionsOverTime);
 
 // now these need authentication
 v1Router.use(koaJwt({ secret: process.env.JWT_SECRET! }));

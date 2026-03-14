@@ -976,3 +976,34 @@ export const useGetUnmappedIdentities = () => {
   })
   return unmappedIdentities
 }
+
+export const useGetFactionsOverTime = () => {
+  const factionsOverTime = useQuery({
+    queryKey: ['factions-over-time'],
+    queryFn: async (): Promise<
+      Array<{
+        date: string
+        factions: {
+          faction_code: string
+          declarations: number
+          points_per_declaration: number
+          name: string
+          hex_code: string
+        }[]
+      }>
+    > => {
+      const url = `${import.meta.env.VITE_BACKEND_URL}/v1/factions-over-time`
+      const res = await fetch(url, {})
+      if (!res.ok) {
+        notifications.show({
+          title: 'Error',
+          message: `Failed to fetch factions over time data: ${res.statusText}`,
+          color: 'red',
+        })
+        throw new Error('Failed to fetch factions over time data')
+      }
+      return res.json()
+    },
+  })
+  return factionsOverTime
+}
