@@ -989,6 +989,7 @@ export const useGetFactionsOverTime = () => {
           points_per_declaration: number
           name: string
           hex_code: string
+          short_name: string
         }[]
       }>
     > => {

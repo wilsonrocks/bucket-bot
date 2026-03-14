@@ -16,6 +16,7 @@ export const getFactionsOverTime = async (ctx: Context) => {
       "faction_snapshot.points_per_declaration",
       "faction_snapshot_batch.created_at as snapshot_date",
       "faction.name",
+      "faction.short_name",
       "faction.hex_code",
     ])
     .execute();
@@ -38,6 +39,7 @@ export const getFactionsOverTime = async (ctx: Context) => {
           points_per_declaration: row.points_per_declaration,
           name: row.name,
           hex_code: row.hex_code,
+          short_name: row.short_name,
         });
 
         return acc;
