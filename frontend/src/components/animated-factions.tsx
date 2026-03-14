@@ -1,6 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
-import * as d3 from 'd3'
-import { timeFormat } from 'd3-time-format'
+import { useGetFactionsOverTime } from '@/hooks/useApi'
 import { ActionIcon, Group } from '@mantine/core'
 import { useMediaQuery, useResizeObserver } from '@mantine/hooks'
 import {
@@ -8,7 +6,9 @@ import {
   IconPlayerPlay,
   IconPlayerSkipBack,
 } from '@tabler/icons-react'
-import { useGetFactionsOverTime } from '@/hooks/useApi'
+import * as d3 from 'd3'
+import { timeFormat } from 'd3-time-format'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 type Metric = 'declarations' | 'points_per_declaration'
 
