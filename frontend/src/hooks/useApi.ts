@@ -987,6 +987,7 @@ export const useGetFactionsOverTime = () => {
           faction_code: string
           declarations: number
           points_per_declaration: number
+          total_points: number
           name: string
           hex_code: string
           short_name: string

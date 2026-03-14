@@ -14,7 +14,7 @@ export const Route = createFileRoute('/site/_site-pages/faction-rankings')({
 
 function RouteComponent() {
   const [metric, setMetric] = useState<
-    'declarations' | 'points_per_declaration'
+    'declarations' | 'points_per_declaration' | 'total_points'
   >('points_per_declaration')
   const factionRankingsQuery = useGetFactionRankings()
 
@@ -72,6 +72,7 @@ function RouteComponent() {
             data={[
               { value: 'points_per_declaration', label: 'Average Points' },
               { value: 'declarations', label: 'Declarations' },
+              { value: 'total_points', label: 'Total Points' },
             ]}
           />
           <FactionsBarRace metric={metric} />

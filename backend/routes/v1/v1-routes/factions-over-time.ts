@@ -14,6 +14,7 @@ export const getFactionsOverTime = async (ctx: Context) => {
       "faction_snapshot.faction_code",
       "faction_snapshot.declarations",
       "faction_snapshot.points_per_declaration",
+      "faction_snapshot.total_points",
       "faction_snapshot_batch.created_at as snapshot_date",
       "faction.name",
       "faction.short_name",
@@ -37,6 +38,7 @@ export const getFactionsOverTime = async (ctx: Context) => {
           faction_code: row.faction_code,
           declarations: row.declarations,
           points_per_declaration: row.points_per_declaration,
+          total_points: row.total_points,
           name: row.name,
           hex_code: row.hex_code,
           short_name: row.short_name,
@@ -54,6 +56,7 @@ export const getFactionsOverTime = async (ctx: Context) => {
       ...f,
       declarations: 0,
       points_per_declaration: 0,
+      total_points: 0,
     })),
   };
   ctx.body = [zeroRecord, ...grouped];
