@@ -1,5 +1,5 @@
+import { List, Stack, Text } from '@mantine/core'
 import { createFileRoute } from '@tanstack/react-router'
-import { List, Stack, Text, Title } from '@mantine/core'
 
 export const Route = createFileRoute('/site/_site-pages/how-it-works')({
   component: RouteComponent,
