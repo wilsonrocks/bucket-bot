@@ -2,8 +2,12 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import * as d3 from 'd3'
 import { timeFormat } from 'd3-time-format'
 import { ActionIcon, Group } from '@mantine/core'
-import { useResizeObserver } from '@mantine/hooks'
-import { IconPlayerPause, IconPlayerPlay, IconPlayerSkipBack } from '@tabler/icons-react'
+import { useMediaQuery, useResizeObserver } from '@mantine/hooks'
+import {
+  IconPlayerPause,
+  IconPlayerPlay,
+  IconPlayerSkipBack,
+} from '@tabler/icons-react'
 import { useGetFactionsOverTime } from '@/hooks/useApi'
 
 type Metric = 'declarations' | 'points_per_declaration'
@@ -13,6 +17,7 @@ type FactionDatum = {
   declarations: number
   points_per_declaration: number
   name: string
+  short_name: string
   hex_code: string
 }
 
@@ -21,17 +26,25 @@ type Snapshot = {
   factions: FactionDatum[]
 }
 
-function sortFactions(factions: FactionDatum[], metric: Metric = 'points_per_declaration') {
+function sortFactions(
+  factions: FactionDatum[],
+  metric: Metric = 'points_per_declaration',
+) {
   return [...factions].sort((a, b) => b[metric] - a[metric])
 }
 
-export function FactionsBarRace({ metric = 'points_per_declaration' }: { metric?: Metric }) {
+export function FactionsBarRace({
+  metric = 'points_per_declaration',
+}: {
+  metric?: Metric
+}) {
   const { data } = useGetFactionsOverTime()
 
   const [containerRef, containerRect] = useResizeObserver<HTMLDivElement>()
+  const isMobile = useMediaQuery('(max-width: 600px)')
   const width = containerRect.width || 700
   const height = 400
-  const margin = { top: 20, right: 60, bottom: 20, left: 150 }
+  const margin = { top: 20, right: 60, bottom: 20, left: isMobile ? 40 : 150 }
   const innerWidth = width - margin.left - margin.right
   const innerHeight = height - margin.top - margin.bottom
 
@@ -89,7 +102,13 @@ export function FactionsBarRace({ metric = 'points_per_declaration' }: { metric?
 
   // Catmull-Rom spline: interpolates between p1→p2 using neighbouring points for
   // smooth velocity at each keyframe (no velocity discontinuity = no pausing feel)
-  function catmullRom(p0: number, p1: number, p2: number, p3: number, t: number) {
+  function catmullRom(
+    p0: number,
+    p1: number,
+    p2: number,
+    p3: number,
+    t: number,
+  ) {
     const t2 = t * t
     const t3 = t2 * t
     return Math.max(
@@ -124,17 +143,31 @@ export function FactionsBarRace({ metric = 'points_per_declaration' }: { metric?
 
     return baseFactions.map((f1) => {
       const get = (snap: Snapshot) =>
-        snap.factions.find((f) => f.faction_code === f1.faction_code)?.[metric] ?? 0
-      const animated = catmullRom(get(data[i0]), get(data[i1]), get(data[i2]), get(data[i3]), t)
+        snap.factions.find((f) => f.faction_code === f1.faction_code)?.[
+          metric
+        ] ?? 0
+      const animated = catmullRom(
+        get(data[i0]),
+        get(data[i1]),
+        get(data[i2]),
+        get(data[i3]),
+        t,
+      )
       return {
         ...f1,
         declarations: metric === 'declarations' ? animated : f1.declarations,
-        points_per_declaration: metric === 'points_per_declaration' ? animated : f1.points_per_declaration,
+        points_per_declaration:
+          metric === 'points_per_declaration'
+            ? animated
+            : f1.points_per_declaration,
       }
     })
   }, [fractionalFrame, data, metric])
 
-  const sorted = useMemo(() => sortFactions(interpolated, metric), [interpolated, metric])
+  const sorted = useMemo(
+    () => sortFactions(interpolated, metric),
+    [interpolated, metric],
+  )
 
   const xScale = useMemo(() => {
     const max =
@@ -211,7 +244,7 @@ export function FactionsBarRace({ metric = 'points_per_declaration' }: { metric?
       .attr('x', -10)
       .attr('y', yScale.bandwidth() / 2)
       .attr('text-anchor', 'end')
-      .text((d) => d.name)
+      .text((d) => (isMobile ? d.short_name : d.name))
 
     merged
       .select('.value')
@@ -229,24 +262,35 @@ export function FactionsBarRace({ metric = 'points_per_declaration' }: { metric?
         return barW > innerWidth - 50 ? 'white' : 'currentColor'
       })
       .text((d) =>
-        metric === 'declarations' ? Math.round(d[metric]).toString() : d[metric].toFixed(2),
+        metric === 'declarations'
+          ? Math.round(d[metric]).toString()
+          : d[metric].toFixed(2),
       )
 
     bars.exit().remove()
-  }, [positions, xScale, yScale, metric])
+  }, [positions, xScale, yScale, metric, isMobile])
 
   return (
     <div ref={containerRef}>
       <Group mb={10} align="center">
         <strong>{displayedDate}</strong>
         <ActionIcon onClick={() => setIsPlaying((p) => !p)} variant="subtle">
-          {isPlaying ? <IconPlayerPause size={16} /> : <IconPlayerPlay size={16} />}
+          {isPlaying ? (
+            <IconPlayerPause size={16} />
+          ) : (
+            <IconPlayerPlay size={16} />
+          )}
         </ActionIcon>
         <ActionIcon onClick={handleReset} variant="subtle">
           <IconPlayerSkipBack size={16} />
         </ActionIcon>
       </Group>
-      <svg ref={svgRef} width="100%" height={height} viewBox={`0 0 ${width} ${height}`}>
+      <svg
+        ref={svgRef}
+        width="100%"
+        height={height}
+        viewBox={`0 0 ${width} ${height}`}
+      >
         <g
           className="chart"
           transform={`translate(${margin.left},${margin.top})`}
