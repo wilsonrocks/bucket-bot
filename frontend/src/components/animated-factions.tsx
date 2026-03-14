@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import * as d3 from 'd3'
 import { timeFormat } from 'd3-time-format'
 import { ActionIcon, Group } from '@mantine/core'
+import { useResizeObserver } from '@mantine/hooks'
 import { IconPlayerPause, IconPlayerPlay, IconPlayerSkipBack } from '@tabler/icons-react'
 import { useGetFactionsOverTime } from '@/hooks/useApi'
 
@@ -27,9 +28,10 @@ function sortFactions(factions: FactionDatum[]) {
 export function FactionsBarRace() {
   const { data } = useGetFactionsOverTime()
 
-  const width = 700
+  const [containerRef, containerRect] = useResizeObserver<HTMLDivElement>()
+  const width = containerRect.width || 700
   const height = 400
-  const margin = { top: 20, right: 20, bottom: 20, left: 120 }
+  const margin = { top: 20, right: 60, bottom: 20, left: 150 }
   const innerWidth = width - margin.left - margin.right
   const innerHeight = height - margin.top - margin.bottom
 
@@ -227,7 +229,7 @@ export function FactionsBarRace() {
   }, [positions, xScale, yScale])
 
   return (
-    <div>
+    <div ref={containerRef}>
       <Group mb={10} align="center">
         <strong>{displayedDate}</strong>
         <ActionIcon onClick={() => setIsPlaying((p) => !p)} variant="subtle">
@@ -237,7 +239,7 @@ export function FactionsBarRace() {
           <IconPlayerSkipBack size={16} />
         </ActionIcon>
       </Group>
-      <svg ref={svgRef} width={width} height={height}>
+      <svg ref={svgRef} width="100%" height={height} viewBox={`0 0 ${width} ${height}`}>
         <g
           className="chart"
           transform={`translate(${margin.left},${margin.top})`}
