@@ -6,6 +6,8 @@ import { useResizeObserver } from '@mantine/hooks'
 import { IconPlayerPause, IconPlayerPlay, IconPlayerSkipBack } from '@tabler/icons-react'
 import { useGetFactionsOverTime } from '@/hooks/useApi'
 
+type Metric = 'declarations' | 'points_per_declaration'
+
 type FactionDatum = {
   faction_code: string
   declarations: number
@@ -19,13 +21,11 @@ type Snapshot = {
   factions: FactionDatum[]
 }
 
-function sortFactions(factions: FactionDatum[]) {
-  return [...factions].sort(
-    (a, b) => b.points_per_declaration - a.points_per_declaration,
-  )
+function sortFactions(factions: FactionDatum[], metric: Metric = 'points_per_declaration') {
+  return [...factions].sort((a, b) => b[metric] - a[metric])
 }
 
-export function FactionsBarRace() {
+export function FactionsBarRace({ metric = 'points_per_declaration' }: { metric?: Metric }) {
   const { data } = useGetFactionsOverTime()
 
   const [containerRef, containerRect] = useResizeObserver<HTMLDivElement>()
@@ -124,33 +124,28 @@ export function FactionsBarRace() {
 
     return baseFactions.map((f1) => {
       const get = (snap: Snapshot) =>
-        snap.factions.find((f) => f.faction_code === f1.faction_code)
-          ?.points_per_declaration ?? 0
+        snap.factions.find((f) => f.faction_code === f1.faction_code)?.[metric] ?? 0
+      const animated = catmullRom(get(data[i0]), get(data[i1]), get(data[i2]), get(data[i3]), t)
       return {
         ...f1,
-        points_per_declaration: catmullRom(
-          get(data[i0]),
-          get(data[i1]),
-          get(data[i2]),
-          get(data[i3]),
-          t,
-        ),
+        declarations: metric === 'declarations' ? animated : f1.declarations,
+        points_per_declaration: metric === 'points_per_declaration' ? animated : f1.points_per_declaration,
       }
     })
-  }, [fractionalFrame, data])
+  }, [fractionalFrame, data, metric])
 
-  const sorted = useMemo(() => sortFactions(interpolated), [interpolated])
+  const sorted = useMemo(() => sortFactions(interpolated, metric), [interpolated, metric])
 
   const xScale = useMemo(() => {
     const max =
-      d3.max(data ?? [], (s) => d3.max(s.factions, (f) => f.points_per_declaration)) || 1
+      d3.max(data ?? [], (s) => d3.max(s.factions, (f) => f[metric])) || 1
     return d3.scaleLinear().domain([0, max]).range([0, innerWidth])
-  }, [data, innerWidth])
+  }, [data, innerWidth, metric])
 
   const makeYScale = (factions: FactionDatum[]) =>
     d3
       .scaleBand<string>()
-      .domain(sortFactions(factions).map((d) => d.faction_code))
+      .domain(sortFactions(factions, metric).map((d) => d.faction_code))
       .range([0, innerHeight])
       .padding(0.1)
 
@@ -207,7 +202,7 @@ export function FactionsBarRace() {
 
     merged
       .select('rect')
-      .attr('width', (d) => xScale(d.points_per_declaration))
+      .attr('width', (d) => xScale(d[metric]))
       .attr('height', yScale.bandwidth())
       .attr('fill', (d) => d.hex_code)
 
@@ -221,22 +216,24 @@ export function FactionsBarRace() {
     merged
       .select('.value')
       .attr('x', (d) => {
-        const barW = Math.min(xScale(d.points_per_declaration), innerWidth)
+        const barW = Math.min(xScale(d[metric]), innerWidth)
         return barW > innerWidth - 50 ? barW - 6 : barW + 6
       })
       .attr('y', yScale.bandwidth() / 2)
       .attr('text-anchor', (d) => {
-        const barW = Math.min(xScale(d.points_per_declaration), innerWidth)
+        const barW = Math.min(xScale(d[metric]), innerWidth)
         return barW > innerWidth - 50 ? 'end' : 'start'
       })
       .attr('fill', (d) => {
-        const barW = Math.min(xScale(d.points_per_declaration), innerWidth)
+        const barW = Math.min(xScale(d[metric]), innerWidth)
         return barW > innerWidth - 50 ? 'white' : 'currentColor'
       })
-      .text((d) => d.points_per_declaration.toFixed(2))
+      .text((d) =>
+        metric === 'declarations' ? Math.round(d[metric]).toString() : d[metric].toFixed(2),
+      )
 
     bars.exit().remove()
-  }, [positions, xScale, yScale])
+  }, [positions, xScale, yScale, metric])
 
   return (
     <div ref={containerRef}>

@@ -1,8 +1,9 @@
 import { FactionsBarRace } from '@/components/animated-factions'
 import { useGetFactionRankings } from '@/hooks/useApi'
-import { Table } from '@mantine/core'
+import { Select, Table } from '@mantine/core'
 import { createFileRoute } from '@tanstack/react-router'
 import { Tabs } from '@/components/routed-tabs'
+import { useState } from 'react'
 
 export const Route = createFileRoute('/site/_site-pages/faction-rankings')({
   component: RouteComponent,
@@ -12,6 +13,9 @@ export const Route = createFileRoute('/site/_site-pages/faction-rankings')({
 })
 
 function RouteComponent() {
+  const [metric, setMetric] = useState<
+    'declarations' | 'points_per_declaration'
+  >('points_per_declaration')
   const factionRankingsQuery = useGetFactionRankings()
   if (factionRankingsQuery.isLoading) {
     return <div>Loading...</div>
@@ -57,7 +61,19 @@ function RouteComponent() {
         </Tabs.Panel>
 
         <Tabs.Panel value="animation">
-          <FactionsBarRace />
+          <Select
+            mt="sm"
+            w={220}
+            value={metric}
+            onChange={(v) =>
+              setMetric((v ?? 'points_per_declaration') as typeof metric)
+            }
+            data={[
+              { value: 'points_per_declaration', label: 'Average Points' },
+              { value: 'declarations', label: 'Declarations' },
+            ]}
+          />
+          <FactionsBarRace metric={metric} />
         </Tabs.Panel>
       </Tabs>
     </div>
