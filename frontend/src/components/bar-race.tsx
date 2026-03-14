@@ -25,6 +25,7 @@ export type Snapshot<T extends BarDatum = BarDatum> = {
 type BarRaceProps<T extends BarDatum> = {
   data: Snapshot<T>[]
   formatValue?: (v: number) => string
+  duration?: number
 }
 
 function sortItems<T extends BarDatum>(items: T[]) {
@@ -53,6 +54,7 @@ function catmullRom(
 function BarRaceInner<T extends BarDatum>({
   data,
   formatValue = (v) => v.toFixed(2),
+  duration = 1500,
 }: BarRaceProps<T>) {
   const [containerRef, containerRect] = useResizeObserver<HTMLDivElement>()
   const isMobile = useMediaQuery('(max-width: 600px)')
@@ -68,7 +70,6 @@ function BarRaceInner<T extends BarDatum>({
   const [startSignal, setStartSignal] = useState(0)
   const offsetRef = useRef(0)
 
-  const duration = 1500
   const [timeElapsed, setTimeElapsed] = useState(0)
 
   useEffect(() => {
