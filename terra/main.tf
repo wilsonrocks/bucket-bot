@@ -135,6 +135,14 @@ output "frontend_distribution_domain_name" {
   value = aws_cloudfront_distribution.frontend.domain_name
 }
 
+output "frontend_distribution_id" {
+  value = aws_cloudfront_distribution.frontend.id
+}
+
+output "frontend_bucket_name" {
+  value = aws_s3_bucket.frontend.bucket
+}
+
 
 
 resource "aws_route53_zone" "primary" {
@@ -230,4 +238,55 @@ resource "aws_acm_certificate_validation" "frontend" {
 
 output "route53_ns" {
   value = aws_route53_zone.primary.name_servers
+}
+
+output "route53_zone_id" {
+  value = aws_route53_zone.primary.zone_id
+}
+
+
+
+resource "aws_iam_user" "github_actions_deploy" {
+  name = "bucket-bot-github-actions-deploy"
+}
+
+resource "aws_iam_user_policy" "github_actions_deploy" {
+  name = "bucket-bot-frontend-deploy"
+  user = aws_iam_user.github_actions_deploy.name
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:PutObject",
+          "s3:DeleteObject",
+          "s3:ListBucket",
+        ]
+        Resource = [
+          aws_s3_bucket.frontend.arn,
+          "${aws_s3_bucket.frontend.arn}/*",
+        ]
+      },
+      {
+        Effect   = "Allow"
+        Action   = "cloudfront:CreateInvalidation"
+        Resource = aws_cloudfront_distribution.frontend.arn
+      },
+    ]
+  })
+}
+
+resource "aws_iam_access_key" "github_actions_deploy" {
+  user = aws_iam_user.github_actions_deploy.name
+}
+
+output "github_actions_deploy_access_key_id" {
+  value = aws_iam_access_key.github_actions_deploy.id
+}
+
+output "github_actions_deploy_secret_access_key" {
+  value     = aws_iam_access_key.github_actions_deploy.secret
+  sensitive = true
 }
