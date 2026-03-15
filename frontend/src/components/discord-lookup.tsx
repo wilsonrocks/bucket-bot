@@ -45,7 +45,7 @@ export const DiscordLookup: React.FC<{
                 <img
                   width={50}
                   height={50}
-                  src={option.discord_avatar_url}
+                  src={option.discord_avatar_url ?? undefined}
                   alt="Avatar"
                 />
                 <Stack>

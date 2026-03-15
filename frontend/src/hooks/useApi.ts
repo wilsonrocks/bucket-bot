@@ -108,9 +108,9 @@ export const useGetAllTourneys = () => {
         id: number
         name: string
         date: string
-        venue: string
-        level_code: string
-        longshanks_id: number | null
+        venue: string | null
+        tier_code: string | null
+        longshanks_id: string | null
         players: number
       }>
     > => {
@@ -133,20 +133,20 @@ export const useGetTourneyDetail = (id: number) => {
         id: number
         name: string
         date: string
-        venue: string
-        tier_code: string
-        days: number | null
-        rounds: number | null
+        venue: string | null
+        tier_code: string | null
+        days: number
+        rounds: number
         organiser_discord_id: string | null
         venue_id: number | null
-        discord_post_id: number | null
+        discord_post_id: string | null
       }
       players: {
         factionHexCode: string
-        playerId: number
+        playerId: number | null
         factionName: string
         playerName: string
-        place: number
+        place: number | null
         points: number
       }[]
       paintingCategories: {
@@ -172,7 +172,7 @@ export const useGetRankingTypes = () => {
       Array<{
         code: string
         name: string
-        description: string
+        description: string | null
       }>
     > => {
       const url = `${import.meta.env.VITE_BACKEND_URL}/v1/ranking-types`
@@ -255,11 +255,11 @@ export const useSearchDiscordUsers = (text: string) => {
     queryFn: async (): Promise<
       {
         discord_user_id: string
-        discord_display_name: string
-        discord_nickname: string
-        discord_avatar_url: string
+        discord_display_name: string | null
+        discord_nickname: string | null
+        discord_avatar_url: string | null
         created_at: string
-        discord_username: string
+        discord_username: string | null
       }[]
     > => {
       const url = `${import.meta.env.VITE_BACKEND_URL}/v1/search-discord-users?text=${encodeURIComponent(text)}`
@@ -470,9 +470,9 @@ export const useGetVenues = () => {
     queryFn: async (): Promise<
       Array<{
         id: number
-        name: string
-        town: string
-        post_code: string
+        name: string | null
+        town: string | null
+        post_code: string | null
       }>
     > => {
       const url = `${import.meta.env.VITE_BACKEND_URL}/v1/venues`
@@ -555,8 +555,7 @@ export const useGetPlayerById = (playerId: number) => {
     queryFn: async (): Promise<{
       id: number
       name: string
-      discord_user_id: string | null
-      longshanks_id: number | null
+      discord_id: string | null
       longshanks_name: string | null
     }> => {
       const url = `${import.meta.env.VITE_BACKEND_URL}/v1/player/${playerId}`
@@ -690,7 +689,7 @@ export const useGetTiers = () => {
     queryFn: async (): Promise<
       Array<{
         code: string
-        name: string
+        name: string | null
       }>
     > => {
       const url = `${import.meta.env.VITE_BACKEND_URL}/v1/tiers`
@@ -787,7 +786,7 @@ export const useGetFactionRankings = () => {
         faction_code: string
         total_points: number
         declarations: number
-        points_per_declaration: number
+        points_per_declaration: number | null
         declaration_rate: number
         hex_code: string
       }>
@@ -854,11 +853,11 @@ export const useGetAllDiscordUsers = () => {
     queryFn: async (): Promise<
       {
         discord_user_id: string
-        discord_display_name: string
-        discord_nickname: string
-        discord_avatar_url: string
+        discord_display_name: string | null
+        discord_nickname: string | null
+        discord_avatar_url: string | null
         created_at: string
-        discord_username: string
+        discord_username: string | null
         name: string | null
         longshanks_name: string | null
       }[]
@@ -954,7 +953,7 @@ export const useGetUnmappedIdentities = () => {
         results: Array<{
           tourney_id: number
           tourney_name: string
-          place: number
+          place: number | null
           faction: string
         }>
       }[]
@@ -986,7 +985,7 @@ export const useGetFactionsOverTime = () => {
         factions: {
           faction_code: string
           declarations: number
-          points_per_declaration: number
+          points_per_declaration: number | null
           total_points: number
           name: string
           hex_code: string
