@@ -10,7 +10,7 @@ permissions:
   packages: write
 
 jobs:
-  deploy:
+  build:
     environment: prod
     env:
       GCP_PROJECT: ${{ vars.GCP_PROJECT }}
@@ -49,3 +49,22 @@ jobs:
       - name: Push Docker image
         run: |
           docker push ghcr.io/${{ github.repository }}:${{ github.sha }}
+          docker tag ghcr.io/${{ github.repository }}:${{ github.sha }} ghcr.io/${{ github.repository }}:latest
+          docker push ghcr.io/${{ github.repository }}:latest
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: prod
+    env:
+      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      BACKEND_IP: ${{ vars.BACKEND_IP }}
+      BACKEND_USER: deploy
+    steps:
+      - name: Deploy to VPS
+        shell: bash
+        run: |
+          eval "$(ssh-agent -s)"
+          echo "$SSH_PRIVATE_KEY" | ssh-add -
+          ssh -o "StrictHostKeyChecking=no" $BACKEND_USER@$BACKEND_IP \
+            "docker pull ghcr.io/${{ github.repository }}:latest && sudo systemctl restart bucket-bot"
