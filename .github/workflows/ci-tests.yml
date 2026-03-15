@@ -1,8 +1,9 @@
-name: Test Business Logic
+name: CI / Tests
 
 on:
   pull_request:
     branches: [main]
+  workflow_call:
 
 jobs:
   vitest:

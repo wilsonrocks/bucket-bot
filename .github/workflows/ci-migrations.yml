@@ -1,11 +1,11 @@
-name: Test SQL migrations
+name: CI / Migrations
 on:
   pull_request:
     branches:
       - main
     paths:
       - "backend/db/migrations/**"
-      - ".github/workflows/test-migrations.yml"
+      - ".github/workflows/ci-migrations.yml"
 
 jobs:
   test-migrations:

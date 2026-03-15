@@ -1,16 +1,23 @@
-name: Deploy Backend
+name: Deploy / Backend
 on:
   push:
     branches:
       - main
       - switch-to-terra
+    paths:
+      - "backend/**"
+      - ".github/workflows/deploy-backend.yml"
 
 permissions:
   contents: read
   packages: write
 
 jobs:
+  test:
+    uses: ./.github/workflows/ci-tests.yml
+
   build:
+    needs: test
     environment: prod
     env:
       GCP_PROJECT: ${{ vars.GCP_PROJECT }}

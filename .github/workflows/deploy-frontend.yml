@@ -1,4 +1,4 @@
-name: Deploy Frontend
+name: Deploy / Frontend
 on:
   push:
     branches:
@@ -6,12 +6,17 @@ on:
       - switch-to-terra
     paths:
       - "frontend/**"
+      - ".github/workflows/deploy-frontend.yml"
 
 permissions:
   contents: read
 
 jobs:
+  test:
+    uses: ./.github/workflows/ci-tests.yml
+
   deploy:
+    needs: test
     runs-on: ubuntu-latest
     environment: prod
     defaults:
