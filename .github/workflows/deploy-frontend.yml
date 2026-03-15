@@ -3,7 +3,6 @@ on:
   push:
     branches:
       - main
-      - switch-to-terra
     paths:
       - "frontend/**"
       - ".github/workflows/deploy-frontend.yml"
