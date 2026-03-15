@@ -3,8 +3,9 @@ on:
   push:
     branches:
       - main
+      - switch-to-terra
     paths:
-      - 'frontend/**'
+      - "frontend/**"
 
 permissions:
   contents: read
