@@ -158,26 +158,24 @@ v1Router.openapi(getFactionRankingsRoute, getFactionRankings);
 v1Router.openapi(getFactionsOverTimeRoute, getFactionsOverTime);
 v1Router.openapi(getUnmappedIdentitiesRoute, getUnmappedIdentities);
 
-// ── Protected routes (JWT required) ───────────────────────────────────────
-// Using a sub-router so the JWT middleware doesn't bleed onto /doc and /ui
+// ── JWT middleware (all routes below require authentication) ───────────────
 
-const protectedRouter = new OpenAPIHono<AppEnv>();
-protectedRouter.use("*", jwt({ secret: JWT_SECRET!, alg: "HS256" }));
+v1Router.use("*", jwt({ secret: JWT_SECRET!, alg: "HS256" }));
 
-protectedRouter.openapi(newLongshanksEventRoute, newLongshanksEvent);
-protectedRouter.openapi(newBotEventRoute, newBotEventHandler);
-protectedRouter.openapi(hasRankingReporterRoleRoute, hasRankingReporterRole);
-protectedRouter.openapi(generateRankingsRoute, generateRankingsHandler);
-protectedRouter.openapi(createVenueRoute, createVenueHandler);
-protectedRouter.openapi(fetchDiscordUserIdsRoute, fetchAndStoreDiscordUserIds);
-protectedRouter.openapi(searchDiscordUsersRoute, searchDiscordUsersByName);
-protectedRouter.openapi(getAllDiscordUsersRoute, getAllDiscordUsers);
-protectedRouter.openapi(matchPlayerToDiscordUserRoute, matchPlayerToDiscordUser);
-protectedRouter.openapi(postDiscordRankingsRoute, postDiscordRankingsHandler);
-protectedRouter.openapi(postEventSummaryToDiscordRoute, postEventSummaryToDiscord);
-protectedRouter.openapi(updateTourneyRoute, updateTourney);
-protectedRouter.route("/bot-chat", botChatRouter);
-protectedRouter.openapi(generateFactionRankingsRoute, generateFactionRankingsHandler);
-protectedRouter.openapi(postFactionRankingsRoute, postFactionRankingsHandler);
+// ── Protected routes ───────────────────────────────────────────────────────
 
-v1Router.route("/", protectedRouter);
+v1Router.openapi(newLongshanksEventRoute, newLongshanksEvent);
+v1Router.openapi(newBotEventRoute, newBotEventHandler);
+v1Router.openapi(hasRankingReporterRoleRoute, hasRankingReporterRole);
+v1Router.openapi(generateRankingsRoute, generateRankingsHandler);
+v1Router.openapi(createVenueRoute, createVenueHandler);
+v1Router.openapi(fetchDiscordUserIdsRoute, fetchAndStoreDiscordUserIds);
+v1Router.openapi(searchDiscordUsersRoute, searchDiscordUsersByName);
+v1Router.openapi(getAllDiscordUsersRoute, getAllDiscordUsers);
+v1Router.openapi(matchPlayerToDiscordUserRoute, matchPlayerToDiscordUser);
+v1Router.openapi(postDiscordRankingsRoute, postDiscordRankingsHandler);
+v1Router.openapi(postEventSummaryToDiscordRoute, postEventSummaryToDiscord);
+v1Router.openapi(updateTourneyRoute, updateTourney);
+v1Router.route("/bot-chat", botChatRouter);
+v1Router.openapi(generateFactionRankingsRoute, generateFactionRankingsHandler);
+v1Router.openapi(postFactionRankingsRoute, postFactionRankingsHandler);
