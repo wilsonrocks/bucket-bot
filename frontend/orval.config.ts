@@ -6,6 +6,7 @@ export default defineConfig({
     output: {
       mode: 'tags-split',
       target: './src/api/generated',
+      baseUrl: '/v1',
       client: 'react-query',
       override: {
         mutator: {

@@ -119,7 +119,7 @@ export const getPostTokenUrl = () => {
 
   
 
-  return `/token`
+  return `/v1/token`
 }
 
 export const postToken = async (postTokenBody: PostTokenBody, options?: RequestInit): Promise<postTokenResponse> => {
@@ -195,7 +195,7 @@ export const getGetRankingTypesUrl = () => {
 
   
 
-  return `/ranking-types`
+  return `/v1/ranking-types`
 }
 
 export const getRankingTypes = async ( options?: RequestInit): Promise<getRankingTypesResponse> => {
@@ -215,7 +215,7 @@ export const getRankingTypes = async ( options?: RequestInit): Promise<getRankin
 
 export const getGetRankingTypesQueryKey = () => {
     return [
-    `/ranking-types`
+    `/v1/ranking-types`
     ] as const;
     }
 
@@ -299,7 +299,7 @@ export const getGetRankingsTypeCodeUrl = () => {
 
   
 
-  return `/rankings/:typeCode`
+  return `/v1/rankings/:typeCode`
 }
 
 export const getRankingsTypeCode = async ( options?: RequestInit): Promise<getRankingsTypeCodeResponse> => {
@@ -319,7 +319,7 @@ export const getRankingsTypeCode = async ( options?: RequestInit): Promise<getRa
 
 export const getGetRankingsTypeCodeQueryKey = () => {
     return [
-    `/rankings/:typeCode`
+    `/v1/rankings/:typeCode`
     ] as const;
     }
 
@@ -410,7 +410,7 @@ export const getGetRankingsPlayerIdTypeCodeUrl = () => {
 
   
 
-  return `/rankings/:playerId/:typeCode`
+  return `/v1/rankings/:playerId/:typeCode`
 }
 
 export const getRankingsPlayerIdTypeCode = async ( options?: RequestInit): Promise<getRankingsPlayerIdTypeCodeResponse> => {
@@ -430,7 +430,7 @@ export const getRankingsPlayerIdTypeCode = async ( options?: RequestInit): Promi
 
 export const getGetRankingsPlayerIdTypeCodeQueryKey = () => {
     return [
-    `/rankings/:playerId/:typeCode`
+    `/v1/rankings/:playerId/:typeCode`
     ] as const;
     }
 
@@ -514,7 +514,7 @@ export const getGetTourneyUrl = () => {
 
   
 
-  return `/tourney`
+  return `/v1/tourney`
 }
 
 export const getTourney = async ( options?: RequestInit): Promise<getTourneyResponse> => {
@@ -534,7 +534,7 @@ export const getTourney = async ( options?: RequestInit): Promise<getTourneyResp
 
 export const getGetTourneyQueryKey = () => {
     return [
-    `/tourney`
+    `/v1/tourney`
     ] as const;
     }
 
@@ -618,7 +618,7 @@ export const getPostTourneyUrl = () => {
 
   
 
-  return `/tourney`
+  return `/v1/tourney`
 }
 
 export const postTourney = async (postTourneyBody: PostTourneyBody, options?: RequestInit): Promise<postTourneyResponse> => {
@@ -694,7 +694,7 @@ export const getGetTourneyIdUrl = () => {
 
   
 
-  return `/tourney/:id`
+  return `/v1/tourney/:id`
 }
 
 export const getTourneyId = async ( options?: RequestInit): Promise<getTourneyIdResponse> => {
@@ -714,7 +714,7 @@ export const getTourneyId = async ( options?: RequestInit): Promise<getTourneyId
 
 export const getGetTourneyIdQueryKey = () => {
     return [
-    `/tourney/:id`
+    `/v1/tourney/:id`
     ] as const;
     }
 
@@ -805,7 +805,7 @@ export const getGetTourneysPlayerPlayerIdUrl = () => {
 
   
 
-  return `/tourneys/player/:playerId`
+  return `/v1/tourneys/player/:playerId`
 }
 
 export const getTourneysPlayerPlayerId = async ( options?: RequestInit): Promise<getTourneysPlayerPlayerIdResponse> => {
@@ -825,7 +825,7 @@ export const getTourneysPlayerPlayerId = async ( options?: RequestInit): Promise
 
 export const getGetTourneysPlayerPlayerIdQueryKey = () => {
     return [
-    `/tourneys/player/:playerId`
+    `/v1/tourneys/player/:playerId`
     ] as const;
     }
 
@@ -909,7 +909,7 @@ export const getGetVenuesUrl = () => {
 
   
 
-  return `/venues`
+  return `/v1/venues`
 }
 
 export const getVenues = async ( options?: RequestInit): Promise<getVenuesResponse> => {
@@ -929,7 +929,7 @@ export const getVenues = async ( options?: RequestInit): Promise<getVenuesRespon
 
 export const getGetVenuesQueryKey = () => {
     return [
-    `/venues`
+    `/v1/venues`
     ] as const;
     }
 
@@ -1013,7 +1013,7 @@ export const getGetPlayersUrl = () => {
 
   
 
-  return `/players`
+  return `/v1/players`
 }
 
 export const getPlayers = async ( options?: RequestInit): Promise<getPlayersResponse> => {
@@ -1033,7 +1033,7 @@ export const getPlayers = async ( options?: RequestInit): Promise<getPlayersResp
 
 export const getGetPlayersQueryKey = () => {
     return [
-    `/players`
+    `/v1/players`
     ] as const;
     }
 
@@ -1129,7 +1129,7 @@ export const getGetPlayerIdUrl = () => {
 
   
 
-  return `/player/:id`
+  return `/v1/player/:id`
 }
 
 export const getPlayerId = async ( options?: RequestInit): Promise<getPlayerIdResponse> => {
@@ -1149,7 +1149,7 @@ export const getPlayerId = async ( options?: RequestInit): Promise<getPlayerIdRe
 
 export const getGetPlayerIdQueryKey = () => {
     return [
-    `/player/:id`
+    `/v1/player/:id`
     ] as const;
     }
 
@@ -1233,7 +1233,7 @@ export const getGetTiersUrl = () => {
 
   
 
-  return `/tiers`
+  return `/v1/tiers`
 }
 
 export const getTiers = async ( options?: RequestInit): Promise<getTiersResponse> => {
@@ -1253,7 +1253,7 @@ export const getTiers = async ( options?: RequestInit): Promise<getTiersResponse
 
 export const getGetTiersQueryKey = () => {
     return [
-    `/tiers`
+    `/v1/tiers`
     ] as const;
     }
 
@@ -1337,7 +1337,7 @@ export const getGetFactionRankingsUrl = () => {
 
   
 
-  return `/faction-rankings`
+  return `/v1/faction-rankings`
 }
 
 export const getFactionRankings = async ( options?: RequestInit): Promise<getFactionRankingsResponse> => {
@@ -1357,7 +1357,7 @@ export const getFactionRankings = async ( options?: RequestInit): Promise<getFac
 
 export const getGetFactionRankingsQueryKey = () => {
     return [
-    `/faction-rankings`
+    `/v1/faction-rankings`
     ] as const;
     }
 
@@ -1441,7 +1441,7 @@ export const getPostFactionRankingsUrl = () => {
 
   
 
-  return `/faction-rankings`
+  return `/v1/faction-rankings`
 }
 
 export const postFactionRankings = async ( options?: RequestInit): Promise<postFactionRankingsResponse> => {
@@ -1516,7 +1516,7 @@ export const getGetFactionsOverTimeUrl = () => {
 
   
 
-  return `/factions-over-time`
+  return `/v1/factions-over-time`
 }
 
 export const getFactionsOverTime = async ( options?: RequestInit): Promise<getFactionsOverTimeResponse> => {
@@ -1536,7 +1536,7 @@ export const getFactionsOverTime = async ( options?: RequestInit): Promise<getFa
 
 export const getGetFactionsOverTimeQueryKey = () => {
     return [
-    `/factions-over-time`
+    `/v1/factions-over-time`
     ] as const;
     }
 
@@ -1620,7 +1620,7 @@ export const getGetUnmappedIdentitiesUrl = () => {
 
   
 
-  return `/unmapped-identities`
+  return `/v1/unmapped-identities`
 }
 
 export const getUnmappedIdentities = async ( options?: RequestInit): Promise<getUnmappedIdentitiesResponse> => {
@@ -1640,7 +1640,7 @@ export const getUnmappedIdentities = async ( options?: RequestInit): Promise<get
 
 export const getGetUnmappedIdentitiesQueryKey = () => {
     return [
-    `/unmapped-identities`
+    `/v1/unmapped-identities`
     ] as const;
     }
 
@@ -1736,7 +1736,7 @@ export const getPostLongshanksEventIdUrl = () => {
 
   
 
-  return `/longshanks-event/:id`
+  return `/v1/longshanks-event/:id`
 }
 
 export const postLongshanksEventId = async ( options?: RequestInit): Promise<postLongshanksEventIdResponse> => {
@@ -1818,7 +1818,7 @@ export const getPostBotEventUrl = () => {
 
   
 
-  return `/bot-event`
+  return `/v1/bot-event`
 }
 
 export const postBotEvent = async (postBotEventBody: PostBotEventBody, options?: RequestInit): Promise<postBotEventResponse> => {
@@ -1906,7 +1906,7 @@ export const getGetHasRoleUrl = () => {
 
   
 
-  return `/has-role`
+  return `/v1/has-role`
 }
 
 export const getHasRole = async ( options?: RequestInit): Promise<getHasRoleResponse> => {
@@ -1926,7 +1926,7 @@ export const getHasRole = async ( options?: RequestInit): Promise<getHasRoleResp
 
 export const getGetHasRoleQueryKey = () => {
     return [
-    `/has-role`
+    `/v1/has-role`
     ] as const;
     }
 
@@ -2010,7 +2010,7 @@ export const getPostGenerateRankingsUrl = () => {
 
   
 
-  return `/generate-rankings`
+  return `/v1/generate-rankings`
 }
 
 export const postGenerateRankings = async ( options?: RequestInit): Promise<postGenerateRankingsResponse> => {
@@ -2092,7 +2092,7 @@ export const getPostCreateVenueUrl = () => {
 
   
 
-  return `/create-venue`
+  return `/v1/create-venue`
 }
 
 export const postCreateVenue = async (postCreateVenueBody: PostCreateVenueBody, options?: RequestInit): Promise<postCreateVenueResponse> => {
@@ -2168,7 +2168,7 @@ export const getPostFetchDiscordUserIdsUrl = () => {
 
   
 
-  return `/fetch-discord-user-ids`
+  return `/v1/fetch-discord-user-ids`
 }
 
 export const postFetchDiscordUserIds = async ( options?: RequestInit): Promise<postFetchDiscordUserIdsResponse> => {
@@ -2257,7 +2257,7 @@ export const getGetSearchDiscordUsersUrl = (params: GetSearchDiscordUsersParams,
 
   const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0 ? `/search-discord-users?${stringifiedParams}` : `/search-discord-users`
+  return stringifiedParams.length > 0 ? `/v1/search-discord-users?${stringifiedParams}` : `/v1/search-discord-users`
 }
 
 export const getSearchDiscordUsers = async (params: GetSearchDiscordUsersParams, options?: RequestInit): Promise<getSearchDiscordUsersResponse> => {
@@ -2277,7 +2277,7 @@ export const getSearchDiscordUsers = async (params: GetSearchDiscordUsersParams,
 
 export const getGetSearchDiscordUsersQueryKey = (params?: GetSearchDiscordUsersParams,) => {
     return [
-    `/search-discord-users`, ...(params ? [params] : [])
+    `/v1/search-discord-users`, ...(params ? [params] : [])
     ] as const;
     }
 
@@ -2361,7 +2361,7 @@ export const getGetAllDiscordUsersUrl = () => {
 
   
 
-  return `/all-discord-users`
+  return `/v1/all-discord-users`
 }
 
 export const getAllDiscordUsers = async ( options?: RequestInit): Promise<getAllDiscordUsersResponse> => {
@@ -2381,7 +2381,7 @@ export const getAllDiscordUsers = async ( options?: RequestInit): Promise<getAll
 
 export const getGetAllDiscordUsersQueryKey = () => {
     return [
-    `/all-discord-users`
+    `/v1/all-discord-users`
     ] as const;
     }
 
@@ -2472,7 +2472,7 @@ export const getPostMatchPlayerToDiscordUserUrl = () => {
 
   
 
-  return `/match-player-to-discord-user`
+  return `/v1/match-player-to-discord-user`
 }
 
 export const postMatchPlayerToDiscordUser = async (postMatchPlayerToDiscordUserBody: PostMatchPlayerToDiscordUserBody, options?: RequestInit): Promise<postMatchPlayerToDiscordUserResponse> => {
@@ -2548,7 +2548,7 @@ export const getPostPostDiscordRankingsUrl = () => {
 
   
 
-  return `/post-discord-rankings`
+  return `/v1/post-discord-rankings`
 }
 
 export const postPostDiscordRankings = async ( options?: RequestInit): Promise<postPostDiscordRankingsResponse> => {
@@ -2635,7 +2635,7 @@ export const getPostPostDiscordEventTourneyIdUrl = () => {
 
   
 
-  return `/post-discord-event/:tourneyId`
+  return `/v1/post-discord-event/:tourneyId`
 }
 
 export const postPostDiscordEventTourneyId = async ( options?: RequestInit): Promise<postPostDiscordEventTourneyIdResponse> => {
@@ -2710,7 +2710,7 @@ export const getGetBotChatChannelsUrl = () => {
 
   
 
-  return `/bot-chat/channels`
+  return `/v1/bot-chat/channels`
 }
 
 export const getBotChatChannels = async ( options?: RequestInit): Promise<getBotChatChannelsResponse> => {
@@ -2730,7 +2730,7 @@ export const getBotChatChannels = async ( options?: RequestInit): Promise<getBot
 
 export const getGetBotChatChannelsQueryKey = () => {
     return [
-    `/bot-chat/channels`
+    `/v1/bot-chat/channels`
     ] as const;
     }
 
@@ -2821,7 +2821,7 @@ export const getPostBotChatPostMessageUrl = () => {
 
   
 
-  return `/bot-chat/post-message`
+  return `/v1/bot-chat/post-message`
 }
 
 export const postBotChatPostMessage = async (postBotChatPostMessageBody: PostBotChatPostMessageBody, options?: RequestInit): Promise<postBotChatPostMessageResponse> => {
@@ -2916,7 +2916,7 @@ export const getPostPostFactionRankingsUrl = (params?: PostPostFactionRankingsPa
 
   const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0 ? `/post-faction-rankings?${stringifiedParams}` : `/post-faction-rankings`
+  return stringifiedParams.length > 0 ? `/v1/post-faction-rankings?${stringifiedParams}` : `/v1/post-faction-rankings`
 }
 
 export const postPostFactionRankings = async (params?: PostPostFactionRankingsParams, options?: RequestInit): Promise<postPostFactionRankingsResponse> => {
