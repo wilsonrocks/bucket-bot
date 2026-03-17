@@ -1,4 +1,5 @@
-import { useCreateVenueMutation, useGetVenues } from '@/hooks/useApi'
+import { useGetVenues } from '@/api/generated/default/default'
+import { useCreateVenueMutation } from '@/hooks/useApi'
 import { Box, Button, Grid, Paper, Table, TextInput } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { createFileRoute } from '@tanstack/react-router'
