@@ -1,15 +1,39 @@
-import { Context } from "koa";
-import z, { hex, ZodError } from "zod";
+import { createRoute, z, type RouteHandler } from "@hono/zod-openapi";
+import { sql } from "kysely";
+import { ColorResolvable, EmbedBuilder } from "discord.js";
+import { formatDate } from "date-fns/format";
+import type { AppEnv } from "../../../hono-env.js";
 import {
   EVENT_ENTHUSIAST_ROLE_ID,
   getDiscordClient,
-} from "../../../logic/discord-client";
-import { ColorResolvable, EmbedBuilder } from "discord.js";
-import { formatDate } from "date-fns/format";
-import { sql } from "kysely";
+} from "../../../logic/discord-client.js";
 
-export const allTourneys = async (ctx: Context) => {
-  const results = await ctx.state.db
+const ErrorSchema = z.object({ error: z.string() });
+
+const TourneyListItemSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  date: z.string().nullable(),
+  venue: z.string().nullable(),
+  tier_code: z.string().nullable(),
+  players: z.number(),
+  longshanks_id: z.string().nullable(),
+});
+
+export const allTourneysRoute = createRoute({
+  method: "get",
+  path: "/tourney",
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.array(TourneyListItemSchema) } },
+      description: "List of all tournaments",
+    },
+  },
+});
+
+export const allTourneys: RouteHandler<typeof allTourneysRoute, AppEnv> = async (c) => {
+  const db = c.get("db");
+  const results = await db
     .selectFrom("tourney")
     .innerJoin("result", "tourney.id", "result.tourney_id")
     .select([
@@ -18,40 +42,56 @@ export const allTourneys = async (ctx: Context) => {
       "tourney.date",
       "tourney.venue",
       "tourney.tier_code",
-
-      ctx.state.db.fn.count("result.id").as("players"),
+      db.fn.count("result.id").as("players"),
       "tourney.longshanks_id",
     ])
     .groupBy(["tourney.id"])
     .orderBy("tourney.date", "desc")
     .execute();
 
-  ctx.response.body = results.map((event) => {
-    return {
-      ...event,
-      players: parseInt(event.players as string),
-    };
-  });
+  return c.json(
+    results.map((event) => ({ ...event, players: parseInt(event.players as string) })) as any,
+    200,
+  );
 };
 
-export const detailTourney = async (ctx: Context) => {
-  const playerDataPromise = ctx.state.db
+export const detailTourneyRoute = createRoute({
+  method: "get",
+  path: "/tourney/:id",
+  request: {
+    params: z.object({ id: z.string() }),
+  },
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: z.object({
+            players: z.array(z.object({}).passthrough()),
+            tourney: z.object({}).passthrough(),
+            paintingCategories: z.array(z.object({}).passthrough()),
+          }),
+        },
+      },
+      description: "Tournament details",
+    },
+  },
+});
+
+export const detailTourney: RouteHandler<typeof detailTourneyRoute, AppEnv> = async (c) => {
+  const { id } = c.req.valid("param");
+  const db = c.get("db");
+
+  const playerDataPromise = db
     .selectFrom("tourney")
     .innerJoin("result", "tourney.id", "result.tourney_id")
-    .innerJoin(
-      "player_identity",
-      "player_identity.id",
-      "result.player_identity_id",
-    )
+    .innerJoin("player_identity", "player_identity.id", "result.player_identity_id")
     .leftJoin("player", "player_identity.player_id", "player.id")
     .innerJoin("faction", "result.faction_code", "faction.name_code")
-    .where("tourney.id", "=", ctx.params.id)
+    .where("tourney.id", "=", Number(id))
     .select([
       "player.id as playerId",
       "faction.name as factionName",
-      sql<string>`coalesce(${sql.ref("player.name")}, ${sql.ref("player_identity.provider_name")})`.as(
-        "playerName",
-      ),
+      sql<string>`coalesce(${sql.ref("player.name")}, ${sql.ref("player_identity.provider_name")})`.as("playerName"),
       "result.place",
       "result.points",
       "faction.hex_code as factionHexCode",
@@ -59,20 +99,16 @@ export const detailTourney = async (ctx: Context) => {
     .orderBy("result.place", "asc")
     .execute();
 
-  const tourneyInfoPromise = ctx.state.db
+  const tourneyInfoPromise = db
     .selectFrom("tourney")
-    .where("tourney.id", "=", ctx.params.id)
+    .where("tourney.id", "=", Number(id))
     .selectAll()
     .executeTakeFirstOrThrow();
 
-  const paintingCategoriesPromise = ctx.state.db
+  const paintingCategoriesPromise = db
     .selectFrom("painting_category")
-    .innerJoin(
-      "painting_winner",
-      "painting_category.id",
-      "painting_winner.category_id",
-    )
-    .where("tourney_id", "=", ctx.params.id)
+    .innerJoin("painting_winner", "painting_category.id", "painting_winner.category_id")
+    .where("tourney_id", "=", Number(id))
     .execute();
 
   const [players, tourney, paintingCategories] = await Promise.all([
@@ -88,40 +124,47 @@ export const detailTourney = async (ctx: Context) => {
         category = { name: row.name, winners: [] };
         acc.push(category);
       }
-      category.winners.push({
-        player_id: row.player_id,
-        position: row.position,
-        model: row.model,
-      });
+      category.winners.push({ player_id: row.player_id, position: row.position, model: row.model });
       return acc;
     },
     [],
   );
 
-  ctx.response.body = {
-    players,
-    tourney,
-    paintingCategories: formattedPaintingCategories,
-  };
+  return c.json({ players, tourney, paintingCategories: formattedPaintingCategories } as any, 200);
 };
 
-export const getTourneysForPlayerHandler = async (ctx: Context) => {
-  const playerId = Number(ctx.params.playerId);
-  if (!playerId || isNaN(playerId)) {
-    ctx.throw(400, "Invalid player ID");
+export const getTourneysForPlayerRoute = createRoute({
+  method: "get",
+  path: "/tourneys/player/:playerId",
+  request: {
+    params: z.object({ playerId: z.string() }),
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.array(z.object({}).passthrough()) } },
+      description: "Tournaments for a player",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Invalid player ID",
+    },
+  },
+});
+
+export const getTourneysForPlayerHandler: RouteHandler<typeof getTourneysForPlayerRoute, AppEnv> = async (c) => {
+  const { playerId } = c.req.valid("param");
+  const playerIdNum = Number(playerId);
+  if (isNaN(playerIdNum)) {
+    return c.json({ error: "Invalid player ID" }, 400);
   }
 
-  const results = await ctx.state.db
+  const results = await c.get("db")
     .selectFrom("result")
     .innerJoin("tourney", "result.tourney_id", "tourney.id")
     .innerJoin("faction", "result.faction_code", "faction.name_code")
-    .innerJoin(
-      "player_identity",
-      "result.player_identity_id",
-      "player_identity.id",
-    )
+    .innerJoin("player_identity", "result.player_identity_id", "player_identity.id")
     .innerJoin("player", "player_identity.player_id", "player.id")
-    .where("player_identity.player_id", "=", playerId)
+    .where("player_identity.player_id", "=", playerIdNum)
     .select([
       "tourney.id as tourneyId",
       "tourney.name as tourneyName",
@@ -137,10 +180,10 @@ export const getTourneysForPlayerHandler = async (ctx: Context) => {
     .orderBy("tourney.date", "desc")
     .execute();
 
-  ctx.response.body = results;
+  return c.json(results as any, 200);
 };
 
-const tourneyUpdateValidator = z.object({
+const TourneyUpdateBodySchema = z.object({
   id: z.number(),
   organiserDiscordId: z.string().optional(),
   venueId: z.number().optional(),
@@ -150,46 +193,79 @@ const tourneyUpdateValidator = z.object({
   tierCode: z.string(),
 });
 
-export const updateTourney = async (ctx: Context) => {
-  let validatedParams;
-  try {
-    validatedParams = tourneyUpdateValidator.parse(ctx.request.body);
-  } catch (error) {
-    console.log(error);
-    ctx.throw(400, (error as any as ZodError).message);
-  }
+export const updateTourneyRoute = createRoute({
+  method: "post",
+  path: "/tourney",
+  request: {
+    body: {
+      content: { "application/json": { schema: TourneyUpdateBodySchema } },
+    },
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.object({ message: z.string() }) } },
+      description: "Tournament updated",
+    },
+  },
+});
 
-  await ctx.state.db.transaction().execute(async (trx) => {
-    const { id: tourneyId } = validatedParams;
-    console.table(validatedParams);
+export const updateTourney: RouteHandler<typeof updateTourneyRoute, AppEnv> = async (c) => {
+  const body = c.req.valid("json");
+
+  await c.get("db").transaction().execute(async (trx) => {
     await trx
       .updateTable("tourney")
       .set({
-        name: validatedParams.name,
-        organiser_discord_id: validatedParams.organiserDiscordId || null,
-        venue_id: validatedParams.venueId || null,
-        rounds: validatedParams.rounds,
-        days: validatedParams.days,
-        tier_code: validatedParams.tierCode,
+        name: body.name,
+        organiser_discord_id: body.organiserDiscordId ?? null,
+        venue_id: body.venueId ?? null,
+        rounds: body.rounds,
+        days: body.days,
+        tier_code: body.tierCode,
       })
-      .where("id", "=", tourneyId)
+      .where("id", "=", body.id)
       .execute();
   });
 
-  ctx.response.body = { message: "success" };
+  return c.json({ message: "success" }, 200);
 };
 
-export const postEventSummaryToDiscord = async (ctx: Context) => {
-  const discordClient = await getDiscordClient();
-  const tourneyId = Number(ctx.params.tourneyId);
+export const postEventSummaryToDiscordRoute = createRoute({
+  method: "post",
+  path: "/post-discord-event/:tourneyId",
+  request: {
+    params: z.object({ tourneyId: z.string() }),
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.object({ discord_post_id: z.string() }) } },
+      description: "Event summary posted to Discord",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Invalid tourney ID",
+    },
+    500: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Discord channel error",
+    },
+  },
+});
 
-  if (!tourneyId || isNaN(tourneyId)) {
-    ctx.throw(400, "Invalid tourney ID");
+export const postEventSummaryToDiscord: RouteHandler<typeof postEventSummaryToDiscordRoute, AppEnv> = async (c) => {
+  const { tourneyId } = c.req.valid("param");
+  const tourneyIdNum = Number(tourneyId);
+
+  if (isNaN(tourneyIdNum)) {
+    return c.json({ error: "Invalid tourney ID" }, 400);
   }
 
-  const tourneyData = await ctx.state.db
+  const db = c.get("db");
+  const discordClient = await getDiscordClient();
+
+  const tourneyData = await db
     .selectFrom("tourney")
-    .where("tourney.id", "=", tourneyId)
+    .where("tourney.id", "=", tourneyIdNum)
     .innerJoin("venue", "tourney.venue_id", "venue.id")
     .select([
       "tourney.name as tourneyName",
@@ -200,20 +276,14 @@ export const postEventSummaryToDiscord = async (ctx: Context) => {
     ])
     .executeTakeFirstOrThrow();
 
-  const resultsTableData = await ctx.state.db
+  const resultsTableData = await db
     .selectFrom("result")
-    .where("result.tourney_id", "=", tourneyId)
-    .innerJoin(
-      "player_identity",
-      "result.player_identity_id",
-      "player_identity.id",
-    )
+    .where("result.tourney_id", "=", tourneyIdNum)
+    .innerJoin("player_identity", "result.player_identity_id", "player_identity.id")
     .leftJoin("player", "player_identity.player_id", "player.id")
     .innerJoin("faction", "result.faction_code", "faction.name_code")
     .select([
-      sql<string>`coalesce(${sql.ref("player.name")}, ${sql.ref("player_identity.provider_name")})`.as(
-        "playerName",
-      ),
+      sql<string>`coalesce(${sql.ref("player.name")}, ${sql.ref("player_identity.provider_name")})`.as("playerName"),
       "player.discord_id as discord_id",
       "result.place as place",
       "result.points as points",
@@ -222,29 +292,21 @@ export const postEventSummaryToDiscord = async (ctx: Context) => {
     .orderBy("result.place", "asc")
     .execute();
 
-  // Step 1: Get top player per faction using ROW_NUMBER
-  const topPlayersSubquery = ctx.state.db
+  const topPlayersSubquery = db
     .selectFrom("result")
-    .innerJoin(
-      "player_identity",
-      "result.player_identity_id",
-      "player_identity.id",
-    )
-    .where("result.tourney_id", "=", tourneyId)
+    .innerJoin("player_identity", "result.player_identity_id", "player_identity.id")
+    .where("result.tourney_id", "=", tourneyIdNum)
     .select([
       "player_identity.id",
       "result.faction_code",
       "result.points",
-      sql<number>`ROW_NUMBER() OVER (PARTITION BY result.faction_code ORDER BY result.points DESC)`.as(
-        "rn",
-      ),
+      sql<number>`ROW_NUMBER() OVER (PARTITION BY result.faction_code ORDER BY result.points DESC)`.as("rn"),
     ])
     .as("top_players");
 
-  // Step 2: Get total points and player count per faction
-  const factionTotalsSubquery = ctx.state.db
+  const factionTotalsSubquery = db
     .selectFrom("result as r")
-    .where("r.tourney_id", "=", tourneyId)
+    .where("r.tourney_id", "=", tourneyIdNum)
     .select([
       "r.faction_code",
       sql<number>`COUNT(*)`.as("player_count"),
@@ -253,23 +315,16 @@ export const postEventSummaryToDiscord = async (ctx: Context) => {
     .groupBy("r.faction_code")
     .as("faction_totals");
 
-  // Step 3: Join top player + faction totals + faction name
-  const factionSummary = await ctx.state.db
+  const factionSummary = await db
     .selectFrom(topPlayersSubquery)
-    .innerJoin(
-      factionTotalsSubquery,
-      "top_players.faction_code",
-      "faction_totals.faction_code",
-    )
+    .innerJoin(factionTotalsSubquery, "top_players.faction_code", "faction_totals.faction_code")
     .innerJoin("player_identity", "top_players.id", "player_identity.id")
     .leftJoin("player", "player_identity.player_id", "player.id")
     .leftJoin("faction", "top_players.faction_code", "faction.name_code")
     .where("top_players.rn", "=", 1)
     .select([
       "player.discord_id",
-      sql<string>`coalesce(${sql.ref("player.name")}, ${sql.ref("player_identity.provider_name")})`.as(
-        "player_name",
-      ),
+      sql<string>`coalesce(${sql.ref("player.name")}, ${sql.ref("player_identity.provider_name")})`.as("player_name"),
       "faction.name as faction_name",
       "top_players.points as top_points",
       "faction_totals.player_count",
@@ -280,13 +335,9 @@ export const postEventSummaryToDiscord = async (ctx: Context) => {
     .orderBy("faction.name", "asc")
     .execute();
 
-  const totals = await ctx.state.db
+  const totals = await db
     .selectFrom("result")
-    .innerJoin(
-      "player_identity",
-      "result.player_identity_id",
-      "player_identity.id",
-    )
+    .innerJoin("player_identity", "result.player_identity_id", "player_identity.id")
     .select((eb) => [
       eb.fn.sum("rounds_played").as("games_played"),
       sql`COUNT(DISTINCT tourney_id)`.as("total_events"),
@@ -296,68 +347,41 @@ export const postEventSummaryToDiscord = async (ctx: Context) => {
 
   const channelId = process.env.DISCORD_EVENTS_CHANNEL_ID;
   if (!channelId) {
-    ctx.throw(500, "Discord events channel ID not configured");
+    return c.json({ error: "Discord events channel ID not configured" }, 500);
   }
   const channel = await discordClient.channels.fetch(channelId);
 
   if (!channel || !channel.isTextBased() || !channel.isSendable()) {
-    ctx.throw(500, "Discord events channel not found or not text-based");
+    return c.json({ error: "Discord events channel not found or not text-based" }, 500);
   }
 
   const introEmbed = new EmbedBuilder()
     .setTitle(`${tourneyData.tourneyName}`)
     .setDescription(
-      `
-      I have eaten the data for the **${tourneyData.tourneyName}** event in ${
-        tourneyData.venueTown
-      } on ${formatDate(tourneyData.tourneyDate, "EEEE, d MMMM yyyy")}.
-  
-  I can confirm that it was delicious!
-  
-  Shout out to <@${tourneyData.organiserDiscordId}> for organising it! ❤️ `,
+      `I have eaten the data for the **${tourneyData.tourneyName}** event in ${tourneyData.venueTown} on ${formatDate(tourneyData.tourneyDate, "EEEE, d MMMM yyyy")}.\n\nI can confirm that it was delicious!\n\nShout out to <@${tourneyData.organiserDiscordId}> for organising it! ❤️`,
     )
     .addFields({
       name: "Results",
       value: resultsTableData
-        .map(
-          (r) =>
-            `#${r.place} - ${r.playerName} (${r.factionName}) - ${r.points.toFixed(2)} pts`,
-        )
+        .map((r) => `#${r.place} - ${r.playerName} (${r.factionName}) - ${r.points.toFixed(2)} pts`)
         .join("\n"),
     });
 
-  const factionEmbeds = factionSummary.map((faction) => {
-    return new EmbedBuilder()
+  const factionEmbeds = factionSummary.map((faction) =>
+    new EmbedBuilder()
       .setTitle(`${faction.emoji} ${faction.faction_name}`)
       .setColor(faction.hex_code as ColorResolvable)
       .addFields(
-        {
-          name: "Players",
-          value: faction.player_count.toString(),
-          inline: true,
-        },
-        {
-          name: "Total Ranking Points",
-          value: faction.total_ranking_points.toFixed(2),
-          inline: true,
-        },
-        {
-          name: "Best Player",
-          value: faction.player_name,
-          inline: true,
-        },
-      );
-  });
+        { name: "Players", value: faction.player_count.toString(), inline: true },
+        { name: "Total Ranking Points", value: faction.total_ranking_points.toFixed(2), inline: true },
+        { name: "Best Player", value: faction.player_name, inline: true },
+      ),
+  );
 
   const communityEmbed = new EmbedBuilder()
     .setTitle("Community Stats")
     .setDescription(
-      `***BEEP BOOP!***\n
-    **${totals.total_players}** people have played **${
-      totals.games_played
-    }** games at **${totals.total_events}** event${
-      totals.total_events == 1 ? "" : "s"
-    } so far! This is really good, let's make it more! 🚀 🤖 🪣`,
+      `***BEEP BOOP!***\n\n**${totals.total_players}** people have played **${totals.games_played}** games at **${totals.total_events}** event${totals.total_events == 1 ? "" : "s"} so far! This is really good, let's make it more! 🚀 🤖 🪣`,
     );
 
   const sentMessage = await channel.send({
@@ -365,10 +389,11 @@ export const postEventSummaryToDiscord = async (ctx: Context) => {
     embeds: [introEmbed, ...factionEmbeds, communityEmbed],
   });
 
-  await ctx.state.db
+  await db
     .updateTable("tourney")
     .set({ discord_post_id: sentMessage.url })
-    .where("id", "=", tourneyId)
+    .where("id", "=", tourneyIdNum)
     .execute();
-  ctx.response.body = { discord_post_id: sentMessage.url };
+
+  return c.json({ discord_post_id: sentMessage.url }, 200);
 };

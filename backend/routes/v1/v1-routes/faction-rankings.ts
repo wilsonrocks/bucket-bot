@@ -1,19 +1,45 @@
-import { Context } from "koa";
-import { generateFactionRankings } from "../../../logic/rankings/generate-faction-rankings";
-import { ColorResolvable, EmbedBuilder, Emoji, TextChannel } from "discord.js";
-import { getDiscordClient } from "../../../logic/discord-client";
+import { createRoute, z, type RouteHandler } from "@hono/zod-openapi";
+import { ColorResolvable, EmbedBuilder, TextChannel } from "discord.js";
+import type { AppEnv } from "../../../hono-env.js";
+import { getDiscordClient } from "../../../logic/discord-client.js";
+import { generateFactionRankings } from "../../../logic/rankings/generate-faction-rankings.js";
 
 const { DISCORD_FACTION_CHANNEL_ID, DISCORD_TEST_CHANNEL_ID } = process.env;
 if (!DISCORD_FACTION_CHANNEL_ID) {
   throw new Error("DISCORD_FACTION_CHANNEL_ID env var is not set");
 }
-
 if (!DISCORD_TEST_CHANNEL_ID) {
   throw new Error("DISCORD_TEST_CHANNEL_ID env var is not set");
 }
 
-export const getFactionRankings = async (ctx: Context) => {
-  const newestBatch = await ctx.state.db
+const FactionRankingSchema = z.object({
+  snapshot_date: z.string().nullable(),
+  faction_name: z.string(),
+  rank: z.number().nullable(),
+  faction_code: z.string(),
+  total_points: z.number().nullable(),
+  declarations: z.number().nullable(),
+  declaration_rate: z.number().nullable(),
+  points_per_declaration: z.number().nullable(),
+  hex_code: z.string(),
+});
+
+const ErrorSchema = z.object({ error: z.string() });
+
+export const getFactionRankingsRoute = createRoute({
+  method: "get",
+  path: "/faction-rankings",
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.array(FactionRankingSchema) } },
+      description: "Current faction rankings",
+    },
+  },
+});
+
+export const getFactionRankings: RouteHandler<typeof getFactionRankingsRoute, AppEnv> = async (c) => {
+  const db = c.get("db");
+  const newestBatch = await db
     .selectFrom("faction_snapshot_batch")
     .select("id")
     .orderBy("created_at", "desc")
@@ -21,17 +47,12 @@ export const getFactionRankings = async (ctx: Context) => {
     .executeTakeFirst();
 
   if (!newestBatch) {
-    ctx.response.body = [];
-    return;
+    return c.json([], 200);
   }
 
-  const data = await ctx.state.db
+  const data = await db
     .selectFrom("faction_snapshot")
-    .innerJoin(
-      "faction_snapshot_batch",
-      "faction_snapshot.batch_id",
-      "faction_snapshot_batch.id",
-    )
+    .innerJoin("faction_snapshot_batch", "faction_snapshot.batch_id", "faction_snapshot_batch.id")
     .innerJoin("faction", "faction_snapshot.faction_code", "faction.name_code")
     .select([
       "faction_snapshot_batch.created_at as snapshot_date",
@@ -48,24 +69,62 @@ export const getFactionRankings = async (ctx: Context) => {
     .orderBy("rank")
     .execute();
 
-  ctx.response.body = data;
+  return c.json(data as any, 200);
 };
 
-export const generateFactionRankingsHandler = async (ctx: Context) => {
-  await generateFactionRankings(ctx.state.db);
-  ctx.response.status = 200;
-  ctx.response.body = { success: true };
+export const generateFactionRankingsRoute = createRoute({
+  method: "post",
+  path: "/faction-rankings",
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.object({ success: z.boolean() }) } },
+      description: "Faction rankings generated",
+    },
+  },
+});
+
+export const generateFactionRankingsHandler: RouteHandler<typeof generateFactionRankingsRoute, AppEnv> = async (c) => {
+  await generateFactionRankings(c.get("db"));
+  return c.json({ success: true }, 200);
 };
 
-export const postFactionRankingsHandler = async (ctx: Context) => {
-  const { live: liveQueryParam } = ctx.request.query;
-  const isLive = typeof liveQueryParam === "string";
+export const postFactionRankingsRoute = createRoute({
+  method: "post",
+  path: "/post-faction-rankings",
+  request: {
+    query: z.object({ live: z.string().optional() }),
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.object({ success: z.literal(true) }) } },
+      description: "Faction rankings posted to Discord",
+    },
+    400: {
+      content: {
+        "application/json": {
+          schema: z.object({ success: z.literal(false), message: z.string() }),
+        },
+      },
+      description: "No faction snapshot available",
+    },
+    500: {
+      content: {
+        "application/json": {
+          schema: z.object({ success: z.literal(false), message: z.string() }),
+        },
+      },
+      description: "Discord channel error",
+    },
+  },
+});
 
-  const channelId = isLive
-    ? DISCORD_FACTION_CHANNEL_ID
-    : DISCORD_TEST_CHANNEL_ID;
+export const postFactionRankingsHandler: RouteHandler<typeof postFactionRankingsRoute, AppEnv> = async (c) => {
+  const { live } = c.req.valid("query");
+  const isLive = live !== undefined;
+  const channelId = isLive ? DISCORD_FACTION_CHANNEL_ID! : DISCORD_TEST_CHANNEL_ID!;
 
-  const mostRecentSnapshotBatch = await ctx.state.db
+  const db = c.get("db");
+  const mostRecentSnapshotBatch = await db
     .selectFrom("faction_snapshot_batch")
     .select("id")
     .orderBy("created_at", "desc")
@@ -73,15 +132,10 @@ export const postFactionRankingsHandler = async (ctx: Context) => {
     .executeTakeFirst();
 
   if (!mostRecentSnapshotBatch) {
-    ctx.response.status = 400;
-    ctx.response.body = {
-      success: false,
-      message: "No faction snapshot batch available.",
-    };
-    return;
+    return c.json({ success: false as const, message: "No faction snapshot batch available." }, 400);
   }
 
-  const snapshot = await ctx.state.db
+  const snapshot = await db
     .selectFrom("faction_snapshot")
     .innerJoin("faction", "faction_snapshot.faction_code", "faction.name_code")
     .select([
@@ -102,64 +156,35 @@ export const postFactionRankingsHandler = async (ctx: Context) => {
   const channel = await discordClient.channels.fetch(channelId);
 
   if (!channel || !(channel instanceof TextChannel) || !channel.isSendable) {
-    ctx.response.status = 500;
-    ctx.response.body = {
-      success: false,
-      message: `Discord channel with ID ${channelId} not found or is not text-based.`,
-    };
-    return;
+    return c.json(
+      { success: false as const, message: `Discord channel with ID ${channelId} not found or is not text-based.` },
+      500,
+    );
   }
 
   const introEmbed = new EmbedBuilder()
-    .setTitle(`Faction Rankings`)
+    .setTitle("Faction Rankings")
     .setDescription(
-      `***BEEP BOOP!*** I have eaten the delicious data from all the UK Malifaux rankings and here some yummy faction standings for you to enjoy!\n`,
+      "***BEEP BOOP!*** I have eaten the delicious data from all the UK Malifaux rankings and here some yummy faction standings for you to enjoy!\n",
     );
 
   const factionEmbeds = snapshot.map(
-    ({
-      faction_name,
-      hex_code,
-      rank,
-      total_points,
-      declarations,
-      points_per_declaration,
-      declaration_rate,
-      emoji,
-    }) =>
+    ({ faction_name, hex_code, rank, total_points, declarations, points_per_declaration, declaration_rate, emoji }) =>
       new EmbedBuilder()
         .setTitle(`${rank}. ${faction_name} ${emoji}`)
         .setColor(hex_code as ColorResolvable)
         .addFields(
-          {
-            name: "Declarations",
-            value: declarations.toString(),
-            inline: true,
-          },
-          {
-            name: "Total Points",
-            value: total_points.toString(),
-            inline: true,
-          },
-
-          {
-            name: "Play Rate",
-            value: declaration_rate
-              ? (declaration_rate * 100).toFixed(2) + "%"
-              : "",
-            inline: true,
-          },
+          { name: "Declarations", value: declarations.toString(), inline: true },
+          { name: "Total Points", value: total_points.toString(), inline: true },
+          { name: "Play Rate", value: declaration_rate ? (declaration_rate * 100).toFixed(2) + "%" : "", inline: true },
           {
             name: "Points per Declaration",
-            value: points_per_declaration
-              ? `**${points_per_declaration.toFixed(2)}**`
-              : "",
+            value: points_per_declaration ? `**${points_per_declaration.toFixed(2)}**` : "",
             inline: true,
           },
         ),
   );
 
   await channel.send({ embeds: [introEmbed, ...factionEmbeds] });
-  ctx.response.status = 200;
-  ctx.response.body = { success: true };
+  return c.json({ success: true as const }, 200);
 };

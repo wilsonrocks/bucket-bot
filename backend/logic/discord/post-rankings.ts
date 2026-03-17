@@ -77,8 +77,6 @@ export const postDiscordRankings = async (db: Kysely<DB>) => {
       .limit(TOP_X_PLAYERS)
       .execute();
 
-    console.debug(`Posting rankings for type: ${typeCode}`, rankings);
-
     const { discord_channel_id } = batch;
     if (!discord_channel_id) {
       console.warn(
