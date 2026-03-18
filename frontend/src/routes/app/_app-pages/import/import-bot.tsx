@@ -1,9 +1,9 @@
 import { BookmarkletCode } from '@/components/bookmarklet-code'
 import {
-  useCreateBotEventMutation,
+  usePostBotEvent,
   useGetAllDiscordUsers,
   useGetVenues,
-} from '@/hooks/useApi'
+} from '@/api/hooks'
 import {
   Alert,
   Box,
@@ -78,7 +78,7 @@ function RouteComponent() {
   })
   const venues = useGetVenues()
   const discordUsers = useGetAllDiscordUsers()
-  const createBotEventMutation = useCreateBotEventMutation()
+  const createBotEventMutation = usePostBotEvent()
 
   useEffect(() => {
     if (botJson) {
@@ -158,11 +158,15 @@ function RouteComponent() {
               onSubmit={detailsForm.onSubmit((values) => {
                 if (botJson !== null)
                   createBotEventMutation.mutate({
-                    ...values,
-                    eventId: botJson.eventId,
-                    dateString: botJson.dateString,
-                    results: botJson.results,
-                    venueId: Number(values.venueId),
+                    data: {
+                      ...values,
+                      eventId: botJson.eventId,
+                      dateString: botJson.dateString,
+                      results: botJson.results,
+                      venueId: Number(values.venueId),
+                      rounds: values.rounds ?? 3,
+                      days: values.days ?? 1,
+                    },
                   })
               })}
             >
@@ -176,10 +180,12 @@ function RouteComponent() {
                 label="Organiser"
                 data={discordUsers.data.map((user) => ({
                   value: String(user.discord_user_id),
-                  label:
+                  label: (
                     user.name ||
                     user.discord_display_name ||
-                    user.discord_username,
+                    user.discord_username ||
+                    user.discord_user_id
+                  ) as string,
                 }))}
                 {...detailsForm.getInputProps('organiserDiscordId')}
               />
@@ -188,7 +194,7 @@ function RouteComponent() {
                 data={
                   venues.data?.map((venue) => ({
                     value: venue.id.toString(),
-                    label: venue.name,
+                    label: venue.name as string,
                   })) ?? []
                 }
                 {...detailsForm.getInputProps('venueId')}

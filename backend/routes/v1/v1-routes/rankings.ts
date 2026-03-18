@@ -14,7 +14,7 @@ const RankingEntrySchema = z.object({
 
 export const rankingsRoute = createRoute({
   method: "get",
-  path: "/rankings/:typeCode",
+  path: "/rankings/{typeCode}",
   request: {
     params: z.object({ typeCode: z.string() }),
   },

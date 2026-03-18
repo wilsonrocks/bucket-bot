@@ -18,7 +18,7 @@ const ErrorSchema = z.object({ error: z.string() });
 
 export const rankingsPlayerRoute = createRoute({
   method: "get",
-  path: "/rankings/:playerId/:typeCode",
+  path: "/rankings/{playerId}/{typeCode}",
   request: {
     params: z.object({ playerId: z.string(), typeCode: z.string() }),
   },

@@ -31,7 +31,7 @@ export const getPlayers: RouteHandler<typeof getPlayersRoute, AppEnv> = async (c
 
 export const getPlayerByIdRoute = createRoute({
   method: "get",
-  path: "/player/:id",
+  path: "/player/{id}",
   request: {
     params: z.object({ id: z.string() }),
   },

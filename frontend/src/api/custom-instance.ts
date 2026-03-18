@@ -37,6 +37,8 @@ export const customFetch = async <T>(
     })
   }
 
-  if (response.status === 204) return undefined as T
-  return response.json() as Promise<T>
+  if (response.status === 204)
+    return { data: undefined, status: 204, headers: response.headers } as T
+  const json = await response.json()
+  return { data: json, status: response.status, headers: response.headers } as T
 }

@@ -1,7 +1,7 @@
 import {
-  useGetDiscordBotChannels,
-  usePostMessageToDiscordChannel,
-} from '@/hooks/useApi'
+  useGetBotChatChannels,
+  usePostBotChatPostMessage,
+} from '@/api/hooks'
 import {
   Box,
   Button,
@@ -22,8 +22,8 @@ export const Route = createFileRoute('/app/_app-pages/bot-chat')({
 })
 
 function RouteComponent() {
-  const { data: channelData } = useGetDiscordBotChannels()
-  const postMessageMutation = usePostMessageToDiscordChannel()
+  const { data: channelData } = useGetBotChatChannels()
+  const postMessageMutation = usePostBotChatPostMessage()
 
   const [channelId, setChannelId] = useState<string | null>(null)
   const [message, setMessage] = useState<string>('')
@@ -38,8 +38,8 @@ function RouteComponent() {
                 searchable
                 label="Channel"
                 data={channelData.map((channel) => ({
-                  value: channel.id,
-                  label: channel.name,
+                  value: channel.id ?? '',
+                  label: channel.name ?? '',
                 }))}
                 value={channelId}
                 onChange={setChannelId}
@@ -49,7 +49,7 @@ function RouteComponent() {
                 onClick={() => {
                   if (channelId && message)
                     postMessageMutation.mutate(
-                      { channelId, message },
+                      { data: { channelId, message } },
                       {
                         onSuccess: () => {
                           setMessage('')

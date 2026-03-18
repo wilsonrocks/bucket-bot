@@ -1,4 +1,4 @@
-import { useGetUnmappedIdentities } from '@/hooks/useApi'
+import { useGetUnmappedIdentities } from '@/api/hooks'
 import { Route as BotChat } from '@/routes/app/_app-pages/bot-chat'
 import { Route as EventsAppRoute } from '@/routes/app/_app-pages/events'
 import { Route as IdentitiesRoute } from '@/routes/app/_app-pages/identities'

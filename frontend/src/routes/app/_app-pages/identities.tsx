@@ -1,6 +1,6 @@
 import { DiscordLookup } from '@/components/discord-lookup'
 import { toOrdinal } from '@/helpers/to-ordinal'
-import { useGetUnmappedIdentities } from '@/hooks/useApi'
+import { useGetUnmappedIdentities } from '@/api/hooks'
 import { List, Pagination, Table, Text } from '@mantine/core'
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
@@ -65,14 +65,14 @@ function RouteComponent() {
                   {currentIdentity.results.map(
                     ({ place, faction, tourney_name }) => (
                       <List.Item key={`${place}-${tourney_name}-${faction}`}>
-                        {`${toOrdinal(place)} place at ${tourney_name} with ${faction}`}
+                        {`${toOrdinal(place ?? 0)} place at ${tourney_name} with ${faction}`}
                       </List.Item>
                     ),
                   )}
                 </List>,
                 <DiscordLookup
                   playerIdentityId={currentIdentity.player_identity_id}
-                  initialText={currentIdentity.name}
+                  initialText={currentIdentity.name ?? ''}
                 />,
               ],
             ],

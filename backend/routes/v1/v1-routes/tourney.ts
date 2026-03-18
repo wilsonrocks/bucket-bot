@@ -57,7 +57,7 @@ export const allTourneys: RouteHandler<typeof allTourneysRoute, AppEnv> = async 
 
 export const detailTourneyRoute = createRoute({
   method: "get",
-  path: "/tourney/:id",
+  path: "/tourney/{id}",
   request: {
     params: z.object({ id: z.string() }),
   },
@@ -135,7 +135,7 @@ export const detailTourney: RouteHandler<typeof detailTourneyRoute, AppEnv> = as
 
 export const getTourneysForPlayerRoute = createRoute({
   method: "get",
-  path: "/tourneys/player/:playerId",
+  path: "/tourneys/player/{playerId}",
   request: {
     params: z.object({ playerId: z.string() }),
   },
@@ -232,7 +232,7 @@ export const updateTourney: RouteHandler<typeof updateTourneyRoute, AppEnv> = as
 
 export const postEventSummaryToDiscordRoute = createRoute({
   method: "post",
-  path: "/post-discord-event/:tourneyId",
+  path: "/post-discord-event/{tourneyId}",
   request: {
     params: z.object({ tourneyId: z.string() }),
   },

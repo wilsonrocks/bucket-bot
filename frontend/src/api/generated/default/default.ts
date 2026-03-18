@@ -294,17 +294,17 @@ export type getRankingsTypeCodeResponseSuccess = (getRankingsTypeCodeResponse200
 
 export type getRankingsTypeCodeResponse = (getRankingsTypeCodeResponseSuccess)
 
-export const getGetRankingsTypeCodeUrl = () => {
+export const getGetRankingsTypeCodeUrl = (typeCode: string,) => {
 
 
   
 
-  return `/v1/rankings/:typeCode`
+  return `/v1/rankings/${typeCode}`
 }
 
-export const getRankingsTypeCode = async ( options?: RequestInit): Promise<getRankingsTypeCodeResponse> => {
+export const getRankingsTypeCode = async (typeCode: string, options?: RequestInit): Promise<getRankingsTypeCodeResponse> => {
   
-  return customFetch<getRankingsTypeCodeResponse>(getGetRankingsTypeCodeUrl(),
+  return customFetch<getRankingsTypeCodeResponse>(getGetRankingsTypeCodeUrl(typeCode),
   {      
     ...options,
     method: 'GET'
@@ -317,29 +317,29 @@ export const getRankingsTypeCode = async ( options?: RequestInit): Promise<getRa
 
 
 
-export const getGetRankingsTypeCodeQueryKey = () => {
+export const getGetRankingsTypeCodeQueryKey = (typeCode: string,) => {
     return [
-    `/v1/rankings/:typeCode`
+    `/v1/rankings/${typeCode}`
     ] as const;
     }
 
     
-export const getGetRankingsTypeCodeQueryOptions = <TData = Awaited<ReturnType<typeof getRankingsTypeCode>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRankingsTypeCode>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+export const getGetRankingsTypeCodeQueryOptions = <TData = Awaited<ReturnType<typeof getRankingsTypeCode>>, TError = unknown>(typeCode: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRankingsTypeCode>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetRankingsTypeCodeQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getGetRankingsTypeCodeQueryKey(typeCode);
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getRankingsTypeCode>>> = ({ signal }) => getRankingsTypeCode({ signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getRankingsTypeCode>>> = ({ signal }) => getRankingsTypeCode(typeCode, { signal, ...requestOptions });
 
       
 
       
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getRankingsTypeCode>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, enabled: !!(typeCode), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getRankingsTypeCode>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type GetRankingsTypeCodeQueryResult = NonNullable<Awaited<ReturnType<typeof getRankingsTypeCode>>>
@@ -347,7 +347,7 @@ export type GetRankingsTypeCodeQueryError = unknown
 
 
 export function useGetRankingsTypeCode<TData = Awaited<ReturnType<typeof getRankingsTypeCode>>, TError = unknown>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRankingsTypeCode>>, TError, TData>> & Pick<
+ typeCode: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRankingsTypeCode>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getRankingsTypeCode>>,
           TError,
@@ -357,7 +357,7 @@ export function useGetRankingsTypeCode<TData = Awaited<ReturnType<typeof getRank
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetRankingsTypeCode<TData = Awaited<ReturnType<typeof getRankingsTypeCode>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRankingsTypeCode>>, TError, TData>> & Pick<
+ typeCode: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRankingsTypeCode>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getRankingsTypeCode>>,
           TError,
@@ -367,16 +367,16 @@ export function useGetRankingsTypeCode<TData = Awaited<ReturnType<typeof getRank
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetRankingsTypeCode<TData = Awaited<ReturnType<typeof getRankingsTypeCode>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRankingsTypeCode>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ typeCode: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRankingsTypeCode>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
 export function useGetRankingsTypeCode<TData = Awaited<ReturnType<typeof getRankingsTypeCode>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRankingsTypeCode>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ typeCode: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRankingsTypeCode>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getGetRankingsTypeCodeQueryOptions(options)
+  const queryOptions = getGetRankingsTypeCodeQueryOptions(typeCode,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -405,17 +405,19 @@ export type getRankingsPlayerIdTypeCodeResponseError = (getRankingsPlayerIdTypeC
 
 export type getRankingsPlayerIdTypeCodeResponse = (getRankingsPlayerIdTypeCodeResponseSuccess | getRankingsPlayerIdTypeCodeResponseError)
 
-export const getGetRankingsPlayerIdTypeCodeUrl = () => {
+export const getGetRankingsPlayerIdTypeCodeUrl = (playerId: string,
+    typeCode: string,) => {
 
 
   
 
-  return `/v1/rankings/:playerId/:typeCode`
+  return `/v1/rankings/${playerId}/${typeCode}`
 }
 
-export const getRankingsPlayerIdTypeCode = async ( options?: RequestInit): Promise<getRankingsPlayerIdTypeCodeResponse> => {
+export const getRankingsPlayerIdTypeCode = async (playerId: string,
+    typeCode: string, options?: RequestInit): Promise<getRankingsPlayerIdTypeCodeResponse> => {
   
-  return customFetch<getRankingsPlayerIdTypeCodeResponse>(getGetRankingsPlayerIdTypeCodeUrl(),
+  return customFetch<getRankingsPlayerIdTypeCodeResponse>(getGetRankingsPlayerIdTypeCodeUrl(playerId,typeCode),
   {      
     ...options,
     method: 'GET'
@@ -428,29 +430,31 @@ export const getRankingsPlayerIdTypeCode = async ( options?: RequestInit): Promi
 
 
 
-export const getGetRankingsPlayerIdTypeCodeQueryKey = () => {
+export const getGetRankingsPlayerIdTypeCodeQueryKey = (playerId: string,
+    typeCode: string,) => {
     return [
-    `/v1/rankings/:playerId/:typeCode`
+    `/v1/rankings/${playerId}/${typeCode}`
     ] as const;
     }
 
     
-export const getGetRankingsPlayerIdTypeCodeQueryOptions = <TData = Awaited<ReturnType<typeof getRankingsPlayerIdTypeCode>>, TError = GetRankingsPlayerIdTypeCode400>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRankingsPlayerIdTypeCode>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+export const getGetRankingsPlayerIdTypeCodeQueryOptions = <TData = Awaited<ReturnType<typeof getRankingsPlayerIdTypeCode>>, TError = GetRankingsPlayerIdTypeCode400>(playerId: string,
+    typeCode: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRankingsPlayerIdTypeCode>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetRankingsPlayerIdTypeCodeQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getGetRankingsPlayerIdTypeCodeQueryKey(playerId,typeCode);
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getRankingsPlayerIdTypeCode>>> = ({ signal }) => getRankingsPlayerIdTypeCode({ signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getRankingsPlayerIdTypeCode>>> = ({ signal }) => getRankingsPlayerIdTypeCode(playerId,typeCode, { signal, ...requestOptions });
 
       
 
       
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getRankingsPlayerIdTypeCode>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, enabled: !!(playerId && typeCode), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getRankingsPlayerIdTypeCode>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type GetRankingsPlayerIdTypeCodeQueryResult = NonNullable<Awaited<ReturnType<typeof getRankingsPlayerIdTypeCode>>>
@@ -458,7 +462,8 @@ export type GetRankingsPlayerIdTypeCodeQueryError = GetRankingsPlayerIdTypeCode4
 
 
 export function useGetRankingsPlayerIdTypeCode<TData = Awaited<ReturnType<typeof getRankingsPlayerIdTypeCode>>, TError = GetRankingsPlayerIdTypeCode400>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRankingsPlayerIdTypeCode>>, TError, TData>> & Pick<
+ playerId: string,
+    typeCode: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRankingsPlayerIdTypeCode>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getRankingsPlayerIdTypeCode>>,
           TError,
@@ -468,7 +473,8 @@ export function useGetRankingsPlayerIdTypeCode<TData = Awaited<ReturnType<typeof
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetRankingsPlayerIdTypeCode<TData = Awaited<ReturnType<typeof getRankingsPlayerIdTypeCode>>, TError = GetRankingsPlayerIdTypeCode400>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRankingsPlayerIdTypeCode>>, TError, TData>> & Pick<
+ playerId: string,
+    typeCode: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRankingsPlayerIdTypeCode>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getRankingsPlayerIdTypeCode>>,
           TError,
@@ -478,16 +484,18 @@ export function useGetRankingsPlayerIdTypeCode<TData = Awaited<ReturnType<typeof
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetRankingsPlayerIdTypeCode<TData = Awaited<ReturnType<typeof getRankingsPlayerIdTypeCode>>, TError = GetRankingsPlayerIdTypeCode400>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRankingsPlayerIdTypeCode>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ playerId: string,
+    typeCode: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRankingsPlayerIdTypeCode>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
 export function useGetRankingsPlayerIdTypeCode<TData = Awaited<ReturnType<typeof getRankingsPlayerIdTypeCode>>, TError = GetRankingsPlayerIdTypeCode400>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRankingsPlayerIdTypeCode>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ playerId: string,
+    typeCode: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRankingsPlayerIdTypeCode>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getGetRankingsPlayerIdTypeCodeQueryOptions(options)
+  const queryOptions = getGetRankingsPlayerIdTypeCodeQueryOptions(playerId,typeCode,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -689,17 +697,17 @@ export type getTourneyIdResponseSuccess = (getTourneyIdResponse200) & {
 
 export type getTourneyIdResponse = (getTourneyIdResponseSuccess)
 
-export const getGetTourneyIdUrl = () => {
+export const getGetTourneyIdUrl = (id: string,) => {
 
 
   
 
-  return `/v1/tourney/:id`
+  return `/v1/tourney/${id}`
 }
 
-export const getTourneyId = async ( options?: RequestInit): Promise<getTourneyIdResponse> => {
+export const getTourneyId = async (id: string, options?: RequestInit): Promise<getTourneyIdResponse> => {
   
-  return customFetch<getTourneyIdResponse>(getGetTourneyIdUrl(),
+  return customFetch<getTourneyIdResponse>(getGetTourneyIdUrl(id),
   {      
     ...options,
     method: 'GET'
@@ -712,29 +720,29 @@ export const getTourneyId = async ( options?: RequestInit): Promise<getTourneyId
 
 
 
-export const getGetTourneyIdQueryKey = () => {
+export const getGetTourneyIdQueryKey = (id: string,) => {
     return [
-    `/v1/tourney/:id`
+    `/v1/tourney/${id}`
     ] as const;
     }
 
     
-export const getGetTourneyIdQueryOptions = <TData = Awaited<ReturnType<typeof getTourneyId>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTourneyId>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+export const getGetTourneyIdQueryOptions = <TData = Awaited<ReturnType<typeof getTourneyId>>, TError = unknown>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTourneyId>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetTourneyIdQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getGetTourneyIdQueryKey(id);
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTourneyId>>> = ({ signal }) => getTourneyId({ signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTourneyId>>> = ({ signal }) => getTourneyId(id, { signal, ...requestOptions });
 
       
 
       
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTourneyId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTourneyId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type GetTourneyIdQueryResult = NonNullable<Awaited<ReturnType<typeof getTourneyId>>>
@@ -742,7 +750,7 @@ export type GetTourneyIdQueryError = unknown
 
 
 export function useGetTourneyId<TData = Awaited<ReturnType<typeof getTourneyId>>, TError = unknown>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTourneyId>>, TError, TData>> & Pick<
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTourneyId>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getTourneyId>>,
           TError,
@@ -752,7 +760,7 @@ export function useGetTourneyId<TData = Awaited<ReturnType<typeof getTourneyId>>
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetTourneyId<TData = Awaited<ReturnType<typeof getTourneyId>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTourneyId>>, TError, TData>> & Pick<
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTourneyId>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getTourneyId>>,
           TError,
@@ -762,16 +770,16 @@ export function useGetTourneyId<TData = Awaited<ReturnType<typeof getTourneyId>>
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetTourneyId<TData = Awaited<ReturnType<typeof getTourneyId>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTourneyId>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTourneyId>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
 export function useGetTourneyId<TData = Awaited<ReturnType<typeof getTourneyId>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTourneyId>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTourneyId>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getGetTourneyIdQueryOptions(options)
+  const queryOptions = getGetTourneyIdQueryOptions(id,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -800,17 +808,17 @@ export type getTourneysPlayerPlayerIdResponseError = (getTourneysPlayerPlayerIdR
 
 export type getTourneysPlayerPlayerIdResponse = (getTourneysPlayerPlayerIdResponseSuccess | getTourneysPlayerPlayerIdResponseError)
 
-export const getGetTourneysPlayerPlayerIdUrl = () => {
+export const getGetTourneysPlayerPlayerIdUrl = (playerId: string,) => {
 
 
   
 
-  return `/v1/tourneys/player/:playerId`
+  return `/v1/tourneys/player/${playerId}`
 }
 
-export const getTourneysPlayerPlayerId = async ( options?: RequestInit): Promise<getTourneysPlayerPlayerIdResponse> => {
+export const getTourneysPlayerPlayerId = async (playerId: string, options?: RequestInit): Promise<getTourneysPlayerPlayerIdResponse> => {
   
-  return customFetch<getTourneysPlayerPlayerIdResponse>(getGetTourneysPlayerPlayerIdUrl(),
+  return customFetch<getTourneysPlayerPlayerIdResponse>(getGetTourneysPlayerPlayerIdUrl(playerId),
   {      
     ...options,
     method: 'GET'
@@ -823,29 +831,29 @@ export const getTourneysPlayerPlayerId = async ( options?: RequestInit): Promise
 
 
 
-export const getGetTourneysPlayerPlayerIdQueryKey = () => {
+export const getGetTourneysPlayerPlayerIdQueryKey = (playerId: string,) => {
     return [
-    `/v1/tourneys/player/:playerId`
+    `/v1/tourneys/player/${playerId}`
     ] as const;
     }
 
     
-export const getGetTourneysPlayerPlayerIdQueryOptions = <TData = Awaited<ReturnType<typeof getTourneysPlayerPlayerId>>, TError = GetTourneysPlayerPlayerId400>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTourneysPlayerPlayerId>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+export const getGetTourneysPlayerPlayerIdQueryOptions = <TData = Awaited<ReturnType<typeof getTourneysPlayerPlayerId>>, TError = GetTourneysPlayerPlayerId400>(playerId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTourneysPlayerPlayerId>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetTourneysPlayerPlayerIdQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getGetTourneysPlayerPlayerIdQueryKey(playerId);
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTourneysPlayerPlayerId>>> = ({ signal }) => getTourneysPlayerPlayerId({ signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTourneysPlayerPlayerId>>> = ({ signal }) => getTourneysPlayerPlayerId(playerId, { signal, ...requestOptions });
 
       
 
       
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTourneysPlayerPlayerId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, enabled: !!(playerId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTourneysPlayerPlayerId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type GetTourneysPlayerPlayerIdQueryResult = NonNullable<Awaited<ReturnType<typeof getTourneysPlayerPlayerId>>>
@@ -853,7 +861,7 @@ export type GetTourneysPlayerPlayerIdQueryError = GetTourneysPlayerPlayerId400
 
 
 export function useGetTourneysPlayerPlayerId<TData = Awaited<ReturnType<typeof getTourneysPlayerPlayerId>>, TError = GetTourneysPlayerPlayerId400>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTourneysPlayerPlayerId>>, TError, TData>> & Pick<
+ playerId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTourneysPlayerPlayerId>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getTourneysPlayerPlayerId>>,
           TError,
@@ -863,7 +871,7 @@ export function useGetTourneysPlayerPlayerId<TData = Awaited<ReturnType<typeof g
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetTourneysPlayerPlayerId<TData = Awaited<ReturnType<typeof getTourneysPlayerPlayerId>>, TError = GetTourneysPlayerPlayerId400>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTourneysPlayerPlayerId>>, TError, TData>> & Pick<
+ playerId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTourneysPlayerPlayerId>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getTourneysPlayerPlayerId>>,
           TError,
@@ -873,16 +881,16 @@ export function useGetTourneysPlayerPlayerId<TData = Awaited<ReturnType<typeof g
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetTourneysPlayerPlayerId<TData = Awaited<ReturnType<typeof getTourneysPlayerPlayerId>>, TError = GetTourneysPlayerPlayerId400>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTourneysPlayerPlayerId>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ playerId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTourneysPlayerPlayerId>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
 export function useGetTourneysPlayerPlayerId<TData = Awaited<ReturnType<typeof getTourneysPlayerPlayerId>>, TError = GetTourneysPlayerPlayerId400>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTourneysPlayerPlayerId>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ playerId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTourneysPlayerPlayerId>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getGetTourneysPlayerPlayerIdQueryOptions(options)
+  const queryOptions = getGetTourneysPlayerPlayerIdQueryOptions(playerId,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -1124,17 +1132,17 @@ export type getPlayerIdResponseError = (getPlayerIdResponse400 | getPlayerIdResp
 
 export type getPlayerIdResponse = (getPlayerIdResponseSuccess | getPlayerIdResponseError)
 
-export const getGetPlayerIdUrl = () => {
+export const getGetPlayerIdUrl = (id: string,) => {
 
 
   
 
-  return `/v1/player/:id`
+  return `/v1/player/${id}`
 }
 
-export const getPlayerId = async ( options?: RequestInit): Promise<getPlayerIdResponse> => {
+export const getPlayerId = async (id: string, options?: RequestInit): Promise<getPlayerIdResponse> => {
   
-  return customFetch<getPlayerIdResponse>(getGetPlayerIdUrl(),
+  return customFetch<getPlayerIdResponse>(getGetPlayerIdUrl(id),
   {      
     ...options,
     method: 'GET'
@@ -1147,29 +1155,29 @@ export const getPlayerId = async ( options?: RequestInit): Promise<getPlayerIdRe
 
 
 
-export const getGetPlayerIdQueryKey = () => {
+export const getGetPlayerIdQueryKey = (id: string,) => {
     return [
-    `/v1/player/:id`
+    `/v1/player/${id}`
     ] as const;
     }
 
     
-export const getGetPlayerIdQueryOptions = <TData = Awaited<ReturnType<typeof getPlayerId>>, TError = GetPlayerId400 | GetPlayerId404>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlayerId>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+export const getGetPlayerIdQueryOptions = <TData = Awaited<ReturnType<typeof getPlayerId>>, TError = GetPlayerId400 | GetPlayerId404>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlayerId>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetPlayerIdQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getGetPlayerIdQueryKey(id);
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPlayerId>>> = ({ signal }) => getPlayerId({ signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPlayerId>>> = ({ signal }) => getPlayerId(id, { signal, ...requestOptions });
 
       
 
       
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPlayerId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPlayerId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type GetPlayerIdQueryResult = NonNullable<Awaited<ReturnType<typeof getPlayerId>>>
@@ -1177,7 +1185,7 @@ export type GetPlayerIdQueryError = GetPlayerId400 | GetPlayerId404
 
 
 export function useGetPlayerId<TData = Awaited<ReturnType<typeof getPlayerId>>, TError = GetPlayerId400 | GetPlayerId404>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlayerId>>, TError, TData>> & Pick<
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlayerId>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getPlayerId>>,
           TError,
@@ -1187,7 +1195,7 @@ export function useGetPlayerId<TData = Awaited<ReturnType<typeof getPlayerId>>, 
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetPlayerId<TData = Awaited<ReturnType<typeof getPlayerId>>, TError = GetPlayerId400 | GetPlayerId404>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlayerId>>, TError, TData>> & Pick<
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlayerId>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getPlayerId>>,
           TError,
@@ -1197,16 +1205,16 @@ export function useGetPlayerId<TData = Awaited<ReturnType<typeof getPlayerId>>, 
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useGetPlayerId<TData = Awaited<ReturnType<typeof getPlayerId>>, TError = GetPlayerId400 | GetPlayerId404>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlayerId>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlayerId>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
 export function useGetPlayerId<TData = Awaited<ReturnType<typeof getPlayerId>>, TError = GetPlayerId400 | GetPlayerId404>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlayerId>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlayerId>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getGetPlayerIdQueryOptions(options)
+  const queryOptions = getGetPlayerIdQueryOptions(id,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -1731,17 +1739,17 @@ export type postLongshanksEventIdResponseError = (postLongshanksEventIdResponse4
 
 export type postLongshanksEventIdResponse = (postLongshanksEventIdResponseSuccess | postLongshanksEventIdResponseError)
 
-export const getPostLongshanksEventIdUrl = () => {
+export const getPostLongshanksEventIdUrl = (id: string,) => {
 
 
   
 
-  return `/v1/longshanks-event/:id`
+  return `/v1/longshanks-event/${id}`
 }
 
-export const postLongshanksEventId = async ( options?: RequestInit): Promise<postLongshanksEventIdResponse> => {
+export const postLongshanksEventId = async (id: string, options?: RequestInit): Promise<postLongshanksEventIdResponse> => {
   
-  return customFetch<postLongshanksEventIdResponse>(getPostLongshanksEventIdUrl(),
+  return customFetch<postLongshanksEventIdResponse>(getPostLongshanksEventIdUrl(id),
   {      
     ...options,
     method: 'POST'
@@ -1754,8 +1762,8 @@ export const postLongshanksEventId = async ( options?: RequestInit): Promise<pos
 
 
 export const getPostLongshanksEventIdMutationOptions = <TError = PostLongshanksEventId400 | PostLongshanksEventId502,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postLongshanksEventId>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof postLongshanksEventId>>, TError,void, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postLongshanksEventId>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postLongshanksEventId>>, TError,{id: string}, TContext> => {
 
 const mutationKey = ['postLongshanksEventId'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
@@ -1767,10 +1775,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postLongshanksEventId>>, void> = () => {
-          
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postLongshanksEventId>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
 
-          return  postLongshanksEventId(requestOptions)
+          return  postLongshanksEventId(id,requestOptions)
         }
 
 
@@ -1785,11 +1793,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type PostLongshanksEventIdMutationError = PostLongshanksEventId400 | PostLongshanksEventId502
 
     export const usePostLongshanksEventId = <TError = PostLongshanksEventId400 | PostLongshanksEventId502,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postLongshanksEventId>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postLongshanksEventId>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof postLongshanksEventId>>,
         TError,
-        void,
+        {id: string},
         TContext
       > => {
       return useMutation(getPostLongshanksEventIdMutationOptions(options), queryClient);
@@ -2630,17 +2638,17 @@ export type postPostDiscordEventTourneyIdResponseError = (postPostDiscordEventTo
 
 export type postPostDiscordEventTourneyIdResponse = (postPostDiscordEventTourneyIdResponseSuccess | postPostDiscordEventTourneyIdResponseError)
 
-export const getPostPostDiscordEventTourneyIdUrl = () => {
+export const getPostPostDiscordEventTourneyIdUrl = (tourneyId: string,) => {
 
 
   
 
-  return `/v1/post-discord-event/:tourneyId`
+  return `/v1/post-discord-event/${tourneyId}`
 }
 
-export const postPostDiscordEventTourneyId = async ( options?: RequestInit): Promise<postPostDiscordEventTourneyIdResponse> => {
+export const postPostDiscordEventTourneyId = async (tourneyId: string, options?: RequestInit): Promise<postPostDiscordEventTourneyIdResponse> => {
   
-  return customFetch<postPostDiscordEventTourneyIdResponse>(getPostPostDiscordEventTourneyIdUrl(),
+  return customFetch<postPostDiscordEventTourneyIdResponse>(getPostPostDiscordEventTourneyIdUrl(tourneyId),
   {      
     ...options,
     method: 'POST'
@@ -2653,8 +2661,8 @@ export const postPostDiscordEventTourneyId = async ( options?: RequestInit): Pro
 
 
 export const getPostPostDiscordEventTourneyIdMutationOptions = <TError = PostPostDiscordEventTourneyId400 | PostPostDiscordEventTourneyId500,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postPostDiscordEventTourneyId>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof postPostDiscordEventTourneyId>>, TError,void, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postPostDiscordEventTourneyId>>, TError,{tourneyId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postPostDiscordEventTourneyId>>, TError,{tourneyId: string}, TContext> => {
 
 const mutationKey = ['postPostDiscordEventTourneyId'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
@@ -2666,10 +2674,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postPostDiscordEventTourneyId>>, void> = () => {
-          
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postPostDiscordEventTourneyId>>, {tourneyId: string}> = (props) => {
+          const {tourneyId} = props ?? {};
 
-          return  postPostDiscordEventTourneyId(requestOptions)
+          return  postPostDiscordEventTourneyId(tourneyId,requestOptions)
         }
 
 
@@ -2684,11 +2692,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type PostPostDiscordEventTourneyIdMutationError = PostPostDiscordEventTourneyId400 | PostPostDiscordEventTourneyId500
 
     export const usePostPostDiscordEventTourneyId = <TError = PostPostDiscordEventTourneyId400 | PostPostDiscordEventTourneyId500,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postPostDiscordEventTourneyId>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postPostDiscordEventTourneyId>>, TError,{tourneyId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof postPostDiscordEventTourneyId>>,
         TError,
-        void,
+        {tourneyId: string},
         TContext
       > => {
       return useMutation(getPostPostDiscordEventTourneyIdMutationOptions(options), queryClient);

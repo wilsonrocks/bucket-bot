@@ -1,5 +1,5 @@
 import { FactionsBarRace } from '@/components/animated-factions'
-import { useGetFactionRankings } from '@/hooks/useApi'
+import { useGetFactionRankings } from '@/api/hooks'
 import { Select, Table } from '@mantine/core'
 import { createFileRoute } from '@tanstack/react-router'
 import { Tabs } from '@/components/routed-tabs'
@@ -49,13 +49,13 @@ function RouteComponent() {
                     paddingLeft: '0.5rem',
                   }}
                 >
-                  {faction.rank.toString()}
+                  {(faction.rank ?? 0).toString()}
                 </div>,
                 faction.faction_name,
                 faction.declarations,
-                `${(faction.declaration_rate * 100).toFixed(2)}%`,
+                `${((faction.declaration_rate ?? 0) * 100).toFixed(2)}%`,
                 faction.total_points,
-                <strong>{faction.points_per_declaration.toFixed(2)}</strong>,
+                <strong>{(faction.points_per_declaration ?? 0).toFixed(2)}</strong>,
               ]),
             }}
           />

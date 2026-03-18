@@ -1,5 +1,5 @@
 import { Link } from '@/components/link'
-import { useGetAllTourneys } from '@/hooks/useApi'
+import { useGetTourney as useGetAllTourneys } from '@/api/hooks'
 import { Table } from '@mantine/core'
 import { createFileRoute } from '@tanstack/react-router'
 import { format, parseISO } from 'date-fns'
@@ -18,7 +18,7 @@ function RouteComponent() {
         <Table
           data={{
             body: tourneys.data.map(
-              ({ id, name, date, players, level_code }) => [
+              ({ id, name, date, players }) => [
                 <Link
                   search={{ tab: undefined }}
                   to={EventIdRoute.to}
@@ -26,12 +26,11 @@ function RouteComponent() {
                 >
                   {name}
                 </Link>,
-                format(parseISO(date), 'dd MMM yyyy'),
+                date ? format(parseISO(date), 'dd MMM yyyy') : '',
                 players,
-                level_code,
               ],
             ),
-            head: ['Name', 'Date', 'Players', 'Level'],
+            head: ['Name', 'Date', 'Players'],
           }}
         />
       ) : (

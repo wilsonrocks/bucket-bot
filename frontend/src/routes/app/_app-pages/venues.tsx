@@ -1,5 +1,4 @@
-import { useGetVenues } from '@/api/generated/default/default'
-import { useCreateVenueMutation } from '@/hooks/useApi'
+import { useGetVenues, usePostCreateVenue } from '@/api/hooks'
 import { Box, Button, Grid, Paper, Table, TextInput } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { createFileRoute } from '@tanstack/react-router'
@@ -19,7 +18,7 @@ function RouteComponent() {
   })
 
   const { data: venuesData } = useGetVenues()
-  const createVenueMutation = useCreateVenueMutation()
+  const createVenueMutation = usePostCreateVenue()
 
   return (
     <div>
@@ -28,9 +27,11 @@ function RouteComponent() {
           onSubmit={form.onSubmit((values) => {
             createVenueMutation.mutate(
               {
-                name: values.name,
-                town: values.town,
-                postCode: values.postCode,
+                data: {
+                  name: values.name,
+                  town: values.town,
+                  postCode: values.postCode,
+                },
               },
               {
                 onSuccess: () => {

@@ -1,13 +1,13 @@
 import { createFileRoute } from '@tanstack/react-router'
 
 import {
-  useFetchDiscordUsersMutation,
-  useGenerateFactionRankingsMutation,
-  useGenerateRankingsSnapshotMutation,
+  usePostFetchDiscordUserIds,
+  usePostFactionRankings,
+  usePostGenerateRankings,
   useGetRankingTypes,
-  usePostFactionRankingsToDiscordMutation,
-  usePostRankingsToDiscordMutation,
-} from '@/hooks/useApi'
+  usePostPostFactionRankings,
+  usePostPostDiscordRankings,
+} from '@/api/hooks'
 
 import { Button, Card, Grid, List, Text, Title } from '@mantine/core'
 
@@ -24,11 +24,11 @@ export const Route = createFileRoute('/app/_app-pages/rankings/')({
 })
 
 function RouteComponent() {
-  const generateRankings = useGenerateRankingsSnapshotMutation()
-  const generateFactionRankings = useGenerateFactionRankingsMutation()
-  const fetchDiscordUsers = useFetchDiscordUsersMutation()
-  const postPlayerRankingsToDiscord = usePostRankingsToDiscordMutation()
-  const postFactionRankingsToDiscord = usePostFactionRankingsToDiscordMutation()
+  const generateRankings = usePostGenerateRankings()
+  const generateFactionRankings = usePostFactionRankings()
+  const fetchDiscordUsers = usePostFetchDiscordUserIds()
+  const postPlayerRankingsToDiscord = usePostPostDiscordRankings()
+  const postFactionRankingsToDiscord = usePostPostFactionRankings()
 
   const rankingTypes = useGetRankingTypes()
 
@@ -231,7 +231,7 @@ function RouteComponent() {
                   </div>
                 ),
                 onConfirm: () => {
-                  postFactionRankingsToDiscord.mutate(true)
+                  postFactionRankingsToDiscord.mutate({ params: { live: 'true' } })
                 },
                 labels: { confirm: 'Make it so', cancel: 'Wait...' },
               })

@@ -16,7 +16,7 @@ const ErrorSchema = z.object({ error: z.string() });
 
 export const newLongshanksEventRoute = createRoute({
   method: "post",
-  path: "/longshanks-event/:id",
+  path: "/longshanks-event/{id}",
   request: {
     params: z.object({ id: z.string() }),
   },

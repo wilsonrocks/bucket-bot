@@ -1,15 +1,24 @@
 import { Select, Table, Tabs, Title } from '@mantine/core'
+
+type PlayerTourneyItem = {
+  tourneyId: number
+  tourneyName: string
+  points: number
+  place: number
+  factionName: string
+  date: string
+}
 import { createFileRoute } from '@tanstack/react-router'
 import z from 'zod'
 
 import { LazyPlayerRankingOverTimeChart } from '@/components/charts'
 import { Link } from '@/components/link'
 import {
-  useGetPlayerById,
+  useGetPlayerId,
   useGetRankingTypes,
-  useGetRankingsForPlayer,
-  useGetTourneysForPlayer,
-} from '@/hooks/useApi'
+  useGetRankingsPlayerIdTypeCode,
+  useGetTourneysPlayerPlayerId,
+} from '@/api/hooks'
 import { Route as EventRoute } from '@/routes/site/_site-pages/event.$id'
 import { formatDate } from 'date-fns'
 import { Suspense } from 'react'
@@ -28,10 +37,10 @@ function RouteComponent() {
   const { id } = Route.useParams()
   const rankingTypes = useGetRankingTypes()
   const { typeCode, tab } = Route.useSearch()
-  const rankingsData = useGetRankingsForPlayer(id, typeCode)
-  const playerData = useGetPlayerById(id)
+  const rankingsData = useGetRankingsPlayerIdTypeCode(String(id), typeCode, { query: { enabled: !!typeCode } })
+  const playerData = useGetPlayerId(String(id))
   const navigate = Route.useNavigate()
-  const tourneys = useGetTourneysForPlayer(id)
+  const tourneys = useGetTourneysPlayerPlayerId(String(id))
 
   if (!playerData.data) return <div>Loading...</div>
   return (
@@ -57,7 +66,7 @@ function RouteComponent() {
               <Table
                 tabularNums
                 data={{
-                  body: tourneys.data.map((tourney) => [
+                  body: (tourneys.data as PlayerTourneyItem[]).map((tourney) => [
                     <Link
                       to={EventRoute.to}
                       params={{ id: tourney.tourneyId }}
