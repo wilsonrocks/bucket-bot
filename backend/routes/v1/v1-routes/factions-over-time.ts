@@ -1,13 +1,36 @@
-import { Context } from "koa";
+import { createRoute, z, type RouteHandler } from "@hono/zod-openapi";
+import type { AppEnv } from "../../../hono-env.js";
 
-export const getFactionsOverTime = async (ctx: Context) => {
-  const factionData = await ctx.state.db
+const FactionSnapshotGroupSchema = z.object({
+  date: z.string(),
+  factions: z.array(
+    z.object({
+      faction_code: z.string(),
+      declarations: z.number().nullable(),
+      points_per_declaration: z.number().nullable(),
+      total_points: z.number().nullable(),
+      name: z.string(),
+      hex_code: z.string(),
+      short_name: z.string().nullable(),
+    }),
+  ),
+});
+
+export const getFactionsOverTimeRoute = createRoute({
+  method: "get",
+  path: "/factions-over-time",
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.array(FactionSnapshotGroupSchema) } },
+      description: "Faction stats grouped by snapshot date",
+    },
+  },
+});
+
+export const getFactionsOverTime: RouteHandler<typeof getFactionsOverTimeRoute, AppEnv> = async (c) => {
+  const factionData = await c.get("db")
     .selectFrom("faction_snapshot")
-    .innerJoin(
-      "faction_snapshot_batch",
-      "faction_snapshot.batch_id",
-      "faction_snapshot_batch.id",
-    )
+    .innerJoin("faction_snapshot_batch", "faction_snapshot.batch_id", "faction_snapshot_batch.id")
     .innerJoin("faction", "faction_snapshot.faction_code", "faction.name_code")
     .select([
       "faction_snapshot.batch_id",
@@ -26,14 +49,9 @@ export const getFactionsOverTime = async (ctx: Context) => {
     factionData.reduce(
       (acc, row) => {
         const key = row.snapshot_date.toISOString();
-
         if (!acc[key]) {
-          acc[key] = {
-            date: row.snapshot_date,
-            factions: [],
-          };
+          acc[key] = { date: row.snapshot_date, factions: [] };
         }
-
         acc[key].factions.push({
           faction_code: row.faction_code,
           declarations: row.declarations,
@@ -43,7 +61,6 @@ export const getFactionsOverTime = async (ctx: Context) => {
           hex_code: row.hex_code,
           short_name: row.short_name,
         });
-
         return acc;
       },
       {} as Record<string, any>,
@@ -59,5 +76,6 @@ export const getFactionsOverTime = async (ctx: Context) => {
       total_points: 0,
     })),
   };
-  ctx.body = [zeroRecord, ...grouped];
+
+  return c.json([zeroRecord, ...grouped] as any, 200);
 };

@@ -1,8 +1,8 @@
-import { Context } from "koa";
-import z from "zod";
-import { extractPlayersFromLongshanksHTML } from "../../../logic/longshanks/extract-longshanks-players";
-import { extractTourneyFromLongshanksHtml } from "../../../logic/longshanks/extract-longshanks-tourney-data";
-import { calculatePoints, maxPoints } from "../../../logic/points";
+import { createRoute, z, type RouteHandler } from "@hono/zod-openapi";
+import type { AppEnv } from "../../../hono-env.js";
+import { extractPlayersFromLongshanksHTML } from "../../../logic/longshanks/extract-longshanks-players.js";
+import { extractTourneyFromLongshanksHtml } from "../../../logic/longshanks/extract-longshanks-tourney-data.js";
+import { calculatePoints, maxPoints } from "../../../logic/points.js";
 
 const otherDataValidator = z.object({
   longshanksId: z.string(),
@@ -12,56 +12,62 @@ const otherDataValidator = z.object({
   tournamentOrganiserId: z.string().optional(),
 });
 
-export const newLongshanksEvent = async (ctx: Context) => {
-  const longshanksEventId = ctx.params.id;
-  if (!longshanksEventId) {
-    ctx.throw(400, "Missing longshanks id query parameter");
-  }
+const ErrorSchema = z.object({ error: z.string() });
+
+export const newLongshanksEventRoute = createRoute({
+  method: "post",
+  path: "/longshanks-event/{id}",
+  request: {
+    params: z.object({ id: z.string() }),
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.object({}).passthrough() } },
+      description: "Longshanks event ingested",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Invalid request or event already exists",
+    },
+    502: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Failed to fetch from Longshanks",
+    },
+  },
+});
+
+export const newLongshanksEvent: RouteHandler<typeof newLongshanksEventRoute, AppEnv> = async (c) => {
+  const { id: longshanksEventId } = c.req.valid("param");
 
   const [players, otherData] = await Promise.all([
     (async () => {
       const standingsUrl = `https://malifaux.longshanks.org/events/detail/panel_standings.php?event=${longshanksEventId}&section=player`;
       const html = await fetch(standingsUrl);
-
       if (!html.ok) {
-        ctx.throw(502, `Failed to fetch data from Longshanks ${standingsUrl}`);
+        throw Object.assign(new Error(`Failed to fetch data from Longshanks ${standingsUrl}`), { status: 502 });
       }
-
-      const htmlText = await html.text();
-
-      const playerData = extractPlayersFromLongshanksHTML(htmlText);
-      return playerData;
+      return extractPlayersFromLongshanksHTML(await html.text());
     })(),
     (async () => {
       const otherDataUrl = `https://malifaux.longshanks.org/event/${longshanksEventId}/`;
       const html = await fetch(otherDataUrl);
-
       if (!html.ok) {
-        ctx.throw(502, `Failed to fetch data from Longshanks ${otherDataUrl}`);
+        throw Object.assign(new Error(`Failed to fetch data from Longshanks ${otherDataUrl}`), { status: 502 });
       }
-
-      const htmlText = await html.text();
-      const tourneyData = extractTourneyFromLongshanksHtml(htmlText);
-      return tourneyData;
+      return extractTourneyFromLongshanksHtml(await html.text());
     })(),
   ]);
 
   const parsedOtherData = otherDataValidator.parse(otherData);
 
-  const factions = await ctx.state.db
-    .selectFrom("faction")
-    .selectAll()
-    .execute();
-
+  const db = c.get("db");
+  const factions = await db.selectFrom("faction").selectAll().execute();
   const factionMap: Record<string, string> = {};
-
   factions.forEach((faction) => {
     factionMap[faction.longshanks_html_name] = faction.name_code;
   });
 
-  await ctx.state.db.transaction().execute(async (trx) => {
-    // first check if it already exists
-
+  await db.transaction().execute(async (trx) => {
     const alreadyExistingTourney = await trx
       .selectFrom("tourney")
       .where("longshanks_id", "=", parsedOtherData.longshanksId)
@@ -69,15 +75,15 @@ export const newLongshanksEvent = async (ctx: Context) => {
       .executeTakeFirst();
 
     if (alreadyExistingTourney) {
-      ctx.throw(
-        400,
-        `Tourney with longshanks id ${parsedOtherData.longshanksId} already exists with id ${alreadyExistingTourney.id}`,
+      throw Object.assign(
+        new Error(`Tourney with longshanks id ${parsedOtherData.longshanksId} already exists with id ${alreadyExistingTourney.id}`),
+        { status: 400 },
       );
     }
+
     const tourney = await trx
       .insertInto("tourney")
       .values({
-        // TODO add in organiser_id which is a foreign key to player table
         longshanks_id: parsedOtherData.longshanksId,
         name: parsedOtherData.name,
         venue: parsedOtherData.location,
@@ -89,15 +95,11 @@ export const newLongshanksEvent = async (ctx: Context) => {
 
     await Promise.all(
       players.map(async (longshanksPlayer) => {
-        // check faction is valid
         const faction_code = factionMap[longshanksPlayer.faction];
         if (!faction_code) {
-          throw new Error(
-            `Can't derive faction code for ${longshanksPlayer.faction}`,
-          );
+          throw new Error(`Can't derive faction code for ${longshanksPlayer.faction}`);
         }
 
-        // do we already have a longshanks player identity for this ID?
         let dbPlayerIdentity = await trx
           .selectFrom("player_identity")
           .where("identity_provider_id", "=", "LONGSHANKS")
@@ -119,11 +121,10 @@ export const newLongshanksEvent = async (ctx: Context) => {
 
         const points = calculatePoints(
           players.length,
-          maxPoints("Local", Math.max(...players.map((x) => x.roundsPlayed))), // TODO not hard code to local
+          maxPoints("Local", Math.max(...players.map((x) => x.roundsPlayed))),
         ).points[longshanksPlayer.rank - 1];
 
-        if (!points)
-          ctx.throw(400, "Not enough players to award points/rankings");
+        if (!points) throw new Error("Not enough players to award points/rankings");
 
         await trx
           .insertInto("result")
@@ -140,11 +141,11 @@ export const newLongshanksEvent = async (ctx: Context) => {
     );
   });
 
-  const tourney = await ctx.state.db
+  const tourney = await db
     .selectFrom("tourney")
     .where("longshanks_id", "=", otherData.longshanksId)
     .select("id")
     .executeTakeFirstOrThrow();
 
-  ctx.body = { ...otherData, players, id: tourney.id };
+  return c.json({ ...otherData, players, id: tourney.id } as any, 200);
 };

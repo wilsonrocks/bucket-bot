@@ -1,79 +1,107 @@
-import { Router } from "@koa/router";
+import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
+import { swaggerUI } from "@hono/swagger-ui";
+import { jwt } from "hono/jwt";
 import jsonWebToken from "jsonwebtoken";
-import z from "zod";
-import { newLongshanksEvent } from "./v1-routes/new-longshanks-event";
-import { hasRankingReporterRole } from "./v1-routes/roles";
-
-import koaJwt from "koa-jwt";
-import { botChatRouter } from "./v1-routes/discord-bot-chat";
+import type { AppEnv } from "../../hono-env.js";
+import { botChatRouter } from "./v1-routes/discord-bot-chat.js";
 import {
   fetchAndStoreDiscordUserIds,
+  fetchDiscordUserIdsRoute,
   getAllDiscordUsers,
+  getAllDiscordUsersRoute,
   matchPlayerToDiscordUser,
+  matchPlayerToDiscordUserRoute,
   searchDiscordUsersByName,
-} from "./v1-routes/discord-id";
-import { postDiscordRankingsHandler } from "./v1-routes/discord-rankings";
+  searchDiscordUsersRoute,
+} from "./v1-routes/discord-id.js";
+import { postDiscordRankingsHandler, postDiscordRankingsRoute } from "./v1-routes/discord-rankings.js";
 import {
   generateFactionRankingsHandler,
+  generateFactionRankingsRoute,
   getFactionRankings,
+  getFactionRankingsRoute,
   postFactionRankingsHandler,
-} from "./v1-routes/faction-rankings";
-import { generateRankingsHandler } from "./v1-routes/generate-rankings";
-import { getUnmappedIdentities } from "./v1-routes/identities";
-import { newBotEventHandler } from "./v1-routes/new-bot-event";
-import { getPlayerById, getPlayers } from "./v1-routes/players";
-import { rankingTypesHandler } from "./v1-routes/ranking-types";
-import { rankingsHandler } from "./v1-routes/rankings";
-import { rankingsPlayerHandler } from "./v1-routes/rankings-player";
-import { getAllTiers } from "./v1-routes/tiers";
+  postFactionRankingsRoute,
+} from "./v1-routes/faction-rankings.js";
+import { generateRankingsHandler, generateRankingsRoute } from "./v1-routes/generate-rankings.js";
+import { getUnmappedIdentities, getUnmappedIdentitiesRoute } from "./v1-routes/identities.js";
+import { newBotEventHandler, newBotEventRoute } from "./v1-routes/new-bot-event.js";
+import { newLongshanksEvent, newLongshanksEventRoute } from "./v1-routes/new-longshanks-event.js";
+import { getPlayerById, getPlayerByIdRoute, getPlayers, getPlayersRoute } from "./v1-routes/players.js";
+import { rankingTypesHandler, rankingTypesRoute } from "./v1-routes/ranking-types.js";
+import { rankingsHandler, rankingsRoute } from "./v1-routes/rankings.js";
+import { rankingsPlayerHandler, rankingsPlayerRoute } from "./v1-routes/rankings-player.js";
+import { hasRankingReporterRole, hasRankingReporterRoleRoute } from "./v1-routes/roles.js";
+import { getAllTiers, getAllTiersRoute } from "./v1-routes/tiers.js";
 import {
   allTourneys,
+  allTourneysRoute,
   detailTourney,
+  detailTourneyRoute,
   getTourneysForPlayerHandler,
+  getTourneysForPlayerRoute,
   postEventSummaryToDiscord,
+  postEventSummaryToDiscordRoute,
   updateTourney,
-} from "./v1-routes/tourney";
-import { createVenueHandler, getAllVenuesHandler } from "./v1-routes/venues";
-import { getFactionsOverTime } from "./v1-routes/factions-over-time";
+  updateTourneyRoute,
+} from "./v1-routes/tourney.js";
+import { createVenueHandler, createVenueRoute, getAllVenuesHandler, getAllVenuesRoute } from "./v1-routes/venues.js";
+import { getFactionsOverTime, getFactionsOverTimeRoute } from "./v1-routes/factions-over-time.js";
 
 const JWT_SECRET = process.env.JWT_SECRET;
-
-if (!JWT_SECRET) {
-  throw new Error("JWT_SECRET is not defined");
-  // TODO unify and typescript this checking
-}
+if (!JWT_SECRET) throw new Error("JWT_SECRET is not defined");
 
 const DISCORD_REDIRECT_URL = process.env.DISCORD_REDIRECT_URL;
-if (!DISCORD_REDIRECT_URL) {
-  throw new Error("DISCORD_REDIRECT_URL is not defined");
-}
+if (!DISCORD_REDIRECT_URL) throw new Error("DISCORD_REDIRECT_URL is not defined");
 
 const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID;
-if (!DISCORD_CLIENT_ID) {
-  throw new Error("DISCORD_CLIENT_ID is not defined");
-}
+if (!DISCORD_CLIENT_ID) throw new Error("DISCORD_CLIENT_ID is not defined");
 
 const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET;
-if (!DISCORD_CLIENT_SECRET) {
-  throw new Error("DISCORD_CLIENT_SECRET is not defined");
-}
+if (!DISCORD_CLIENT_SECRET) throw new Error("DISCORD_CLIENT_SECRET is not defined");
 
-const basicAuth = Buffer.from(
-  `${DISCORD_CLIENT_ID}:${DISCORD_CLIENT_SECRET}`,
-).toString("base64");
+const basicAuth = Buffer.from(`${DISCORD_CLIENT_ID}:${DISCORD_CLIENT_SECRET}`).toString("base64");
 
-export const v1Router = new Router({ prefix: "/v1" });
+export const v1Router = new OpenAPIHono<AppEnv>();
 
-const tokenValidator = z.object({ code: z.string() });
+v1Router.doc("/doc", {
+  openapi: "3.0.0",
+  info: { title: "Bucket Bot API", version: "1.0.0" },
+});
+v1Router.get("/ui", swaggerUI({ url: "/v1/doc" }));
 
-v1Router.post("/token", async (ctx) => {
-  let validatedBody;
-  try {
-    validatedBody = tokenValidator.parse(ctx.request.body);
-  } catch (e) {
-    return ctx.throw(400, "Invalid request body", { cause: e });
-  }
-  ctx.body = { token: "fakeToken" };
+// ── Token (Discord OAuth) ──────────────────────────────────────────────────
+
+const tokenBodySchema = z.object({ code: z.string() });
+const tokenResponseSchema = z.object({
+  jwt: z.string(),
+  username: z.string(),
+  global_name: z.string(),
+});
+const tokenRoute = createRoute({
+  method: "post",
+  path: "/token",
+  request: {
+    body: { content: { "application/json": { schema: tokenBodySchema } } },
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: tokenResponseSchema } },
+      description: "JWT token for authenticated user",
+    },
+    400: {
+      content: { "application/json": { schema: z.object({ error: z.string() }) } },
+      description: "Invalid request",
+    },
+    502: {
+      content: { "application/json": { schema: z.object({ error: z.string() }) } },
+      description: "Discord API error",
+    },
+  },
+});
+
+v1Router.openapi(tokenRoute, async (c) => {
+  const { code } = c.req.valid("json");
 
   const tokenResponse = await fetch("https://discord.com/api/oauth2/token", {
     method: "POST",
@@ -83,90 +111,71 @@ v1Router.post("/token", async (ctx) => {
     },
     body: new URLSearchParams({
       grant_type: "authorization_code",
-      code: validatedBody.code,
-      redirect_uri: DISCORD_REDIRECT_URL,
+      code,
+      redirect_uri: DISCORD_REDIRECT_URL!,
     }),
   });
 
   if (!tokenResponse.ok) {
-    console.error(
-      "Discord token response not ok:",
-      tokenResponse.statusText,
-      JSON.stringify(tokenResponse),
-    );
-    return ctx.throw(
-      502,
-      "Error fetching token from Discord",
-      tokenResponse.statusText,
-      JSON.stringify(tokenResponse),
-    );
+    console.error("Discord token response not ok:", tokenResponse.statusText);
+    return c.json({ error: "Error fetching token from Discord" }, 502);
   }
 
   const { access_token } = await tokenResponse.json();
 
   const idResponse = await fetch("https://discord.com/api/users/@me", {
-    headers: {
-      Authorization: `Bearer ${access_token}`,
-    },
+    headers: { Authorization: `Bearer ${access_token}` },
   });
 
   if (!idResponse.ok) {
-    console.error("Discord token response not ok:", tokenResponse.statusText);
-
-    return ctx.throw(
-      502,
-      "Error fetching user id from Discord",
-      idResponse.statusText,
-    );
+    console.error("Discord id response not ok:", idResponse.statusText);
+    return c.json({ error: "Error fetching user id from Discord" }, 502);
   }
 
-  const userData = await idResponse.json();
-  const { id, username, global_name } = userData;
+  const { id, username, global_name } = await idResponse.json();
 
-  const jwt = jsonWebToken.sign({ id, username, global_name }, JWT_SECRET, {
+  const jwtToken = jsonWebToken.sign({ id, username, global_name }, JWT_SECRET!, {
     algorithm: "HS256",
     expiresIn: "1y",
   });
 
-  ctx.response.body = { jwt, username, global_name };
+  return c.json({ jwt: jwtToken, username, global_name }, 200);
 });
 
-v1Router.get("/ranking-types", rankingTypesHandler);
-v1Router.get("/rankings/:typeCode", rankingsHandler);
-v1Router.get("/rankings/:playerId/:typeCode", rankingsPlayerHandler);
-v1Router.get("/tourney", allTourneys);
-v1Router.get("/tourney/:id", detailTourney);
-v1Router.get("/tourneys/player/:playerId", getTourneysForPlayerHandler);
-v1Router.get("/venues", getAllVenuesHandler);
-v1Router.get("/players", getPlayers);
-v1Router.get("/player/:id", getPlayerById);
-v1Router.get("/tiers", getAllTiers);
-v1Router.get("/faction-rankings", getFactionRankings);
-v1Router.get("/factions-over-time", getFactionsOverTime);
+// ── Public routes ──────────────────────────────────────────────────────────
 
-// now these need authentication
-v1Router.use(koaJwt({ secret: process.env.JWT_SECRET! }));
+v1Router.openapi(rankingTypesRoute, rankingTypesHandler);
+v1Router.openapi(rankingsRoute, rankingsHandler);
+v1Router.openapi(rankingsPlayerRoute, rankingsPlayerHandler);
+v1Router.openapi(allTourneysRoute, allTourneys);
+v1Router.openapi(detailTourneyRoute, detailTourney);
+v1Router.openapi(getTourneysForPlayerRoute, getTourneysForPlayerHandler);
+v1Router.openapi(getAllVenuesRoute, getAllVenuesHandler);
+v1Router.openapi(getPlayersRoute, getPlayers);
+v1Router.openapi(getPlayerByIdRoute, getPlayerById);
+v1Router.openapi(getAllTiersRoute, getAllTiers);
+v1Router.openapi(getFactionRankingsRoute, getFactionRankings);
+v1Router.openapi(getFactionsOverTimeRoute, getFactionsOverTime);
+v1Router.openapi(getUnmappedIdentitiesRoute, getUnmappedIdentities);
 
-v1Router.post("/longshanks-event/:id", newLongshanksEvent);
-v1Router.post("/bot-event", newBotEventHandler);
+// ── JWT middleware (all routes below require authentication) ───────────────
 
-v1Router.get("/has-role", hasRankingReporterRole);
-v1Router.post("/generate-rankings", generateRankingsHandler);
+v1Router.use("*", jwt({ secret: JWT_SECRET!, alg: "HS256" }));
 
-v1Router.post("/create-venue", createVenueHandler);
+// ── Protected routes ───────────────────────────────────────────────────────
 
-v1Router.post("/fetch-discord-user-ids", fetchAndStoreDiscordUserIds); // THIS is a weird hack because we in a lambda and this rate limits severely
-v1Router.get("/search-discord-users", searchDiscordUsersByName);
-v1Router.get("/all-discord-users", getAllDiscordUsers);
-v1Router.post("/match-player-to-discord-user", matchPlayerToDiscordUser);
-v1Router.post("/post-discord-rankings", postDiscordRankingsHandler);
-v1Router.post("/post-discord-event/:tourneyId", postEventSummaryToDiscord);
-v1Router.post("/tourney", updateTourney);
-
-v1Router.use("/bot-chat", botChatRouter.routes());
-v1Router.use("/bot-chat", botChatRouter.allowedMethods());
-v1Router.post("/faction-rankings", generateFactionRankingsHandler);
-
-v1Router.post("/post-faction-rankings", postFactionRankingsHandler);
-
-v1Router.get("/unmapped-identities", getUnmappedIdentities);
+v1Router.openapi(newLongshanksEventRoute, newLongshanksEvent);
+v1Router.openapi(newBotEventRoute, newBotEventHandler);
+v1Router.openapi(hasRankingReporterRoleRoute, hasRankingReporterRole);
+v1Router.openapi(generateRankingsRoute, generateRankingsHandler);
+v1Router.openapi(createVenueRoute, createVenueHandler);
+v1Router.openapi(fetchDiscordUserIdsRoute, fetchAndStoreDiscordUserIds);
+v1Router.openapi(searchDiscordUsersRoute, searchDiscordUsersByName);
+v1Router.openapi(getAllDiscordUsersRoute, getAllDiscordUsers);
+v1Router.openapi(matchPlayerToDiscordUserRoute, matchPlayerToDiscordUser);
+v1Router.openapi(postDiscordRankingsRoute, postDiscordRankingsHandler);
+v1Router.openapi(postEventSummaryToDiscordRoute, postEventSummaryToDiscord);
+v1Router.openapi(updateTourneyRoute, updateTourney);
+v1Router.route("/bot-chat", botChatRouter);
+v1Router.openapi(generateFactionRankingsRoute, generateFactionRankingsHandler);
+v1Router.openapi(postFactionRankingsRoute, postFactionRankingsHandler);

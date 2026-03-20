@@ -1,18 +1,8 @@
-import { useGetFactionsOverTime } from '@/hooks/useApi'
+import { useGetFactionsOverTime } from '@/api/hooks'
 import { useMemo } from 'react'
 import { BarRace } from './bar-race'
 
 type Metric = 'declarations' | 'points_per_declaration' | 'total_points'
-
-type FactionDatum = {
-  faction_code: string
-  declarations: number
-  points_per_declaration: number
-  total_points: number
-  name: string
-  short_name: string
-  hex_code: string
-}
 
 export function FactionsBarRace({
   metric = 'points_per_declaration',
@@ -25,10 +15,11 @@ export function FactionsBarRace({
     () =>
       (data ?? []).map((snap) => ({
         date: snap.date,
-        items: snap.factions.map((f: FactionDatum) => ({
+        items: snap.factions.map((f) => ({
           ...f,
+          short_name: f.short_name ?? '',
           id: f.faction_code,
-          value: f[metric],
+          value: f[metric] ?? 0,
         })),
       })),
     [data, metric],

@@ -1,4 +1,4 @@
-import { useGetRankingTypes, useGetRankings } from '@/hooks/useApi'
+import { useGetRankingTypes, useGetRankingsTypeCode } from '@/api/hooks'
 import { Box, Group, Select, Table, Text } from '@mantine/core'
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { Route as PlayerRoute } from '@/routes/site/_site-pages/player.$id'
@@ -27,7 +27,7 @@ function RouteComponent() {
   const rankingDescription = rankingTypes.data?.find(
     (rt) => rt.code === typeCode,
   )?.description
-  const rankings = useGetRankings(typeCode)
+  const rankings = useGetRankingsTypeCode(typeCode ?? '', { query: { enabled: !!typeCode } })
   return (
     <div>
       <Group align="center">
@@ -53,11 +53,11 @@ function RouteComponent() {
               body: rankings.data.map((player) => [
                 <Box w={20}>{player.rank}</Box>,
                 <Box w={150}>
-                  <Link to={PlayerRoute.to} params={{ id: player.player_id }}>
+                  <Link to={PlayerRoute.to} params={{ id: player.player_id! }}>
                     {player.name}
                   </Link>
                 </Box>,
-                <Box w={50}>{player.total_points.toFixed(2)}</Box>,
+                <Box w={50}>{(player.total_points ?? 0).toFixed(2)}</Box>,
               ]),
             }}
           />

@@ -1,7 +1,7 @@
 import {
-  useMatchPlayerToDiscordUser,
-  useSearchDiscordUsers,
-} from '@/hooks/useApi'
+  usePostMatchPlayerToDiscordUser,
+  useGetSearchDiscordUsers,
+} from '@/api/hooks'
 import {
   Box,
   Button,
@@ -24,8 +24,8 @@ export const DiscordLookup: React.FC<{
   useEffect(() => {
     setText(initialText)
   }, [initialText])
-  const options = useSearchDiscordUsers(text)
-  const matchMutation = useMatchPlayerToDiscordUser()
+  const options = useGetSearchDiscordUsers({ text })
+  const matchMutation = usePostMatchPlayerToDiscordUser()
   return (
     <div>
       <TextInput
@@ -45,7 +45,7 @@ export const DiscordLookup: React.FC<{
                 <img
                   width={50}
                   height={50}
-                  src={option.discord_avatar_url}
+                  src={option.discord_avatar_url ?? undefined}
                   alt="Avatar"
                 />
                 <Stack>
@@ -64,8 +64,10 @@ export const DiscordLookup: React.FC<{
                       labels: { confirm: 'Make it so', cancel: 'Wait...' },
                       onConfirm: () => {
                         matchMutation.mutate({
-                          playerIdentityId,
-                          discordUserId: option.discord_user_id,
+                          data: {
+                            playerIdentityId,
+                            discordUserId: option.discord_user_id,
+                          },
                         })
                       },
                       children: (

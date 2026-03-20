@@ -1,17 +1,42 @@
-import { Context } from "koa";
-import { mostRecentSnapshot } from "../../../logic/most-recent-snapshot";
+import { createRoute, z, type RouteHandler } from "@hono/zod-openapi";
+import type { AppEnv } from "../../../hono-env.js";
+import { mostRecentSnapshot } from "../../../logic/most-recent-snapshot.js";
 
-export const rankingsHandler = async (ctx: Context) => {
-  const { typeCode } = ctx.params;
-  const snapshot = await mostRecentSnapshot(ctx.state.db, typeCode);
+const RankingEntrySchema = z.object({
+  rank: z.number().nullable(),
+  total_points: z.number().nullable(),
+  player_id: z.number().nullable(),
+  batch_id: z.number().nullable(),
+  type_code: z.string().nullable(),
+  id: z.number(),
+  name: z.string(),
+}).passthrough();
+
+export const rankingsRoute = createRoute({
+  method: "get",
+  path: "/rankings/{typeCode}",
+  request: {
+    params: z.object({ typeCode: z.string() }),
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.array(RankingEntrySchema) } },
+      description: "Rankings for a given type",
+    },
+  },
+});
+
+export const rankingsHandler: RouteHandler<typeof rankingsRoute, AppEnv> = async (c) => {
+  const { typeCode } = c.req.valid("param");
+  const snapshot = await mostRecentSnapshot(c.get("db"), typeCode);
   const snapshotId = snapshot.id;
-  const rankings = await ctx.state.db
+  const rankings = await c.get("db")
     .selectFrom("ranking_snapshot")
     .innerJoin("player", "ranking_snapshot.player_id", "player.id")
     .innerJoin(
       "ranking_snapshot_batch",
       "ranking_snapshot.batch_id",
-      "ranking_snapshot_batch.id"
+      "ranking_snapshot_batch.id",
     )
     .where("batch_id", "=", snapshotId)
     .where("type_code", "=", typeCode)
@@ -19,5 +44,5 @@ export const rankingsHandler = async (ctx: Context) => {
     .orderBy("rank", "asc")
     .execute();
 
-  ctx.body = rankings;
+  return c.json(rankings as any, 200);
 };

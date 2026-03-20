@@ -1,4 +1,4 @@
-import { useCreateLongshanksEventMutation } from '@/hooks/useApi.ts'
+import { usePostLongshanksEventId } from '@/api/hooks'
 import { Button, Loader, TextInput } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { createFileRoute } from '@tanstack/react-router'
@@ -30,15 +30,15 @@ function RouteComponent() {
     }),
   })
   const navigateToEventPage = EventIdRoute.useNavigate()
-  const newLongshanksEventMutation = useCreateLongshanksEventMutation()
+  const newLongshanksEventMutation = usePostLongshanksEventId()
 
   return (
     <div>
       <form
         onSubmit={form.onSubmit((values) => {
-          newLongshanksEventMutation.mutate(values.longshanksId, {
+          newLongshanksEventMutation.mutate({ id: String(values.longshanksId) }, {
             onSuccess: (response) => {
-              navigateToEventPage({ params: { id: response.id } })
+              navigateToEventPage({ params: { id: (response.data as { id: number }).id }, search: { tab: undefined } })
             },
             onError: (error) => {
               console.error(error)
@@ -57,6 +57,7 @@ function RouteComponent() {
         </Button>
 
         {newLongshanksEventMutation.isPending && <Loader />}
+
       </form>
     </div>
   )

@@ -1,17 +1,8 @@
 import { formatDate } from "date-fns";
-import {
-  ColorResolvable,
-  EmbedBuilder,
-  TextChannel,
-  userMention,
-} from "discord.js";
+import { ColorResolvable, EmbedBuilder, TextChannel } from "discord.js";
 import { Kysely } from "kysely";
 import { DB } from "kysely-codegen";
-import {
-  EVENT_ENTHUSIAST_ROLE_ID,
-  getDiscordClient,
-  UK_MALIFAUX_SERVER_ID,
-} from "../discord-client";
+import { getDiscordClient, MENTION_EVENT_ENTHUSIAST } from "../discord-client";
 import { mostRecentSnapshot } from "../most-recent-snapshot";
 
 const TOP_X_PLAYERS = 16;
@@ -77,8 +68,6 @@ export const postDiscordRankings = async (db: Kysely<DB>) => {
       .limit(TOP_X_PLAYERS)
       .execute();
 
-    console.debug(`Posting rankings for type: ${typeCode}`, rankings);
-
     const { discord_channel_id } = batch;
     if (!discord_channel_id) {
       console.warn(
@@ -113,7 +102,7 @@ export const postDiscordRankings = async (db: Kysely<DB>) => {
 
     await channel.send({
       content: `***BEEP BOOP!***
-<@&${EVENT_ENTHUSIAST_ROLE_ID}>
+      ${MENTION_EVENT_ENTHUSIAST}
 
 Here is your weekly breakfast of rankings that I have cooked from data. I hope that it is tasty and nutritious and sustains you until you can next play in an event and generate more data for me. Enjoy!
 

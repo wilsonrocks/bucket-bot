@@ -1,48 +1,75 @@
-import { Router } from "@koa/router";
-import {
-  getDiscordClient,
-  UK_MALIFAUX_SERVER_ID,
-} from "../../../logic/discord-client";
+import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
+import type { AppEnv } from "../../../hono-env.js";
+import { UK_MALIFAUX_SERVER_ID, getDiscordClient } from "../../../logic/discord-client.js";
 
-export const botChatRouter = new Router();
+export const botChatRouter = new OpenAPIHono<AppEnv>();
 
-botChatRouter.get("/channels", async (ctx) => {
-  const discordClient = await getDiscordClient();
-  const guildId = UK_MALIFAUX_SERVER_ID;
-  const guild = await discordClient.guilds.fetch(guildId);
-
-  const channels = await guild.channels.fetch();
-
-  ctx.response.body = channels
-    .mapValues((channel) => ({
-      name: channel?.name,
-      id: channel?.id,
-    }))
-    .sort((a, b) => (String(a.name) > String(b.name) ? 1 : -1));
+const getChannelsRoute = createRoute({
+  method: "get",
+  path: "/channels",
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: z.array(z.object({ name: z.string().nullable(), id: z.string().nullable() })),
+        },
+      },
+      description: "List of guild channels",
+    },
+  },
 });
 
-botChatRouter.post("/post-message", async (ctx) => {
+botChatRouter.openapi(getChannelsRoute, async (c) => {
   const discordClient = await getDiscordClient();
-  const body = ctx.request.body as { channelId: string; message: string };
-  const channelId = body.channelId;
-  const message = body.message;
+  const guild = await discordClient.guilds.fetch(UK_MALIFAUX_SERVER_ID);
+  const channels = await guild.channels.fetch();
 
-  if (!channelId || !message) {
-    ctx.response.status = 400;
-    ctx.response.body = { error: "channelId and message are required" };
-    return;
-  }
+  const channelList = channels
+    .mapValues((channel) => ({ name: channel?.name ?? null, id: channel?.id ?? null }))
+    .sort((a, b) => (String(a.name) > String(b.name) ? 1 : -1))
+    .map((v) => v);
+
+  return c.json(channelList as any, 200);
+});
+
+const PostMessageBodySchema = z.object({
+  channelId: z.string(),
+  message: z.string(),
+});
+
+const postMessageRoute = createRoute({
+  method: "post",
+  path: "/post-message",
+  request: {
+    body: {
+      content: { "application/json": { schema: PostMessageBodySchema } },
+    },
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.object({ success: z.literal(true) }) } },
+      description: "Message posted",
+    },
+    404: {
+      content: { "application/json": { schema: z.object({ error: z.string() }) } },
+      description: "Channel not found",
+    },
+  },
+});
+
+botChatRouter.openapi(postMessageRoute, async (c) => {
+  const { channelId, message } = c.req.valid("json");
+  const discordClient = await getDiscordClient();
 
   const channel = await discordClient.channels.fetch(channelId);
   if (!channel || !channel.isTextBased()) {
-    ctx.response.status = 404;
-    ctx.response.body = { error: "Channel not found or is not text-based" };
-    return;
+    return c.json({ error: "Channel not found or is not text-based" }, 404);
   }
 
-  if (!channel.isSendable()) return;
-  await channel.send(message);
+  if (!channel.isSendable()) {
+    return c.json({ error: "Channel not found or is not text-based" }, 404);
+  }
 
-  ctx.response.status = 200;
-  ctx.response.body = { success: true };
+  await channel.send(message);
+  return c.json({ success: true as const }, 200);
 });

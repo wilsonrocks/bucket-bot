@@ -1,14 +1,24 @@
 import { EventEditPlayerList } from '@/components/event-edit-player-list'
 import { Link } from '@/components/link'
 
+type TourneyFields = {
+  name: string
+  organiser_discord_id: string | null
+  venue_id: number | null
+  rounds: number | null
+  days: number | null
+  tier_code: string
+  discord_post_id: string | null
+}
+
 import {
   useGetAllDiscordUsers,
   useGetTiers,
-  useGetTourneyDetail,
+  useGetTourneyId,
   useGetVenues,
-  usePostEventToDiscordMutation,
-  useUpdateTourneyMutation,
-} from '@/hooks/useApi'
+  usePostPostDiscordEventTourneyId,
+  usePostTourney,
+} from '@/api/hooks'
 import {
   Alert,
   Button,
@@ -76,18 +86,18 @@ function RouteComponent() {
   //   },
   // })
 
-  const tourneyDetail = useGetTourneyDetail(id)
+  const tourneyDetail = useGetTourneyId(String(id))
 
   useEffect(() => {
     if (tourneyDetail.data) {
+      const tourney = tourneyDetail.data.tourney as TourneyFields
       detailsForm.setValues({
-        eventName: tourneyDetail.data.tourney.name,
-        organiserDiscordId:
-          tourneyDetail.data.tourney.organiser_discord_id || '',
-        venueId: tourneyDetail.data.tourney.venue_id?.toString() || '',
-        rounds: tourneyDetail.data.tourney.rounds ?? null,
-        days: tourneyDetail.data.tourney.days ?? null,
-        tier: tourneyDetail.data.tourney.tier_code,
+        eventName: tourney.name,
+        organiserDiscordId: tourney.organiser_discord_id || '',
+        venueId: tourney.venue_id?.toString() || '',
+        rounds: tourney.rounds ?? null,
+        days: tourney.days ?? null,
+        tier: tourney.tier_code,
       })
     }
   }, [tourneyDetail.isFetched])
@@ -96,8 +106,8 @@ function RouteComponent() {
   const venues = useGetVenues()
 
   const tiers = useGetTiers()
-  const updateTourney = useUpdateTourneyMutation()
-  const postToDiscord = usePostEventToDiscordMutation()
+  const updateTourney = usePostTourney(id)
+  const postToDiscord = usePostPostDiscordEventTourneyId()
 
   if (
     !tourneyDetail.data ||
@@ -113,7 +123,7 @@ function RouteComponent() {
   return (
     <div>
       <Title order={1} mb="md">
-        {tourneyDetail.data.tourney.name}
+        {(tourneyDetail.data.tourney as TourneyFields).name}
       </Title>
 
       <Tabs defaultValue="details">
@@ -132,11 +142,11 @@ function RouteComponent() {
                   organiserDiscordId: values.organiserDiscordId,
                   venueId: values.venueId ? Number(values.venueId) : undefined,
                   name: values.eventName,
-                  rounds: values.rounds,
-                  days: values.days,
+                  rounds: values.rounds ?? 3,
+                  days: values.days ?? 1,
                   tierCode: values.tier,
                 }
-                updateTourney.mutate(payload)
+                updateTourney.mutate({ data: payload })
               })}
             >
               <Title order={3} mb="md">
@@ -155,10 +165,12 @@ function RouteComponent() {
                     label="Organiser"
                     data={discordUsers.data.map((user) => ({
                       value: String(user.discord_user_id),
-                      label:
+                      label: (
                         user.name ||
                         user.discord_display_name ||
-                        user.discord_username,
+                        user.discord_username ||
+                        user.discord_user_id
+                      ) as string,
                     }))}
                     {...detailsForm.getInputProps('organiserDiscordId')}
                   />
@@ -169,7 +181,7 @@ function RouteComponent() {
                     label="Venue"
                     data={venues.data.map((venue) => ({
                       value: venue.id.toString(),
-                      label: `${venue.name} - ${venue.town}`,
+                      label: `${venue.name} - ${venue.town}` as string,
                     }))}
                     {...detailsForm.getInputProps('venueId')}
                   />
@@ -332,7 +344,7 @@ function RouteComponent() {
           <Title order={3} mb="md">
             Players
           </Title>
-          <EventEditPlayerList players={tourneyDetail.data.players} />
+          <EventEditPlayerList players={tourneyDetail.data.players as any} />
         </Tabs.Panel>
 
         <Tabs.Panel value="discord">
@@ -340,16 +352,16 @@ function RouteComponent() {
             Discord
           </Title>
           <Button
-            disabled={tourneyDetail.data.tourney.discord_post_id !== null}
+            disabled={(tourneyDetail.data.tourney as TourneyFields).discord_post_id !== null}
             onClick={() => {
-              postToDiscord.mutate(id)
+              postToDiscord.mutate({ tourneyId: String(id) })
             }}
           >
             Post Results to Discord
           </Button>
 
-          {tourneyDetail.data.tourney.discord_post_id && (
-            <Link to={`${tourneyDetail.data.tourney.discord_post_id}`}>
+          {(tourneyDetail.data.tourney as TourneyFields).discord_post_id && (
+            <Link to={`${(tourneyDetail.data.tourney as TourneyFields).discord_post_id}`}>
               View Discord Message
             </Link>
           )}
