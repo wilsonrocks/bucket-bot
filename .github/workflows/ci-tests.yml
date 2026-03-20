@@ -25,4 +25,4 @@ jobs:
         uses: ./.github/actions/install-flyway
 
       - name: Run Vitest
-        run: npx vitest run --reporter=github-actions
+        run: npx vitest run --reporter=verbose
