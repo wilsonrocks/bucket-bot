@@ -5,6 +5,7 @@ export default defineConfig({
   test: {
     exclude: ["**/node_modules/**", "**/dist/**", "**/.*/**"],
     globalSetup: "./logic/test-helpers/global-setup.ts",
+    fileParallelism: false,
     sequence: {
       concurrent: false,
       shuffle: {
