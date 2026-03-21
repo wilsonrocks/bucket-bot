@@ -41,13 +41,7 @@ function makeYScale(items: BarDatum[], innerHeight: number) {
     .padding(0.1)
 }
 
-function catmullRom(
-  p0: number,
-  p1: number,
-  p2: number,
-  p3: number,
-  t: number,
-) {
+function catmullRom(p0: number, p1: number, p2: number, p3: number, t: number) {
   const t2 = t * t
   const t3 = t2 * t
   return Math.max(
@@ -69,7 +63,7 @@ function BarRaceInner<T extends BarDatum>({
   const isMobile = useMediaQuery('(max-width: 600px)')
   const width = containerRect.width || 700
   const height = 400
-  const margin = { top: 20, right: 60, bottom: 20, left: isMobile ? 40 : 150 }
+  const margin = { top: 20, right: 100, bottom: 20, left: 10 }
   const innerWidth = width - margin.left - margin.right
   const innerHeight = height - margin.top - margin.bottom
 
@@ -182,7 +176,8 @@ function BarRaceInner<T extends BarDatum>({
   const sorted = useMemo(() => sortItems(interpolated), [interpolated])
 
   const xScale = useMemo(() => {
-    const maxVal = max(data, (snapshot) => max(snapshot.items, (d) => d.value)) || 1
+    const maxVal =
+      max(data, (snapshot) => max(snapshot.items, (d) => d.value)) || 1
     return scaleLinear().domain([0, maxVal]).range([0, innerWidth])
   }, [data, innerWidth])
 
@@ -197,7 +192,10 @@ function BarRaceInner<T extends BarDatum>({
     const frameCount = data.length
     if (!data[frame]) return []
     const yScaleCur = makeYScale(data[frame].items, innerHeight)
-    const yScaleNext = makeYScale(data[Math.min(frame + 1, frameCount - 1)].items, innerHeight)
+    const yScaleNext = makeYScale(
+      data[Math.min(frame + 1, frameCount - 1)].items,
+      innerHeight,
+    )
     return sorted.map((d) => {
       // Fall back to innerHeight (bottom) so entering/exiting bars slide in/out from the bottom
       const y0 = yScaleCur(d.id) ?? innerHeight
@@ -228,7 +226,6 @@ function BarRaceInner<T extends BarDatum>({
 
     const barsEnter = bars.enter().append('g').attr('class', 'bar')
     barsEnter.append('rect').attr('height', yScale.bandwidth())
-    barsEnter.append('text').attr('class', 'label').attr('dy', '0.35em')
     barsEnter.append('text').attr('class', 'value').attr('dy', '0.35em')
 
     const merged = barsEnter.merge(bars as any)
@@ -239,13 +236,6 @@ function BarRaceInner<T extends BarDatum>({
       .attr('width', (d) => xScale(d.value))
       .attr('height', yScale.bandwidth())
       .attr('fill', (d) => d.hex_code)
-
-    merged
-      .select('.label')
-      .attr('x', -10)
-      .attr('y', yScale.bandwidth() / 2)
-      .attr('text-anchor', 'end')
-      .text((d) => (isMobile ? d.short_name : d.name))
 
     merged
       .select('.value')
@@ -262,7 +252,9 @@ function BarRaceInner<T extends BarDatum>({
         const barWidth = Math.min(xScale(d.value), innerWidth)
         return barWidth > innerWidth - 50 ? 'white' : 'currentColor'
       })
-      .text((d) => formatValue(d.value))
+      .text(
+        (d) => `${isMobile ? d.short_name : d.name} (${formatValue(d.value)})`,
+      )
 
     bars.exit().remove()
   }, [positions, xScale, yScale, isMobile, formatValue])
