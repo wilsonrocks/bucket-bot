@@ -150,21 +150,33 @@ function BarRaceInner<T extends BarDatum>({
 
     if (!data[iCur]) return []
 
-    const baseItems =
-      data[iCur].items.length > 0 ? data[iCur].items : data[iNext].items
+    // Union of players from adjacent frames so entering/exiting bars animate smoothly
+    const seenIds = new Set<string>()
+    const baseItems: T[] = []
+    for (const snap of [data[iPrev], data[iCur], data[iNext]]) {
+      for (const item of snap.items) {
+        if (!seenIds.has(item.id)) {
+          seenIds.add(item.id)
+          // Prefer metadata from current frame; fall back to wherever we found the player
+          baseItems.push(data[iCur].items.find((d) => d.id === item.id) ?? item)
+        }
+      }
+    }
 
-    return baseItems.map((item) => {
-      const getValue = (snap: Snapshot<T>) =>
-        snap.items.find((candidate) => candidate.id === item.id)?.value ?? 0
-      const animated = catmullRom(
-        getValue(data[iPrev]),
-        getValue(data[iCur]),
-        getValue(data[iNext]),
-        getValue(data[iFar]),
-        t,
-      )
-      return { ...item, value: animated }
-    })
+    return baseItems
+      .map((item) => {
+        const getValue = (snap: Snapshot<T>) =>
+          snap.items.find((candidate) => candidate.id === item.id)?.value ?? 0
+        const animated = catmullRom(
+          getValue(data[iPrev]),
+          getValue(data[iCur]),
+          getValue(data[iNext]),
+          getValue(data[iFar]),
+          t,
+        )
+        return { ...item, value: animated }
+      })
+      .filter((item) => item.value > 0)
   }, [fractionalFrame, data])
 
   const sorted = useMemo(() => sortItems(interpolated), [interpolated])
@@ -187,8 +199,9 @@ function BarRaceInner<T extends BarDatum>({
     const yScaleCur = makeYScale(data[frame].items, innerHeight)
     const yScaleNext = makeYScale(data[Math.min(frame + 1, frameCount - 1)].items, innerHeight)
     return sorted.map((d) => {
-      const y0 = yScaleCur(d.id) ?? 0
-      const y1 = yScaleNext(d.id) ?? 0
+      // Fall back to innerHeight (bottom) so entering/exiting bars slide in/out from the bottom
+      const y0 = yScaleCur(d.id) ?? innerHeight
+      const y1 = yScaleNext(d.id) ?? innerHeight
       return { ...d, y: y0 + (y1 - y0) * t }
     })
   }, [fractionalFrame, sorted, data, innerHeight])
