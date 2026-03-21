@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# This script dumps the current database schema to schema.sql so that LLMs
+# and developers can quickly understand the full schema without reading through
+# all the migrations. Run it whenever the schema changes and commit the result.
+#
+# To set up a fresh local database, use Flyway to apply the migrations in order:
+#   flyway -url=... -user=... -password=... migrate
+# Or use the seed script if you need test data too.
+
+: "${DATABASE_URL:?Error: DATABASE_URL is not set.}"
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)"
+OUTPUT="$SCRIPT_DIR/schema.sql"
+
+pg_dump --schema-only --no-owner --no-acl "$DATABASE_URL" > "$OUTPUT"
+echo "Schema dumped to $OUTPUT"
