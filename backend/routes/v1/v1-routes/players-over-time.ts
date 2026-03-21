@@ -118,9 +118,9 @@ export const getPlayersOverTime: RouteHandler<
 
   const zeroRecord = {
     date: new Date("2026-01-01"),
-    players: grouped[0].players.map((p: any) => ({
+    players: grouped[0].players.map((p: any, i: number) => ({
       ...p,
-      rank: 0,
+      rank: i + 1,
       total_points: 0,
     })),
   };

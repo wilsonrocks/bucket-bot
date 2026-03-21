@@ -73,6 +73,7 @@ function RouteComponent() {
           )}
         </Tabs.Panel>
         <Tabs.Panel value="animation">
+          <Text size="sm" c="dimmed" mt="xs">Showing top 16 players</Text>
           <PlayersBarRace typeCode={typeCode ?? ''} />
         </Tabs.Panel>
       </Tabs>

@@ -16,6 +16,7 @@ export type BarDatum = {
   short_name: string
   hex_code: string
   hex_codes?: string[]
+  rank: number
 }
 
 type GradientStop = { offset: string; color: string }
@@ -90,7 +91,7 @@ function BarRaceInner<T extends BarDatum>({
   const isMobile = useMediaQuery('(max-width: 600px)')
   const width = containerRect.width || 700
   const height = 400
-  const margin = { top: 20, right: 100, bottom: 20, left: 10 }
+  const margin = { top: 20, right: 100, bottom: 20, left: 30 }
   const innerWidth = width - margin.left - margin.right
   const innerHeight = height - margin.top - margin.bottom
 
@@ -278,6 +279,7 @@ function BarRaceInner<T extends BarDatum>({
 
     const barsEnter = bars.enter().append('g').attr('class', 'bar')
     barsEnter.append('rect').attr('height', yScale.bandwidth())
+    barsEnter.append('text').attr('class', 'rank').attr('dy', '0.35em')
     barsEnter.append('text').attr('class', 'value').attr('dy', '0.35em')
 
     const merged = barsEnter.merge(bars as any)
@@ -288,6 +290,14 @@ function BarRaceInner<T extends BarDatum>({
       .attr('width', (d) => xScale(d.value))
       .attr('height', yScale.bandwidth())
       .attr('fill', (d) => `url(#grad-${d.id})`)
+
+    merged
+      .select('.rank')
+      .attr('x', -6)
+      .attr('y', yScale.bandwidth() / 2)
+      .attr('text-anchor', 'end')
+      .attr('fill', 'black')
+      .text((d) => d.rank)
 
     merged
       .select('.value')

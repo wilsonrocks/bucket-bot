@@ -1,6 +1,6 @@
 import { FactionsBarRace } from '@/components/animated-factions'
 import { useGetFactionRankings } from '@/api/hooks'
-import { Select, Table } from '@mantine/core'
+import { Select, Table, Text } from '@mantine/core'
 import { createFileRoute } from '@tanstack/react-router'
 import { Tabs } from '@/components/routed-tabs'
 import { useState } from 'react'
@@ -62,6 +62,7 @@ function RouteComponent() {
         </Tabs.Panel>
 
         <Tabs.Panel value="animation">
+          <Text size="sm" c="dimmed" mt="xs">Showing top 16 factions</Text>
           <Select
             mt="sm"
             w={220}

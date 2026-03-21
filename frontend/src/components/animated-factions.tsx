@@ -13,15 +13,25 @@ export function FactionsBarRace({
 
   const barData = useMemo(
     () =>
-      (data ?? []).map((snap) => ({
-        date: snap.date,
-        items: snap.factions.map((f) => ({
+      (data ?? []).map((snap) => {
+        const items = snap.factions.map((f) => ({
           ...f,
           short_name: f.short_name ?? '',
           id: f.faction_code,
           value: f[metric] ?? 0,
-        })),
-      })),
+        }))
+        const sorted = [...items].sort((a, b) => b.value - a.value)
+        const rankMap = new Map<string, number>()
+        let rank = 1
+        for (let i = 0; i < sorted.length; i++) {
+          if (i > 0 && sorted[i].value < sorted[i - 1].value) rank = i + 1
+          rankMap.set(sorted[i].id, rank)
+        }
+        return {
+          date: snap.date,
+          items: items.map((item) => ({ ...item, rank: rankMap.get(item.id)! })),
+        }
+      }),
     [data, metric],
   )
 

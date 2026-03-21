@@ -18,6 +18,7 @@ export function PlayersBarRace({ typeCode }: { typeCode: string }) {
           short_name: p.name.split(' ')[0],
           hex_code: p.factions[0]?.hex_code ?? '#4A90D9',
           hex_codes: p.factions.map((f) => f.hex_code),
+          rank: p.rank,
         })),
       })),
     [data],
