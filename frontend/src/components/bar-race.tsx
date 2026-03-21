@@ -19,12 +19,15 @@ export type BarDatum = {
   rank: number
 }
 
+// Fraction of each run's width that blends into adjacent colours on each side.
+// e.g. 0.2 means 20% blend on each end → 60% solid in the middle.
+const BLEND_FRACTION = 0.2
+
 type GradientStop = { offset: string; color: string }
 
 function toGradientStops(hex_codes: string[]): GradientStop[] {
   if (hex_codes.length === 0) return []
   const total = hex_codes.length
-  // Collapse runs, record each run's midpoint for smooth blending
   const runs: { color: string; start: number; end: number }[] = []
   let i = 0
   while (i < total) {
@@ -34,13 +37,23 @@ function toGradientStops(hex_codes: string[]): GradientStop[] {
     runs.push({ color, start: i / total, end: j / total })
     i = j
   }
-  const stops: GradientStop[] = []
-  for (const run of runs) {
-    const mid = (run.start + run.end) / 2
-    stops.push({ offset: `${(mid * 100).toFixed(4)}%`, color: run.color })
+
+  if (runs.length === 1) {
+    return [{ offset: '0%', color: runs[0].color }, { offset: '100%', color: runs[0].color }]
   }
-  // Anchor first and last colours at the edges
-  stops.unshift({ offset: '0%', color: runs[0].color })
+
+  const stops: GradientStop[] = [{ offset: '0%', color: runs[0].color }]
+
+  for (let i = 0; i < runs.length - 1; i++) {
+    const left = runs[i]
+    const right = runs[i + 1]
+    const boundary = left.end
+    const blendStart = boundary - BLEND_FRACTION * (left.end - left.start)
+    const blendEnd = boundary + BLEND_FRACTION * (right.end - right.start)
+    stops.push({ offset: `${(blendStart * 100).toFixed(4)}%`, color: left.color })
+    stops.push({ offset: `${(blendEnd * 100).toFixed(4)}%`, color: right.color })
+  }
+
   stops.push({ offset: '100%', color: runs[runs.length - 1].color })
   return stops
 }
