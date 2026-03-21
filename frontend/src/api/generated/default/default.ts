@@ -35,6 +35,7 @@ import type {
   GetPlayerId400,
   GetPlayerId404,
   GetPlayers200Item,
+  GetPlayersOverTimeTypeCode200Item,
   GetRankingTypes200Item,
   GetRankingsPlayerIdTypeCode200,
   GetRankingsPlayerIdTypeCode400,
@@ -1602,6 +1603,110 @@ export function useGetFactionsOverTime<TData = Awaited<ReturnType<typeof getFact
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetFactionsOverTimeQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+export type getPlayersOverTimeTypeCodeResponse200 = {
+  data: GetPlayersOverTimeTypeCode200Item[]
+  status: 200
+}
+
+export type getPlayersOverTimeTypeCodeResponseSuccess = (getPlayersOverTimeTypeCodeResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getPlayersOverTimeTypeCodeResponse = (getPlayersOverTimeTypeCodeResponseSuccess)
+
+export const getGetPlayersOverTimeTypeCodeUrl = (typeCode: string,) => {
+
+
+  
+
+  return `/v1/players-over-time/${typeCode}`
+}
+
+export const getPlayersOverTimeTypeCode = async (typeCode: string, options?: RequestInit): Promise<getPlayersOverTimeTypeCodeResponse> => {
+  
+  return customFetch<getPlayersOverTimeTypeCodeResponse>(getGetPlayersOverTimeTypeCodeUrl(typeCode),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
+
+export const getGetPlayersOverTimeTypeCodeQueryKey = (typeCode: string,) => {
+    return [
+    `/v1/players-over-time/${typeCode}`
+    ] as const;
+    }
+
+    
+export const getGetPlayersOverTimeTypeCodeQueryOptions = <TData = Awaited<ReturnType<typeof getPlayersOverTimeTypeCode>>, TError = unknown>(typeCode: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlayersOverTimeTypeCode>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPlayersOverTimeTypeCodeQueryKey(typeCode);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPlayersOverTimeTypeCode>>> = ({ signal }) => getPlayersOverTimeTypeCode(typeCode, { signal, ...requestOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(typeCode), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPlayersOverTimeTypeCode>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetPlayersOverTimeTypeCodeQueryResult = NonNullable<Awaited<ReturnType<typeof getPlayersOverTimeTypeCode>>>
+export type GetPlayersOverTimeTypeCodeQueryError = unknown
+
+
+export function useGetPlayersOverTimeTypeCode<TData = Awaited<ReturnType<typeof getPlayersOverTimeTypeCode>>, TError = unknown>(
+ typeCode: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlayersOverTimeTypeCode>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPlayersOverTimeTypeCode>>,
+          TError,
+          Awaited<ReturnType<typeof getPlayersOverTimeTypeCode>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPlayersOverTimeTypeCode<TData = Awaited<ReturnType<typeof getPlayersOverTimeTypeCode>>, TError = unknown>(
+ typeCode: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlayersOverTimeTypeCode>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPlayersOverTimeTypeCode>>,
+          TError,
+          Awaited<ReturnType<typeof getPlayersOverTimeTypeCode>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPlayersOverTimeTypeCode<TData = Awaited<ReturnType<typeof getPlayersOverTimeTypeCode>>, TError = unknown>(
+ typeCode: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlayersOverTimeTypeCode>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetPlayersOverTimeTypeCode<TData = Awaited<ReturnType<typeof getPlayersOverTimeTypeCode>>, TError = unknown>(
+ typeCode: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlayersOverTimeTypeCode>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetPlayersOverTimeTypeCodeQueryOptions(typeCode,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

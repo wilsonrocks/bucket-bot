@@ -216,6 +216,19 @@ export type GetFactionsOverTime200Item = {
   factions: GetFactionsOverTime200ItemFactionsItem[];
 };
 
+export type GetPlayersOverTimeTypeCode200ItemPlayersItem = {
+  player_id: number;
+  name: string;
+  rank: number;
+  total_points: number;
+  hex_code: string;
+};
+
+export type GetPlayersOverTimeTypeCode200Item = {
+  date: string;
+  players: GetPlayersOverTimeTypeCode200ItemPlayersItem[];
+};
+
 export type GetUnmappedIdentities200ItemResultsItem = {
   /** @nullable */
   tourney_id: number | null;

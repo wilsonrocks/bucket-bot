@@ -4,6 +4,7 @@ import {
   useGetBotChatChannels as useGetBotChatChannelsGenerated,
   useGetFactionRankings as useGetFactionRankingsGenerated,
   useGetFactionsOverTime as useGetFactionsOverTimeGenerated,
+  useGetPlayersOverTimeTypeCode as useGetPlayersOverTimeTypeCodeGenerated,
   useGetHasRole as useGetHasRoleGenerated,
   useGetPlayerId as useGetPlayerIdGenerated,
   useGetPlayers as useGetPlayersGenerated,
@@ -74,6 +75,9 @@ export const useGetFactionRankings = (options?: Parameters<typeof useGetFactionR
 
 export const useGetFactionsOverTime = (options?: Parameters<typeof useGetFactionsOverTimeGenerated>[0]) =>
   useGetFactionsOverTimeGenerated({ ...options, query: { ...options?.query, select: (res) => res.data } })
+
+export const useGetPlayersOverTimeTypeCode = (typeCode: string, options?: Parameters<typeof useGetPlayersOverTimeTypeCodeGenerated>[1]) =>
+  useGetPlayersOverTimeTypeCodeGenerated(typeCode, { ...options, query: { ...options?.query, select: (res) => res.data } })
 
 export const useGetBotChatChannels = (options?: Parameters<typeof useGetBotChatChannelsGenerated>[0]) =>
   useGetBotChatChannelsGenerated({ ...options, query: { ...options?.query, select: (res) => res.data } })
