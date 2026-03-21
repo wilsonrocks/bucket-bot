@@ -15,6 +15,33 @@ export type BarDatum = {
   name: string
   short_name: string
   hex_code: string
+  hex_codes?: string[]
+}
+
+type GradientStop = { offset: string; color: string }
+
+function toGradientStops(hex_codes: string[]): GradientStop[] {
+  if (hex_codes.length === 0) return []
+  const total = hex_codes.length
+  // Collapse runs, record each run's midpoint for smooth blending
+  const runs: { color: string; start: number; end: number }[] = []
+  let i = 0
+  while (i < total) {
+    const color = hex_codes[i]
+    let j = i
+    while (j < total && hex_codes[j] === color) j++
+    runs.push({ color, start: i / total, end: j / total })
+    i = j
+  }
+  const stops: GradientStop[] = []
+  for (const run of runs) {
+    const mid = (run.start + run.end) / 2
+    stops.push({ offset: `${(mid * 100).toFixed(4)}%`, color: run.color })
+  }
+  // Anchor first and last colours at the edges
+  stops.unshift({ offset: '0%', color: runs[0].color })
+  stops.push({ offset: '100%', color: runs[runs.length - 1].color })
+  return stops
 }
 
 export type Snapshot<T extends BarDatum = BarDatum> = {
@@ -220,6 +247,31 @@ function BarRaceInner<T extends BarDatum>({
     const svg = select(svgRef.current)
     const g = svg.select<SVGGElement>('g.chart')
 
+    // Sync gradient defs
+    let defs = svg.select<SVGDefsElement>('defs')
+    if (defs.empty()) defs = svg.insert('defs', ':first-child')
+
+    const grads = defs
+      .selectAll<SVGLinearGradientElement, BarDatum>('linearGradient')
+      .data(positions, (d: BarDatum) => d.id)
+
+    const gradsEnter = grads.enter().append('linearGradient')
+    gradsEnter
+      .attr('id', (d) => `grad-${d.id}`)
+      .attr('gradientUnits', 'objectBoundingBox')
+
+    gradsEnter.merge(grads as any).each(function (d) {
+      const stops = d.hex_codes && d.hex_codes.length > 0
+        ? toGradientStops(d.hex_codes)
+        : [{ offset: '0%', color: d.hex_code }, { offset: '100%', color: d.hex_code }]
+      select(this).selectAll('stop').remove()
+      select(this).selectAll('stop').data(stops).enter().append('stop')
+        .attr('offset', (s) => s.offset)
+        .attr('stop-color', (s) => s.color)
+    })
+
+    grads.exit().remove()
+
     const bars = g
       .selectAll<SVGGElement, BarDatum>('g.bar')
       .data(positions, (d: BarDatum) => d.id)
@@ -235,7 +287,7 @@ function BarRaceInner<T extends BarDatum>({
       .select('rect')
       .attr('width', (d) => xScale(d.value))
       .attr('height', yScale.bandwidth())
-      .attr('fill', (d) => d.hex_code)
+      .attr('fill', (d) => `url(#grad-${d.id})`)
 
     merged
       .select('.value')

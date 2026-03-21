@@ -1,8 +1,6 @@
 import { createRoute, z, type RouteHandler } from "@hono/zod-openapi";
 import type { AppEnv } from "../../../hono-env.js";
 
-const HEX_CODE = "#4A90D9";
-
 const PlayerSnapshotGroupSchema = z.object({
   date: z.string(),
   players: z.array(
@@ -11,7 +9,9 @@ const PlayerSnapshotGroupSchema = z.object({
       name: z.string(),
       rank: z.number(),
       total_points: z.number(),
-      hex_code: z.string(),
+      factions: z.array(
+        z.object({ hex_code: z.string(), faction_code: z.string() }),
+      ),
     }),
   ),
 });
@@ -51,12 +51,50 @@ export const getPlayersOverTime: RouteHandler<
     .where("ranking_snapshot.rank", "<=", 16)
     .select([
       "ranking_snapshot.player_id",
+      "ranking_snapshot.batch_id",
       "ranking_snapshot.rank",
       "ranking_snapshot.total_points",
       "ranking_snapshot_batch.created_at as snapshot_date",
       "player.name",
     ])
     .execute();
+
+  const batchIds = [...new Set(playerData.map((r) => r.batch_id))];
+
+  const factionData =
+    batchIds.length > 0
+      ? await c
+          .get("db")
+          .selectFrom("ranking_snapshot_event")
+          .innerJoin(
+            "player_identity",
+            "player_identity.player_id",
+            "ranking_snapshot_event.player_id",
+          )
+          .innerJoin("result", (join) =>
+            join
+              .onRef("result.player_identity_id", "=", "player_identity.id")
+              .onRef("result.tourney_id", "=", "ranking_snapshot_event.tourney_id"),
+          )
+          .innerJoin("faction", "faction.name_code", "result.faction_code")
+          .innerJoin("tourney", "tourney.id", "ranking_snapshot_event.tourney_id")
+          .where("ranking_snapshot_event.batch_id", "in", batchIds)
+          .select([
+            "ranking_snapshot_event.batch_id",
+            "ranking_snapshot_event.player_id",
+            "faction.hex_code",
+            "faction.name_code as faction_code",
+          ])
+          .orderBy("tourney.created_at")
+          .execute()
+      : [];
+
+  const factionMap = new Map<string, { hex_code: string; faction_code: string }[]>();
+  for (const row of factionData) {
+    const key = `${row.batch_id}-${row.player_id}`;
+    if (!factionMap.has(key)) factionMap.set(key, []);
+    factionMap.get(key)!.push({ hex_code: row.hex_code, faction_code: row.faction_code });
+  }
 
   const grouped = Object.values(
     playerData.reduce(
@@ -70,7 +108,7 @@ export const getPlayersOverTime: RouteHandler<
           name: row.name,
           rank: row.rank,
           total_points: row.total_points,
-          hex_code: HEX_CODE,
+          factions: factionMap.get(`${row.batch_id}-${row.player_id}`) ?? [],
         });
         return acc;
       },
