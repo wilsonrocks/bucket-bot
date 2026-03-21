@@ -24,20 +24,31 @@ export const getPlayersOverTimeRoute = createRoute({
   },
   responses: {
     200: {
-      content: { "application/json": { schema: z.array(PlayerSnapshotGroupSchema) } },
+      content: {
+        "application/json": { schema: z.array(PlayerSnapshotGroupSchema) },
+      },
       description: "Player ranking stats grouped by snapshot date",
     },
   },
 });
 
-export const getPlayersOverTime: RouteHandler<typeof getPlayersOverTimeRoute, AppEnv> = async (c) => {
+export const getPlayersOverTime: RouteHandler<
+  typeof getPlayersOverTimeRoute,
+  AppEnv
+> = async (c) => {
   const { typeCode } = c.req.valid("param");
 
-  const playerData = await c.get("db")
+  const playerData = await c
+    .get("db")
     .selectFrom("ranking_snapshot")
-    .innerJoin("ranking_snapshot_batch", "ranking_snapshot.batch_id", "ranking_snapshot_batch.id")
+    .innerJoin(
+      "ranking_snapshot_batch",
+      "ranking_snapshot.batch_id",
+      "ranking_snapshot_batch.id",
+    )
     .innerJoin("player", "ranking_snapshot.player_id", "player.id")
     .where("ranking_snapshot_batch.type_code", "=", typeCode)
+    .where("ranking_snapshot.rank", "<=", 16)
     .select([
       "ranking_snapshot.player_id",
       "ranking_snapshot.rank",
