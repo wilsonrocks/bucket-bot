@@ -42,7 +42,7 @@ function RouteComponent() {
             label: rt.name,
           }))}
           value={typeCode}
-          onChange={(value) => navigate({ search: { typeCode: value } })}
+          onChange={(value) => navigate({ search: (prev) => ({ ...prev, typeCode: value }) })}
         />
         {rankingDescription && <Text>{rankingDescription}</Text>}
       </Group>
