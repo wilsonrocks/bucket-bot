@@ -50,6 +50,8 @@ import type {
   GetTourneysPlayerPlayerId400,
   GetUnmappedIdentities200Item,
   GetVenues200Item,
+  PostBotChatClearTestChannel200,
+  PostBotChatClearTestChannel404,
   PostBotChatPostMessage200,
   PostBotChatPostMessage404,
   PostBotChatPostMessageBody,
@@ -2992,6 +2994,88 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getPostBotChatPostMessageMutationOptions(options), queryClient);
+    }
+    export type postBotChatClearTestChannelResponse200 = {
+  data: PostBotChatClearTestChannel200
+  status: 200
+}
+
+export type postBotChatClearTestChannelResponse404 = {
+  data: PostBotChatClearTestChannel404
+  status: 404
+}
+
+export type postBotChatClearTestChannelResponseSuccess = (postBotChatClearTestChannelResponse200) & {
+  headers: Headers;
+};
+export type postBotChatClearTestChannelResponseError = (postBotChatClearTestChannelResponse404) & {
+  headers: Headers;
+};
+
+export type postBotChatClearTestChannelResponse = (postBotChatClearTestChannelResponseSuccess | postBotChatClearTestChannelResponseError)
+
+export const getPostBotChatClearTestChannelUrl = () => {
+
+
+  
+
+  return `/v1/bot-chat/clear-test-channel`
+}
+
+export const postBotChatClearTestChannel = async ( options?: RequestInit): Promise<postBotChatClearTestChannelResponse> => {
+  
+  return customFetch<postBotChatClearTestChannelResponse>(getPostBotChatClearTestChannelUrl(),
+  {      
+    ...options,
+    method: 'POST'
+    
+    
+  }
+);}
+  
+
+
+
+export const getPostBotChatClearTestChannelMutationOptions = <TError = PostBotChatClearTestChannel404,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postBotChatClearTestChannel>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postBotChatClearTestChannel>>, TError,void, TContext> => {
+
+const mutationKey = ['postBotChatClearTestChannel'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postBotChatClearTestChannel>>, void> = () => {
+          
+
+          return  postBotChatClearTestChannel(requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostBotChatClearTestChannelMutationResult = NonNullable<Awaited<ReturnType<typeof postBotChatClearTestChannel>>>
+    
+    export type PostBotChatClearTestChannelMutationError = PostBotChatClearTestChannel404
+
+    export const usePostBotChatClearTestChannel = <TError = PostBotChatClearTestChannel404,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postBotChatClearTestChannel>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postBotChatClearTestChannel>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getPostBotChatClearTestChannelMutationOptions(options), queryClient);
     }
     export type postPostFactionRankingsResponse200 = {
   data: PostPostFactionRankings200

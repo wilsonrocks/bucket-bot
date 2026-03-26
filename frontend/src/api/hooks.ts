@@ -41,6 +41,7 @@ import type {
 
 // ── Re-export simple mutations (no invalidation needed) ────────────────────
 export {
+  usePostBotChatClearTestChannel,
   usePostBotChatPostMessage,
   usePostFactionRankings,
   usePostGenerateRankings,
