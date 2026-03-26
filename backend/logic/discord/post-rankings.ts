@@ -2,7 +2,11 @@ import { formatDate } from "date-fns";
 import { ColorResolvable, EmbedBuilder, TextChannel } from "discord.js";
 import { Kysely } from "kysely";
 import { DB } from "kysely-codegen";
-import { getDiscordClient, MENTION_EVENT_ENTHUSIAST } from "../discord-client";
+import {
+  getDiscordClient,
+  MENTION_EVENT_ENTHUSIAST,
+  mentionUser,
+} from "../discord-client";
 import { mostRecentSnapshot } from "../most-recent-snapshot";
 
 const TOP_X_PLAYERS = 16;
@@ -19,12 +23,13 @@ export function mentionIfPossible(player: {
   }
 }
 export const postDiscordRankings = async (db: Kysely<DB>) => {
+  const discordClient = await getDiscordClient();
   const rankingTypes = await db
     .selectFrom("ranking_snapshot_type")
     .where("display", "!=", false)
     .selectAll()
     .execute();
-
+  let topPlayer;
   for (const { name, code: typeCode, description, hex_code } of rankingTypes) {
     const batch = await mostRecentSnapshot(db, typeCode);
     if (!batch) {
@@ -68,6 +73,10 @@ export const postDiscordRankings = async (db: Kysely<DB>) => {
       .limit(TOP_X_PLAYERS)
       .execute();
 
+    if (typeCode === "ROLLING_YEAR") {
+      topPlayer = rankings[0];
+    }
+
     const { discord_channel_id } = batch;
     if (!discord_channel_id) {
       console.warn(
@@ -75,7 +84,6 @@ export const postDiscordRankings = async (db: Kysely<DB>) => {
       );
       continue;
     }
-    const discordClient = await getDiscordClient();
     const channel = await discordClient.channels.fetch(discord_channel_id);
 
     if (!(channel instanceof TextChannel)) {
@@ -112,5 +120,30 @@ There's only a maximum of ${TOP_X_PLAYERS} players shown here. But you can see t
 
       embeds: [embed],
     });
+  }
+  // post in the announcements one
+  const announceChannelId = process.env.DISCORD_ANNOUNCE_CHANNEL_ID;
+  if (announceChannelId) {
+    const announceChannel =
+      await discordClient.channels.fetch(announceChannelId);
+
+    if (!(announceChannel instanceof TextChannel)) {
+      throw new Error(
+        `Fetched announceChannel is not a TextChannel, ${announceChannel}`,
+      );
+    }
+
+    const isSendable = announceChannel?.isSendable();
+    if (isSendable) {
+      announceChannel.send(`***BEEP-BOOP*** ${MENTION_EVENT_ENTHUSIAST}
+
+New rankings are out! Please check all the channels for the different ranking types.
+
+${topPlayer?.discord_user_id ? `Well done to ${mentionUser(topPlayer)} for being the current Top Dog. Please try to beat them.` : ""}
+        `);
+    }
+  } else {
+    // TODO come up with a nicer way of checking channels etc, maybe grab them all on initialisation?
+    console.error("DISCORD_ANNOUNCE_CHANNEL_ID is not defined");
   }
 };
