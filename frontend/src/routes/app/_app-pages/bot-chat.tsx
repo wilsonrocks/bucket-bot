@@ -1,7 +1,9 @@
 import {
   useGetBotChatChannels,
+  usePostBotChatClearTestChannel,
   usePostBotChatPostMessage,
 } from '@/api/hooks'
+import { modals } from '@mantine/modals'
 import {
   Box,
   Button,
@@ -24,6 +26,7 @@ export const Route = createFileRoute('/app/_app-pages/bot-chat')({
 function RouteComponent() {
   const { data: channelData } = useGetBotChatChannels()
   const postMessageMutation = usePostBotChatPostMessage()
+  const clearTestChannelMutation = usePostBotChatClearTestChannel()
 
   const [channelId, setChannelId] = useState<string | null>(null)
   const [message, setMessage] = useState<string>('')
@@ -71,6 +74,26 @@ function RouteComponent() {
           </Group>
         </Box>
       )}
+      <Box mt="xl">
+        <Title order={4}>Test Channel</Title>
+        <Button
+          color="red"
+          mt="sm"
+          loading={clearTestChannelMutation.isPending}
+          onClick={() =>
+            modals.openConfirmModal({
+              title: 'Clear Test Channel',
+              centered: true,
+              children: 'This will delete all messages in the test channel. Are you sure?',
+              labels: { confirm: 'Clear it', cancel: 'Cancel' },
+              confirmProps: { color: 'red' },
+              onConfirm: () => clearTestChannelMutation.mutate({}),
+            })
+          }
+        >
+          Clear Test Channel
+        </Button>
+      </Box>
     </div>
   )
 }

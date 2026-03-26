@@ -73,3 +73,56 @@ botChatRouter.openapi(postMessageRoute, async (c) => {
   await channel.send(message);
   return c.json({ success: true as const }, 200);
 });
+
+const clearTestChannelRoute = createRoute({
+  method: "post",
+  path: "/clear-test-channel",
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.object({ deleted: z.number() }) } },
+      description: "Messages deleted",
+    },
+    404: {
+      content: { "application/json": { schema: z.object({ error: z.string() }) } },
+      description: "Channel not found",
+    },
+  },
+});
+
+botChatRouter.openapi(clearTestChannelRoute, async (c) => {
+  const channelId = process.env.DISCORD_TEST_CHANNEL_ID!;
+  const discordClient = await getDiscordClient();
+  const channel = await discordClient.channels.fetch(channelId);
+
+  if (!channel || !channel.isTextBased() || channel.isDMBased()) {
+    return c.json({ error: "Channel not found or not a guild text channel" }, 404);
+  }
+
+  const twoWeeksAgo = Date.now() - 14 * 24 * 60 * 60 * 1000;
+  let totalDeleted = 0;
+
+  while (true) {
+    const messages = await channel.messages.fetch({ limit: 100 });
+    if (messages.size === 0) break;
+
+    const recent = messages.filter((m) => m.createdTimestamp > twoWeeksAgo);
+    const old = messages.filter((m) => m.createdTimestamp <= twoWeeksAgo);
+
+    if (recent.size >= 2) {
+      const deleted = await channel.bulkDelete(recent);
+      totalDeleted += deleted.size;
+    } else if (recent.size === 1) {
+      await recent.first()!.delete();
+      totalDeleted++;
+    }
+
+    for (const msg of old.values()) {
+      await msg.delete();
+      totalDeleted++;
+    }
+
+    if (messages.size < 100) break;
+  }
+
+  return c.json({ deleted: totalDeleted }, 200);
+});

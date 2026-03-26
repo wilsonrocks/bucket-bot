@@ -216,12 +216,17 @@ export type GetFactionsOverTime200Item = {
   factions: GetFactionsOverTime200ItemFactionsItem[];
 };
 
+export type GetPlayersOverTimeTypeCode200ItemPlayersItemFactionsItem = {
+  hex_code: string;
+  faction_code: string;
+};
+
 export type GetPlayersOverTimeTypeCode200ItemPlayersItem = {
   player_id: number;
   name: string;
   rank: number;
   total_points: number;
-  hex_code: string;
+  factions: GetPlayersOverTimeTypeCode200ItemPlayersItemFactionsItem[];
 };
 
 export type GetPlayersOverTimeTypeCode200Item = {
@@ -423,6 +428,14 @@ export type PostBotChatPostMessage200 = {
 };
 
 export type PostBotChatPostMessage404 = {
+  error: string;
+};
+
+export type PostBotChatClearTestChannel200 = {
+  deleted: number;
+};
+
+export type PostBotChatClearTestChannel404 = {
   error: string;
 };
 
