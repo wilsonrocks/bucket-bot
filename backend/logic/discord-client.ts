@@ -6,7 +6,16 @@ export const MENTION_EVENT_ENTHUSIAST = process.env.MENTION_FOR_REAL
   ? `<@&${EVENT_ENTHUSIAST_ROLE_ID}>`
   : `\`@Event Enthusiast\``;
 
+export const mentionUser = ({
+  discord_user_id,
+  name,
+}: {
+  discord_user_id: string | null;
+  name: string;
+}) => (process.env.MENTION_FOR_REAL ? `<@${discord_user_id}>` : `\`${name}\``);
+
 import { Client, GatewayIntentBits, Events } from "discord.js";
+import { string } from "zod";
 
 let client: Client | null = null;
 let readyPromise: Promise<Client> | null = null;
