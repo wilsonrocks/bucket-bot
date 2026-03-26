@@ -9,16 +9,16 @@ export function PlayersBarRace({ typeCode }: { typeCode: string }) {
 
   const barData = useMemo(
     () =>
-      (data ?? []).map((snap) => ({
-        date: snap.date,
-        items: snap.players.map((p) => ({
-          id: String(p.player_id),
-          value: p.total_points,
-          name: p.name,
-          short_name: p.name.split(' ')[0],
-          hex_code: p.factions[0]?.hex_code ?? '#4A90D9',
-          hex_codes: p.factions.map((f) => f.hex_code),
-          rank: p.rank,
+      (data ?? []).map((snapshot) => ({
+        date: snapshot.date,
+        items: snapshot.players.map((player) => ({
+          id: String(player.player_id),
+          value: player.total_points,
+          name: player.name,
+          short_name: player.name.split(' ')[0],
+          hex_code: player.factions[0]?.hex_code ?? '#4A90D9',
+          hex_codes: player.factions.map((faction) => faction.hex_code),
+          rank: player.rank,
         })),
       })),
     [data],
