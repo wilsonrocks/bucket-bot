@@ -65,6 +65,26 @@ resource "aws_cloudfront_distribution" "frontend" {
     origin_access_control_id = aws_cloudfront_origin_access_control.frontend.id
   }
 
+  origin {
+    domain_name              = aws_s3_bucket.assets.bucket_regional_domain_name
+    origin_id                = "assets"
+    origin_access_control_id = aws_cloudfront_origin_access_control.assets.id
+  }
+
+  ordered_cache_behavior {
+    path_pattern           = "/media/*"
+    target_origin_id       = "assets"
+    viewer_protocol_policy = "redirect-to-https"
+    allowed_methods        = ["GET", "HEAD"]
+    cached_methods         = ["GET", "HEAD"]
+    forwarded_values {
+      query_string = false
+      cookies {
+        forward = "none"
+      }
+    }
+  }
+
   default_cache_behavior {
     target_origin_id       = "frontend"
     viewer_protocol_policy = "redirect-to-https"
@@ -288,5 +308,97 @@ output "github_actions_deploy_access_key_id" {
 
 output "github_actions_deploy_secret_access_key" {
   value     = aws_iam_access_key.github_actions_deploy.secret
+  sensitive = true
+}
+
+
+
+# ──────────────────────────────────────────
+# ASSETS (user-uploaded content at /media/*)
+# ──────────────────────────────────────────
+
+resource "aws_s3_bucket" "assets" {
+  bucket = "bucket-bot-assets"
+}
+
+resource "aws_s3_bucket_public_access_block" "assets" {
+  bucket = aws_s3_bucket.assets.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+resource "aws_cloudfront_origin_access_control" "assets" {
+  name                              = "bucket-bot-assets"
+  origin_access_control_origin_type = "s3"
+  signing_behavior                  = "always"
+  signing_protocol                  = "sigv4"
+}
+
+resource "aws_s3_bucket_policy" "assets" {
+  bucket = aws_s3_bucket.assets.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Principal = {
+        Service = "cloudfront.amazonaws.com"
+      }
+      Action   = "s3:GetObject"
+      Resource = "${aws_s3_bucket.assets.arn}/*"
+      Condition = {
+        StringEquals = {
+          "AWS:SourceArn" = aws_cloudfront_distribution.frontend.arn
+        }
+      }
+    }]
+  })
+}
+
+resource "aws_iam_user" "backend_assets" {
+  name = "bucket-bot-backend-assets"
+}
+
+resource "aws_iam_user_policy" "backend_assets" {
+  name = "bucket-bot-assets-access"
+  user = aws_iam_user.backend_assets.name
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:PutObject",
+          "s3:DeleteObject",
+          "s3:GetObject",
+          "s3:ListBucket",
+        ]
+        Resource = [
+          aws_s3_bucket.assets.arn,
+          "${aws_s3_bucket.assets.arn}/*",
+        ]
+      },
+    ]
+  })
+}
+
+resource "aws_iam_access_key" "backend_assets" {
+  user = aws_iam_user.backend_assets.name
+}
+
+output "assets_bucket_name" {
+  value = aws_s3_bucket.assets.bucket
+}
+
+output "backend_assets_access_key_id" {
+  value = aws_iam_access_key.backend_assets.id
+}
+
+output "backend_assets_secret_access_key" {
+  value     = aws_iam_access_key.backend_assets.secret
   sensitive = true
 }
