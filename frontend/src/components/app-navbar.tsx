@@ -4,6 +4,7 @@ import { Route as EventsAppRoute } from '@/routes/app/_app-pages/events'
 import { Route as IdentitiesRoute } from '@/routes/app/_app-pages/identities'
 import { Route as ImportRoute } from '@/routes/app/_app-pages/import'
 import { Route as RankingsRoute } from '@/routes/app/_app-pages/rankings'
+import { Route as TeamsRoute } from '@/routes/app/_app-pages/teams'
 import { Route as VenuesRoute } from '@/routes/app/_app-pages/venues'
 
 import { Badge, Divider, Group, ScrollArea, Stack } from '@mantine/core'
@@ -31,6 +32,7 @@ export const AppNavbar = () => {
           }
         />
 
+        <AppNavLink to={TeamsRoute.to} label="Teams" />
         <AppNavLink to={VenuesRoute.to} label="Venues" />
         <AppNavLink to={BotChat.to} label="B(UK)et Bot Chat" />
         <Divider />

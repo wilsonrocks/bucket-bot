@@ -253,6 +253,80 @@ export type GetUnmappedIdentities200Item = {
   results: GetUnmappedIdentities200ItemResultsItem[];
 };
 
+export type GetTeams200Item = {
+  id: number;
+  name: string;
+  /** @nullable */
+  description: string | null;
+  /** @nullable */
+  brand_colour: string | null;
+  /** @nullable */
+  venue_id: number | null;
+  /** @nullable */
+  created_at: string | null;
+  [key: string]: unknown | null;
+};
+
+export type GetTeamsId200MembersItem = {
+  membership_id: number;
+  player_id: number;
+  player_name: string;
+  is_captain: boolean;
+};
+
+export type GetTeamsId200 = {
+  id: number;
+  name: string;
+  /** @nullable */
+  description: string | null;
+  /** @nullable */
+  brand_colour: string | null;
+  /** @nullable */
+  venue_id: number | null;
+  /** @nullable */
+  created_at: string | null;
+  members: GetTeamsId200MembersItem[];
+  [key: string]: unknown | null;
+};
+
+export type GetTeamsId404 = {
+  error: string;
+};
+
+export type PutTeamsIdBody = {
+  name?: string;
+  /** @nullable */
+  description?: string | null;
+  /** @nullable */
+  brand_colour?: string | null;
+};
+
+export type PutTeamsId200 = {
+  id: number;
+  name: string;
+  /** @nullable */
+  description: string | null;
+  /** @nullable */
+  brand_colour: string | null;
+  /** @nullable */
+  venue_id: number | null;
+  /** @nullable */
+  created_at: string | null;
+  [key: string]: unknown | null;
+};
+
+export type PutTeamsId404 = {
+  error: string;
+};
+
+export type DeleteTeamsId200 = {
+  success: boolean;
+};
+
+export type DeleteTeamsId404 = {
+  error: string;
+};
+
 export type PostLongshanksEventId200 = {[key: string]: unknown | null};
 
 export type PostLongshanksEventId400 = {
@@ -418,5 +492,57 @@ export type PostPostFactionRankings400 = {
 export type PostPostFactionRankings500 = {
   success: boolean;
   message: string;
+};
+
+export type PostCreateTeamBody = {
+  name: string;
+  description?: string;
+  brand_colour?: string;
+};
+
+export type PostCreateTeam201 = {
+  id: number;
+  name: string;
+  /** @nullable */
+  description: string | null;
+  /** @nullable */
+  brand_colour: string | null;
+  /** @nullable */
+  venue_id: number | null;
+  /** @nullable */
+  created_at: string | null;
+  [key: string]: unknown | null;
+};
+
+export type PostTeamsTeamIdMembersBody = {
+  player_id: number;
+  is_captain?: boolean;
+};
+
+export type PostTeamsTeamIdMembers201 = {
+  membership_id: number;
+  player_id: number;
+  player_name: string;
+  is_captain: boolean;
+};
+
+export type PatchTeamsTeamIdMembersMembershipIdBody = {
+  is_captain: boolean;
+};
+
+export type PatchTeamsTeamIdMembersMembershipId200 = {
+  success: boolean;
+};
+
+export type PatchTeamsTeamIdMembersMembershipId404 = {
+  error: string;
+};
+
+export type DeleteTeamsTeamIdMembersMembershipId200 = {
+  success: boolean;
+};
+
+export type DeleteTeamsTeamIdMembersMembershipId404 = {
+  error: string;
 };
 

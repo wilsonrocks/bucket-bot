@@ -45,6 +45,11 @@ cd frontend && npm run generate-client
 
 Run this after adding/changing backend routes.
 
+## Frontend sections
+
+- `_site` — public-facing pages (no auth required), e.g. rankings, events, team pages
+- `_app` — restricted admin pages (requires JWT / ranking reporter role), e.g. import, identity management, team management
+
 ## Key directories
 
 - [backend/routes/v1/v1-routes/](backend/routes/v1/v1-routes/) — API endpoint implementations
