@@ -1,6 +1,7 @@
 import { useGetTeamsId } from '@/api/hooks'
 import { Badge, Table, Title } from '@mantine/core'
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
+import { Link } from '@/components/link'
 import { Route as PlayerRoute } from './player.$id'
 import z from 'zod'
 

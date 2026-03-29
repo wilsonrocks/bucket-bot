@@ -29,7 +29,7 @@ import z from 'zod'
 export const Route = createFileRoute('/app/_app-pages/teams/$id')({
   component: RouteComponent,
   params: z.object({ id: z.string() }),
-  staticData: { title: 'Edit Team' },
+  staticData: {},
 })
 
 function RouteComponent() {
@@ -134,7 +134,25 @@ function RouteComponent() {
                   <Table.Td>{member.player_name}</Table.Td>
                   <Table.Td>
                     {member.is_captain ? (
-                      <Badge color="yellow">Captain</Badge>
+                      <Badge
+                        color="yellow"
+                        rightSection={
+                          <Box
+                            style={{ cursor: 'pointer', lineHeight: 1 }}
+                            onClick={() =>
+                              updateMember.mutate({
+                                teamId: String(id),
+                                membershipId: String(member.membership_id),
+                                data: { is_captain: false },
+                              })
+                            }
+                          >
+                            ×
+                          </Box>
+                        }
+                      >
+                        Captain
+                      </Badge>
                     ) : (
                       <Button
                         size="compact-xs"
