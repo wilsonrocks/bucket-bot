@@ -11,23 +11,26 @@ import {
   Badge,
   Box,
   Button,
+  Center,
   Checkbox,
   ColorInput,
-  FileInput,
   Grid,
   Group,
   Image,
+  Overlay,
   Paper,
   Select,
   Stack,
   Table,
+  Text,
   Textarea,
   TextInput,
   Title,
 } from '@mantine/core'
 import { useForm } from '@mantine/form'
+import { useHover } from '@mantine/hooks'
 import { createFileRoute } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import z from 'zod'
 
 export const Route = createFileRoute('/app/_app-pages/teams/$id')({
@@ -75,7 +78,8 @@ function RouteComponent() {
   const [isCaptain, setIsCaptain] = useState(false)
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
-  const [uploading, setUploading] = useState(false)
+  const { hovered: imageHovered, ref: imageHoverRef } = useHover()
+  const imageInputRef = useRef<HTMLInputElement>(null)
 
   const existingPlayerIds = new Set(team?.members.map((m) => m.player_id) ?? [])
 
@@ -95,14 +99,19 @@ function RouteComponent() {
       <Paper withBorder p="md" mb="md">
         <Title order={5} mb="sm">Edit Details</Title>
         <form
-          onSubmit={editForm.onSubmit((values) => {
+          onSubmit={editForm.onSubmit(async (values) => {
+            let image_key = values.image_key
+            if (imageFile) {
+              image_key = await uploadTeamImage(imageFile, 'team')
+              setImageFile(null)
+            }
             updateTeam.mutate({
               id,
               data: {
                 name: values.name || undefined,
                 description: values.description || null,
                 brand_colour: values.brand_colour || null,
-                image_key: values.image_key,
+                image_key,
               },
             })
           })}
@@ -126,6 +135,43 @@ function RouteComponent() {
                 {...editForm.getInputProps('brand_colour')}
               />
             </Grid.Col>
+            <Grid.Col span={{ base: 12, xs: 4 }}>
+              <Text size="sm" fw={500} mb={4}>Team Image</Text>
+              <Box
+                ref={imageHoverRef}
+                w={120}
+                h={120}
+                style={{ position: 'relative', cursor: 'pointer', borderRadius: 'var(--mantine-radius-sm)', border: '1px solid var(--mantine-color-default-border)', overflow: 'hidden' }}
+                onClick={() => imageInputRef.current?.click()}
+              >
+                {imagePreview ? (
+                  <Image src={imagePreview} w={120} h={120} fit="contain" />
+                ) : (
+                  <Center h={120} c="dimmed">
+                    <Text size="xs">Click to upload</Text>
+                  </Center>
+                )}
+                {imageHovered && (
+                  <Overlay color="#000" backgroundOpacity={0.5} radius="sm">
+                    <Center h="100%">
+                      <Text size="xs" c="white">{imagePreview ? 'Change' : 'Upload'}</Text>
+                    </Center>
+                  </Overlay>
+                )}
+              </Box>
+              <input
+                ref={imageInputRef}
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                style={{ display: 'none' }}
+                onChange={(e) => {
+                  const file = e.target.files?.[0] ?? null
+                  setImageFile(file)
+                  if (file) setImagePreview(URL.createObjectURL(file))
+                  e.target.value = ''
+                }}
+              />
+            </Grid.Col>
           </Grid>
           <Box mt="sm">
             <Button type="submit" loading={updateTeam.isPending}>
@@ -133,48 +179,6 @@ function RouteComponent() {
             </Button>
           </Box>
         </form>
-      </Paper>
-
-      <Paper withBorder p="md" mb="md">
-        <Title order={5} mb="sm">Team Image</Title>
-        <Stack gap="sm">
-          {imagePreview && (
-            <Image src={imagePreview} w={200} h={200} fit="contain" radius="sm" />
-          )}
-          <FileInput
-            label="Upload new image"
-            accept="image/png,image/jpeg,image/webp"
-            value={imageFile}
-            onChange={(file) => {
-              setImageFile(file)
-              if (file) setImagePreview(URL.createObjectURL(file))
-            }}
-            w={300}
-          />
-          <Button
-            w="fit-content"
-            loading={uploading}
-            disabled={!imageFile}
-            onClick={async () => {
-              if (!imageFile) return
-              setUploading(true)
-              try {
-                const key = await uploadTeamImage(imageFile, 'team')
-                editForm.setFieldValue('image_key', key)
-                setImageFile(null)
-              } finally {
-                setUploading(false)
-              }
-            }}
-          >
-            Upload Image
-          </Button>
-          {editForm.values.image_key && (
-            <Box fz="sm" c="dimmed">
-              Saved key: {editForm.values.image_key} — click Save Changes to persist
-            </Box>
-          )}
-        </Stack>
       </Paper>
 
       <Paper withBorder p="md" mb="md">
