@@ -110,7 +110,6 @@ export const postDiscordRankings = async (db: Kysely<DB>) => {
 
     await channel.send({
       content: `***BEEP BOOP!***
-      ${MENTION_EVENT_ENTHUSIAST}
 
 Here is your weekly breakfast of rankings that I have cooked from data. I hope that it is tasty and nutritious and sustains you until you can next play in an event and generate more data for me. Enjoy!
 

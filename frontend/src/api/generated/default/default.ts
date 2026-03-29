@@ -55,9 +55,9 @@ import type {
   PostBotChatPostMessage200,
   PostBotChatPostMessage404,
   PostBotChatPostMessageBody,
-  PostBotEvent200,
-  PostBotEvent400,
-  PostBotEventBody,
+  PostBotEventId200,
+  PostBotEventId400,
+  PostBotEventId502,
   PostCreateVenue201,
   PostCreateVenue400,
   PostCreateVenueBody,
@@ -1909,53 +1909,57 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getPostLongshanksEventIdMutationOptions(options), queryClient);
     }
-    export type postBotEventResponse200 = {
-  data: PostBotEvent200
+    export type postBotEventIdResponse200 = {
+  data: PostBotEventId200
   status: 200
 }
 
-export type postBotEventResponse400 = {
-  data: PostBotEvent400
+export type postBotEventIdResponse400 = {
+  data: PostBotEventId400
   status: 400
 }
 
-export type postBotEventResponseSuccess = (postBotEventResponse200) & {
-  headers: Headers;
-};
-export type postBotEventResponseError = (postBotEventResponse400) & {
-  headers: Headers;
-};
-
-export type postBotEventResponse = (postBotEventResponseSuccess | postBotEventResponseError)
-
-export const getPostBotEventUrl = () => {
-
-
-  
-
-  return `/v1/bot-event`
+export type postBotEventIdResponse502 = {
+  data: PostBotEventId502
+  status: 502
 }
 
-export const postBotEvent = async (postBotEventBody: PostBotEventBody, options?: RequestInit): Promise<postBotEventResponse> => {
+export type postBotEventIdResponseSuccess = (postBotEventIdResponse200) & {
+  headers: Headers;
+};
+export type postBotEventIdResponseError = (postBotEventIdResponse400 | postBotEventIdResponse502) & {
+  headers: Headers;
+};
+
+export type postBotEventIdResponse = (postBotEventIdResponseSuccess | postBotEventIdResponseError)
+
+export const getPostBotEventIdUrl = (id: string,) => {
+
+
   
-  return customFetch<postBotEventResponse>(getPostBotEventUrl(),
+
+  return `/v1/bot-event/${id}`
+}
+
+export const postBotEventId = async (id: string, options?: RequestInit): Promise<postBotEventIdResponse> => {
+  
+  return customFetch<postBotEventIdResponse>(getPostBotEventIdUrl(id),
   {      
     ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      postBotEventBody,)
+    method: 'POST'
+    
+    
   }
 );}
   
 
 
 
-export const getPostBotEventMutationOptions = <TError = PostBotEvent400,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postBotEvent>>, TError,{data: PostBotEventBody}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof postBotEvent>>, TError,{data: PostBotEventBody}, TContext> => {
+export const getPostBotEventIdMutationOptions = <TError = PostBotEventId400 | PostBotEventId502,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postBotEventId>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postBotEventId>>, TError,{id: string}, TContext> => {
 
-const mutationKey = ['postBotEvent'];
+const mutationKey = ['postBotEventId'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -1965,10 +1969,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postBotEvent>>, {data: PostBotEventBody}> = (props) => {
-          const {data} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postBotEventId>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
 
-          return  postBotEvent(data,requestOptions)
+          return  postBotEventId(id,requestOptions)
         }
 
 
@@ -1978,19 +1982,19 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type PostBotEventMutationResult = NonNullable<Awaited<ReturnType<typeof postBotEvent>>>
-    export type PostBotEventMutationBody = PostBotEventBody
-    export type PostBotEventMutationError = PostBotEvent400
+    export type PostBotEventIdMutationResult = NonNullable<Awaited<ReturnType<typeof postBotEventId>>>
+    
+    export type PostBotEventIdMutationError = PostBotEventId400 | PostBotEventId502
 
-    export const usePostBotEvent = <TError = PostBotEvent400,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postBotEvent>>, TError,{data: PostBotEventBody}, TContext>, request?: SecondParameter<typeof customFetch>}
+    export const usePostBotEventId = <TError = PostBotEventId400 | PostBotEventId502,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postBotEventId>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof postBotEvent>>,
+        Awaited<ReturnType<typeof postBotEventId>>,
         TError,
-        {data: PostBotEventBody},
+        {id: string},
         TContext
       > => {
-      return useMutation(getPostBotEventMutationOptions(options), queryClient);
+      return useMutation(getPostBotEventIdMutationOptions(options), queryClient);
     }
     export type getHasRoleResponse200 = {
   data: GetHasRole200

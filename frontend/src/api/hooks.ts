@@ -18,7 +18,7 @@ import {
   useGetTourneysPlayerPlayerId as useGetTourneysPlayerPlayerIdGenerated,
   useGetUnmappedIdentities as useGetUnmappedIdentitiesGenerated,
   useGetVenues as useGetVenuesGenerated,
-  usePostBotEvent as usePostBotEventGenerated,
+  usePostBotEventId as usePostBotEventIdGenerated,
   usePostCreateVenue as usePostCreateVenueGenerated,
   usePostFetchDiscordUserIds as usePostFetchDiscordUserIdsGenerated,
   usePostLongshanksEventId as usePostLongshanksEventIdGenerated,
@@ -124,9 +124,9 @@ export const usePostLongshanksEventId = () => {
   })
 }
 
-export const usePostBotEvent = () => {
+export const usePostBotEventId = () => {
   const queryClient = useQueryClient()
-  return usePostBotEventGenerated({
+  return usePostBotEventIdGenerated({
     mutation: {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: getGetTourneyQueryKey() })

@@ -1,97 +1,97 @@
-import { isValid, parse as parseDate } from "date-fns";
 import { createRoute, z, type RouteHandler } from "@hono/zod-openapi";
 import type { AppEnv } from "../../../hono-env.js";
-import { Faction, IdentityProvider } from "../../../logic/fixtures.js";
+import { IdentityProvider } from "../../../logic/fixtures.js";
+import { mapBotFactionToFactionCode } from "../../../logic/bot/map-bot-faction.js";
 import { calculatePoints, maxPoints } from "../../../logic/points.js";
 
-const NewBotEventBodySchema = z.object({
-  eventId: z.string(),
-  eventName: z.string(),
-  organiserDiscordId: z.string(),
-  venueId: z.number().nullable(),
+const BotApiLeagueEntrySchema = z.object({
+  position: z.number(),
+  name: z.string(),
+  faction: z.string(),
+  w: z.number(),
+  d: z.number(),
+  l: z.number(),
+});
+
+const BotApiResponseSchema = z.object({
+  botid: z.string(),
+  name: z.string(),
+  date: z.string(),
   rounds: z.number(),
-  days: z.number(),
-  tier: z.string(),
-  dateString: z.string(),
-  results: z.array(
-    z.object({
-      name: z.string(),
-      place: z.number(),
-      played: z.number(),
-      faction: z.string(),
-    }),
-  ),
+  location: z.string(),
+  league: z.array(BotApiLeagueEntrySchema),
 });
 
 const ErrorSchema = z.object({ error: z.string() });
 
 export const newBotEventRoute = createRoute({
   method: "post",
-  path: "/bot-event",
+  path: "/bot-event/{id}",
   request: {
-    body: {
-      content: { "application/json": { schema: NewBotEventBodySchema } },
-    },
+    params: z.object({ id: z.string() }),
   },
   responses: {
     200: {
-      content: {
-        "application/json": {
-          schema: z.object({ message: z.string(), data: NewBotEventBodySchema }),
-        },
-      },
-      description: "Bot event received successfully",
+      content: { "application/json": { schema: z.object({ id: z.number() }) } },
+      description: "BOT event ingested",
     },
     400: {
       content: { "application/json": { schema: ErrorSchema } },
-      description: "Invalid request",
+      description: "Invalid request or event already exists",
+    },
+    502: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Failed to fetch from BOT API",
     },
   },
 });
 
 export const newBotEventHandler: RouteHandler<typeof newBotEventRoute, AppEnv> = async (c) => {
-  const parsedData = c.req.valid("json");
+  const { id: botEventId } = c.req.valid("param");
 
-  const {
-    eventId: botEventId,
-    eventName,
-    results,
-    venueId,
-    dateString,
-  } = parsedData;
+  const apiUrl = `https://bag-o-tools.web.app/api/event/${botEventId}`;
+  const response = await fetch(apiUrl);
+  if (!response.ok) {
+    throw Object.assign(new Error(`Failed to fetch from BOT API: ${apiUrl}`), { status: 502 });
+  }
 
-  await c.get("db").transaction().execute(async (trx) => {
+  const apiData = BotApiResponseSchema.parse(await response.json());
+
+  const db = c.get("db");
+
+  await db.transaction().execute(async (trx) => {
     const alreadyExistingTourney = await trx
       .selectFrom("tourney")
-      .where("bot_id", "=", botEventId)
+      .where("bot_id", "=", apiData.botid)
       .select("id")
       .executeTakeFirst();
 
     if (alreadyExistingTourney) {
-      throw new Error(`Event with BOT ID ${botEventId} already exists`);
+      throw Object.assign(
+        new Error(`Event with BOT ID ${apiData.botid} already exists`),
+        { status: 400 },
+      );
     }
-
-    const date = parseDate(dateString, "EEE, MMM d yyyy", new Date());
-    if (!isValid(date)) throw new Error("Error Parsing Event Date");
 
     const tourney = await trx
       .insertInto("tourney")
       .values({
-        bot_id: botEventId,
-        name: eventName,
-        venue_id: venueId,
-        number_of_players: results.length,
-        date,
+        bot_id: apiData.botid,
+        name: apiData.name,
+        venue: apiData.location,
+        date: new Date(apiData.date),
+        number_of_players: apiData.league.length,
+        rounds: apiData.rounds,
       })
-      .returningAll()
+      .returning("id")
       .executeTakeFirstOrThrow();
 
     await Promise.all(
-      results.map(async (result) => {
+      apiData.league.map(async (entry) => {
         let dbPlayerIdentity = await trx
           .selectFrom("player_identity")
-          .where("external_id", "=", result.name)
-          .where("identity_provider_id", "=", "BOT")
+          .where("identity_provider_id", "=", IdentityProvider.BOT)
+          .where("external_id", "=", entry.name)
           .select("id")
           .executeTakeFirst();
 
@@ -100,17 +100,17 @@ export const newBotEventHandler: RouteHandler<typeof newBotEventRoute, AppEnv> =
             .insertInto("player_identity")
             .values({
               identity_provider_id: IdentityProvider.BOT,
-              external_id: result.name,
-              provider_name: result.name,
+              external_id: entry.name,
+              provider_name: entry.name,
             })
-            .returningAll()
+            .returning("id")
             .executeTakeFirstOrThrow();
         }
 
         const points = calculatePoints(
-          results.length,
-          maxPoints("Local", Math.max(...results.map((x) => x.played))),
-        ).points[result.place - 1];
+          apiData.league.length,
+          maxPoints("Local", apiData.rounds),
+        ).points[entry.position - 1];
 
         if (!points) throw new Error("Not enough players to award points/rankings");
 
@@ -119,39 +119,21 @@ export const newBotEventHandler: RouteHandler<typeof newBotEventRoute, AppEnv> =
           .values({
             tourney_id: tourney.id,
             player_identity_id: dbPlayerIdentity.id,
-            place: result.place,
-            rounds_played: result.played,
-            faction_code: mapBotFactionToFactionCode(result.faction),
+            place: entry.position,
+            rounds_played: entry.w + entry.d + entry.l,
+            faction_code: mapBotFactionToFactionCode(entry.faction),
             points,
           })
-          .returningAll()
-          .executeTakeFirst();
+          .execute();
       }),
     );
   });
 
-  return c.json({ message: "BOT event received successfully", data: parsedData }, 200);
-};
+  const tourney = await db
+    .selectFrom("tourney")
+    .where("bot_id", "=", apiData.botid)
+    .select("id")
+    .executeTakeFirstOrThrow();
 
-function mapBotFactionToFactionCode(botFaction: string): Faction {
-  switch (botFaction) {
-    case "outcasts":
-      return Faction.OUTCASTS;
-    case "guild":
-      return Faction.GUILD;
-    case "bayou":
-      return Faction.BAYOU;
-    case "arcanists":
-      return Faction.ARCANISTS;
-    case "explorers":
-      return Faction.EXPLORER;
-    case "neverborn":
-      return Faction.NEVERBORN;
-    case "thunders":
-      return Faction.THUNDERS;
-    case "resurrectionists":
-      return Faction.RESSERS;
-    default:
-      throw new Error("UNKNOWN FACTION");
-  }
-}
+  return c.json({ id: tourney.id }, 200);
+};

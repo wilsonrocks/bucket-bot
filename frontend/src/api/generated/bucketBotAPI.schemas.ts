@@ -263,52 +263,15 @@ export type PostLongshanksEventId502 = {
   error: string;
 };
 
-export type PostBotEventBodyResultsItem = {
-  name: string;
-  place: number;
-  played: number;
-  faction: string;
+export type PostBotEventId200 = {
+  id: number;
 };
 
-export type PostBotEventBody = {
-  eventId: string;
-  eventName: string;
-  organiserDiscordId: string;
-  /** @nullable */
-  venueId: number | null;
-  rounds: number;
-  days: number;
-  tier: string;
-  dateString: string;
-  results: PostBotEventBodyResultsItem[];
+export type PostBotEventId400 = {
+  error: string;
 };
 
-export type PostBotEvent200DataResultsItem = {
-  name: string;
-  place: number;
-  played: number;
-  faction: string;
-};
-
-export type PostBotEvent200Data = {
-  eventId: string;
-  eventName: string;
-  organiserDiscordId: string;
-  /** @nullable */
-  venueId: number | null;
-  rounds: number;
-  days: number;
-  tier: string;
-  dateString: string;
-  results: PostBotEvent200DataResultsItem[];
-};
-
-export type PostBotEvent200 = {
-  message: string;
-  data: PostBotEvent200Data;
-};
-
-export type PostBotEvent400 = {
+export type PostBotEventId502 = {
   error: string;
 };
 
