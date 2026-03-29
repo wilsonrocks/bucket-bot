@@ -23,6 +23,7 @@ import {
   usePostFetchDiscordUserIds as usePostFetchDiscordUserIdsGenerated,
   usePostLongshanksEventId as usePostLongshanksEventIdGenerated,
   usePostMatchPlayerToDiscordUser as usePostMatchPlayerToDiscordUserGenerated,
+  usePostPostDiscordEventTourneyId as usePostPostDiscordEventTourneyIdGenerated,
   usePostTourney as usePostTourneyGenerated,
   getGetTourneyQueryKey,
   getGetTourneyIdQueryKey,
@@ -45,7 +46,6 @@ export {
   usePostBotChatPostMessage,
   usePostFactionRankings,
   usePostGenerateRankings,
-  usePostPostDiscordEventTourneyId,
   usePostPostDiscordRankings,
   usePostPostFactionRankings,
   usePostToken,
@@ -176,6 +176,17 @@ export const usePostTourney = (id: number) => {
     mutation: {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: getGetTourneyIdQueryKey(String(id)) })
+      },
+    },
+  })
+}
+
+export const usePostPostDiscordEventTourneyId = () => {
+  const queryClient = useQueryClient()
+  return usePostPostDiscordEventTourneyIdGenerated({
+    mutation: {
+      onSuccess: (_, { tourneyId }) => {
+        queryClient.invalidateQueries({ queryKey: getGetTourneyIdQueryKey(tourneyId) })
       },
     },
   })
