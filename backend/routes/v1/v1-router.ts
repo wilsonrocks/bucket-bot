@@ -106,6 +106,7 @@ import {
   updateTeamMemberRoute,
   updateTeamRoute,
 } from "./v1-routes/teams.js";
+import { uploadHandler, uploadRoute } from "./v1-routes/upload.js";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) throw new Error("JWT_SECRET is not defined");
@@ -253,6 +254,7 @@ v1Router.openapi(updateTourneyRoute, updateTourney);
 v1Router.route("/bot-chat", botChatRouter);
 v1Router.openapi(generateFactionRankingsRoute, generateFactionRankingsHandler);
 v1Router.openapi(postFactionRankingsRoute, postFactionRankingsHandler);
+v1Router.openapi(uploadRoute, uploadHandler);
 v1Router.openapi(createTeamRoute, createTeamHandler);
 v1Router.openapi(updateTeamRoute, updateTeamHandler);
 v1Router.openapi(deleteTeamRoute, deleteTeamHandler);

@@ -261,6 +261,8 @@ export type GetTeams200Item = {
   /** @nullable */
   brand_colour: string | null;
   /** @nullable */
+  image_key: string | null;
+  /** @nullable */
   venue_id: number | null;
   /** @nullable */
   created_at: string | null;
@@ -282,6 +284,8 @@ export type GetTeamsId200 = {
   /** @nullable */
   brand_colour: string | null;
   /** @nullable */
+  image_key: string | null;
+  /** @nullable */
   venue_id: number | null;
   /** @nullable */
   created_at: string | null;
@@ -299,6 +303,8 @@ export type PutTeamsIdBody = {
   description?: string | null;
   /** @nullable */
   brand_colour?: string | null;
+  /** @nullable */
+  image_key?: string | null;
 };
 
 export type PutTeamsId200 = {
@@ -308,6 +314,8 @@ export type PutTeamsId200 = {
   description: string | null;
   /** @nullable */
   brand_colour: string | null;
+  /** @nullable */
+  image_key: string | null;
   /** @nullable */
   venue_id: number | null;
   /** @nullable */
@@ -507,6 +515,8 @@ export type PostCreateTeam201 = {
   description: string | null;
   /** @nullable */
   brand_colour: string | null;
+  /** @nullable */
+  image_key: string | null;
   /** @nullable */
   venue_id: number | null;
   /** @nullable */

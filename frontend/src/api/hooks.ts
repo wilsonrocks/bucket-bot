@@ -276,3 +276,21 @@ export const useDeleteTeamsTeamIdMembersMembershipId = (teamId: number) => {
     },
   })
 }
+
+export const uploadTeamImage = async (file: File, type: string): Promise<string> => {
+  const stored = localStorage.getItem('auth')
+  const jwt = stored ? (JSON.parse(stored) as { jwt: string }).jwt : null
+  const formData = new FormData()
+  formData.append('file', file)
+  const response = await fetch(
+    `${import.meta.env.VITE_BACKEND_URL}/v1/upload?type=${encodeURIComponent(type)}`,
+    {
+      method: 'POST',
+      headers: jwt ? { Authorization: `Bearer ${jwt}` } : {},
+      body: formData,
+    },
+  )
+  if (!response.ok) throw new Error(`Upload failed: ${response.statusText}`)
+  const { key } = (await response.json()) as { key: string }
+  return key
+}

@@ -8,6 +8,7 @@ const TeamSchema = z.object({
   name: z.string(),
   description: z.string().nullable(),
   brand_colour: z.string().nullable(),
+  image_key: z.string().nullable(),
   venue_id: z.number().nullable(),
   created_at: z.string().nullable(),
 }).passthrough();
@@ -141,6 +142,7 @@ const UpdateTeamBodySchema = z.object({
   name: z.string().optional(),
   description: z.string().nullable().optional(),
   brand_colour: z.string().nullable().optional(),
+  image_key: z.string().nullable().optional(),
 });
 
 export const updateTeamRoute = createRoute({

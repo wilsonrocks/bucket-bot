@@ -5,6 +5,7 @@ import {
   usePatchTeamsTeamIdMembersMembershipId,
   usePostTeamsTeamIdMembers,
   usePutTeamsId,
+  uploadTeamImage,
 } from '@/api/hooks'
 import {
   Badge,
@@ -12,10 +13,13 @@ import {
   Button,
   Checkbox,
   ColorInput,
+  FileInput,
   Grid,
   Group,
+  Image,
   Paper,
   Select,
+  Stack,
   Table,
   Textarea,
   TextInput,
@@ -42,8 +46,13 @@ function RouteComponent() {
   const updateMember = usePatchTeamsTeamIdMembersMembershipId(Number(id))
   const removeMember = useDeleteTeamsTeamIdMembersMembershipId(Number(id))
 
-  const editForm = useForm<{ name: string; description: string; brand_colour: string }>({
-    initialValues: { name: '', description: '', brand_colour: '' },
+  const editForm = useForm<{
+    name: string
+    description: string
+    brand_colour: string
+    image_key: string | null
+  }>({
+    initialValues: { name: '', description: '', brand_colour: '', image_key: null },
   })
 
   useEffect(() => {
@@ -52,12 +61,21 @@ function RouteComponent() {
         name: team.name,
         description: team.description ?? '',
         brand_colour: team.brand_colour ?? '',
+        image_key: team.image_key ?? null,
       })
+      if (team.image_key) {
+        setImagePreview(
+          `${import.meta.env.VITE_ASSETS_URL}/${team.image_key}-200x200.png`,
+        )
+      }
     }
   }, [team?.id])
 
   const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null)
   const [isCaptain, setIsCaptain] = useState(false)
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [uploading, setUploading] = useState(false)
 
   const existingPlayerIds = new Set(team?.members.map((m) => m.player_id) ?? [])
 
@@ -84,6 +102,7 @@ function RouteComponent() {
                 name: values.name || undefined,
                 description: values.description || null,
                 brand_colour: values.brand_colour || null,
+                image_key: values.image_key,
               },
             })
           })}
@@ -114,6 +133,48 @@ function RouteComponent() {
             </Button>
           </Box>
         </form>
+      </Paper>
+
+      <Paper withBorder p="md" mb="md">
+        <Title order={5} mb="sm">Team Image</Title>
+        <Stack gap="sm">
+          {imagePreview && (
+            <Image src={imagePreview} w={200} h={200} fit="contain" radius="sm" />
+          )}
+          <FileInput
+            label="Upload new image"
+            accept="image/png,image/jpeg,image/webp"
+            value={imageFile}
+            onChange={(file) => {
+              setImageFile(file)
+              if (file) setImagePreview(URL.createObjectURL(file))
+            }}
+            w={300}
+          />
+          <Button
+            w="fit-content"
+            loading={uploading}
+            disabled={!imageFile}
+            onClick={async () => {
+              if (!imageFile) return
+              setUploading(true)
+              try {
+                const key = await uploadTeamImage(imageFile, 'team')
+                editForm.setFieldValue('image_key', key)
+                setImageFile(null)
+              } finally {
+                setUploading(false)
+              }
+            }}
+          >
+            Upload Image
+          </Button>
+          {editForm.values.image_key && (
+            <Box fz="sm" c="dimmed">
+              Saved key: {editForm.values.image_key} — click Save Changes to persist
+            </Box>
+          )}
+        </Stack>
       </Paper>
 
       <Paper withBorder p="md" mb="md">

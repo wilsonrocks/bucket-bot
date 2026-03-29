@@ -1,5 +1,5 @@
 import { useGetTeamsId } from '@/api/hooks'
-import { Badge, Table, Title } from '@mantine/core'
+import { Badge, Image, Table, Title } from '@mantine/core'
 import { createFileRoute } from '@tanstack/react-router'
 import { Link } from '@/components/link'
 import { Route as PlayerRoute } from './player.$id'
@@ -23,6 +23,17 @@ function RouteComponent() {
         {team.name}
       </Title>
       {team.description && <p>{team.description}</p>}
+      {team.image_key && (
+        <Image
+          src={`${import.meta.env.VITE_ASSETS_URL}/${team.image_key}-200x200.png`}
+          w={200}
+          h={200}
+          fit="contain"
+          radius="sm"
+          mb="md"
+          alt={`${team.name} logo`}
+        />
+      )}
 
       <Table mt="md">
         <Table.Thead>
