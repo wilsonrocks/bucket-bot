@@ -21,16 +21,16 @@ import { Route as SiteSitePagesHowItWorksRouteImport } from './routes/site/_site
 import { Route as SiteSitePagesFactionRankingsRouteImport } from './routes/site/_site-pages/faction-rankings'
 import { Route as SiteSitePagesEventsRouteImport } from './routes/site/_site-pages/events'
 import { Route as AppAppPagesVenuesRouteImport } from './routes/app/_app-pages/venues'
-import { Route as AppAppPagesTeamsRouteImport } from './routes/app/_app-pages/teams'
 import { Route as AppAppPagesIdentitiesRouteImport } from './routes/app/_app-pages/identities'
 import { Route as AppAppPagesBotChatRouteImport } from './routes/app/_app-pages/bot-chat'
+import { Route as AppAppPagesTeamsIndexRouteImport } from './routes/app/_app-pages/teams/index'
 import { Route as AppAppPagesRankingsIndexRouteImport } from './routes/app/_app-pages/rankings/index'
 import { Route as AppAppPagesImportIndexRouteImport } from './routes/app/_app-pages/import/index'
 import { Route as AppAppPagesEventsIndexRouteImport } from './routes/app/_app-pages/events/index'
 import { Route as SiteSitePagesTeamIdRouteImport } from './routes/site/_site-pages/team.$id'
 import { Route as SiteSitePagesPlayerIdRouteImport } from './routes/site/_site-pages/player.$id'
 import { Route as SiteSitePagesEventIdRouteImport } from './routes/site/_site-pages/event.$id'
-import { Route as AppAppPagesTeamsIdRouteImport } from './routes/app/_app-pages/teams.$id'
+import { Route as AppAppPagesTeamsIdRouteImport } from './routes/app/_app-pages/teams/$id'
 import { Route as AppAppPagesImportImportLongshanksRouteImport } from './routes/app/_app-pages/import/import-longshanks'
 import { Route as AppAppPagesImportImportBotRouteImport } from './routes/app/_app-pages/import/import-bot'
 import { Route as AppAppPagesEventsIdEditRouteImport } from './routes/app/_app-pages/events.$id.edit'
@@ -96,11 +96,6 @@ const AppAppPagesVenuesRoute = AppAppPagesVenuesRouteImport.update({
   path: '/venues',
   getParentRoute: () => AppRouteRoute,
 } as any)
-const AppAppPagesTeamsRoute = AppAppPagesTeamsRouteImport.update({
-  id: '/_app-pages/teams',
-  path: '/teams',
-  getParentRoute: () => AppRouteRoute,
-} as any)
 const AppAppPagesIdentitiesRoute = AppAppPagesIdentitiesRouteImport.update({
   id: '/_app-pages/identities',
   path: '/identities',
@@ -109,6 +104,11 @@ const AppAppPagesIdentitiesRoute = AppAppPagesIdentitiesRouteImport.update({
 const AppAppPagesBotChatRoute = AppAppPagesBotChatRouteImport.update({
   id: '/_app-pages/bot-chat',
   path: '/bot-chat',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppAppPagesTeamsIndexRoute = AppAppPagesTeamsIndexRouteImport.update({
+  id: '/_app-pages/teams/',
+  path: '/teams/',
   getParentRoute: () => AppRouteRoute,
 } as any)
 const AppAppPagesRankingsIndexRoute =
@@ -143,9 +143,9 @@ const SiteSitePagesEventIdRoute = SiteSitePagesEventIdRouteImport.update({
   getParentRoute: () => SiteRouteRoute,
 } as any)
 const AppAppPagesTeamsIdRoute = AppAppPagesTeamsIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => AppAppPagesTeamsRoute,
+  id: '/_app-pages/teams/$id',
+  path: '/teams/$id',
+  getParentRoute: () => AppRouteRoute,
 } as any)
 const AppAppPagesImportImportLongshanksRoute =
   AppAppPagesImportImportLongshanksRouteImport.update({
@@ -174,7 +174,6 @@ export interface FileRoutesByFullPath {
   '/site/': typeof SiteIndexRoute
   '/app/bot-chat': typeof AppAppPagesBotChatRoute
   '/app/identities': typeof AppAppPagesIdentitiesRoute
-  '/app/teams': typeof AppAppPagesTeamsRouteWithChildren
   '/app/venues': typeof AppAppPagesVenuesRoute
   '/site/events': typeof SiteSitePagesEventsRoute
   '/site/faction-rankings': typeof SiteSitePagesFactionRankingsRoute
@@ -190,6 +189,7 @@ export interface FileRoutesByFullPath {
   '/app/events': typeof AppAppPagesEventsIndexRoute
   '/app/import': typeof AppAppPagesImportIndexRoute
   '/app/rankings': typeof AppAppPagesRankingsIndexRoute
+  '/app/teams': typeof AppAppPagesTeamsIndexRoute
   '/app/events/$id/edit': typeof AppAppPagesEventsIdEditRoute
 }
 export interface FileRoutesByTo {
@@ -200,7 +200,6 @@ export interface FileRoutesByTo {
   '/site': typeof SiteIndexRoute
   '/app/bot-chat': typeof AppAppPagesBotChatRoute
   '/app/identities': typeof AppAppPagesIdentitiesRoute
-  '/app/teams': typeof AppAppPagesTeamsRouteWithChildren
   '/app/venues': typeof AppAppPagesVenuesRoute
   '/site/events': typeof SiteSitePagesEventsRoute
   '/site/faction-rankings': typeof SiteSitePagesFactionRankingsRoute
@@ -216,6 +215,7 @@ export interface FileRoutesByTo {
   '/app/events': typeof AppAppPagesEventsIndexRoute
   '/app/import': typeof AppAppPagesImportIndexRoute
   '/app/rankings': typeof AppAppPagesRankingsIndexRoute
+  '/app/teams': typeof AppAppPagesTeamsIndexRoute
   '/app/events/$id/edit': typeof AppAppPagesEventsIdEditRoute
 }
 export interface FileRoutesById {
@@ -228,7 +228,6 @@ export interface FileRoutesById {
   '/site/': typeof SiteIndexRoute
   '/app/_app-pages/bot-chat': typeof AppAppPagesBotChatRoute
   '/app/_app-pages/identities': typeof AppAppPagesIdentitiesRoute
-  '/app/_app-pages/teams': typeof AppAppPagesTeamsRouteWithChildren
   '/app/_app-pages/venues': typeof AppAppPagesVenuesRoute
   '/site/_site-pages/events': typeof SiteSitePagesEventsRoute
   '/site/_site-pages/faction-rankings': typeof SiteSitePagesFactionRankingsRoute
@@ -244,6 +243,7 @@ export interface FileRoutesById {
   '/app/_app-pages/events/': typeof AppAppPagesEventsIndexRoute
   '/app/_app-pages/import/': typeof AppAppPagesImportIndexRoute
   '/app/_app-pages/rankings/': typeof AppAppPagesRankingsIndexRoute
+  '/app/_app-pages/teams/': typeof AppAppPagesTeamsIndexRoute
   '/app/_app-pages/events/$id/edit': typeof AppAppPagesEventsIdEditRoute
 }
 export interface FileRouteTypes {
@@ -257,7 +257,6 @@ export interface FileRouteTypes {
     | '/site/'
     | '/app/bot-chat'
     | '/app/identities'
-    | '/app/teams'
     | '/app/venues'
     | '/site/events'
     | '/site/faction-rankings'
@@ -273,6 +272,7 @@ export interface FileRouteTypes {
     | '/app/events'
     | '/app/import'
     | '/app/rankings'
+    | '/app/teams'
     | '/app/events/$id/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -283,7 +283,6 @@ export interface FileRouteTypes {
     | '/site'
     | '/app/bot-chat'
     | '/app/identities'
-    | '/app/teams'
     | '/app/venues'
     | '/site/events'
     | '/site/faction-rankings'
@@ -299,6 +298,7 @@ export interface FileRouteTypes {
     | '/app/events'
     | '/app/import'
     | '/app/rankings'
+    | '/app/teams'
     | '/app/events/$id/edit'
   id:
     | '__root__'
@@ -310,7 +310,6 @@ export interface FileRouteTypes {
     | '/site/'
     | '/app/_app-pages/bot-chat'
     | '/app/_app-pages/identities'
-    | '/app/_app-pages/teams'
     | '/app/_app-pages/venues'
     | '/site/_site-pages/events'
     | '/site/_site-pages/faction-rankings'
@@ -326,6 +325,7 @@ export interface FileRouteTypes {
     | '/app/_app-pages/events/'
     | '/app/_app-pages/import/'
     | '/app/_app-pages/rankings/'
+    | '/app/_app-pages/teams/'
     | '/app/_app-pages/events/$id/edit'
   fileRoutesById: FileRoutesById
 }
@@ -422,13 +422,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAppPagesVenuesRouteImport
       parentRoute: typeof AppRouteRoute
     }
-    '/app/_app-pages/teams': {
-      id: '/app/_app-pages/teams'
-      path: '/teams'
-      fullPath: '/app/teams'
-      preLoaderRoute: typeof AppAppPagesTeamsRouteImport
-      parentRoute: typeof AppRouteRoute
-    }
     '/app/_app-pages/identities': {
       id: '/app/_app-pages/identities'
       path: '/identities'
@@ -441,6 +434,13 @@ declare module '@tanstack/react-router' {
       path: '/bot-chat'
       fullPath: '/app/bot-chat'
       preLoaderRoute: typeof AppAppPagesBotChatRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/app/_app-pages/teams/': {
+      id: '/app/_app-pages/teams/'
+      path: '/teams'
+      fullPath: '/app/teams'
+      preLoaderRoute: typeof AppAppPagesTeamsIndexRouteImport
       parentRoute: typeof AppRouteRoute
     }
     '/app/_app-pages/rankings/': {
@@ -487,10 +487,10 @@ declare module '@tanstack/react-router' {
     }
     '/app/_app-pages/teams/$id': {
       id: '/app/_app-pages/teams/$id'
-      path: '/$id'
+      path: '/teams/$id'
       fullPath: '/app/teams/$id'
       preLoaderRoute: typeof AppAppPagesTeamsIdRouteImport
-      parentRoute: typeof AppAppPagesTeamsRoute
+      parentRoute: typeof AppRouteRoute
     }
     '/app/_app-pages/import/import-longshanks': {
       id: '/app/_app-pages/import/import-longshanks'
@@ -516,41 +516,32 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface AppAppPagesTeamsRouteChildren {
-  AppAppPagesTeamsIdRoute: typeof AppAppPagesTeamsIdRoute
-}
-
-const AppAppPagesTeamsRouteChildren: AppAppPagesTeamsRouteChildren = {
-  AppAppPagesTeamsIdRoute: AppAppPagesTeamsIdRoute,
-}
-
-const AppAppPagesTeamsRouteWithChildren =
-  AppAppPagesTeamsRoute._addFileChildren(AppAppPagesTeamsRouteChildren)
-
 interface AppRouteRouteChildren {
   AppAppPagesBotChatRoute: typeof AppAppPagesBotChatRoute
   AppAppPagesIdentitiesRoute: typeof AppAppPagesIdentitiesRoute
-  AppAppPagesTeamsRoute: typeof AppAppPagesTeamsRouteWithChildren
   AppAppPagesVenuesRoute: typeof AppAppPagesVenuesRoute
   AppAppPagesImportImportBotRoute: typeof AppAppPagesImportImportBotRoute
   AppAppPagesImportImportLongshanksRoute: typeof AppAppPagesImportImportLongshanksRoute
+  AppAppPagesTeamsIdRoute: typeof AppAppPagesTeamsIdRoute
   AppAppPagesEventsIndexRoute: typeof AppAppPagesEventsIndexRoute
   AppAppPagesImportIndexRoute: typeof AppAppPagesImportIndexRoute
   AppAppPagesRankingsIndexRoute: typeof AppAppPagesRankingsIndexRoute
+  AppAppPagesTeamsIndexRoute: typeof AppAppPagesTeamsIndexRoute
   AppAppPagesEventsIdEditRoute: typeof AppAppPagesEventsIdEditRoute
 }
 
 const AppRouteRouteChildren: AppRouteRouteChildren = {
   AppAppPagesBotChatRoute: AppAppPagesBotChatRoute,
   AppAppPagesIdentitiesRoute: AppAppPagesIdentitiesRoute,
-  AppAppPagesTeamsRoute: AppAppPagesTeamsRouteWithChildren,
   AppAppPagesVenuesRoute: AppAppPagesVenuesRoute,
   AppAppPagesImportImportBotRoute: AppAppPagesImportImportBotRoute,
   AppAppPagesImportImportLongshanksRoute:
     AppAppPagesImportImportLongshanksRoute,
+  AppAppPagesTeamsIdRoute: AppAppPagesTeamsIdRoute,
   AppAppPagesEventsIndexRoute: AppAppPagesEventsIndexRoute,
   AppAppPagesImportIndexRoute: AppAppPagesImportIndexRoute,
   AppAppPagesRankingsIndexRoute: AppAppPagesRankingsIndexRoute,
+  AppAppPagesTeamsIndexRoute: AppAppPagesTeamsIndexRoute,
   AppAppPagesEventsIdEditRoute: AppAppPagesEventsIdEditRoute,
 }
 

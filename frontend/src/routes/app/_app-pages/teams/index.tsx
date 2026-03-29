@@ -18,9 +18,9 @@ import {
 import { useForm } from '@mantine/form'
 import { modals } from '@mantine/modals'
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { Route as TeamEditRoute } from './teams.$id'
+import { Route as TeamEditRoute } from './$id'
 
-export const Route = createFileRoute('/app/_app-pages/teams')({
+export const Route = createFileRoute('/app/_app-pages/teams/')({
   component: RouteComponent,
   staticData: { title: 'Teams' },
 })
