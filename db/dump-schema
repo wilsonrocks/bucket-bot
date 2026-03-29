@@ -14,5 +14,11 @@ set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)"
 OUTPUT="$SCRIPT_DIR/schema.sql"
 
-pg_dump --schema-only --no-owner --no-acl "$DATABASE_URL" > "$OUTPUT"
+pg_dump --schema-only --no-owner --no-acl --no-comments "$DATABASE_URL" \
+  | grep -v "^--" \
+  | grep -vE "^(CREATE SEQUENCE|ALTER SEQUENCE)" \
+  | grep -vE "^[[:space:]]+(START WITH|INCREMENT BY|NO MINVALUE|NO MAXVALUE|CACHE) " \
+  | grep -vE "SET DEFAULT nextval\(" \
+  | cat -s \
+  > "$OUTPUT"
 echo "Schema dumped to $OUTPUT"
