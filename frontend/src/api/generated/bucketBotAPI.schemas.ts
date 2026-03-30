@@ -323,12 +323,20 @@ export type PutTeamsId200 = {
   [key: string]: unknown | null;
 };
 
+export type PutTeamsId403 = {
+  error: string;
+};
+
 export type PutTeamsId404 = {
   error: string;
 };
 
 export type DeleteTeamsId200 = {
   success: boolean;
+};
+
+export type DeleteTeamsId403 = {
+  error: string;
 };
 
 export type DeleteTeamsId404 = {
@@ -359,6 +367,7 @@ export type PostBotEventId502 = {
 
 export type GetHasRole200 = {
   rankingReporter: boolean;
+  captainOfTeamIds: number[];
 };
 
 export type GetHasRole400 = {
@@ -502,6 +511,22 @@ export type PostPostFactionRankings500 = {
   message: string;
 };
 
+export type PostUploadParams = {
+type: string;
+};
+
+export type PostUpload200 = {
+  key: string;
+};
+
+export type PostUpload400 = {
+  error: string;
+};
+
+export type PostUpload413 = {
+  error: string;
+};
+
 export type PostCreateTeamBody = {
   name: string;
   description?: string;
@@ -524,6 +549,10 @@ export type PostCreateTeam201 = {
   [key: string]: unknown | null;
 };
 
+export type PostCreateTeam403 = {
+  error: string;
+};
+
 export type PostTeamsTeamIdMembersBody = {
   player_id: number;
   is_captain?: boolean;
@@ -536,6 +565,10 @@ export type PostTeamsTeamIdMembers201 = {
   is_captain: boolean;
 };
 
+export type PostTeamsTeamIdMembers403 = {
+  error: string;
+};
+
 export type PatchTeamsTeamIdMembersMembershipIdBody = {
   is_captain: boolean;
 };
@@ -544,12 +577,20 @@ export type PatchTeamsTeamIdMembersMembershipId200 = {
   success: boolean;
 };
 
+export type PatchTeamsTeamIdMembersMembershipId403 = {
+  error: string;
+};
+
 export type PatchTeamsTeamIdMembersMembershipId404 = {
   error: string;
 };
 
 export type DeleteTeamsTeamIdMembersMembershipId200 = {
   success: boolean;
+};
+
+export type DeleteTeamsTeamIdMembersMembershipId403 = {
+  error: string;
 };
 
 export type DeleteTeamsTeamIdMembersMembershipId404 = {

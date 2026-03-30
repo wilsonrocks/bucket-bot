@@ -1,7 +1,9 @@
 import { createRoute, z, type RouteHandler } from "@hono/zod-openapi";
 import type { AppEnv } from "../../../hono-env.js";
+import { canAccessTeam, isRankingReporter } from "../permissions.js";
 
 const ErrorSchema = z.object({ error: z.string() });
+const ForbiddenSchema = z.object({ error: z.string() });
 
 const TeamSchema = z.object({
   id: z.number(),
@@ -117,10 +119,20 @@ export const createTeamRoute = createRoute({
       content: { "application/json": { schema: TeamSchema } },
       description: "Team created",
     },
+    403: {
+      content: { "application/json": { schema: ForbiddenSchema } },
+      description: "Forbidden",
+    },
   },
 });
 
 export const createTeamHandler: RouteHandler<typeof createTeamRoute, AppEnv> = async (c) => {
+  const { id: userId } = c.get("jwtPayload") as { id: string };
+
+  if (!await isRankingReporter(userId)) {
+    return c.json({ error: "Forbidden" }, 403);
+  }
+
   const { name, description, brand_colour } = c.req.valid("json");
 
   const team = await c.get("db")
@@ -159,6 +171,10 @@ export const updateTeamRoute = createRoute({
       content: { "application/json": { schema: TeamSchema } },
       description: "Team updated",
     },
+    403: {
+      content: { "application/json": { schema: ForbiddenSchema } },
+      description: "Forbidden",
+    },
     404: {
       content: { "application/json": { schema: ErrorSchema } },
       description: "Team not found",
@@ -168,6 +184,12 @@ export const updateTeamRoute = createRoute({
 
 export const updateTeamHandler: RouteHandler<typeof updateTeamRoute, AppEnv> = async (c) => {
   const id = Number(c.req.valid("param").id);
+  const { id: userId } = c.get("jwtPayload") as { id: string };
+
+  if (!await canAccessTeam(userId, id, c.get("db"))) {
+    return c.json({ error: "Forbidden" }, 403);
+  }
+
   const body = c.req.valid("json");
 
   const team = await c.get("db")
@@ -197,6 +219,10 @@ export const deleteTeamRoute = createRoute({
       content: { "application/json": { schema: z.object({ success: z.literal(true) }) } },
       description: "Team deleted",
     },
+    403: {
+      content: { "application/json": { schema: ForbiddenSchema } },
+      description: "Forbidden",
+    },
     404: {
       content: { "application/json": { schema: ErrorSchema } },
       description: "Team not found",
@@ -206,6 +232,11 @@ export const deleteTeamRoute = createRoute({
 
 export const deleteTeamHandler: RouteHandler<typeof deleteTeamRoute, AppEnv> = async (c) => {
   const id = Number(c.req.valid("param").id);
+  const { id: userId } = c.get("jwtPayload") as { id: string };
+
+  if (!await isRankingReporter(userId)) {
+    return c.json({ error: "Forbidden" }, 403);
+  }
 
   const result = await c.get("db")
     .deleteFrom("team")
@@ -240,11 +271,21 @@ export const addTeamMemberRoute = createRoute({
       content: { "application/json": { schema: MemberSchema } },
       description: "Member added",
     },
+    403: {
+      content: { "application/json": { schema: ForbiddenSchema } },
+      description: "Forbidden",
+    },
   },
 });
 
 export const addTeamMemberHandler: RouteHandler<typeof addTeamMemberRoute, AppEnv> = async (c) => {
   const teamId = Number(c.req.valid("param").teamId);
+  const { id: userId } = c.get("jwtPayload") as { id: string };
+
+  if (!await canAccessTeam(userId, teamId, c.get("db"))) {
+    return c.json({ error: "Forbidden" }, 403);
+  }
+
   const { player_id, is_captain } = c.req.valid("json");
 
   const membership = await c.get("db")
@@ -287,6 +328,10 @@ export const updateTeamMemberRoute = createRoute({
       content: { "application/json": { schema: z.object({ success: z.literal(true) }) } },
       description: "Member updated",
     },
+    403: {
+      content: { "application/json": { schema: ForbiddenSchema } },
+      description: "Forbidden",
+    },
     404: {
       content: { "application/json": { schema: ErrorSchema } },
       description: "Membership not found",
@@ -295,7 +340,14 @@ export const updateTeamMemberRoute = createRoute({
 });
 
 export const updateTeamMemberHandler: RouteHandler<typeof updateTeamMemberRoute, AppEnv> = async (c) => {
+  const teamId = Number(c.req.valid("param").teamId);
   const membershipId = Number(c.req.valid("param").membershipId);
+  const { id: userId } = c.get("jwtPayload") as { id: string };
+
+  if (!await canAccessTeam(userId, teamId, c.get("db"))) {
+    return c.json({ error: "Forbidden" }, 403);
+  }
+
   const { is_captain } = c.req.valid("json");
 
   const result = await c.get("db")
@@ -324,6 +376,10 @@ export const removeTeamMemberRoute = createRoute({
       content: { "application/json": { schema: z.object({ success: z.literal(true) }) } },
       description: "Member removed",
     },
+    403: {
+      content: { "application/json": { schema: ForbiddenSchema } },
+      description: "Forbidden",
+    },
     404: {
       content: { "application/json": { schema: ErrorSchema } },
       description: "Membership not found",
@@ -332,7 +388,13 @@ export const removeTeamMemberRoute = createRoute({
 });
 
 export const removeTeamMemberHandler: RouteHandler<typeof removeTeamMemberRoute, AppEnv> = async (c) => {
+  const teamId = Number(c.req.valid("param").teamId);
   const membershipId = Number(c.req.valid("param").membershipId);
+  const { id: userId } = c.get("jwtPayload") as { id: string };
+
+  if (!await canAccessTeam(userId, teamId, c.get("db"))) {
+    return c.json({ error: "Forbidden" }, 403);
+  }
 
   const result = await c.get("db")
     .deleteFrom("membership")

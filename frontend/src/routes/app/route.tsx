@@ -2,6 +2,7 @@ import { LogoutButton } from '@/components/LoginButton'
 import { AppNavbar } from '@/components/app-navbar'
 import { NetworkIndicator } from '@/components/network-indicator'
 import { useAuth } from '@/hooks/useAuth'
+import { usePermissions } from '@/hooks/usePermissions'
 import {
   AppShell,
   Burger,
@@ -20,6 +21,7 @@ import {
   Outlet,
   redirect,
   useMatches,
+  useNavigate,
   useRouterState,
 } from '@tanstack/react-router'
 import { useEffect } from 'react'
@@ -55,6 +57,15 @@ export const Route = createFileRoute('/app')({
     const title = matches.at(-1)?.staticData.title
 
     const auth = useAuth()
+    const { rankingReporter, captainOfTeamIds, isLoading: permissionsLoading } = usePermissions()
+    const navigate = useNavigate()
+
+    useEffect(() => {
+      if (permissionsLoading) return
+      if (!rankingReporter && captainOfTeamIds.length === 0) {
+        navigate({ to: LoginRoute.to })
+      }
+    }, [permissionsLoading, rankingReporter, captainOfTeamIds.length])
 
     return (
       <MantineProvider theme={{ defaultColorScheme: 'dark' }}>

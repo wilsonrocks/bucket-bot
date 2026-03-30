@@ -1,12 +1,13 @@
 import { DiscordLookup } from '@/components/discord-lookup'
 import { toOrdinal } from '@/helpers/to-ordinal'
 import { useGetUnmappedIdentities } from '@/api/hooks'
+import { RequireRankingReporter } from '@/components/RequireRankingReporter'
 import { List, Pagination, Table, Text } from '@mantine/core'
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 
 export const Route = createFileRoute('/app/_app-pages/identities')({
-  component: RouteComponent,
+  component: () => <RequireRankingReporter><RouteComponent /></RequireRankingReporter>,
   staticData: { title: 'Identities' },
 })
 

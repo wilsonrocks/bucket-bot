@@ -7,6 +7,7 @@ import {
   usePutTeamsId,
   uploadTeamImage,
 } from '@/api/hooks'
+import { usePermissions } from '@/hooks/usePermissions'
 import {
   Badge,
   Box,
@@ -29,9 +30,10 @@ import {
 } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { useHover } from '@mantine/hooks'
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect, useRef, useState } from 'react'
 import z from 'zod'
+import { Route as TeamsRoute } from './index'
 
 export const Route = createFileRoute('/app/_app-pages/teams/$id')({
   component: RouteComponent,
@@ -41,6 +43,16 @@ export const Route = createFileRoute('/app/_app-pages/teams/$id')({
 
 function RouteComponent() {
   const { id } = Route.useParams()
+  const { rankingReporter, isTeamCaptain, isLoading: permissionsLoading } = usePermissions()
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (permissionsLoading) return
+    if (!rankingReporter && !isTeamCaptain(Number(id))) {
+      navigate({ to: TeamsRoute.to })
+    }
+  }, [permissionsLoading, rankingReporter, id])
+
   const { data: team } = useGetTeamsId(id)
   const { data: players } = useGetPlayers()
 

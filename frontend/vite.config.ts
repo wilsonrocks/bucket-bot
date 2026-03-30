@@ -25,6 +25,10 @@ export default defineConfig({
   test: {
     include: ['src/**/*.{test,spec}.{ts,tsx}'],
     exclude: ['**/dist/**'],
-    // watchExclude: ['**/dist/**'],
+    environment: 'jsdom',
+    globals: true,
+    alias: {
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
+    },
   },
 })

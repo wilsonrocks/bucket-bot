@@ -1,11 +1,12 @@
 import { usePostBotEventId } from '@/api/hooks'
+import { RequireRankingReporter } from '@/components/RequireRankingReporter'
 import { Button, Loader, TextInput } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { createFileRoute } from '@tanstack/react-router'
 import { Route as EventIdRoute } from '../events.$id.edit.tsx'
 
 export const Route = createFileRoute('/app/_app-pages/import/import-bot')({
-  component: RouteComponent,
+  component: () => <RequireRankingReporter><RouteComponent /></RequireRankingReporter>,
   staticData: { title: 'Import BOT Event' },
 })
 
