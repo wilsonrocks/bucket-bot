@@ -13,7 +13,6 @@ import {
   Box,
   Button,
   Center,
-  Checkbox,
   ColorInput,
   Grid,
   Group,
@@ -87,7 +86,6 @@ function RouteComponent() {
   }, [team?.id])
 
   const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null)
-  const [isCaptain, setIsCaptain] = useState(false)
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const { hovered: imageHovered, ref: imageHoverRef } = useHover()
@@ -277,12 +275,6 @@ function RouteComponent() {
             onChange={setSelectedPlayerId}
             w={250}
           />
-          <Checkbox
-            label="Captain"
-            checked={isCaptain}
-            onChange={(e) => setIsCaptain(e.currentTarget.checked)}
-            mb={4}
-          />
           <Button
             mb={4}
             disabled={!selectedPlayerId}
@@ -292,12 +284,11 @@ function RouteComponent() {
               addMember.mutate(
                 {
                   teamId: String(id),
-                  data: { player_id: Number(selectedPlayerId), is_captain: isCaptain },
+                  data: { player_id: Number(selectedPlayerId), is_captain: false },
                 },
                 {
                   onSuccess: () => {
                     setSelectedPlayerId(null)
-                    setIsCaptain(false)
                   },
                 },
               )
