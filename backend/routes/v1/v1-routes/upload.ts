@@ -76,9 +76,9 @@ export const uploadHandler: RouteHandler<typeof uploadRoute, AppEnv> = async (c)
   const hash = crypto.createHash("sha256").update(buffer).digest("hex").slice(0, 16);
   const baseKey = `${type}/${hash}`;
 
-  const [originalPng, ...resizedPngs] = await Promise.all([
+  const [originalPng, resizedPngs] = await Promise.all([
     sharp(buffer).png().toBuffer(),
-    ...IMAGE_WIDTHS.map((w) => sharp(buffer).resize({ width: w }).png().toBuffer()),
+    Promise.all(IMAGE_WIDTHS.map((w) => sharp(buffer).resize({ width: w }).png().toBuffer())),
   ]);
 
   // CloudFront forwards the full path to S3, so /media/team/x.png → S3 key media/team/x.png
@@ -89,10 +89,10 @@ export const uploadHandler: RouteHandler<typeof uploadRoute, AppEnv> = async (c)
       Body: originalPng,
       ContentType: "image/png",
     })),
-    ...IMAGE_WIDTHS.map((w, i) => s3.send(new PutObjectCommand({
+    ...resizedPngs.map((png, i) => s3.send(new PutObjectCommand({
       Bucket: ASSETS_BUCKET_NAME,
-      Key: `media/${baseKey}-w${w}.png`,
-      Body: resizedPngs[i],
+      Key: `media/${baseKey}-w${IMAGE_WIDTHS[i]}.png`,
+      Body: png,
       ContentType: "image/png",
     }))),
   ]);
