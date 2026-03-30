@@ -62,3 +62,20 @@ jobs:
           export FLYWAY_PASSWORD="$PGPASSWORD"
           export FLYWAY_LOCATIONS=filesystem:db/migrations
           flyway migrate
+
+      - name: Set up Node.js 24
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm ci
+
+      - name: Generate DB types and type-check
+        working-directory: backend
+        env:
+          DATABASE_URL: postgresql://${{ env.PGUSER }}:${{ env.PGPASSWORD }}@${{ env.PGHOST }}:${{ env.PGPORT }}/${{ env.PGDATABASE }}
+        run: |
+          npx kysely-codegen
+          npx tsc --noEmit

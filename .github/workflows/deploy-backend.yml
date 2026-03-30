@@ -15,8 +15,26 @@ jobs:
   test:
     uses: ./.github/workflows/ci-tests.yml
 
-  build:
+  migrate:
     needs: test
+    runs-on: ubuntu-latest
+    environment: prod
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install Flyway
+        uses: ./.github/actions/install-flyway
+
+      - name: Run migrations
+        env:
+          FLYWAY_URL: ${{ secrets.FLYWAY_URL }}
+          FLYWAY_USER: ${{ secrets.DATABASE_USER }}
+          FLYWAY_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+          FLYWAY_LOCATIONS: filesystem:db/migrations
+        run: flyway migrate
+
+  build:
+    needs: migrate
     environment: prod
     env:
       GCP_PROJECT: ${{ vars.GCP_PROJECT }}
@@ -58,26 +76,8 @@ jobs:
           docker tag ghcr.io/${{ github.repository }}:${{ github.sha }} ghcr.io/${{ github.repository }}:latest
           docker push ghcr.io/${{ github.repository }}:latest
 
-  migrate:
-    needs: build
-    runs-on: ubuntu-latest
-    environment: prod
-    steps:
-      - uses: actions/checkout@v6
-
-      - name: Install Flyway
-        uses: ./.github/actions/install-flyway
-
-      - name: Run migrations
-        env:
-          FLYWAY_URL: ${{ secrets.FLYWAY_URL }}
-          FLYWAY_USER: ${{ secrets.DATABASE_USER }}
-          FLYWAY_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
-          FLYWAY_LOCATIONS: filesystem:db/migrations
-        run: flyway migrate
-
   deploy:
-    needs: migrate
+    needs: build
     runs-on: ubuntu-latest
     environment: prod
     env:
