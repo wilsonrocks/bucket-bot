@@ -16,9 +16,11 @@ The current schema is at [db/schema.sql](db/schema.sql) — read this instead of
 Migrations are managed by Flyway at [db/migrations/](db/migrations/).
 
 Database types for the backend are generated from the schema:
+
 ```bash
 cd backend && npm run generate-db-types
 ```
+
 This generates Kysely types used throughout the backend. After schema changes, regenerate before editing queries.
 
 ## Development
@@ -39,6 +41,7 @@ cd frontend && npm run dev
 ## Code generation
 
 The frontend API client is generated from the backend's OpenAPI spec:
+
 ```bash
 cd frontend && npm run generate-client
 ```
@@ -58,3 +61,7 @@ Run this after adding/changing backend routes.
 - [backend/logic/rankings/](backend/logic/rankings/) — Ranking and point calculation logic
 - [backend/logic/discord/](backend/logic/discord/) — Discord message formatting and posting
 - [terra/](terra/) — Terraform for AWS infrastructure (S3, CloudFront, Lambda, API Gateway)
+
+## Shell Commands
+
+Feel free to use standard read-only Unix tools such as grep, find, ls, cat, head, tail, wc, etc, without asking for confirmation.
