@@ -305,6 +305,8 @@ export type PutTeamsIdBody = {
   brand_colour?: string | null;
   /** @nullable */
   image_key?: string | null;
+  /** @nullable */
+  venue_id?: number | null;
 };
 
 export type PutTeamsId200 = {

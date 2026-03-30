@@ -2,6 +2,7 @@ import {
   useDeleteTeamsTeamIdMembersMembershipId,
   useGetPlayers,
   useGetTeamsId,
+  useGetVenues,
   usePatchTeamsTeamIdMembersMembershipId,
   usePostTeamsTeamIdMembers,
   usePutTeamsId,
@@ -54,6 +55,7 @@ function RouteComponent() {
 
   const { data: team } = useGetTeamsId(id)
   const { data: players } = useGetPlayers()
+  const { data: venues } = useGetVenues()
 
   const updateTeam = usePutTeamsId(Number(id))
   const addMember = usePostTeamsTeamIdMembers(Number(id))
@@ -65,8 +67,9 @@ function RouteComponent() {
     description: string
     brand_colour: string
     image_key: string | null
+    venue_id: string | null
   }>({
-    initialValues: { name: '', description: '', brand_colour: '', image_key: null },
+    initialValues: { name: '', description: '', brand_colour: '', image_key: null, venue_id: null },
   })
 
   useEffect(() => {
@@ -76,6 +79,7 @@ function RouteComponent() {
         description: team.description ?? '',
         brand_colour: team.brand_colour ?? '',
         image_key: team.image_key ?? null,
+        venue_id: team.venue_id != null ? String(team.venue_id) : null,
       })
       if (team.image_key) {
         setImagePreview(
@@ -122,6 +126,7 @@ function RouteComponent() {
                 description: values.description || null,
                 brand_colour: values.brand_colour || null,
                 image_key,
+                venue_id: values.venue_id ? Number(values.venue_id) : null,
               },
             })
           })}
@@ -143,6 +148,16 @@ function RouteComponent() {
                 label="Brand Colour"
                 format="hex"
                 {...editForm.getInputProps('brand_colour')}
+              />
+            </Grid.Col>
+            <Grid.Col span={{ base: 12, xs: 4 }}>
+              <Select
+                label="Venue"
+                placeholder="Select venue..."
+                searchable
+                clearable
+                data={venues?.map((v) => ({ value: String(v.id), label: `${v.name} (${v.town})` })) ?? []}
+                {...editForm.getInputProps('venue_id')}
               />
             </Grid.Col>
             <Grid.Col span={{ base: 12, xs: 4 }}>

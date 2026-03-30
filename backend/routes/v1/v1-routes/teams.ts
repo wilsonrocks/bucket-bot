@@ -155,6 +155,7 @@ const UpdateTeamBodySchema = z.object({
   description: z.string().nullable().optional(),
   brand_colour: z.string().nullable().optional(),
   image_key: z.string().nullable().optional(),
+  venue_id: z.number().nullable().optional(),
 });
 
 export const updateTeamRoute = createRoute({
