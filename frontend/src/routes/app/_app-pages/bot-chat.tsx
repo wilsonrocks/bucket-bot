@@ -3,6 +3,7 @@ import {
   usePostBotChatClearTestChannel,
   usePostBotChatPostMessage,
 } from '@/api/hooks'
+import { RequireRankingReporter } from '@/components/RequireRankingReporter'
 import { modals } from '@mantine/modals'
 import {
   Box,
@@ -17,7 +18,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 
 export const Route = createFileRoute('/app/_app-pages/bot-chat')({
-  component: RouteComponent,
+  component: () => <RequireRankingReporter><RouteComponent /></RequireRankingReporter>,
   staticData: {
     title: 'Bot Chat',
   },

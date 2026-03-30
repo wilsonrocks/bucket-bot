@@ -24,6 +24,12 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  DeleteTeamsId200,
+  DeleteTeamsId403,
+  DeleteTeamsId404,
+  DeleteTeamsTeamIdMembersMembershipId200,
+  DeleteTeamsTeamIdMembersMembershipId403,
+  DeleteTeamsTeamIdMembersMembershipId404,
   GetAllDiscordUsers200Item,
   GetBotChatChannels200Item,
   GetFactionRankings200Item,
@@ -43,6 +49,9 @@ import type {
   GetSearchDiscordUsers200Item,
   GetSearchDiscordUsers400,
   GetSearchDiscordUsersParams,
+  GetTeams200Item,
+  GetTeamsId200,
+  GetTeamsId404,
   GetTiers200Item,
   GetTourney200Item,
   GetTourneyId200,
@@ -50,6 +59,10 @@ import type {
   GetTourneysPlayerPlayerId400,
   GetUnmappedIdentities200Item,
   GetVenues200Item,
+  PatchTeamsTeamIdMembersMembershipId200,
+  PatchTeamsTeamIdMembersMembershipId403,
+  PatchTeamsTeamIdMembersMembershipId404,
+  PatchTeamsTeamIdMembersMembershipIdBody,
   PostBotChatClearTestChannel200,
   PostBotChatClearTestChannel404,
   PostBotChatPostMessage200,
@@ -58,6 +71,9 @@ import type {
   PostBotEventId200,
   PostBotEventId400,
   PostBotEventId502,
+  PostCreateTeam201,
+  PostCreateTeam403,
+  PostCreateTeamBody,
   PostCreateVenue201,
   PostCreateVenue400,
   PostCreateVenueBody,
@@ -78,12 +94,23 @@ import type {
   PostPostFactionRankings400,
   PostPostFactionRankings500,
   PostPostFactionRankingsParams,
+  PostTeamsTeamIdMembers201,
+  PostTeamsTeamIdMembers403,
+  PostTeamsTeamIdMembersBody,
   PostToken200,
   PostToken400,
   PostToken502,
   PostTokenBody,
   PostTourney200,
-  PostTourneyBody
+  PostTourneyBody,
+  PostUpload200,
+  PostUpload400,
+  PostUpload413,
+  PostUploadParams,
+  PutTeamsId200,
+  PutTeamsId403,
+  PutTeamsId404,
+  PutTeamsIdBody
 } from '../bucketBotAPI.schemas';
 
 import { customFetch } from '../../custom-instance';
@@ -1822,7 +1849,398 @@ export function useGetUnmappedIdentities<TData = Awaited<ReturnType<typeof getUn
 
 
 
-export type postLongshanksEventIdResponse200 = {
+export type getTeamsResponse200 = {
+  data: GetTeams200Item[]
+  status: 200
+}
+
+export type getTeamsResponseSuccess = (getTeamsResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getTeamsResponse = (getTeamsResponseSuccess)
+
+export const getGetTeamsUrl = () => {
+
+
+  
+
+  return `/v1/teams`
+}
+
+export const getTeams = async ( options?: RequestInit): Promise<getTeamsResponse> => {
+  
+  return customFetch<getTeamsResponse>(getGetTeamsUrl(),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
+
+export const getGetTeamsQueryKey = () => {
+    return [
+    `/v1/teams`
+    ] as const;
+    }
+
+    
+export const getGetTeamsQueryOptions = <TData = Awaited<ReturnType<typeof getTeams>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTeams>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetTeamsQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTeams>>> = ({ signal }) => getTeams({ signal, ...requestOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTeams>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetTeamsQueryResult = NonNullable<Awaited<ReturnType<typeof getTeams>>>
+export type GetTeamsQueryError = unknown
+
+
+export function useGetTeams<TData = Awaited<ReturnType<typeof getTeams>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTeams>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTeams>>,
+          TError,
+          Awaited<ReturnType<typeof getTeams>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetTeams<TData = Awaited<ReturnType<typeof getTeams>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTeams>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTeams>>,
+          TError,
+          Awaited<ReturnType<typeof getTeams>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetTeams<TData = Awaited<ReturnType<typeof getTeams>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTeams>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetTeams<TData = Awaited<ReturnType<typeof getTeams>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTeams>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetTeamsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+export type getTeamsIdResponse200 = {
+  data: GetTeamsId200
+  status: 200
+}
+
+export type getTeamsIdResponse404 = {
+  data: GetTeamsId404
+  status: 404
+}
+
+export type getTeamsIdResponseSuccess = (getTeamsIdResponse200) & {
+  headers: Headers;
+};
+export type getTeamsIdResponseError = (getTeamsIdResponse404) & {
+  headers: Headers;
+};
+
+export type getTeamsIdResponse = (getTeamsIdResponseSuccess | getTeamsIdResponseError)
+
+export const getGetTeamsIdUrl = (id: string,) => {
+
+
+  
+
+  return `/v1/teams/${id}`
+}
+
+export const getTeamsId = async (id: string, options?: RequestInit): Promise<getTeamsIdResponse> => {
+  
+  return customFetch<getTeamsIdResponse>(getGetTeamsIdUrl(id),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
+
+export const getGetTeamsIdQueryKey = (id: string,) => {
+    return [
+    `/v1/teams/${id}`
+    ] as const;
+    }
+
+    
+export const getGetTeamsIdQueryOptions = <TData = Awaited<ReturnType<typeof getTeamsId>>, TError = GetTeamsId404>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTeamsId>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetTeamsIdQueryKey(id);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTeamsId>>> = ({ signal }) => getTeamsId(id, { signal, ...requestOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTeamsId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetTeamsIdQueryResult = NonNullable<Awaited<ReturnType<typeof getTeamsId>>>
+export type GetTeamsIdQueryError = GetTeamsId404
+
+
+export function useGetTeamsId<TData = Awaited<ReturnType<typeof getTeamsId>>, TError = GetTeamsId404>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTeamsId>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTeamsId>>,
+          TError,
+          Awaited<ReturnType<typeof getTeamsId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetTeamsId<TData = Awaited<ReturnType<typeof getTeamsId>>, TError = GetTeamsId404>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTeamsId>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTeamsId>>,
+          TError,
+          Awaited<ReturnType<typeof getTeamsId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetTeamsId<TData = Awaited<ReturnType<typeof getTeamsId>>, TError = GetTeamsId404>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTeamsId>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetTeamsId<TData = Awaited<ReturnType<typeof getTeamsId>>, TError = GetTeamsId404>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTeamsId>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetTeamsIdQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+export type putTeamsIdResponse200 = {
+  data: PutTeamsId200
+  status: 200
+}
+
+export type putTeamsIdResponse403 = {
+  data: PutTeamsId403
+  status: 403
+}
+
+export type putTeamsIdResponse404 = {
+  data: PutTeamsId404
+  status: 404
+}
+
+export type putTeamsIdResponseSuccess = (putTeamsIdResponse200) & {
+  headers: Headers;
+};
+export type putTeamsIdResponseError = (putTeamsIdResponse403 | putTeamsIdResponse404) & {
+  headers: Headers;
+};
+
+export type putTeamsIdResponse = (putTeamsIdResponseSuccess | putTeamsIdResponseError)
+
+export const getPutTeamsIdUrl = (id: string,) => {
+
+
+  
+
+  return `/v1/teams/${id}`
+}
+
+export const putTeamsId = async (id: string,
+    putTeamsIdBody: PutTeamsIdBody, options?: RequestInit): Promise<putTeamsIdResponse> => {
+  
+  return customFetch<putTeamsIdResponse>(getPutTeamsIdUrl(id),
+  {      
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      putTeamsIdBody,)
+  }
+);}
+  
+
+
+
+export const getPutTeamsIdMutationOptions = <TError = PutTeamsId403 | PutTeamsId404,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putTeamsId>>, TError,{id: string;data: PutTeamsIdBody}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof putTeamsId>>, TError,{id: string;data: PutTeamsIdBody}, TContext> => {
+
+const mutationKey = ['putTeamsId'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putTeamsId>>, {id: string;data: PutTeamsIdBody}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  putTeamsId(id,data,requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PutTeamsIdMutationResult = NonNullable<Awaited<ReturnType<typeof putTeamsId>>>
+    export type PutTeamsIdMutationBody = PutTeamsIdBody
+    export type PutTeamsIdMutationError = PutTeamsId403 | PutTeamsId404
+
+    export const usePutTeamsId = <TError = PutTeamsId403 | PutTeamsId404,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putTeamsId>>, TError,{id: string;data: PutTeamsIdBody}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof putTeamsId>>,
+        TError,
+        {id: string;data: PutTeamsIdBody},
+        TContext
+      > => {
+      return useMutation(getPutTeamsIdMutationOptions(options), queryClient);
+    }
+    export type deleteTeamsIdResponse200 = {
+  data: DeleteTeamsId200
+  status: 200
+}
+
+export type deleteTeamsIdResponse403 = {
+  data: DeleteTeamsId403
+  status: 403
+}
+
+export type deleteTeamsIdResponse404 = {
+  data: DeleteTeamsId404
+  status: 404
+}
+
+export type deleteTeamsIdResponseSuccess = (deleteTeamsIdResponse200) & {
+  headers: Headers;
+};
+export type deleteTeamsIdResponseError = (deleteTeamsIdResponse403 | deleteTeamsIdResponse404) & {
+  headers: Headers;
+};
+
+export type deleteTeamsIdResponse = (deleteTeamsIdResponseSuccess | deleteTeamsIdResponseError)
+
+export const getDeleteTeamsIdUrl = (id: string,) => {
+
+
+  
+
+  return `/v1/teams/${id}`
+}
+
+export const deleteTeamsId = async (id: string, options?: RequestInit): Promise<deleteTeamsIdResponse> => {
+  
+  return customFetch<deleteTeamsIdResponse>(getDeleteTeamsIdUrl(id),
+  {      
+    ...options,
+    method: 'DELETE'
+    
+    
+  }
+);}
+  
+
+
+
+export const getDeleteTeamsIdMutationOptions = <TError = DeleteTeamsId403 | DeleteTeamsId404,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteTeamsId>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteTeamsId>>, TError,{id: string}, TContext> => {
+
+const mutationKey = ['deleteTeamsId'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteTeamsId>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteTeamsId(id,requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteTeamsIdMutationResult = NonNullable<Awaited<ReturnType<typeof deleteTeamsId>>>
+    
+    export type DeleteTeamsIdMutationError = DeleteTeamsId403 | DeleteTeamsId404
+
+    export const useDeleteTeamsId = <TError = DeleteTeamsId403 | DeleteTeamsId404,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteTeamsId>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteTeamsId>>,
+        TError,
+        {id: string},
+        TContext
+      > => {
+      return useMutation(getDeleteTeamsIdMutationOptions(options), queryClient);
+    }
+    export type postLongshanksEventIdResponse200 = {
   data: PostLongshanksEventId200
   status: 200
 }
@@ -3174,5 +3592,446 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getPostPostFactionRankingsMutationOptions(options), queryClient);
+    }
+    export type postUploadResponse200 = {
+  data: PostUpload200
+  status: 200
+}
+
+export type postUploadResponse400 = {
+  data: PostUpload400
+  status: 400
+}
+
+export type postUploadResponse413 = {
+  data: PostUpload413
+  status: 413
+}
+
+export type postUploadResponseSuccess = (postUploadResponse200) & {
+  headers: Headers;
+};
+export type postUploadResponseError = (postUploadResponse400 | postUploadResponse413) & {
+  headers: Headers;
+};
+
+export type postUploadResponse = (postUploadResponseSuccess | postUploadResponseError)
+
+export const getPostUploadUrl = (params: PostUploadParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/v1/upload?${stringifiedParams}` : `/v1/upload`
+}
+
+export const postUpload = async (params: PostUploadParams, options?: RequestInit): Promise<postUploadResponse> => {
+  
+  return customFetch<postUploadResponse>(getPostUploadUrl(params),
+  {      
+    ...options,
+    method: 'POST'
+    
+    
+  }
+);}
+  
+
+
+
+export const getPostUploadMutationOptions = <TError = PostUpload400 | PostUpload413,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postUpload>>, TError,{params: PostUploadParams}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postUpload>>, TError,{params: PostUploadParams}, TContext> => {
+
+const mutationKey = ['postUpload'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postUpload>>, {params: PostUploadParams}> = (props) => {
+          const {params} = props ?? {};
+
+          return  postUpload(params,requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostUploadMutationResult = NonNullable<Awaited<ReturnType<typeof postUpload>>>
+    
+    export type PostUploadMutationError = PostUpload400 | PostUpload413
+
+    export const usePostUpload = <TError = PostUpload400 | PostUpload413,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postUpload>>, TError,{params: PostUploadParams}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postUpload>>,
+        TError,
+        {params: PostUploadParams},
+        TContext
+      > => {
+      return useMutation(getPostUploadMutationOptions(options), queryClient);
+    }
+    export type postCreateTeamResponse201 = {
+  data: PostCreateTeam201
+  status: 201
+}
+
+export type postCreateTeamResponse403 = {
+  data: PostCreateTeam403
+  status: 403
+}
+
+export type postCreateTeamResponseSuccess = (postCreateTeamResponse201) & {
+  headers: Headers;
+};
+export type postCreateTeamResponseError = (postCreateTeamResponse403) & {
+  headers: Headers;
+};
+
+export type postCreateTeamResponse = (postCreateTeamResponseSuccess | postCreateTeamResponseError)
+
+export const getPostCreateTeamUrl = () => {
+
+
+  
+
+  return `/v1/create-team`
+}
+
+export const postCreateTeam = async (postCreateTeamBody: PostCreateTeamBody, options?: RequestInit): Promise<postCreateTeamResponse> => {
+  
+  return customFetch<postCreateTeamResponse>(getPostCreateTeamUrl(),
+  {      
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      postCreateTeamBody,)
+  }
+);}
+  
+
+
+
+export const getPostCreateTeamMutationOptions = <TError = PostCreateTeam403,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postCreateTeam>>, TError,{data: PostCreateTeamBody}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postCreateTeam>>, TError,{data: PostCreateTeamBody}, TContext> => {
+
+const mutationKey = ['postCreateTeam'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postCreateTeam>>, {data: PostCreateTeamBody}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postCreateTeam(data,requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostCreateTeamMutationResult = NonNullable<Awaited<ReturnType<typeof postCreateTeam>>>
+    export type PostCreateTeamMutationBody = PostCreateTeamBody
+    export type PostCreateTeamMutationError = PostCreateTeam403
+
+    export const usePostCreateTeam = <TError = PostCreateTeam403,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postCreateTeam>>, TError,{data: PostCreateTeamBody}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postCreateTeam>>,
+        TError,
+        {data: PostCreateTeamBody},
+        TContext
+      > => {
+      return useMutation(getPostCreateTeamMutationOptions(options), queryClient);
+    }
+    export type postTeamsTeamIdMembersResponse201 = {
+  data: PostTeamsTeamIdMembers201
+  status: 201
+}
+
+export type postTeamsTeamIdMembersResponse403 = {
+  data: PostTeamsTeamIdMembers403
+  status: 403
+}
+
+export type postTeamsTeamIdMembersResponseSuccess = (postTeamsTeamIdMembersResponse201) & {
+  headers: Headers;
+};
+export type postTeamsTeamIdMembersResponseError = (postTeamsTeamIdMembersResponse403) & {
+  headers: Headers;
+};
+
+export type postTeamsTeamIdMembersResponse = (postTeamsTeamIdMembersResponseSuccess | postTeamsTeamIdMembersResponseError)
+
+export const getPostTeamsTeamIdMembersUrl = (teamId: string,) => {
+
+
+  
+
+  return `/v1/teams/${teamId}/members`
+}
+
+export const postTeamsTeamIdMembers = async (teamId: string,
+    postTeamsTeamIdMembersBody: PostTeamsTeamIdMembersBody, options?: RequestInit): Promise<postTeamsTeamIdMembersResponse> => {
+  
+  return customFetch<postTeamsTeamIdMembersResponse>(getPostTeamsTeamIdMembersUrl(teamId),
+  {      
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      postTeamsTeamIdMembersBody,)
+  }
+);}
+  
+
+
+
+export const getPostTeamsTeamIdMembersMutationOptions = <TError = PostTeamsTeamIdMembers403,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postTeamsTeamIdMembers>>, TError,{teamId: string;data: PostTeamsTeamIdMembersBody}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postTeamsTeamIdMembers>>, TError,{teamId: string;data: PostTeamsTeamIdMembersBody}, TContext> => {
+
+const mutationKey = ['postTeamsTeamIdMembers'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postTeamsTeamIdMembers>>, {teamId: string;data: PostTeamsTeamIdMembersBody}> = (props) => {
+          const {teamId,data} = props ?? {};
+
+          return  postTeamsTeamIdMembers(teamId,data,requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostTeamsTeamIdMembersMutationResult = NonNullable<Awaited<ReturnType<typeof postTeamsTeamIdMembers>>>
+    export type PostTeamsTeamIdMembersMutationBody = PostTeamsTeamIdMembersBody
+    export type PostTeamsTeamIdMembersMutationError = PostTeamsTeamIdMembers403
+
+    export const usePostTeamsTeamIdMembers = <TError = PostTeamsTeamIdMembers403,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postTeamsTeamIdMembers>>, TError,{teamId: string;data: PostTeamsTeamIdMembersBody}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postTeamsTeamIdMembers>>,
+        TError,
+        {teamId: string;data: PostTeamsTeamIdMembersBody},
+        TContext
+      > => {
+      return useMutation(getPostTeamsTeamIdMembersMutationOptions(options), queryClient);
+    }
+    export type patchTeamsTeamIdMembersMembershipIdResponse200 = {
+  data: PatchTeamsTeamIdMembersMembershipId200
+  status: 200
+}
+
+export type patchTeamsTeamIdMembersMembershipIdResponse403 = {
+  data: PatchTeamsTeamIdMembersMembershipId403
+  status: 403
+}
+
+export type patchTeamsTeamIdMembersMembershipIdResponse404 = {
+  data: PatchTeamsTeamIdMembersMembershipId404
+  status: 404
+}
+
+export type patchTeamsTeamIdMembersMembershipIdResponseSuccess = (patchTeamsTeamIdMembersMembershipIdResponse200) & {
+  headers: Headers;
+};
+export type patchTeamsTeamIdMembersMembershipIdResponseError = (patchTeamsTeamIdMembersMembershipIdResponse403 | patchTeamsTeamIdMembersMembershipIdResponse404) & {
+  headers: Headers;
+};
+
+export type patchTeamsTeamIdMembersMembershipIdResponse = (patchTeamsTeamIdMembersMembershipIdResponseSuccess | patchTeamsTeamIdMembersMembershipIdResponseError)
+
+export const getPatchTeamsTeamIdMembersMembershipIdUrl = (teamId: string,
+    membershipId: string,) => {
+
+
+  
+
+  return `/v1/teams/${teamId}/members/${membershipId}`
+}
+
+export const patchTeamsTeamIdMembersMembershipId = async (teamId: string,
+    membershipId: string,
+    patchTeamsTeamIdMembersMembershipIdBody: PatchTeamsTeamIdMembersMembershipIdBody, options?: RequestInit): Promise<patchTeamsTeamIdMembersMembershipIdResponse> => {
+  
+  return customFetch<patchTeamsTeamIdMembersMembershipIdResponse>(getPatchTeamsTeamIdMembersMembershipIdUrl(teamId,membershipId),
+  {      
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      patchTeamsTeamIdMembersMembershipIdBody,)
+  }
+);}
+  
+
+
+
+export const getPatchTeamsTeamIdMembersMembershipIdMutationOptions = <TError = PatchTeamsTeamIdMembersMembershipId403 | PatchTeamsTeamIdMembersMembershipId404,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchTeamsTeamIdMembersMembershipId>>, TError,{teamId: string;membershipId: string;data: PatchTeamsTeamIdMembersMembershipIdBody}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof patchTeamsTeamIdMembersMembershipId>>, TError,{teamId: string;membershipId: string;data: PatchTeamsTeamIdMembersMembershipIdBody}, TContext> => {
+
+const mutationKey = ['patchTeamsTeamIdMembersMembershipId'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof patchTeamsTeamIdMembersMembershipId>>, {teamId: string;membershipId: string;data: PatchTeamsTeamIdMembersMembershipIdBody}> = (props) => {
+          const {teamId,membershipId,data} = props ?? {};
+
+          return  patchTeamsTeamIdMembersMembershipId(teamId,membershipId,data,requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PatchTeamsTeamIdMembersMembershipIdMutationResult = NonNullable<Awaited<ReturnType<typeof patchTeamsTeamIdMembersMembershipId>>>
+    export type PatchTeamsTeamIdMembersMembershipIdMutationBody = PatchTeamsTeamIdMembersMembershipIdBody
+    export type PatchTeamsTeamIdMembersMembershipIdMutationError = PatchTeamsTeamIdMembersMembershipId403 | PatchTeamsTeamIdMembersMembershipId404
+
+    export const usePatchTeamsTeamIdMembersMembershipId = <TError = PatchTeamsTeamIdMembersMembershipId403 | PatchTeamsTeamIdMembersMembershipId404,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchTeamsTeamIdMembersMembershipId>>, TError,{teamId: string;membershipId: string;data: PatchTeamsTeamIdMembersMembershipIdBody}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof patchTeamsTeamIdMembersMembershipId>>,
+        TError,
+        {teamId: string;membershipId: string;data: PatchTeamsTeamIdMembersMembershipIdBody},
+        TContext
+      > => {
+      return useMutation(getPatchTeamsTeamIdMembersMembershipIdMutationOptions(options), queryClient);
+    }
+    export type deleteTeamsTeamIdMembersMembershipIdResponse200 = {
+  data: DeleteTeamsTeamIdMembersMembershipId200
+  status: 200
+}
+
+export type deleteTeamsTeamIdMembersMembershipIdResponse403 = {
+  data: DeleteTeamsTeamIdMembersMembershipId403
+  status: 403
+}
+
+export type deleteTeamsTeamIdMembersMembershipIdResponse404 = {
+  data: DeleteTeamsTeamIdMembersMembershipId404
+  status: 404
+}
+
+export type deleteTeamsTeamIdMembersMembershipIdResponseSuccess = (deleteTeamsTeamIdMembersMembershipIdResponse200) & {
+  headers: Headers;
+};
+export type deleteTeamsTeamIdMembersMembershipIdResponseError = (deleteTeamsTeamIdMembersMembershipIdResponse403 | deleteTeamsTeamIdMembersMembershipIdResponse404) & {
+  headers: Headers;
+};
+
+export type deleteTeamsTeamIdMembersMembershipIdResponse = (deleteTeamsTeamIdMembersMembershipIdResponseSuccess | deleteTeamsTeamIdMembersMembershipIdResponseError)
+
+export const getDeleteTeamsTeamIdMembersMembershipIdUrl = (teamId: string,
+    membershipId: string,) => {
+
+
+  
+
+  return `/v1/teams/${teamId}/members/${membershipId}`
+}
+
+export const deleteTeamsTeamIdMembersMembershipId = async (teamId: string,
+    membershipId: string, options?: RequestInit): Promise<deleteTeamsTeamIdMembersMembershipIdResponse> => {
+  
+  return customFetch<deleteTeamsTeamIdMembersMembershipIdResponse>(getDeleteTeamsTeamIdMembersMembershipIdUrl(teamId,membershipId),
+  {      
+    ...options,
+    method: 'DELETE'
+    
+    
+  }
+);}
+  
+
+
+
+export const getDeleteTeamsTeamIdMembersMembershipIdMutationOptions = <TError = DeleteTeamsTeamIdMembersMembershipId403 | DeleteTeamsTeamIdMembersMembershipId404,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteTeamsTeamIdMembersMembershipId>>, TError,{teamId: string;membershipId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteTeamsTeamIdMembersMembershipId>>, TError,{teamId: string;membershipId: string}, TContext> => {
+
+const mutationKey = ['deleteTeamsTeamIdMembersMembershipId'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteTeamsTeamIdMembersMembershipId>>, {teamId: string;membershipId: string}> = (props) => {
+          const {teamId,membershipId} = props ?? {};
+
+          return  deleteTeamsTeamIdMembersMembershipId(teamId,membershipId,requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteTeamsTeamIdMembersMembershipIdMutationResult = NonNullable<Awaited<ReturnType<typeof deleteTeamsTeamIdMembersMembershipId>>>
+    
+    export type DeleteTeamsTeamIdMembersMembershipIdMutationError = DeleteTeamsTeamIdMembersMembershipId403 | DeleteTeamsTeamIdMembersMembershipId404
+
+    export const useDeleteTeamsTeamIdMembersMembershipId = <TError = DeleteTeamsTeamIdMembersMembershipId403 | DeleteTeamsTeamIdMembersMembershipId404,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteTeamsTeamIdMembersMembershipId>>, TError,{teamId: string;membershipId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteTeamsTeamIdMembersMembershipId>>,
+        TError,
+        {teamId: string;membershipId: string},
+        TContext
+      > => {
+      return useMutation(getDeleteTeamsTeamIdMembersMembershipIdMutationOptions(options), queryClient);
     }
     

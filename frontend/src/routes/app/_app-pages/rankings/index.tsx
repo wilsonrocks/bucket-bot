@@ -1,3 +1,4 @@
+import { RequireRankingReporter } from '@/components/RequireRankingReporter'
 import { createFileRoute } from '@tanstack/react-router'
 
 import {
@@ -17,7 +18,7 @@ import { Route as IdentitiesRoute } from '../identities'
 import { Link } from '@/components/link'
 
 export const Route = createFileRoute('/app/_app-pages/rankings/')({
-  component: RouteComponent,
+  component: () => <RequireRankingReporter><RouteComponent /></RequireRankingReporter>,
   staticData: {
     title: 'Rankings',
   },

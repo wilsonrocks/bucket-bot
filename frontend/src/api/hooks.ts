@@ -12,6 +12,8 @@ import {
   useGetRankingsTypeCode as useGetRankingsTypeCodeGenerated,
   useGetRankingTypes as useGetRankingTypesGenerated,
   useGetSearchDiscordUsers as useGetSearchDiscordUsersGenerated,
+  useGetTeams as useGetTeamsGenerated,
+  useGetTeamsId as useGetTeamsIdGenerated,
   useGetTiers as useGetTiersGenerated,
   useGetTourney as useGetTourneyGenerated,
   useGetTourneyId as useGetTourneyIdGenerated,
@@ -19,16 +21,24 @@ import {
   useGetUnmappedIdentities as useGetUnmappedIdentitiesGenerated,
   useGetVenues as useGetVenuesGenerated,
   usePostBotEventId as usePostBotEventIdGenerated,
+  usePostCreateTeam as usePostCreateTeamGenerated,
   usePostCreateVenue as usePostCreateVenueGenerated,
   usePostFetchDiscordUserIds as usePostFetchDiscordUserIdsGenerated,
   usePostLongshanksEventId as usePostLongshanksEventIdGenerated,
   usePostMatchPlayerToDiscordUser as usePostMatchPlayerToDiscordUserGenerated,
   usePostPostDiscordEventTourneyId as usePostPostDiscordEventTourneyIdGenerated,
+  usePostTeamsTeamIdMembers as usePostTeamsTeamIdMembersGenerated,
   usePostTourney as usePostTourneyGenerated,
+  usePutTeamsId as usePutTeamsIdGenerated,
+  useDeleteTeamsId as useDeleteTeamsIdGenerated,
+  usePatchTeamsTeamIdMembersMembershipId as usePatchTeamsTeamIdMembersMembershipIdGenerated,
+  useDeleteTeamsTeamIdMembersMembershipId as useDeleteTeamsTeamIdMembersMembershipIdGenerated,
   getGetTourneyQueryKey,
   getGetTourneyIdQueryKey,
   getGetUnmappedIdentitiesQueryKey,
   getGetVenuesQueryKey,
+  getGetTeamsQueryKey,
+  getGetTeamsIdQueryKey,
 } from './generated/default/default'
 
 import type {
@@ -190,4 +200,97 @@ export const usePostPostDiscordEventTourneyId = () => {
       },
     },
   })
+}
+
+// ── Teams ──────────────────────────────────────────────────────────────────
+
+export const useGetTeams = (options?: Parameters<typeof useGetTeamsGenerated>[0]) =>
+  useGetTeamsGenerated({ ...options, query: { ...options?.query, select: (res) => res.data } })
+
+export const useGetTeamsId = (id: string, options?: Parameters<typeof useGetTeamsIdGenerated>[1]) =>
+  useGetTeamsIdGenerated(id, { ...options, query: { ...options?.query, select: (res) => res.data } })
+
+export const usePostCreateTeam = () => {
+  const queryClient = useQueryClient()
+  return usePostCreateTeamGenerated({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: getGetTeamsQueryKey() })
+      },
+    },
+  })
+}
+
+export const usePutTeamsId = (id: number) => {
+  const queryClient = useQueryClient()
+  return usePutTeamsIdGenerated({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: getGetTeamsQueryKey() })
+        queryClient.invalidateQueries({ queryKey: getGetTeamsIdQueryKey(String(id)) })
+      },
+    },
+  })
+}
+
+export const useDeleteTeamsId = () => {
+  const queryClient = useQueryClient()
+  return useDeleteTeamsIdGenerated({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: getGetTeamsQueryKey() })
+      },
+    },
+  })
+}
+
+export const usePostTeamsTeamIdMembers = (teamId: number) => {
+  const queryClient = useQueryClient()
+  return usePostTeamsTeamIdMembersGenerated({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: getGetTeamsIdQueryKey(String(teamId)) })
+      },
+    },
+  })
+}
+
+export const usePatchTeamsTeamIdMembersMembershipId = (teamId: number) => {
+  const queryClient = useQueryClient()
+  return usePatchTeamsTeamIdMembersMembershipIdGenerated({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: getGetTeamsIdQueryKey(String(teamId)) })
+      },
+    },
+  })
+}
+
+export const useDeleteTeamsTeamIdMembersMembershipId = (teamId: number) => {
+  const queryClient = useQueryClient()
+  return useDeleteTeamsTeamIdMembersMembershipIdGenerated({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: getGetTeamsIdQueryKey(String(teamId)) })
+      },
+    },
+  })
+}
+
+export const uploadTeamImage = async (file: File, type: string): Promise<string> => {
+  const stored = localStorage.getItem('auth')
+  const jwt = stored ? (JSON.parse(stored) as { jwt: string }).jwt : null
+  const formData = new FormData()
+  formData.append('file', file)
+  const response = await fetch(
+    `${import.meta.env.VITE_BACKEND_URL}/v1/upload?type=${encodeURIComponent(type)}`,
+    {
+      method: 'POST',
+      headers: jwt ? { Authorization: `Bearer ${jwt}` } : {},
+      body: formData,
+    },
+  )
+  if (!response.ok) throw new Error(`Upload failed: ${response.statusText}`)
+  const { key } = (await response.json()) as { key: string }
+  return key
 }

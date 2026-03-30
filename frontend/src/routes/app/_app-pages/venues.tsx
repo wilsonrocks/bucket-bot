@@ -1,10 +1,11 @@
 import { useGetVenues, usePostCreateVenue } from '@/api/hooks'
+import { RequireRankingReporter } from '@/components/RequireRankingReporter'
 import { Box, Button, Grid, Paper, Table, TextInput } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/app/_app-pages/venues')({
-  component: RouteComponent,
+  component: () => <RequireRankingReporter><RouteComponent /></RequireRankingReporter>,
   staticData: { title: 'Venues' },
 })
 

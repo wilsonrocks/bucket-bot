@@ -29,7 +29,7 @@ export const customFetch = async <T>(
     throw new Error(errorMsg)
   }
 
-  if (method === 'POST') {
+  if (method !== 'GET') {
     notifications.show({
       title: 'Success',
       message: `${url} succeeded`,

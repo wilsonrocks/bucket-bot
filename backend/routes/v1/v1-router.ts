@@ -88,6 +88,25 @@ import {
   getPlayersOverTime,
   getPlayersOverTimeRoute,
 } from "./v1-routes/players-over-time.js";
+import {
+  addTeamMemberHandler,
+  addTeamMemberRoute,
+  createTeamHandler,
+  createTeamRoute,
+  deleteTeamHandler,
+  deleteTeamRoute,
+  getTeamByIdHandler,
+  getTeamByIdRoute,
+  getTeamsHandler,
+  getTeamsRoute,
+  removeTeamMemberHandler,
+  removeTeamMemberRoute,
+  updateTeamHandler,
+  updateTeamMemberHandler,
+  updateTeamMemberRoute,
+  updateTeamRoute,
+} from "./v1-routes/teams.js";
+import { uploadHandler, uploadRoute } from "./v1-routes/upload.js";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) throw new Error("JWT_SECRET is not defined");
@@ -211,6 +230,8 @@ v1Router.openapi(getFactionRankingsRoute, getFactionRankings);
 v1Router.openapi(getFactionsOverTimeRoute, getFactionsOverTime);
 v1Router.openapi(getPlayersOverTimeRoute, getPlayersOverTime);
 v1Router.openapi(getUnmappedIdentitiesRoute, getUnmappedIdentities);
+v1Router.openapi(getTeamsRoute, getTeamsHandler);
+v1Router.openapi(getTeamByIdRoute, getTeamByIdHandler);
 
 // ── JWT middleware (all routes below require authentication) ───────────────
 
@@ -233,3 +254,10 @@ v1Router.openapi(updateTourneyRoute, updateTourney);
 v1Router.route("/bot-chat", botChatRouter);
 v1Router.openapi(generateFactionRankingsRoute, generateFactionRankingsHandler);
 v1Router.openapi(postFactionRankingsRoute, postFactionRankingsHandler);
+v1Router.openapi(uploadRoute, uploadHandler);
+v1Router.openapi(createTeamRoute, createTeamHandler);
+v1Router.openapi(updateTeamRoute, updateTeamHandler);
+v1Router.openapi(deleteTeamRoute, deleteTeamHandler);
+v1Router.openapi(addTeamMemberRoute, addTeamMemberHandler);
+v1Router.openapi(updateTeamMemberRoute, updateTeamMemberHandler);
+v1Router.openapi(removeTeamMemberRoute, removeTeamMemberHandler);

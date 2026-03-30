@@ -1,10 +1,6 @@
 import { createRoute, z, type RouteHandler } from "@hono/zod-openapi";
 import type { AppEnv } from "../../../hono-env.js";
-import {
-  getDiscordClient,
-  RANKING_REPORTER_ROLE_ID,
-  UK_MALIFAUX_SERVER_ID,
-} from "../../../logic/discord-client.js";
+import { getCaptainTeamIds, isRankingReporter } from "../permissions.js";
 
 const ErrorSchema = z.object({ error: z.string() });
 
@@ -13,8 +9,15 @@ export const hasRankingReporterRoleRoute = createRoute({
   path: "/has-role",
   responses: {
     200: {
-      content: { "application/json": { schema: z.object({ rankingReporter: z.boolean() }) } },
-      description: "Whether the user has the ranking reporter role",
+      content: {
+        "application/json": {
+          schema: z.object({
+            rankingReporter: z.boolean(),
+            captainOfTeamIds: z.array(z.number()),
+          }),
+        },
+      },
+      description: "The user's permissions",
     },
     400: {
       content: { "application/json": { schema: ErrorSchema } },
@@ -35,24 +38,15 @@ export const hasRankingReporterRole: RouteHandler<typeof hasRankingReporterRoleR
     return c.json({ error: "Missing userId" }, 400);
   }
 
-  const discordClient = await getDiscordClient();
-
-  let guild;
+  let rankingReporter: boolean;
   try {
-    guild = await discordClient.guilds.fetch(UK_MALIFAUX_SERVER_ID);
+    rankingReporter = await isRankingReporter(userId);
   } catch (err) {
     console.error(err);
-    return c.json({ error: "Failed to fetch guild" }, 500);
+    return c.json({ error: "Failed to fetch Discord role" }, 500);
   }
 
-  let member;
-  try {
-    member = await guild.members.fetch(userId);
-  } catch (err) {
-    console.error(err);
-    return c.json({ error: "Failed to fetch guild member" }, 500);
-  }
+  const captainOfTeamIds = await getCaptainTeamIds(userId, c.get("db"));
 
-  const hasRole = member.roles.cache.has(RANKING_REPORTER_ROLE_ID);
-  return c.json({ rankingReporter: hasRole }, 200);
+  return c.json({ rankingReporter, captainOfTeamIds }, 200);
 };
