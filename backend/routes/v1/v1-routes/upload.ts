@@ -25,6 +25,7 @@ const s3 = new S3Client({
 // ── Route ──────────────────────────────────────────────────────────────────
 
 const MAX_BYTES = 10 * 1024 * 1024;
+const IMAGE_WIDTHS = [150, 800] as const;
 
 const ErrorSchema = z.object({ error: z.string() });
 
@@ -75,9 +76,9 @@ export const uploadHandler: RouteHandler<typeof uploadRoute, AppEnv> = async (c)
   const hash = crypto.createHash("sha256").update(buffer).digest("hex").slice(0, 16);
   const baseKey = `${type}/${hash}`;
 
-  const [originalPng, resizedPng] = await Promise.all([
+  const [originalPng, ...resizedPngs] = await Promise.all([
     sharp(buffer).png().toBuffer(),
-    sharp(buffer).resize(200, 200, { fit: "inside" }).png().toBuffer(),
+    ...IMAGE_WIDTHS.map((w) => sharp(buffer).resize({ width: w }).png().toBuffer()),
   ]);
 
   // CloudFront forwards the full path to S3, so /media/team/x.png → S3 key media/team/x.png
@@ -88,12 +89,12 @@ export const uploadHandler: RouteHandler<typeof uploadRoute, AppEnv> = async (c)
       Body: originalPng,
       ContentType: "image/png",
     })),
-    s3.send(new PutObjectCommand({
+    ...IMAGE_WIDTHS.map((w, i) => s3.send(new PutObjectCommand({
       Bucket: ASSETS_BUCKET_NAME,
-      Key: `media/${baseKey}-200x200.png`,
-      Body: resizedPng,
+      Key: `media/${baseKey}-w${w}.png`,
+      Body: resizedPngs[i],
       ContentType: "image/png",
-    })),
+    }))),
   ]);
 
   return c.json({ key: baseKey }, 200);

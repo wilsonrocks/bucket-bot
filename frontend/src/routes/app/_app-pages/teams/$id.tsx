@@ -83,7 +83,7 @@ function RouteComponent() {
       })
       if (team.image_key) {
         setImagePreview(
-          `${import.meta.env.VITE_ASSETS_URL}/${team.image_key}-200x200.png`,
+          `${import.meta.env.VITE_ASSETS_URL}/${team.image_key}-w150.png`,
         )
       }
     }

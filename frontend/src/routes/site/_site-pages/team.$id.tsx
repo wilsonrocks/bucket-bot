@@ -25,9 +25,8 @@ function RouteComponent() {
       {team.description && <p>{team.description}</p>}
       {team.image_key && (
         <Image
-          src={`${import.meta.env.VITE_ASSETS_URL}/${team.image_key}-200x200.png`}
-          w={200}
-          h={200}
+          src={`${import.meta.env.VITE_ASSETS_URL}/${team.image_key}-w800.png`}
+          maw={400}
           fit="contain"
           radius="sm"
           mb="md"
