@@ -42,6 +42,8 @@ export type GetRankingsTypeCode200Item = {
   type_code: string | null;
   id: number;
   name: string;
+  /** @nullable */
+  short_name: string | null;
   [key: string]: unknown | null;
 };
 
@@ -275,6 +277,8 @@ export type GetPlayersOverTimeTypeCode200ItemPlayersItemFactionsItem = {
 export type GetPlayersOverTimeTypeCode200ItemPlayersItem = {
   player_id: number;
   name: string;
+  /** @nullable */
+  short_name: string | null;
   rank: number;
   total_points: number;
   factions: GetPlayersOverTimeTypeCode200ItemPlayersItemFactionsItem[];

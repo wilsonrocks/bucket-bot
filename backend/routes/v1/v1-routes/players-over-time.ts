@@ -7,6 +7,7 @@ const PlayerSnapshotGroupSchema = z.object({
     z.object({
       player_id: z.number(),
       name: z.string(),
+      short_name: z.string().nullable(),
       rank: z.number(),
       total_points: z.number(),
       factions: z.array(
@@ -56,6 +57,7 @@ export const getPlayersOverTime: RouteHandler<
       "ranking_snapshot.total_points",
       "ranking_snapshot_batch.created_at as snapshot_date",
       "player.name",
+      "player.short_name",
     ])
     .execute();
 
@@ -106,6 +108,7 @@ export const getPlayersOverTime: RouteHandler<
         acc[key].players.push({
           player_id: row.player_id,
           name: row.name,
+          short_name: row.short_name,
           rank: row.rank,
           total_points: row.total_points,
           factions: factionMap.get(`${row.batch_id}-${row.player_id}`) ?? [],
