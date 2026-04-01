@@ -1,5 +1,7 @@
 import { useGetRankingTypes, useGetRankingsTypeCode } from '@/api/hooks'
+import { playerShortName } from '@/helpers/player-short-name'
 import { Box, Group, Select, Table, Text } from '@mantine/core'
+import { useMediaQuery } from '@mantine/hooks'
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { Route as PlayerRoute } from '@/routes/site/_site-pages/player.$id'
 import z from 'zod'
@@ -23,13 +25,16 @@ export const Route = createFileRoute('/site/_site-pages/rankings')({
 
 function RouteComponent() {
   const navigate = Route.useNavigate()
+  const isMobile = useMediaQuery('(max-width: 600px)')
 
   const { typeCode } = Route.useSearch()
   const rankingTypes = useGetRankingTypes()
   const rankingDescription = rankingTypes.data?.find(
     (rt) => rt.code === typeCode,
   )?.description
-  const rankings = useGetRankingsTypeCode(typeCode ?? '', { query: { enabled: !!typeCode } })
+  const rankings = useGetRankingsTypeCode(typeCode ?? '', {
+    query: { enabled: !!typeCode },
+  })
   return (
     <div>
       <Group align="center" mb="sm">
@@ -42,7 +47,9 @@ function RouteComponent() {
             label: rt.name,
           }))}
           value={typeCode}
-          onChange={(value) => navigate({ search: (prev) => ({ ...prev, typeCode: value }) })}
+          onChange={(value) =>
+            navigate({ search: (prev) => ({ ...prev, typeCode: value }) })
+          }
         />
         {rankingDescription && <Text>{rankingDescription}</Text>}
       </Group>
@@ -60,8 +67,11 @@ function RouteComponent() {
                 body: rankings.data.map((player) => [
                   <Box w={20}>{player.rank}</Box>,
                   <Box w={150}>
-                    <Link to={PlayerRoute.to} params={{ id: player.player_id! }}>
-                      {player.name}
+                    <Link
+                      to={PlayerRoute.to}
+                      params={{ id: player.player_id! }}
+                    >
+                      {isMobile ? playerShortName(player) : player.name}
                     </Link>
                   </Box>,
                   <Box w={50}>{(player.total_points ?? 0).toFixed(2)}</Box>,
@@ -73,7 +83,9 @@ function RouteComponent() {
           )}
         </Tabs.Panel>
         <Tabs.Panel value="animation">
-          <Text size="sm" c="dimmed" mt="xs">Showing top 16 players</Text>
+          <Text size="sm" c="dimmed" mt="xs">
+            Showing top 16 players
+          </Text>
           <PlayersBarRace typeCode={typeCode ?? ''} />
         </Tabs.Panel>
       </Tabs>

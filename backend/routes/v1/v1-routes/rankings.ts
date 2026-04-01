@@ -10,7 +10,8 @@ const RankingEntrySchema = z.object({
   type_code: z.string().nullable(),
   id: z.number(),
   name: z.string(),
-}).passthrough();
+  short_name: z.string().nullable(),
+});
 
 export const rankingsRoute = createRoute({
   method: "get",

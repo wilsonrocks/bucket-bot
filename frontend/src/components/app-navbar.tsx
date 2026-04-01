@@ -5,6 +5,7 @@ import { Route as EventsAppRoute } from '@/routes/app/_app-pages/events'
 import { Route as IdentitiesRoute } from '@/routes/app/_app-pages/identities'
 import { Route as ImportRoute } from '@/routes/app/_app-pages/import'
 import { Route as RankingsRoute } from '@/routes/app/_app-pages/rankings'
+import { Route as PlayersRoute } from '@/routes/app/_app-pages/players/'
 import { Route as TeamsRoute } from '@/routes/app/_app-pages/teams/'
 import { Route as VenuesRoute } from '@/routes/app/_app-pages/venues'
 
@@ -23,6 +24,7 @@ export const AppNavbar = () => {
             <AppNavLink to={RankingsRoute.to} label="Rankings" />
             <AppNavLink to={ImportRoute.to} label="Import Events" />
             <AppNavLink to={EventsAppRoute.to} label="Edit Events" />
+            <AppNavLink to={PlayersRoute.to} label="Players" />
             <AppNavLink
               to={IdentitiesRoute.to}
               label={

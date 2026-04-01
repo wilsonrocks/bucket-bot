@@ -1,3 +1,5 @@
+// TODO what is with all this as 200s what if these endpoints fail
+
 import { useQueryClient } from '@tanstack/react-query'
 import {
   useGetAllDiscordUsers as useGetAllDiscordUsersGenerated,
@@ -33,12 +35,17 @@ import {
   useDeleteTeamsId as useDeleteTeamsIdGenerated,
   usePatchTeamsTeamIdMembersMembershipId as usePatchTeamsTeamIdMembersMembershipIdGenerated,
   useDeleteTeamsTeamIdMembersMembershipId as useDeleteTeamsTeamIdMembersMembershipIdGenerated,
+  usePutPlayerId as usePutPlayerIdGenerated,
+  useGetPlayerNameExists as useGetPlayerNameExistsGenerated,
   getGetTourneyQueryKey,
   getGetTourneyIdQueryKey,
   getGetUnmappedIdentitiesQueryKey,
   getGetVenuesQueryKey,
   getGetTeamsQueryKey,
   getGetTeamsIdQueryKey,
+  getGetPlayersQueryKey,
+  getGetPlayerIdQueryKey,
+  getGetPlayerNameExistsQueryKey,
 } from './generated/default/default'
 
 import type {
@@ -48,6 +55,7 @@ import type {
   GetTourneysPlayerPlayerId200Item,
   GetPlayerId200,
   GetHasRole200,
+  GetPlayerNameExists200,
 } from './generated/bucketBotAPI.schemas'
 
 // ── Re-export simple mutations (no invalidation needed) ────────────────────
@@ -66,59 +74,195 @@ export type * from './generated/bucketBotAPI.schemas'
 
 // ── Query hooks (wrapped with select to unwrap the response envelope) ──────
 
-export const useGetVenues = (options?: Parameters<typeof useGetVenuesGenerated>[0]) =>
-  useGetVenuesGenerated({ ...options, query: { ...options?.query, select: (res) => res.data } })
+export const useGetVenues = (
+  options?: Parameters<typeof useGetVenuesGenerated>[0],
+) =>
+  useGetVenuesGenerated({
+    ...options,
+    query: { ...options?.query, select: (res) => res.data },
+  })
 
-export const useGetRankingTypes = (options?: Parameters<typeof useGetRankingTypesGenerated>[0]) =>
-  useGetRankingTypesGenerated({ ...options, query: { ...options?.query, select: (res) => res.data } })
+export const useGetRankingTypes = (
+  options?: Parameters<typeof useGetRankingTypesGenerated>[0],
+) =>
+  useGetRankingTypesGenerated({
+    ...options,
+    query: { ...options?.query, select: (res) => res.data },
+  })
 
-export const useGetTourney = (options?: Parameters<typeof useGetTourneyGenerated>[0]) =>
-  useGetTourneyGenerated({ ...options, query: { ...options?.query, select: (res) => res.data } })
+export const useGetTourney = (
+  options?: Parameters<typeof useGetTourneyGenerated>[0],
+) =>
+  useGetTourneyGenerated({
+    ...options,
+    query: { ...options?.query, select: (res) => res.data },
+  })
 
-export const useGetPlayers = (options?: Parameters<typeof useGetPlayersGenerated>[0]) =>
-  useGetPlayersGenerated({ ...options, query: { ...options?.query, select: (res) => res.data } })
+export const useGetPlayers = (
+  options?: Parameters<typeof useGetPlayersGenerated>[0],
+) =>
+  useGetPlayersGenerated({
+    ...options,
+    query: { ...options?.query, select: (res) => res.data },
+  })
 
-export const useGetTiers = (options?: Parameters<typeof useGetTiersGenerated>[0]) =>
-  useGetTiersGenerated({ ...options, query: { ...options?.query, select: (res) => res.data } })
+export const useGetTiers = (
+  options?: Parameters<typeof useGetTiersGenerated>[0],
+) =>
+  useGetTiersGenerated({
+    ...options,
+    query: { ...options?.query, select: (res) => res.data },
+  })
 
-export const useGetFactionRankings = (options?: Parameters<typeof useGetFactionRankingsGenerated>[0]) =>
-  useGetFactionRankingsGenerated({ ...options, query: { ...options?.query, select: (res) => res.data } })
+export const useGetFactionRankings = (
+  options?: Parameters<typeof useGetFactionRankingsGenerated>[0],
+) =>
+  useGetFactionRankingsGenerated({
+    ...options,
+    query: { ...options?.query, select: (res) => res.data },
+  })
 
-export const useGetFactionsOverTime = (options?: Parameters<typeof useGetFactionsOverTimeGenerated>[0]) =>
-  useGetFactionsOverTimeGenerated({ ...options, query: { ...options?.query, select: (res) => res.data } })
+export const useGetFactionsOverTime = (
+  options?: Parameters<typeof useGetFactionsOverTimeGenerated>[0],
+) =>
+  useGetFactionsOverTimeGenerated({
+    ...options,
+    query: { ...options?.query, select: (res) => res.data },
+  })
 
-export const useGetPlayersOverTimeTypeCode = (typeCode: string, options?: Parameters<typeof useGetPlayersOverTimeTypeCodeGenerated>[1]) =>
-  useGetPlayersOverTimeTypeCodeGenerated(typeCode, { ...options, query: { ...options?.query, select: (res) => res.data } })
+export const useGetPlayersOverTimeTypeCode = (
+  typeCode: string,
+  options?: Parameters<typeof useGetPlayersOverTimeTypeCodeGenerated>[1],
+) =>
+  useGetPlayersOverTimeTypeCodeGenerated(typeCode, {
+    ...options,
+    query: { ...options?.query, select: (res) => res.data },
+  })
 
-export const useGetBotChatChannels = (options?: Parameters<typeof useGetBotChatChannelsGenerated>[0]) =>
-  useGetBotChatChannelsGenerated({ ...options, query: { ...options?.query, select: (res) => res.data } })
+export const useGetBotChatChannels = (
+  options?: Parameters<typeof useGetBotChatChannelsGenerated>[0],
+) =>
+  useGetBotChatChannelsGenerated({
+    ...options,
+    query: { ...options?.query, select: (res) => res.data },
+  })
 
-export const useGetAllDiscordUsers = (options?: Parameters<typeof useGetAllDiscordUsersGenerated>[0]) =>
-  useGetAllDiscordUsersGenerated({ ...options, query: { ...options?.query, select: (res) => res.data } })
+export const useGetAllDiscordUsers = (
+  options?: Parameters<typeof useGetAllDiscordUsersGenerated>[0],
+) =>
+  useGetAllDiscordUsersGenerated({
+    ...options,
+    query: { ...options?.query, select: (res) => res.data },
+  })
 
-export const useGetUnmappedIdentities = (options?: Parameters<typeof useGetUnmappedIdentitiesGenerated>[0]) =>
-  useGetUnmappedIdentitiesGenerated({ ...options, query: { ...options?.query, select: (res) => res.data } })
+export const useGetUnmappedIdentities = (
+  options?: Parameters<typeof useGetUnmappedIdentitiesGenerated>[0],
+) =>
+  useGetUnmappedIdentitiesGenerated({
+    ...options,
+    query: { ...options?.query, select: (res) => res.data },
+  })
 
-export const useGetHasRole = (options?: Parameters<typeof useGetHasRoleGenerated>[0]) =>
-  useGetHasRoleGenerated({ ...options, query: { ...options?.query, select: (res) => res.data as GetHasRole200 } })
+export const useGetHasRole = (
+  options?: Parameters<typeof useGetHasRoleGenerated>[0],
+) =>
+  useGetHasRoleGenerated({
+    ...options,
+    query: { ...options?.query, select: (res) => res.data as GetHasRole200 },
+  })
 
-export const useGetTourneyId = (id: string, options?: Parameters<typeof useGetTourneyIdGenerated>[1]) =>
-  useGetTourneyIdGenerated(id, { ...options, query: { ...options?.query, select: (res) => res.data } })
+export const useGetTourneyId = (
+  id: string,
+  options?: Parameters<typeof useGetTourneyIdGenerated>[1],
+) =>
+  useGetTourneyIdGenerated(id, {
+    ...options,
+    query: { ...options?.query, select: (res) => res.data },
+  })
 
-export const useGetPlayerId = (id: string, options?: Parameters<typeof useGetPlayerIdGenerated>[1]) =>
-  useGetPlayerIdGenerated(id, { ...options, query: { ...options?.query, select: (res) => res.data as GetPlayerId200 } })
+export const useGetPlayerId = (
+  id: string,
+  options?: Parameters<typeof useGetPlayerIdGenerated>[1],
+) =>
+  useGetPlayerIdGenerated(id, {
+    ...options,
+    query: { ...options?.query, select: (res) => res.data as GetPlayerId200 },
+  })
 
-export const useGetTourneysPlayerPlayerId = (playerId: string, options?: Parameters<typeof useGetTourneysPlayerPlayerIdGenerated>[1]) =>
-  useGetTourneysPlayerPlayerIdGenerated(playerId, { ...options, query: { ...options?.query, select: (res) => res.data as GetTourneysPlayerPlayerId200Item[] } })
+export const useGetPlayerNameExists = (
+  params: Parameters<typeof useGetPlayerNameExistsGenerated>[0],
+  options?: Parameters<typeof useGetPlayerNameExistsGenerated>[1],
+) =>
+  useGetPlayerNameExistsGenerated(params, {
+    ...options,
+    query: {
+      ...options?.query,
+      select: (res) => res.data as GetPlayerNameExists200,
+    },
+  })
 
-export const useGetRankingsTypeCode = (typeCode: string, options?: Parameters<typeof useGetRankingsTypeCodeGenerated>[1]) =>
-  useGetRankingsTypeCodeGenerated(typeCode, { ...options, query: { ...options?.query, select: (res) => res.data } })
+export const usePutPlayerId = (id: number) => {
+  const queryClient = useQueryClient()
+  return usePutPlayerIdGenerated({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: getGetPlayersQueryKey() })
+        queryClient.invalidateQueries({
+          queryKey: getGetPlayerIdQueryKey(String(id)),
+        })
+        queryClient.invalidateQueries({
+          queryKey: getGetPlayerNameExistsQueryKey(),
+        })
+      },
+    },
+  })
+}
 
-export const useGetRankingsPlayerIdTypeCode = (playerId: string, typeCode: string, options?: Parameters<typeof useGetRankingsPlayerIdTypeCodeGenerated>[2]) =>
-  useGetRankingsPlayerIdTypeCodeGenerated(playerId, typeCode, { ...options, query: { ...options?.query, select: (res) => res.data as GetRankingsPlayerIdTypeCode200 } })
+export const useGetTourneysPlayerPlayerId = (
+  playerId: string,
+  options?: Parameters<typeof useGetTourneysPlayerPlayerIdGenerated>[1],
+) =>
+  useGetTourneysPlayerPlayerIdGenerated(playerId, {
+    ...options,
+    query: {
+      ...options?.query,
+      select: (res) => res.data as GetTourneysPlayerPlayerId200Item[],
+    },
+  })
 
-export const useGetSearchDiscordUsers = (params: GetSearchDiscordUsersParams, options?: Parameters<typeof useGetSearchDiscordUsersGenerated>[1]) =>
-  useGetSearchDiscordUsersGenerated(params, { ...options, query: { ...options?.query, select: (res) => res.data as GetSearchDiscordUsers200Item[] } })
+export const useGetRankingsTypeCode = (
+  typeCode: string,
+  options?: Parameters<typeof useGetRankingsTypeCodeGenerated>[1],
+) =>
+  useGetRankingsTypeCodeGenerated(typeCode, {
+    ...options,
+    query: { ...options?.query, select: (res) => res.data },
+  })
+
+export const useGetRankingsPlayerIdTypeCode = (
+  playerId: string,
+  typeCode: string,
+  options?: Parameters<typeof useGetRankingsPlayerIdTypeCodeGenerated>[2],
+) =>
+  useGetRankingsPlayerIdTypeCodeGenerated(playerId, typeCode, {
+    ...options,
+    query: {
+      ...options?.query,
+      select: (res) => res.data as GetRankingsPlayerIdTypeCode200,
+    },
+  })
+
+export const useGetSearchDiscordUsers = (
+  params: GetSearchDiscordUsersParams,
+  options?: Parameters<typeof useGetSearchDiscordUsersGenerated>[1],
+) =>
+  useGetSearchDiscordUsersGenerated(params, {
+    ...options,
+    query: {
+      ...options?.query,
+      select: (res) => res.data as GetSearchDiscordUsers200Item[],
+    },
+  })
 
 // ── Wrapped mutations with query invalidation ──────────────────────────────
 
@@ -128,7 +272,9 @@ export const usePostLongshanksEventId = () => {
     mutation: {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: getGetTourneyQueryKey() })
-        queryClient.invalidateQueries({ queryKey: getGetUnmappedIdentitiesQueryKey() })
+        queryClient.invalidateQueries({
+          queryKey: getGetUnmappedIdentitiesQueryKey(),
+        })
       },
     },
   })
@@ -140,7 +286,9 @@ export const usePostBotEventId = () => {
     mutation: {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: getGetTourneyQueryKey() })
-        queryClient.invalidateQueries({ queryKey: getGetUnmappedIdentitiesQueryKey() })
+        queryClient.invalidateQueries({
+          queryKey: getGetUnmappedIdentitiesQueryKey(),
+        })
       },
     },
   })
@@ -162,7 +310,9 @@ export const usePostFetchDiscordUserIds = () => {
   return usePostFetchDiscordUserIdsGenerated({
     mutation: {
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['/v1/search-discord-users'] })
+        queryClient.invalidateQueries({
+          queryKey: ['/v1/search-discord-users'],
+        })
       },
     },
   })
@@ -173,8 +323,12 @@ export const usePostMatchPlayerToDiscordUser = () => {
   return usePostMatchPlayerToDiscordUserGenerated({
     mutation: {
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['/v1/search-discord-users'] })
-        queryClient.invalidateQueries({ queryKey: getGetUnmappedIdentitiesQueryKey() })
+        queryClient.invalidateQueries({
+          queryKey: ['/v1/search-discord-users'],
+        })
+        queryClient.invalidateQueries({
+          queryKey: getGetUnmappedIdentitiesQueryKey(),
+        })
       },
     },
   })
@@ -185,7 +339,9 @@ export const usePostTourney = (id: number) => {
   return usePostTourneyGenerated({
     mutation: {
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: getGetTourneyIdQueryKey(String(id)) })
+        queryClient.invalidateQueries({
+          queryKey: getGetTourneyIdQueryKey(String(id)),
+        })
       },
     },
   })
@@ -196,7 +352,9 @@ export const usePostPostDiscordEventTourneyId = () => {
   return usePostPostDiscordEventTourneyIdGenerated({
     mutation: {
       onSuccess: (_, { tourneyId }) => {
-        queryClient.invalidateQueries({ queryKey: getGetTourneyIdQueryKey(tourneyId) })
+        queryClient.invalidateQueries({
+          queryKey: getGetTourneyIdQueryKey(tourneyId),
+        })
       },
     },
   })
@@ -204,11 +362,22 @@ export const usePostPostDiscordEventTourneyId = () => {
 
 // ── Teams ──────────────────────────────────────────────────────────────────
 
-export const useGetTeams = (options?: Parameters<typeof useGetTeamsGenerated>[0]) =>
-  useGetTeamsGenerated({ ...options, query: { ...options?.query, select: (res) => res.data } })
+export const useGetTeams = (
+  options?: Parameters<typeof useGetTeamsGenerated>[0],
+) =>
+  useGetTeamsGenerated({
+    ...options,
+    query: { ...options?.query, select: (res) => res.data },
+  })
 
-export const useGetTeamsId = (id: string, options?: Parameters<typeof useGetTeamsIdGenerated>[1]) =>
-  useGetTeamsIdGenerated(id, { ...options, query: { ...options?.query, select: (res) => res.data } })
+export const useGetTeamsId = (
+  id: string,
+  options?: Parameters<typeof useGetTeamsIdGenerated>[1],
+) =>
+  useGetTeamsIdGenerated(id, {
+    ...options,
+    query: { ...options?.query, select: (res) => res.data },
+  })
 
 export const usePostCreateTeam = () => {
   const queryClient = useQueryClient()
@@ -227,7 +396,9 @@ export const usePutTeamsId = (id: number) => {
     mutation: {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: getGetTeamsQueryKey() })
-        queryClient.invalidateQueries({ queryKey: getGetTeamsIdQueryKey(String(id)) })
+        queryClient.invalidateQueries({
+          queryKey: getGetTeamsIdQueryKey(String(id)),
+        })
       },
     },
   })
@@ -249,7 +420,9 @@ export const usePostTeamsTeamIdMembers = (teamId: number) => {
   return usePostTeamsTeamIdMembersGenerated({
     mutation: {
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: getGetTeamsIdQueryKey(String(teamId)) })
+        queryClient.invalidateQueries({
+          queryKey: getGetTeamsIdQueryKey(String(teamId)),
+        })
       },
     },
   })
@@ -260,7 +433,9 @@ export const usePatchTeamsTeamIdMembersMembershipId = (teamId: number) => {
   return usePatchTeamsTeamIdMembersMembershipIdGenerated({
     mutation: {
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: getGetTeamsIdQueryKey(String(teamId)) })
+        queryClient.invalidateQueries({
+          queryKey: getGetTeamsIdQueryKey(String(teamId)),
+        })
       },
     },
   })
@@ -271,13 +446,18 @@ export const useDeleteTeamsTeamIdMembersMembershipId = (teamId: number) => {
   return useDeleteTeamsTeamIdMembersMembershipIdGenerated({
     mutation: {
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: getGetTeamsIdQueryKey(String(teamId)) })
+        queryClient.invalidateQueries({
+          queryKey: getGetTeamsIdQueryKey(String(teamId)),
+        })
       },
     },
   })
 }
 
-export const uploadTeamImage = async (file: File, type: string): Promise<string> => {
+export const uploadTeamImage = async (
+  file: File,
+  type: string,
+): Promise<string> => {
   const stored = localStorage.getItem('auth')
   const jwt = stored ? (JSON.parse(stored) as { jwt: string }).jwt : null
   const formData = new FormData()

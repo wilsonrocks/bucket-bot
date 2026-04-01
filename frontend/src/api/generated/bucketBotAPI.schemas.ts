@@ -42,7 +42,8 @@ export type GetRankingsTypeCode200Item = {
   type_code: string | null;
   id: number;
   name: string;
-  [key: string]: unknown | null;
+  /** @nullable */
+  short_name: string | null;
 };
 
 export type GetRankingsPlayerIdTypeCode200Metadata = {
@@ -134,9 +135,15 @@ export type GetPlayers200Item = {
   id: number;
   name: string;
   /** @nullable */
+  short_name: string | null;
+  /** @nullable */
   discord_id: string | null;
   /** @nullable */
   discord_username: string | null;
+  /** @nullable */
+  discord_display_name: string | null;
+  /** @nullable */
+  discord_avatar_url: string | null;
   /** @nullable */
   longshanks_id: string | null;
   /** @nullable */
@@ -149,9 +156,15 @@ export type GetPlayerId200 = {
   id: number;
   name: string;
   /** @nullable */
+  short_name: string | null;
+  /** @nullable */
   discord_id: string | null;
   /** @nullable */
   discord_username: string | null;
+  /** @nullable */
+  discord_display_name: string | null;
+  /** @nullable */
+  discord_avatar_url: string | null;
   /** @nullable */
   longshanks_id: string | null;
   /** @nullable */
@@ -165,6 +178,45 @@ export type GetPlayerId400 = {
 };
 
 export type GetPlayerId404 = {
+  error: string;
+};
+
+export type PutPlayerIdBody = {
+  name: string;
+  /** @nullable */
+  short_name?: string | null;
+};
+
+export type PutPlayerId200 = {
+  id: number;
+  name: string;
+  /** @nullable */
+  short_name: string | null;
+  /** @nullable */
+  discord_id: string | null;
+  /** @nullable */
+  discord_username: string | null;
+  /** @nullable */
+  discord_display_name: string | null;
+  /** @nullable */
+  discord_avatar_url: string | null;
+  /** @nullable */
+  longshanks_id: string | null;
+  /** @nullable */
+  longshanks_name: string | null;
+  /** @nullable */
+  created_at: string | null;
+};
+
+export type PutPlayerId400 = {
+  error: string;
+};
+
+export type PutPlayerId403 = {
+  error: string;
+};
+
+export type PutPlayerId404 = {
   error: string;
 };
 
@@ -224,6 +276,8 @@ export type GetPlayersOverTimeTypeCode200ItemPlayersItemFactionsItem = {
 export type GetPlayersOverTimeTypeCode200ItemPlayersItem = {
   player_id: number;
   name: string;
+  /** @nullable */
+  short_name: string | null;
   rank: number;
   total_points: number;
   factions: GetPlayersOverTimeTypeCode200ItemPlayersItemFactionsItem[];
@@ -596,6 +650,23 @@ export type DeleteTeamsTeamIdMembersMembershipId403 = {
 };
 
 export type DeleteTeamsTeamIdMembersMembershipId404 = {
+  error: string;
+};
+
+export type GetPlayerNameExistsParams = {
+name?: string;
+short_name?: string;
+};
+
+export type GetPlayerNameExists200 = {
+  exists: boolean;
+};
+
+export type GetPlayerNameExists400 = {
+  error: string;
+};
+
+export type GetPlayerNameExists403 = {
   error: string;
 };
 
