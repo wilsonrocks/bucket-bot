@@ -653,20 +653,20 @@ export type DeleteTeamsTeamIdMembersMembershipId404 = {
   error: string;
 };
 
-export type GetPlayerNameExistsParams = {
+export type GetPlayerNameExistsPlayerIdParams = {
 name?: string;
 short_name?: string;
 };
 
-export type GetPlayerNameExists200 = {
+export type GetPlayerNameExistsPlayerId200 = {
   exists: boolean;
 };
 
-export type GetPlayerNameExists400 = {
+export type GetPlayerNameExistsPlayerId400 = {
   error: string;
 };
 
-export type GetPlayerNameExists403 = {
+export type GetPlayerNameExistsPlayerId403 = {
   error: string;
 };
 

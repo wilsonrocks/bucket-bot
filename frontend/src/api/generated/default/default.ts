@@ -40,10 +40,10 @@ import type {
   GetPlayerId200,
   GetPlayerId400,
   GetPlayerId404,
-  GetPlayerNameExists200,
-  GetPlayerNameExists400,
-  GetPlayerNameExists403,
-  GetPlayerNameExistsParams,
+  GetPlayerNameExistsPlayerId200,
+  GetPlayerNameExistsPlayerId400,
+  GetPlayerNameExistsPlayerId403,
+  GetPlayerNameExistsPlayerIdParams,
   GetPlayers200Item,
   GetPlayersOverTimeTypeCode200Item,
   GetRankingTypes200Item,
@@ -4137,31 +4137,32 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getDeleteTeamsTeamIdMembersMembershipIdMutationOptions(options), queryClient);
     }
-    export type getPlayerNameExistsResponse200 = {
-  data: GetPlayerNameExists200
+    export type getPlayerNameExistsPlayerIdResponse200 = {
+  data: GetPlayerNameExistsPlayerId200
   status: 200
 }
 
-export type getPlayerNameExistsResponse400 = {
-  data: GetPlayerNameExists400
+export type getPlayerNameExistsPlayerIdResponse400 = {
+  data: GetPlayerNameExistsPlayerId400
   status: 400
 }
 
-export type getPlayerNameExistsResponse403 = {
-  data: GetPlayerNameExists403
+export type getPlayerNameExistsPlayerIdResponse403 = {
+  data: GetPlayerNameExistsPlayerId403
   status: 403
 }
 
-export type getPlayerNameExistsResponseSuccess = (getPlayerNameExistsResponse200) & {
+export type getPlayerNameExistsPlayerIdResponseSuccess = (getPlayerNameExistsPlayerIdResponse200) & {
   headers: Headers;
 };
-export type getPlayerNameExistsResponseError = (getPlayerNameExistsResponse400 | getPlayerNameExistsResponse403) & {
+export type getPlayerNameExistsPlayerIdResponseError = (getPlayerNameExistsPlayerIdResponse400 | getPlayerNameExistsPlayerIdResponse403) & {
   headers: Headers;
 };
 
-export type getPlayerNameExistsResponse = (getPlayerNameExistsResponseSuccess | getPlayerNameExistsResponseError)
+export type getPlayerNameExistsPlayerIdResponse = (getPlayerNameExistsPlayerIdResponseSuccess | getPlayerNameExistsPlayerIdResponseError)
 
-export const getGetPlayerNameExistsUrl = (params?: GetPlayerNameExistsParams,) => {
+export const getGetPlayerNameExistsPlayerIdUrl = (playerId: string,
+    params?: GetPlayerNameExistsPlayerIdParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
@@ -4173,12 +4174,13 @@ export const getGetPlayerNameExistsUrl = (params?: GetPlayerNameExistsParams,) =
 
   const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0 ? `/v1/player-name-exists?${stringifiedParams}` : `/v1/player-name-exists`
+  return stringifiedParams.length > 0 ? `/v1/player-name-exists/${playerId}?${stringifiedParams}` : `/v1/player-name-exists/${playerId}`
 }
 
-export const getPlayerNameExists = async (params?: GetPlayerNameExistsParams, options?: RequestInit): Promise<getPlayerNameExistsResponse> => {
+export const getPlayerNameExistsPlayerId = async (playerId: string,
+    params?: GetPlayerNameExistsPlayerIdParams, options?: RequestInit): Promise<getPlayerNameExistsPlayerIdResponse> => {
   
-  return customFetch<getPlayerNameExistsResponse>(getGetPlayerNameExistsUrl(params),
+  return customFetch<getPlayerNameExistsPlayerIdResponse>(getGetPlayerNameExistsPlayerIdUrl(playerId,params),
   {      
     ...options,
     method: 'GET'
@@ -4191,66 +4193,72 @@ export const getPlayerNameExists = async (params?: GetPlayerNameExistsParams, op
 
 
 
-export const getGetPlayerNameExistsQueryKey = (params?: GetPlayerNameExistsParams,) => {
+export const getGetPlayerNameExistsPlayerIdQueryKey = (playerId: string,
+    params?: GetPlayerNameExistsPlayerIdParams,) => {
     return [
-    `/v1/player-name-exists`, ...(params ? [params] : [])
+    `/v1/player-name-exists/${playerId}`, ...(params ? [params] : [])
     ] as const;
     }
 
     
-export const getGetPlayerNameExistsQueryOptions = <TData = Awaited<ReturnType<typeof getPlayerNameExists>>, TError = GetPlayerNameExists400 | GetPlayerNameExists403>(params?: GetPlayerNameExistsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlayerNameExists>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+export const getGetPlayerNameExistsPlayerIdQueryOptions = <TData = Awaited<ReturnType<typeof getPlayerNameExistsPlayerId>>, TError = GetPlayerNameExistsPlayerId400 | GetPlayerNameExistsPlayerId403>(playerId: string,
+    params?: GetPlayerNameExistsPlayerIdParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlayerNameExistsPlayerId>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetPlayerNameExistsQueryKey(params);
+  const queryKey =  queryOptions?.queryKey ?? getGetPlayerNameExistsPlayerIdQueryKey(playerId,params);
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPlayerNameExists>>> = ({ signal }) => getPlayerNameExists(params, { signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPlayerNameExistsPlayerId>>> = ({ signal }) => getPlayerNameExistsPlayerId(playerId,params, { signal, ...requestOptions });
 
       
 
       
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPlayerNameExists>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, enabled: !!(playerId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPlayerNameExistsPlayerId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export type GetPlayerNameExistsQueryResult = NonNullable<Awaited<ReturnType<typeof getPlayerNameExists>>>
-export type GetPlayerNameExistsQueryError = GetPlayerNameExists400 | GetPlayerNameExists403
+export type GetPlayerNameExistsPlayerIdQueryResult = NonNullable<Awaited<ReturnType<typeof getPlayerNameExistsPlayerId>>>
+export type GetPlayerNameExistsPlayerIdQueryError = GetPlayerNameExistsPlayerId400 | GetPlayerNameExistsPlayerId403
 
 
-export function useGetPlayerNameExists<TData = Awaited<ReturnType<typeof getPlayerNameExists>>, TError = GetPlayerNameExists400 | GetPlayerNameExists403>(
- params: undefined |  GetPlayerNameExistsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlayerNameExists>>, TError, TData>> & Pick<
+export function useGetPlayerNameExistsPlayerId<TData = Awaited<ReturnType<typeof getPlayerNameExistsPlayerId>>, TError = GetPlayerNameExistsPlayerId400 | GetPlayerNameExistsPlayerId403>(
+ playerId: string,
+    params: undefined |  GetPlayerNameExistsPlayerIdParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlayerNameExistsPlayerId>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getPlayerNameExists>>,
+          Awaited<ReturnType<typeof getPlayerNameExistsPlayerId>>,
           TError,
-          Awaited<ReturnType<typeof getPlayerNameExists>>
+          Awaited<ReturnType<typeof getPlayerNameExistsPlayerId>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetPlayerNameExists<TData = Awaited<ReturnType<typeof getPlayerNameExists>>, TError = GetPlayerNameExists400 | GetPlayerNameExists403>(
- params?: GetPlayerNameExistsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlayerNameExists>>, TError, TData>> & Pick<
+export function useGetPlayerNameExistsPlayerId<TData = Awaited<ReturnType<typeof getPlayerNameExistsPlayerId>>, TError = GetPlayerNameExistsPlayerId400 | GetPlayerNameExistsPlayerId403>(
+ playerId: string,
+    params?: GetPlayerNameExistsPlayerIdParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlayerNameExistsPlayerId>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getPlayerNameExists>>,
+          Awaited<ReturnType<typeof getPlayerNameExistsPlayerId>>,
           TError,
-          Awaited<ReturnType<typeof getPlayerNameExists>>
+          Awaited<ReturnType<typeof getPlayerNameExistsPlayerId>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetPlayerNameExists<TData = Awaited<ReturnType<typeof getPlayerNameExists>>, TError = GetPlayerNameExists400 | GetPlayerNameExists403>(
- params?: GetPlayerNameExistsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlayerNameExists>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+export function useGetPlayerNameExistsPlayerId<TData = Awaited<ReturnType<typeof getPlayerNameExistsPlayerId>>, TError = GetPlayerNameExistsPlayerId400 | GetPlayerNameExistsPlayerId403>(
+ playerId: string,
+    params?: GetPlayerNameExistsPlayerIdParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlayerNameExistsPlayerId>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useGetPlayerNameExists<TData = Awaited<ReturnType<typeof getPlayerNameExists>>, TError = GetPlayerNameExists400 | GetPlayerNameExists403>(
- params?: GetPlayerNameExistsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlayerNameExists>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+export function useGetPlayerNameExistsPlayerId<TData = Awaited<ReturnType<typeof getPlayerNameExistsPlayerId>>, TError = GetPlayerNameExistsPlayerId400 | GetPlayerNameExistsPlayerId403>(
+ playerId: string,
+    params?: GetPlayerNameExistsPlayerIdParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlayerNameExistsPlayerId>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getGetPlayerNameExistsQueryOptions(params,options)
+  const queryOptions = getGetPlayerNameExistsPlayerIdQueryOptions(playerId,params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
