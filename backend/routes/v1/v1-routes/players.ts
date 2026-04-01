@@ -92,8 +92,6 @@ export const getPlayerById: RouteHandler<typeof getPlayerByIdRoute, AppEnv> = as
   return c.json(player as any, 200);
 };
 
-// ── PUT /player/{id} ───────────────────────────────────────────────────────
-
 const UpdatePlayerBodySchema = z.object({
   name: z.string(),
   short_name: z.string().nullable().optional(),
@@ -127,6 +125,58 @@ export const updatePlayerRoute = createRoute({
     },
   },
 });
+
+// ── GET /player-name-exists ────────────────────────────────────────────────
+
+const PlayerNameExistsQuerySchema = z.object({
+  name: z.string().optional(),
+  short_name: z.string().optional(),
+}).refine(
+  (data) => (data.name !== undefined) !== (data.short_name !== undefined),
+  { message: "Exactly one of 'name' or 'short_name' must be provided" }
+);
+
+export const playerNameExistsRoute = createRoute({
+  method: "get",
+  path: "/player-name-exists",
+  request: { query: PlayerNameExistsQuerySchema },
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.object({ exists: z.boolean() }) } },
+      description: "Name existence check",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Bad request",
+    },
+    403: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Forbidden",
+    },
+  },
+});
+
+export const playerNameExistsHandler: RouteHandler<typeof playerNameExistsRoute, AppEnv> = async (c) => {
+  const { id: userId } = c.get("jwtPayload") as { id: string };
+  if (!await isRankingReporter(userId)) {
+    return c.json({ error: "Forbidden" }, 403);
+  }
+
+  const { name, short_name } = c.req.valid("query");
+  const db = c.get("db");
+
+  let query = db.selectFrom("player").select("player.id");
+  if (name !== undefined) {
+    query = query.where("player.name", "=", name);
+  } else {
+    query = query.where("player.short_name", "=", short_name!);
+  }
+
+  const result = await query.executeTakeFirst();
+  return c.json({ exists: result !== undefined }, 200);
+};
+
+// ── PUT /player/{id} ───────────────────────────────────────────────────────
 
 export const updatePlayer: RouteHandler<typeof updatePlayerRoute, AppEnv> = async (c) => {
   const { id: userId } = c.get("jwtPayload") as { id: string };

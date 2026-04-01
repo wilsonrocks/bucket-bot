@@ -1,7 +1,21 @@
-import { useGetPlayerId, usePutPlayerId } from '@/api/hooks'
+import {
+  useGetPlayerId,
+  useGetPlayerNameExists,
+  usePutPlayerId,
+} from '@/api/hooks'
 import { RequireRankingReporter } from '@/components/RequireRankingReporter'
-import { Avatar, Box, Button, Group, Paper, Text, TextInput, Title } from '@mantine/core'
+import {
+  Avatar,
+  Box,
+  Button,
+  Group,
+  Paper,
+  Text,
+  TextInput,
+  Title,
+} from '@mantine/core'
 import { useForm } from '@mantine/form'
+import { useDebouncedValue } from '@mantine/hooks'
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect } from 'react'
 import z from 'zod'
@@ -31,23 +45,57 @@ function RouteComponent() {
     }
   }, [player?.id])
 
+  const [debouncedName] = useDebouncedValue(form.values.name, 300)
+  const [debouncedShortName] = useDebouncedValue(form.values.short_name, 300)
+
+  const checkName =
+    !!player && debouncedName !== '' && debouncedName !== player.name
+  const checkShortName =
+    !!player &&
+    debouncedShortName !== '' &&
+    debouncedShortName !== (player.short_name ?? '')
+
+  const nameExistenceCheck = useGetPlayerNameExists(
+    { name: debouncedName },
+    { query: { enabled: checkName } },
+  )
+  const shortNameExistenceCheck = useGetPlayerNameExists(
+    { short_name: debouncedShortName },
+    { query: { enabled: checkShortName } },
+  )
+
+  const showNameError =
+    nameExistenceCheck.data && nameExistenceCheck.data.exists
+  const showShortNameError =
+    shortNameExistenceCheck.data && shortNameExistenceCheck.data.exists
+
   if (!player) return <div>Loading...</div>
 
   return (
     <div>
       <Paper withBorder p="md" mb="md">
-        <Title order={5} mb="sm">Discord Account</Title>
+        <Title order={5} mb="sm">
+          Discord Account
+        </Title>
         <Group>
           <Avatar src={player.discord_avatar_url ?? undefined} size="md" />
           <div>
-            <Text size="sm" fw={500}>{player.discord_display_name ?? '—'}</Text>
-            <Text size="sm" c="dimmed">{player.discord_username ? `@${player.discord_username}` : 'No Discord linked'}</Text>
+            <Text size="sm" fw={500}>
+              {player.discord_display_name ?? '—'}
+            </Text>
+            <Text size="sm" c="dimmed">
+              {player.discord_username
+                ? `@${player.discord_username}`
+                : 'No Discord linked'}
+            </Text>
           </div>
         </Group>
       </Paper>
 
       <Paper withBorder p="md">
-        <Title order={5} mb="sm">Edit Details</Title>
+        <Title order={5} mb="sm">
+          Edit Details
+        </Title>
         <form
           onSubmit={form.onSubmit((values) => {
             updatePlayer.mutate({
@@ -59,10 +107,33 @@ function RouteComponent() {
             })
           })}
         >
-          <TextInput label="Name" required {...form.getInputProps('name')} mb="sm" />
-          <TextInput label="Short Name" {...form.getInputProps('short_name')} mb="sm" />
+          <TextInput
+            label="Name"
+            required
+            {...form.getInputProps('name')}
+            mb="sm"
+            error={
+              showNameError
+                ? 'This name is already in use'
+                : form.getInputProps('name').error
+            }
+          />
+          <TextInput
+            label="Short Name"
+            {...form.getInputProps('short_name')}
+            mb="sm"
+            error={
+              showShortNameError
+                ? 'This short name is already in use'
+                : form.getInputProps('short_name').error
+            }
+          />
           <Box>
-            <Button type="submit" loading={updatePlayer.isPending}>
+            <Button
+              type="submit"
+              loading={updatePlayer.isPending}
+              disabled={showNameError || showShortNameError}
+            >
               Save
             </Button>
           </Box>

@@ -44,7 +44,6 @@ export type GetRankingsTypeCode200Item = {
   name: string;
   /** @nullable */
   short_name: string | null;
-  [key: string]: unknown | null;
 };
 
 export type GetRankingsPlayerIdTypeCode200Metadata = {
@@ -651,6 +650,23 @@ export type DeleteTeamsTeamIdMembersMembershipId403 = {
 };
 
 export type DeleteTeamsTeamIdMembersMembershipId404 = {
+  error: string;
+};
+
+export type GetPlayerNameExistsParams = {
+name?: string;
+short_name?: string;
+};
+
+export type GetPlayerNameExists200 = {
+  exists: boolean;
+};
+
+export type GetPlayerNameExists400 = {
+  error: string;
+};
+
+export type GetPlayerNameExists403 = {
   error: string;
 };
 
