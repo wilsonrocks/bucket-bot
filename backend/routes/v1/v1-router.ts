@@ -47,6 +47,8 @@ import {
   getPlayerByIdRoute,
   getPlayers,
   getPlayersRoute,
+  updatePlayer,
+  updatePlayerRoute,
 } from "./v1-routes/players.js";
 import {
   rankingTypesHandler,
@@ -261,3 +263,4 @@ v1Router.openapi(deleteTeamRoute, deleteTeamHandler);
 v1Router.openapi(addTeamMemberRoute, addTeamMemberHandler);
 v1Router.openapi(updateTeamMemberRoute, updateTeamMemberHandler);
 v1Router.openapi(removeTeamMemberRoute, removeTeamMemberHandler);
+v1Router.openapi(updatePlayerRoute, updatePlayer);

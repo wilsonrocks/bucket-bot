@@ -33,12 +33,15 @@ import {
   useDeleteTeamsId as useDeleteTeamsIdGenerated,
   usePatchTeamsTeamIdMembersMembershipId as usePatchTeamsTeamIdMembersMembershipIdGenerated,
   useDeleteTeamsTeamIdMembersMembershipId as useDeleteTeamsTeamIdMembersMembershipIdGenerated,
+  usePutPlayerId as usePutPlayerIdGenerated,
   getGetTourneyQueryKey,
   getGetTourneyIdQueryKey,
   getGetUnmappedIdentitiesQueryKey,
   getGetVenuesQueryKey,
   getGetTeamsQueryKey,
   getGetTeamsIdQueryKey,
+  getGetPlayersQueryKey,
+  getGetPlayerIdQueryKey,
 } from './generated/default/default'
 
 import type {
@@ -107,6 +110,18 @@ export const useGetTourneyId = (id: string, options?: Parameters<typeof useGetTo
 
 export const useGetPlayerId = (id: string, options?: Parameters<typeof useGetPlayerIdGenerated>[1]) =>
   useGetPlayerIdGenerated(id, { ...options, query: { ...options?.query, select: (res) => res.data as GetPlayerId200 } })
+
+export const usePutPlayerId = (id: number) => {
+  const queryClient = useQueryClient()
+  return usePutPlayerIdGenerated({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: getGetPlayersQueryKey() })
+        queryClient.invalidateQueries({ queryKey: getGetPlayerIdQueryKey(String(id)) })
+      },
+    },
+  })
+}
 
 export const useGetTourneysPlayerPlayerId = (playerId: string, options?: Parameters<typeof useGetTourneysPlayerPlayerIdGenerated>[1]) =>
   useGetTourneysPlayerPlayerIdGenerated(playerId, { ...options, query: { ...options?.query, select: (res) => res.data as GetTourneysPlayerPlayerId200Item[] } })

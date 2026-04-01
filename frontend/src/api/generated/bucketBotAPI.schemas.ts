@@ -134,9 +134,15 @@ export type GetPlayers200Item = {
   id: number;
   name: string;
   /** @nullable */
+  short_name: string | null;
+  /** @nullable */
   discord_id: string | null;
   /** @nullable */
   discord_username: string | null;
+  /** @nullable */
+  discord_display_name: string | null;
+  /** @nullable */
+  discord_avatar_url: string | null;
   /** @nullable */
   longshanks_id: string | null;
   /** @nullable */
@@ -149,9 +155,15 @@ export type GetPlayerId200 = {
   id: number;
   name: string;
   /** @nullable */
+  short_name: string | null;
+  /** @nullable */
   discord_id: string | null;
   /** @nullable */
   discord_username: string | null;
+  /** @nullable */
+  discord_display_name: string | null;
+  /** @nullable */
+  discord_avatar_url: string | null;
   /** @nullable */
   longshanks_id: string | null;
   /** @nullable */
@@ -165,6 +177,45 @@ export type GetPlayerId400 = {
 };
 
 export type GetPlayerId404 = {
+  error: string;
+};
+
+export type PutPlayerIdBody = {
+  name: string;
+  /** @nullable */
+  short_name?: string | null;
+};
+
+export type PutPlayerId200 = {
+  id: number;
+  name: string;
+  /** @nullable */
+  short_name: string | null;
+  /** @nullable */
+  discord_id: string | null;
+  /** @nullable */
+  discord_username: string | null;
+  /** @nullable */
+  discord_display_name: string | null;
+  /** @nullable */
+  discord_avatar_url: string | null;
+  /** @nullable */
+  longshanks_id: string | null;
+  /** @nullable */
+  longshanks_name: string | null;
+  /** @nullable */
+  created_at: string | null;
+};
+
+export type PutPlayerId400 = {
+  error: string;
+};
+
+export type PutPlayerId403 = {
+  error: string;
+};
+
+export type PutPlayerId404 = {
   error: string;
 };
 
