@@ -1,6 +1,6 @@
 import {
   useGetPlayerId,
-  useGetPlayerNameExists,
+  useGetPlayerNameExistsPlayerId,
   usePutPlayerId,
 } from '@/api/hooks'
 import { RequireRankingReporter } from '@/components/RequireRankingReporter'
@@ -55,19 +55,21 @@ function RouteComponent() {
     debouncedShortName !== '' &&
     debouncedShortName !== (player.short_name ?? '')
 
-  const nameExistenceCheck = useGetPlayerNameExists(
+  const nameExistenceCheck = useGetPlayerNameExistsPlayerId(
+    id,
     { name: debouncedName },
     { query: { enabled: checkName } },
   )
-  const shortNameExistenceCheck = useGetPlayerNameExists(
+  const shortNameExistenceCheck = useGetPlayerNameExistsPlayerId(
+    id,
     { short_name: debouncedShortName },
     { query: { enabled: checkShortName } },
   )
 
   const showNameError =
-    nameExistenceCheck.data && nameExistenceCheck.data.exists
+    checkName && nameExistenceCheck.data?.exists
   const showShortNameError =
-    shortNameExistenceCheck.data && shortNameExistenceCheck.data.exists
+    checkShortName && shortNameExistenceCheck.data?.exists
 
   if (!player) return <div>Loading...</div>
 

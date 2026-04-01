@@ -36,7 +36,7 @@ import {
   usePatchTeamsTeamIdMembersMembershipId as usePatchTeamsTeamIdMembersMembershipIdGenerated,
   useDeleteTeamsTeamIdMembersMembershipId as useDeleteTeamsTeamIdMembersMembershipIdGenerated,
   usePutPlayerId as usePutPlayerIdGenerated,
-  useGetPlayerNameExists as useGetPlayerNameExistsGenerated,
+  useGetPlayerNameExistsPlayerId as useGetPlayerNameExistsPlayerIdGenerated,
   getGetTourneyQueryKey,
   getGetTourneyIdQueryKey,
   getGetUnmappedIdentitiesQueryKey,
@@ -45,7 +45,7 @@ import {
   getGetTeamsIdQueryKey,
   getGetPlayersQueryKey,
   getGetPlayerIdQueryKey,
-  getGetPlayerNameExistsQueryKey,
+  getGetPlayerNameExistsPlayerIdQueryKey,
 } from './generated/default/default'
 
 import type {
@@ -55,7 +55,7 @@ import type {
   GetTourneysPlayerPlayerId200Item,
   GetPlayerId200,
   GetHasRole200,
-  GetPlayerNameExists200,
+  GetPlayerNameExistsPlayerId200,
 } from './generated/bucketBotAPI.schemas'
 
 // ── Re-export simple mutations (no invalidation needed) ────────────────────
@@ -189,15 +189,16 @@ export const useGetPlayerId = (
     query: { ...options?.query, select: (res) => res.data as GetPlayerId200 },
   })
 
-export const useGetPlayerNameExists = (
-  params: Parameters<typeof useGetPlayerNameExistsGenerated>[0],
-  options?: Parameters<typeof useGetPlayerNameExistsGenerated>[1],
+export const useGetPlayerNameExistsPlayerId = (
+  playerId: Parameters<typeof useGetPlayerNameExistsPlayerIdGenerated>[0],
+  params: Parameters<typeof useGetPlayerNameExistsPlayerIdGenerated>[1],
+  options?: Parameters<typeof useGetPlayerNameExistsPlayerIdGenerated>[2],
 ) =>
-  useGetPlayerNameExistsGenerated(params, {
+  useGetPlayerNameExistsPlayerIdGenerated(playerId, params, {
     ...options,
     query: {
       ...options?.query,
-      select: (res) => res.data as GetPlayerNameExists200,
+      select: (res) => res.data as GetPlayerNameExistsPlayerId200,
     },
   })
 
@@ -211,7 +212,7 @@ export const usePutPlayerId = (id: number) => {
           queryKey: getGetPlayerIdQueryKey(String(id)),
         })
         queryClient.invalidateQueries({
-          queryKey: getGetPlayerNameExistsQueryKey(),
+          queryKey: getGetPlayerNameExistsPlayerIdQueryKey(String(id)),
         })
       },
     },

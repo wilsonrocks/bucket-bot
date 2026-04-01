@@ -22,7 +22,11 @@ const ErrorSchema = z.object({ error: z.string() });
 function playerWithDiscordQuery(db: Kysely<DB>) {
   return db
     .selectFrom("player")
-    .leftJoin("discord_user", "discord_user.discord_user_id", "player.discord_id")
+    .leftJoin(
+      "discord_user",
+      "discord_user.discord_user_id",
+      "player.discord_id",
+    )
     .select([
       "player.id",
       "player.name",
@@ -47,8 +51,12 @@ export const getPlayersRoute = createRoute({
   },
 });
 
-export const getPlayers: RouteHandler<typeof getPlayersRoute, AppEnv> = async (c) => {
-  const players = await playerWithDiscordQuery(c.get("db")).orderBy("player.name").execute();
+export const getPlayers: RouteHandler<typeof getPlayersRoute, AppEnv> = async (
+  c,
+) => {
+  const players = await playerWithDiscordQuery(c.get("db"))
+    .orderBy("player.name")
+    .execute();
   return c.json(players as any, 200);
 };
 
@@ -74,7 +82,10 @@ export const getPlayerByIdRoute = createRoute({
   },
 });
 
-export const getPlayerById: RouteHandler<typeof getPlayerByIdRoute, AppEnv> = async (c) => {
+export const getPlayerById: RouteHandler<
+  typeof getPlayerByIdRoute,
+  AppEnv
+> = async (c) => {
   const { id } = c.req.valid("param");
   const playerId = Number(id);
   if (isNaN(playerId)) {
@@ -128,21 +139,28 @@ export const updatePlayerRoute = createRoute({
 
 // ── GET /player-name-exists ────────────────────────────────────────────────
 
-const PlayerNameExistsQuerySchema = z.object({
-  name: z.string().optional(),
-  short_name: z.string().optional(),
-}).refine(
-  (data) => (data.name !== undefined) !== (data.short_name !== undefined),
-  { message: "Exactly one of 'name' or 'short_name' must be provided" }
-);
+const PlayerNameExistsQuerySchema = z
+  .object({
+    name: z.string().optional(),
+    short_name: z.string().optional(),
+  })
+  .refine(
+    (data) => (data.name !== undefined) !== (data.short_name !== undefined),
+    { message: "Exactly one of 'name' or 'short_name' must be provided" },
+  );
 
 export const playerNameExistsRoute = createRoute({
   method: "get",
-  path: "/player-name-exists",
-  request: { query: PlayerNameExistsQuerySchema },
+  path: "/player-name-exists/{player_id}",
+  request: {
+    params: z.object({ player_id: z.string() }),
+    query: PlayerNameExistsQuerySchema,
+  },
   responses: {
     200: {
-      content: { "application/json": { schema: z.object({ exists: z.boolean() }) } },
+      content: {
+        "application/json": { schema: z.object({ exists: z.boolean() }) },
+      },
       description: "Name existence check",
     },
     400: {
@@ -156,16 +174,25 @@ export const playerNameExistsRoute = createRoute({
   },
 });
 
-export const playerNameExistsHandler: RouteHandler<typeof playerNameExistsRoute, AppEnv> = async (c) => {
+export const playerNameExistsHandler: RouteHandler<
+  typeof playerNameExistsRoute,
+  AppEnv
+> = async (c) => {
   const { id: userId } = c.get("jwtPayload") as { id: string };
-  if (!await isRankingReporter(userId)) {
+  if (!(await isRankingReporter(userId))) {
     return c.json({ error: "Forbidden" }, 403);
   }
 
+  const { player_id } = c.req.valid("param");
+  const playerId = Number(player_id);
   const { name, short_name } = c.req.valid("query");
   const db = c.get("db");
 
-  let query = db.selectFrom("player").select("player.id");
+  let query = db
+    .selectFrom("player")
+    .select("player.id")
+    .where("player.id", "!=", playerId);
+
   if (name !== undefined) {
     query = query.where("player.name", "=", name);
   } else {
@@ -178,9 +205,12 @@ export const playerNameExistsHandler: RouteHandler<typeof playerNameExistsRoute,
 
 // ── PUT /player/{id} ───────────────────────────────────────────────────────
 
-export const updatePlayer: RouteHandler<typeof updatePlayerRoute, AppEnv> = async (c) => {
+export const updatePlayer: RouteHandler<
+  typeof updatePlayerRoute,
+  AppEnv
+> = async (c) => {
   const { id: userId } = c.get("jwtPayload") as { id: string };
-  if (!await isRankingReporter(userId)) {
+  if (!(await isRankingReporter(userId))) {
     return c.json({ error: "Forbidden" }, 403);
   }
 
@@ -192,7 +222,8 @@ export const updatePlayer: RouteHandler<typeof updatePlayerRoute, AppEnv> = asyn
 
   const { name, short_name } = c.req.valid("json");
 
-  const updated = await c.get("db")
+  const updated = await c
+    .get("db")
     .updateTable("player")
     .set({ name, ...(short_name !== undefined ? { short_name } : {}) })
     .where("id", "=", playerId)
