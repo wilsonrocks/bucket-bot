@@ -17,6 +17,11 @@ const PlayerSchema = z.object({
   created_at: z.string().nullable(),
 });
 
+const PlayerListItemSchema = PlayerSchema.extend({
+  current_team_name: z.string().nullable(),
+  event_count: z.number(),
+});
+
 const ErrorSchema = z.object({ error: z.string() });
 
 function playerWithDiscordQuery(db: Kysely<DB>) {
@@ -45,7 +50,7 @@ export const getPlayersRoute = createRoute({
   path: "/players",
   responses: {
     200: {
-      content: { "application/json": { schema: z.array(PlayerSchema) } },
+      content: { "application/json": { schema: z.array(PlayerListItemSchema) } },
       description: "List of all players",
     },
   },
@@ -54,7 +59,43 @@ export const getPlayersRoute = createRoute({
 export const getPlayers: RouteHandler<typeof getPlayersRoute, AppEnv> = async (
   c,
 ) => {
-  const players = await playerWithDiscordQuery(c.get("db"))
+  const db = c.get("db");
+  const players = await db
+    .selectFrom("player")
+    .leftJoin(
+      "discord_user",
+      "discord_user.discord_user_id",
+      "player.discord_id",
+    )
+    .leftJoin("membership as current_m", (join) =>
+      join
+        .onRef("current_m.player_id", "=", "player.id")
+        .on("current_m.left_date", "is", null),
+    )
+    .leftJoin("team as current_team", "current_team.id", "current_m.team_id")
+    .select([
+      "player.id",
+      "player.name",
+      "player.short_name",
+      "player.discord_id",
+      "player.longshanks_name",
+      "player.created_at",
+      "discord_user.discord_username",
+      "discord_user.discord_display_name",
+      "discord_user.discord_avatar_url",
+      "current_team.name as current_team_name",
+      (eb) =>
+        eb
+          .selectFrom("result")
+          .innerJoin(
+            "player_identity",
+            "player_identity.id",
+            "result.player_identity_id",
+          )
+          .whereRef("player_identity.player_id", "=", "player.id")
+          .select((eb2) => eb2.fn.countAll<number>().as("count"))
+          .as("event_count"),
+    ])
     .orderBy("player.name")
     .execute();
   return c.json(players as any, 200);

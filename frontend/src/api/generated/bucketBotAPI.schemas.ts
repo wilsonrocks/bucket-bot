@@ -150,6 +150,9 @@ export type GetPlayers200Item = {
   longshanks_name: string | null;
   /** @nullable */
   created_at: string | null;
+  /** @nullable */
+  current_team_name: string | null;
+  event_count: number;
 };
 
 export type GetPlayerId200 = {
