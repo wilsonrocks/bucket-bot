@@ -1,5 +1,5 @@
 
-\restrict aYHxGFB2kKdPS0fjTSB2sNRr6p7zvG1VNZJVrR3qOqQSle2iX13nQq5ChSjlxcv
+\restrict YP9fbB81dyWOhSSk6Im4eOPk7SqNiAR9vXb6xnHfaGVgRHx6piAchJXMM8OnK4n
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -18,6 +18,8 @@ CREATE SCHEMA tiger;
 CREATE SCHEMA tiger_data;
 
 CREATE SCHEMA topology;
+
+CREATE EXTENSION IF NOT EXISTS btree_gist WITH SCHEMA public;
 
 CREATE EXTENSION IF NOT EXISTS pg_trgm WITH SCHEMA public;
 
@@ -136,7 +138,8 @@ CREATE TABLE public.player (
     discord_id text,
     name text NOT NULL,
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
-    longshanks_name text
+    longshanks_name text,
+    short_name text
 );
 
     AS integer
@@ -289,6 +292,9 @@ ALTER TABLE ONLY public.identity_provider
     ADD CONSTRAINT identity_provider_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY public.membership
+    ADD CONSTRAINT membership_no_overlapping_membership EXCLUDE USING gist (player_id WITH =, daterange(join_date, left_date) WITH &&);
+
+ALTER TABLE ONLY public.membership
     ADD CONSTRAINT membership_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY public.painting_category
@@ -418,5 +424,5 @@ ALTER TABLE ONLY public.tourney
 ALTER TABLE ONLY public.tourney
     ADD CONSTRAINT tourney_venue_id_fkey FOREIGN KEY (venue_id) REFERENCES public.venue(id);
 
-\unrestrict aYHxGFB2kKdPS0fjTSB2sNRr6p7zvG1VNZJVrR3qOqQSle2iX13nQq5ChSjlxcv
+\unrestrict YP9fbB81dyWOhSSk6Im4eOPk7SqNiAR9vXb6xnHfaGVgRHx6piAchJXMM8OnK4n
 

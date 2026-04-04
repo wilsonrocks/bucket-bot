@@ -45,6 +45,8 @@ import {
 import {
   getPlayerById,
   getPlayerByIdRoute,
+  getPlayerTeams,
+  getPlayerTeamsRoute,
   getPlayers,
   getPlayersRoute,
   playerNameExistsHandler,
@@ -93,8 +95,6 @@ import {
   getPlayersOverTimeRoute,
 } from "./v1-routes/players-over-time.js";
 import {
-  addTeamMemberHandler,
-  addTeamMemberRoute,
   createTeamHandler,
   createTeamRoute,
   deleteTeamHandler,
@@ -103,14 +103,18 @@ import {
   getTeamByIdRoute,
   getTeamsHandler,
   getTeamsRoute,
+  updateTeamHandler,
+  updateTeamRoute,
+} from "./v1-routes/teams";
+import {
+  addTeamMemberHandler,
+  addTeamMemberRoute,
   removeTeamMemberHandler,
   removeTeamMemberRoute,
-  updateTeamHandler,
   updateTeamMemberHandler,
   updateTeamMemberRoute,
-  updateTeamRoute,
-} from "./v1-routes/teams.js";
-import { uploadHandler, uploadRoute } from "./v1-routes/upload.js";
+} from "./v1-routes/team-memberships";
+import { uploadHandler, uploadRoute } from "./v1-routes/upload";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) throw new Error("JWT_SECRET is not defined");
@@ -229,6 +233,7 @@ v1Router.openapi(getTourneysForPlayerRoute, getTourneysForPlayerHandler);
 v1Router.openapi(getAllVenuesRoute, getAllVenuesHandler);
 v1Router.openapi(getPlayersRoute, getPlayers);
 v1Router.openapi(getPlayerByIdRoute, getPlayerById);
+v1Router.openapi(getPlayerTeamsRoute, getPlayerTeams);
 v1Router.openapi(getAllTiersRoute, getAllTiers);
 v1Router.openapi(getFactionRankingsRoute, getFactionRankings);
 v1Router.openapi(getFactionsOverTimeRoute, getFactionsOverTime);

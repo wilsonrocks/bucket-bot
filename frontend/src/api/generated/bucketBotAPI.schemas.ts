@@ -150,6 +150,9 @@ export type GetPlayers200Item = {
   longshanks_name: string | null;
   /** @nullable */
   created_at: string | null;
+  /** @nullable */
+  current_team_name: string | null;
+  event_count: number;
 };
 
 export type GetPlayerId200 = {
@@ -217,6 +220,21 @@ export type PutPlayerId403 = {
 };
 
 export type PutPlayerId404 = {
+  error: string;
+};
+
+export type GetPlayerIdTeams200Item = {
+  membership_id: number;
+  team_id: number;
+  team_name: string;
+  /** @nullable */
+  join_date: string | null;
+  /** @nullable */
+  left_date: string | null;
+  is_captain: boolean;
+};
+
+export type GetPlayerIdTeams400 = {
   error: string;
 };
 
@@ -622,6 +640,10 @@ export type PostTeamsTeamIdMembers201 = {
 };
 
 export type PostTeamsTeamIdMembers403 = {
+  error: string;
+};
+
+export type PostTeamsTeamIdMembers409 = {
   error: string;
 };
 

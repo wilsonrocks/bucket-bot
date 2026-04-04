@@ -37,6 +37,7 @@ import {
   useDeleteTeamsTeamIdMembersMembershipId as useDeleteTeamsTeamIdMembersMembershipIdGenerated,
   usePutPlayerId as usePutPlayerIdGenerated,
   useGetPlayerNameExistsPlayerId as useGetPlayerNameExistsPlayerIdGenerated,
+  useGetPlayerIdTeams as useGetPlayerIdTeamsGenerated,
   getGetTourneyQueryKey,
   getGetTourneyIdQueryKey,
   getGetUnmappedIdentitiesQueryKey,
@@ -56,6 +57,7 @@ import type {
   GetPlayerId200,
   GetHasRole200,
   GetPlayerNameExistsPlayerId200,
+  GetPlayerIdTeams200Item,
 } from './generated/bucketBotAPI.schemas'
 
 // ── Re-export simple mutations (no invalidation needed) ────────────────────
@@ -187,6 +189,18 @@ export const useGetPlayerId = (
   useGetPlayerIdGenerated(id, {
     ...options,
     query: { ...options?.query, select: (res) => res.data as GetPlayerId200 },
+  })
+
+export const useGetPlayerIdTeams = (
+  id: string,
+  options?: Parameters<typeof useGetPlayerIdTeamsGenerated>[1],
+) =>
+  useGetPlayerIdTeamsGenerated(id, {
+    ...options,
+    query: {
+      ...options?.query,
+      select: (res) => res.data as GetPlayerIdTeams200Item[],
+    },
   })
 
 export const useGetPlayerNameExistsPlayerId = (

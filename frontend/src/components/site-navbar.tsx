@@ -1,6 +1,7 @@
 import { Route as EventsSiteRoute } from '@/routes/site/_site-pages/events'
 import { Route as FactionRankingsRoute } from '@/routes/site/_site-pages/faction-rankings'
 import { Route as HowItWorksRoute } from '@/routes/site/_site-pages/how-it-works'
+import { Route as PlayersRoute } from '@/routes/site/_site-pages/players'
 import { Route as RankingsRoute } from '@/routes/site/_site-pages/rankings'
 import { Route as TeamsRoute } from '@/routes/site/_site-pages/teams'
 import { Divider, ScrollArea, Stack } from '@mantine/core'
@@ -12,8 +13,9 @@ export const SiteNavbar = () => {
     <ScrollArea>
       <Stack>
         <AppNavLink to={EventsSiteRoute.to} label="Events" />
-        <AppNavLink to={RankingsRoute.to} label="Player Rankings" />
-        <AppNavLink to={FactionRankingsRoute.to} label="Faction Rankings" />
+        <AppNavLink to={PlayersRoute.to} label="Players" />
+        <AppNavLink to={RankingsRoute.to} label="Rankings" />
+        <AppNavLink to={FactionRankingsRoute.to} label="Factions" />
         <AppNavLink to={TeamsRoute.to} label="Teams" />
         <AppNavLink to={HowItWorksRoute.to} label="How It Works" />
         <Divider />

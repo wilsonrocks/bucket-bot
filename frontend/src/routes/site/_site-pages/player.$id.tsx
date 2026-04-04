@@ -1,4 +1,4 @@
-import { Select, Table, Tabs, Title } from '@mantine/core'
+import { Badge, Select, Table, Tabs, Title } from '@mantine/core'
 
 type PlayerTourneyItem = {
   tourneyId: number
@@ -15,11 +15,13 @@ import { LazyPlayerRankingOverTimeChart } from '@/components/charts'
 import { Link } from '@/components/link'
 import {
   useGetPlayerId,
+  useGetPlayerIdTeams,
   useGetRankingTypes,
   useGetRankingsPlayerIdTypeCode,
   useGetTourneysPlayerPlayerId,
 } from '@/api/hooks'
 import { Route as EventRoute } from '@/routes/site/_site-pages/event.$id'
+import { Route as TeamRoute } from '@/routes/site/_site-pages/team.$id'
 import { formatDate } from 'date-fns'
 import { Suspense } from 'react'
 
@@ -41,6 +43,7 @@ function RouteComponent() {
   const playerData = useGetPlayerId(String(id))
   const navigate = Route.useNavigate()
   const tourneys = useGetTourneysPlayerPlayerId(String(id))
+  const teams = useGetPlayerIdTeams(String(id))
 
   if (!playerData.data) return <div>Loading...</div>
   return (
@@ -58,6 +61,7 @@ function RouteComponent() {
         <Tabs.List>
           <Tabs.Tab value="events">Events</Tabs.Tab>
           <Tabs.Tab value="rankings">Rankings</Tabs.Tab>
+          <Tabs.Tab value="teams">Teams</Tabs.Tab>
         </Tabs.List>
 
         <Tabs.Panel value="events">
@@ -120,6 +124,37 @@ function RouteComponent() {
               No ranking data available for{' '}
               {rankingTypes.data?.find((rt) => rt.code === typeCode)?.name}.
             </div>
+          )}
+        </Tabs.Panel>
+        <Tabs.Panel value="teams">
+          {teams.data ? (
+            teams.data.length === 0 ? (
+              <div>No team history.</div>
+            ) : (
+              <Table
+                data={{
+                  head: ['Team', 'Joined', 'Left', ''],
+                  body: teams.data.map((m) => [
+                    <Link
+                      to={TeamRoute.to}
+                      params={{ id: String(m.team_id) }}
+                      search={{}}
+                    >
+                      {m.team_name}
+                    </Link>,
+                    m.join_date
+                      ? formatDate(new Date(m.join_date), 'd MMMM yyyy')
+                      : '—',
+                    m.left_date
+                      ? formatDate(new Date(m.left_date), 'd MMMM yyyy')
+                      : 'Current',
+                    m.is_captain ? <Badge size="sm">Captain</Badge> : null,
+                  ]),
+                }}
+              />
+            )
+          ) : (
+            'Loading...'
           )}
         </Tabs.Panel>
       </Tabs>

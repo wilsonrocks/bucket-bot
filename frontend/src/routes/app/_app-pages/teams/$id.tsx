@@ -10,6 +10,7 @@ import {
 } from '@/api/hooks'
 import { usePermissions } from '@/hooks/usePermissions'
 import {
+  Alert,
   Badge,
   Box,
   Button,
@@ -28,6 +29,7 @@ import {
   TextInput,
   Title,
 } from '@mantine/core'
+import { IconAlertCircle } from '@tabler/icons-react'
 import { useForm } from '@mantine/form'
 import { useHover } from '@mantine/hooks'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
@@ -43,7 +45,11 @@ export const Route = createFileRoute('/app/_app-pages/teams/$id')({
 
 function RouteComponent() {
   const { id } = Route.useParams()
-  const { rankingReporter, isTeamCaptain, isLoading: permissionsLoading } = usePermissions()
+  const {
+    rankingReporter,
+    isTeamCaptain,
+    isLoading: permissionsLoading,
+  } = usePermissions()
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -69,7 +75,13 @@ function RouteComponent() {
     image_key: string | null
     venue_id: string | null
   }>({
-    initialValues: { name: '', description: '', brand_colour: '', image_key: null, venue_id: null },
+    initialValues: {
+      name: '',
+      description: '',
+      brand_colour: '',
+      image_key: null,
+      venue_id: null,
+    },
   })
 
   useEffect(() => {
@@ -111,7 +123,9 @@ function RouteComponent() {
       </Title>
 
       <Paper withBorder p="md" mb="md">
-        <Title order={5} mb="sm">Edit Details</Title>
+        <Title order={5} mb="sm">
+          Edit Details
+        </Title>
         <form
           onSubmit={editForm.onSubmit(async (values) => {
             let image_key = values.image_key
@@ -133,7 +147,11 @@ function RouteComponent() {
         >
           <Grid>
             <Grid.Col span={{ base: 12, xs: 4 }}>
-              <TextInput label="Team Name" required {...editForm.getInputProps('name')} />
+              <TextInput
+                label="Team Name"
+                required
+                {...editForm.getInputProps('name')}
+              />
             </Grid.Col>
             <Grid.Col span={{ base: 12, xs: 5 }}>
               <Textarea
@@ -156,17 +174,30 @@ function RouteComponent() {
                 placeholder="Select venue..."
                 searchable
                 clearable
-                data={venues?.map((v) => ({ value: String(v.id), label: `${v.name} (${v.town})` })) ?? []}
+                data={
+                  venues?.map((v) => ({
+                    value: String(v.id),
+                    label: `${v.name} (${v.town})`,
+                  })) ?? []
+                }
                 {...editForm.getInputProps('venue_id')}
               />
             </Grid.Col>
             <Grid.Col span={{ base: 12, xs: 4 }}>
-              <Text size="sm" fw={500} mb={4}>Team Image</Text>
+              <Text size="sm" fw={500} mb={4}>
+                Team Image
+              </Text>
               <Box
                 ref={imageHoverRef}
                 w={120}
                 h={120}
-                style={{ position: 'relative', cursor: 'pointer', borderRadius: 'var(--mantine-radius-sm)', border: '1px solid var(--mantine-color-default-border)', overflow: 'hidden' }}
+                style={{
+                  position: 'relative',
+                  cursor: 'pointer',
+                  borderRadius: 'var(--mantine-radius-sm)',
+                  border: '1px solid var(--mantine-color-default-border)',
+                  overflow: 'hidden',
+                }}
                 onClick={() => imageInputRef.current?.click()}
               >
                 {imagePreview ? (
@@ -179,7 +210,9 @@ function RouteComponent() {
                 {imageHovered && (
                   <Overlay color="#000" backgroundOpacity={0.5} radius="sm">
                     <Center h="100%">
-                      <Text size="xs" c="white">{imagePreview ? 'Change' : 'Upload'}</Text>
+                      <Text size="xs" c="white">
+                        {imagePreview ? 'Change' : 'Upload'}
+                      </Text>
                     </Center>
                   </Overlay>
                 )}
@@ -207,7 +240,9 @@ function RouteComponent() {
       </Paper>
 
       <Paper withBorder p="md" mb="md">
-        <Title order={5} mb="sm">Members</Title>
+        <Title order={5} mb="sm">
+          Members
+        </Title>
 
         {team.members.length > 0 && (
           <Table mb="md">
@@ -299,7 +334,10 @@ function RouteComponent() {
               addMember.mutate(
                 {
                   teamId: String(id),
-                  data: { player_id: Number(selectedPlayerId), is_captain: false },
+                  data: {
+                    player_id: Number(selectedPlayerId),
+                    is_captain: false,
+                  },
                 },
                 {
                   onSuccess: () => {
@@ -312,6 +350,11 @@ function RouteComponent() {
             Add
           </Button>
         </Group>
+        {addMember.isError && (
+          <Alert icon={<IconAlertCircle size={16} />} color="red" mt="xs">
+            {addMember.error?.message ?? 'Failed to add member'}
+          </Alert>
+        )}
       </Paper>
     </div>
   )
