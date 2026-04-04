@@ -19,14 +19,14 @@ export const customFetch = async <T>(
   const method = (options.method ?? 'GET').toUpperCase()
 
   if (!response.ok) {
-    const errorMsg = `${response.status} ${response.statusText}`
-    console.error(`${method} ${url} failed:`, errorMsg)
-    notifications.show({
-      title: 'Error',
-      message: `${url}: ${response.statusText}`,
-      color: 'red',
-    })
-    throw new Error(errorMsg)
+    let message = `${url}: ${response.statusText}`
+    try {
+      const body = await response.json()
+      if (body?.error) message = body.error
+    } catch {}
+    console.error(`${method} ${url} failed:`, response.status)
+    notifications.show({ title: 'Error', message, color: 'red' })
+    throw new Error(message)
   }
 
   if (method !== 'GET') {

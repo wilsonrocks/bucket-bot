@@ -643,6 +643,10 @@ export type PostTeamsTeamIdMembers403 = {
   error: string;
 };
 
+export type PostTeamsTeamIdMembers409 = {
+  error: string;
+};
+
 export type PatchTeamsTeamIdMembersMembershipIdBody = {
   is_captain: boolean;
 };

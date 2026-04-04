@@ -31,6 +31,10 @@ export const addTeamMemberRoute = createRoute({
       content: { "application/json": { schema: ForbiddenSchema } },
       description: "Forbidden",
     },
+    409: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Player already in a team",
+    },
   },
 });
 
@@ -43,6 +47,20 @@ export const addTeamMemberHandler: RouteHandler<typeof addTeamMemberRoute, AppEn
   }
 
   const { player_id, is_captain } = c.req.valid("json");
+
+  const conflict = await c.get("db")
+    .selectFrom("membership")
+    .select("id")
+    .where("player_id", "=", player_id)
+    .where((eb) => eb.or([
+      eb("left_date", "is", null),
+      eb("left_date", ">", new Date()),
+    ]))
+    .executeTakeFirst();
+
+  if (conflict) {
+    return c.json({ error: "Player is already a member of another team" }, 409);
+  }
 
   const membership = await c.get("db")
     .insertInto("membership")
