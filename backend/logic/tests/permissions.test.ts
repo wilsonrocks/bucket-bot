@@ -100,26 +100,25 @@ describe("getCaptainTeamIds", () => {
   test("excludes memberships where left_date is set", async () => {
     await dbClient
       .insertInto("membership")
-      .values({ player_id: TEST_PLAYER_ALICE_ID, team_id: teamId, is_captain: true, left_date: "2024-01-01" as any })
+      .values({ player_id: TEST_PLAYER_ALICE_ID, team_id: teamId, is_captain: true, join_date: "2023-01-01" as any, left_date: "2024-01-01" as any })
       .execute();
 
     const ids = await getCaptainTeamIds(TEST_DISCORD_ALICE, dbClient);
     expect(ids).toEqual([]);
   });
 
-  test("returns multiple team IDs when captain of multiple teams", async () => {
+  test("cannot be an active member of two teams simultaneously", async () => {
     await dbClient
       .insertInto("membership")
-      .values([
-        { player_id: TEST_PLAYER_ALICE_ID, team_id: teamId, is_captain: true },
-        { player_id: TEST_PLAYER_ALICE_ID, team_id: otherTeamId, is_captain: true },
-      ])
+      .values({ player_id: TEST_PLAYER_ALICE_ID, team_id: teamId, is_captain: true })
       .execute();
 
-    const ids = await getCaptainTeamIds(TEST_DISCORD_ALICE, dbClient);
-    expect(ids).toContain(teamId);
-    expect(ids).toContain(otherTeamId);
-    expect(ids).toHaveLength(2);
+    await expect(
+      dbClient
+        .insertInto("membership")
+        .values({ player_id: TEST_PLAYER_ALICE_ID, team_id: otherTeamId, is_captain: true })
+        .execute()
+    ).rejects.toThrow("membership_no_overlapping_membership");
   });
 
   test("does not return teams captained by a different player", async () => {
