@@ -45,6 +45,8 @@ import {
 import {
   getPlayerById,
   getPlayerByIdRoute,
+  getPlayerTeams,
+  getPlayerTeamsRoute,
   getPlayers,
   getPlayersRoute,
   playerNameExistsHandler,
@@ -231,6 +233,7 @@ v1Router.openapi(getTourneysForPlayerRoute, getTourneysForPlayerHandler);
 v1Router.openapi(getAllVenuesRoute, getAllVenuesHandler);
 v1Router.openapi(getPlayersRoute, getPlayers);
 v1Router.openapi(getPlayerByIdRoute, getPlayerById);
+v1Router.openapi(getPlayerTeamsRoute, getPlayerTeams);
 v1Router.openapi(getAllTiersRoute, getAllTiers);
 v1Router.openapi(getFactionRankingsRoute, getFactionRankings);
 v1Router.openapi(getFactionsOverTimeRoute, getFactionsOverTime);

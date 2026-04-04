@@ -220,6 +220,21 @@ export type PutPlayerId404 = {
   error: string;
 };
 
+export type GetPlayerIdTeams200Item = {
+  membership_id: number;
+  team_id: number;
+  team_name: string;
+  /** @nullable */
+  join_date: string | null;
+  /** @nullable */
+  left_date: string | null;
+  is_captain: boolean;
+};
+
+export type GetPlayerIdTeams400 = {
+  error: string;
+};
+
 export type GetTiers200Item = {
   code: string;
   name: string;

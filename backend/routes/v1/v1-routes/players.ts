@@ -103,6 +103,64 @@ export const getPlayerById: RouteHandler<
   return c.json(player as any, 200);
 };
 
+const PlayerTeamMembershipSchema = z.object({
+  membership_id: z.number(),
+  team_id: z.number(),
+  team_name: z.string(),
+  join_date: z.string().nullable(),
+  left_date: z.string().nullable(),
+  is_captain: z.boolean(),
+});
+
+export const getPlayerTeamsRoute = createRoute({
+  method: "get",
+  path: "/player/{id}/teams",
+  request: {
+    params: z.object({ id: z.string() }),
+  },
+  responses: {
+    200: {
+      content: {
+        "application/json": { schema: z.array(PlayerTeamMembershipSchema) },
+      },
+      description: "Team membership history for a player",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Invalid player ID",
+    },
+  },
+});
+
+export const getPlayerTeams: RouteHandler<
+  typeof getPlayerTeamsRoute,
+  AppEnv
+> = async (c) => {
+  const { id } = c.req.valid("param");
+  const playerId = Number(id);
+  if (isNaN(playerId)) {
+    return c.json({ error: "Invalid player ID" }, 400);
+  }
+
+  const memberships = await c
+    .get("db")
+    .selectFrom("membership")
+    .innerJoin("team", "team.id", "membership.team_id")
+    .select([
+      "membership.id as membership_id",
+      "team.id as team_id",
+      "team.name as team_name",
+      "membership.join_date",
+      "membership.left_date",
+      "membership.is_captain",
+    ])
+    .where("membership.player_id", "=", playerId)
+    .orderBy("membership.join_date", "desc")
+    .execute();
+
+  return c.json(memberships as any, 200);
+};
+
 const UpdatePlayerBodySchema = z.object({
   name: z.string(),
   short_name: z.string().nullable().optional(),
