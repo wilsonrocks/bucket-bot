@@ -6,11 +6,14 @@ type AddMemberResult =
   | { type: "conflict" }
   | { type: "success"; membership: { id: number; player_id: number | null; team_id: number | null; is_captain: boolean }; playerName: string };
 
+const FOUNDING_MEMBER_JOIN_DATE = "2025-12-01";
+
 export async function addTeamMember(
   db: Kysely<DB>,
   teamId: number,
   discordUserId: string,
   isCaptain: boolean,
+  foundingMember = false,
 ): Promise<AddMemberResult> {
   const discordUser = await db
     .selectFrom("discord_user")
@@ -68,9 +71,16 @@ export async function addTeamMember(
       return { type: "conflict" } as const;
     }
 
+    const joinDate = foundingMember ? FOUNDING_MEMBER_JOIN_DATE : new Date().toISOString().slice(0, 10);
+
     const membership = await trx
       .insertInto("membership")
-      .values({ team_id: teamId, player_id: player.id, is_captain: isCaptain })
+      .values({
+        team_id: teamId,
+        player_id: player.id,
+        is_captain: isCaptain,
+        join_date: joinDate as any,
+      })
       .returningAll()
       .executeTakeFirstOrThrow();
 

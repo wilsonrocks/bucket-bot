@@ -98,6 +98,33 @@ describe("addTeamMember", () => {
     expect(result.type).toBe("conflict");
   });
 
+  test("sets join_date to 2025-12-01 when founding_member is true", async () => {
+    const result = await addTeamMember(dbClient, teamId, DISCORD_ALICE, false, true);
+
+    expect(result.type).toBe("success");
+    if (result.type !== "success") return;
+
+    const membership = await dbClient
+      .selectFrom("membership").selectAll().where("id", "=", result.membership.id).executeTakeFirstOrThrow();
+    const d = membership.join_date as unknown as Date;
+    expect(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`).toBe("2025-12-01");
+  });
+
+  test("sets join_date to today when founding_member is false", async () => {
+    const now = new Date();
+    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+    const result = await addTeamMember(dbClient, teamId, DISCORD_ALICE, false, false);
+
+    expect(result.type).toBe("success");
+    if (result.type !== "success") return;
+
+    const membership = await dbClient
+      .selectFrom("membership").selectAll().where("id", "=", result.membership.id).executeTakeFirstOrThrow();
+    const d = membership.join_date as unknown as Date;
+    const joinDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    expect(joinDate).toBe(today);
+  });
+
   test("allows adding a player who previously left a team", async () => {
     const player = await dbClient
       .insertInto("player").values({ discord_id: DISCORD_ALICE, name: "Alice" }).returningAll().executeTakeFirstOrThrow();

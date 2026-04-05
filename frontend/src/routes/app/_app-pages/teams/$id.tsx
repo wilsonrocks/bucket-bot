@@ -1,4 +1,5 @@
 import {
+  uploadTeamImage,
   useDeleteTeamsTeamIdMembersMembershipId,
   useGetSearchDiscordUsers,
   useGetTeamsId,
@@ -6,7 +7,6 @@ import {
   usePatchTeamsTeamIdMembersMembershipId,
   usePostTeamsTeamIdMembers,
   usePutTeamsId,
-  uploadTeamImage,
 } from '@/api/hooks'
 import { usePermissions } from '@/hooks/usePermissions'
 import {
@@ -19,19 +19,19 @@ import {
   Grid,
   Group,
   Image,
+  Modal,
   Overlay,
   Paper,
   Select,
-  Stack,
   Table,
   Text,
   Textarea,
   TextInput,
   Title,
 } from '@mantine/core'
-import { IconAlertCircle } from '@tabler/icons-react'
 import { useForm } from '@mantine/form'
-import { useHover } from '@mantine/hooks'
+import { useDisclosure, useHover } from '@mantine/hooks'
+import { IconAlertCircle } from '@tabler/icons-react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect, useRef, useState } from 'react'
 import z from 'zod'
@@ -101,7 +101,11 @@ function RouteComponent() {
   }, [team?.id])
 
   const [discordSearch, setDiscordSearch] = useState('')
-  const [selectedDiscordUserId, setSelectedDiscordUserId] = useState<string | null>(null)
+  const [selectedDiscordUserId, setSelectedDiscordUserId] = useState<
+    string | null
+  >(null)
+  const [joinModalOpened, { open: openJoinModal, close: closeJoinModal }] =
+    useDisclosure(false)
   const { data: discordResults } = useGetSearchDiscordUsers(
     { text: discordSearch },
     { query: { enabled: discordSearch.trim().length > 0 } },
@@ -318,10 +322,15 @@ function RouteComponent() {
             placeholder="Search Discord users..."
             searchable
             data={
-              discordResults?.map((u) => ({
-                value: u.discord_user_id,
-                label: u.discord_display_name || u.discord_username || u.discord_user_id,
-              })) ?? []
+              discordResults?.map((u) => {
+                return {
+                  value: u.discord_user_id,
+                  label:
+                    u.discord_display_name ||
+                    u.discord_username ||
+                    u.discord_user_id,
+                }
+              }) ?? []
             }
             value={selectedDiscordUserId}
             onChange={setSelectedDiscordUserId}
@@ -332,25 +341,7 @@ function RouteComponent() {
           <Button
             mb={4}
             disabled={!selectedDiscordUserId}
-            loading={addMember.isPending}
-            onClick={() => {
-              if (!selectedDiscordUserId) return
-              addMember.mutate(
-                {
-                  teamId: String(id),
-                  data: {
-                    discord_user_id: selectedDiscordUserId,
-                    is_captain: false,
-                  },
-                },
-                {
-                  onSuccess: () => {
-                    setSelectedDiscordUserId(null)
-                    setDiscordSearch('')
-                  },
-                },
-              )
-            }}
+            onClick={openJoinModal}
           >
             Add
           </Button>
@@ -360,6 +351,71 @@ function RouteComponent() {
             {addMember.error?.message ?? 'Failed to add member'}
           </Alert>
         )}
+
+        <Modal
+          opened={joinModalOpened}
+          onClose={closeJoinModal}
+          title="When did this player join?"
+          centered
+        >
+          <Text size="sm" c="dimmed" mb="md">
+            Players added from the start will be included in early 2026 event
+            stats.
+          </Text>
+          <Group>
+            <Button
+              loading={addMember.isPending}
+              onClick={() => {
+                if (!selectedDiscordUserId) return
+                addMember.mutate(
+                  {
+                    teamId: String(id),
+                    data: {
+                      discord_user_id: selectedDiscordUserId,
+                      is_captain: false,
+                      founding_member: true,
+                    },
+                  },
+                  {
+                    onSuccess: () => {
+                      setSelectedDiscordUserId(null)
+                      setDiscordSearch('')
+                      closeJoinModal()
+                    },
+                  },
+                )
+              }}
+            >
+              From the start
+            </Button>
+            <Button
+              variant="default"
+              loading={addMember.isPending}
+              onClick={() => {
+                if (!selectedDiscordUserId) return
+                addMember.mutate(
+                  {
+                    teamId: String(id),
+                    data: {
+                      discord_user_id: selectedDiscordUserId,
+                      is_captain: false,
+                      founding_member: false,
+                    },
+                  },
+                  {
+                    onSuccess: () => {
+                      setSelectedDiscordUserId(null)
+                      setDiscordSearch('')
+                      closeJoinModal()
+                    },
+                  },
+                )
+              }}
+            >
+              Joining now
+            </Button>
+          </Group>
+        </Modal>
       </Paper>
     </div>
   )

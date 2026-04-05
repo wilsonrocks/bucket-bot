@@ -631,6 +631,7 @@ export type PostTeamsTeamIdMembersBody = {
   /** @minLength 1 */
   discord_user_id: string;
   is_captain?: boolean;
+  founding_member?: boolean;
 };
 
 export type PostTeamsTeamIdMembers201 = {

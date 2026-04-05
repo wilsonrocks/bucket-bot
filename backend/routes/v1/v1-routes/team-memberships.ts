@@ -12,6 +12,7 @@ const ForbiddenSchema = z.object({ error: z.string() });
 const AddMemberBodySchema = z.object({
   discord_user_id: z.string().min(1),
   is_captain: z.boolean().default(false),
+  founding_member: z.boolean().default(false),
 });
 
 export const addTeamMemberRoute = createRoute({
@@ -43,32 +44,44 @@ export const addTeamMemberRoute = createRoute({
   },
 });
 
-export const addTeamMemberHandler: RouteHandler<typeof addTeamMemberRoute, AppEnv> = async (c) => {
+export const addTeamMemberHandler: RouteHandler<
+  typeof addTeamMemberRoute,
+  AppEnv
+> = async (c) => {
   const teamId = Number(c.req.valid("param").teamId);
   const { id: userId } = c.get("jwtPayload") as { id: string };
 
-  if (!await canAccessTeam(userId, teamId, c.get("db"))) {
+  if (!(await canAccessTeam(userId, teamId, c.get("db")))) {
     return c.json({ error: "Forbidden" }, 403);
   }
 
-  const { discord_user_id, is_captain } = c.req.valid("json");
+  const { discord_user_id, is_captain, founding_member } = c.req.valid("json");
 
-  const result = await addTeamMember(c.get("db"), teamId, discord_user_id, is_captain);
+  const result = await addTeamMember(
+    c.get("db"),
+    teamId,
+    discord_user_id,
+    is_captain,
+    founding_member,
+  );
 
   if (result.type === "discord_user_not_found") {
     return c.json({ error: "Discord user not found" }, 404);
   }
 
   if (result.type === "conflict") {
-    return c.json({ error: "Player is already a member of another team" }, 409);
+    return c.json({ error: "Player is already a member of a team" }, 409);
   }
 
-  return c.json({
-    membership_id: result.membership.id,
-    player_id: result.membership.player_id!,
-    player_name: result.playerName,
-    is_captain: result.membership.is_captain,
-  } as any, 201);
+  return c.json(
+    {
+      membership_id: result.membership.id,
+      player_id: result.membership.player_id!,
+      player_name: result.playerName,
+      is_captain: result.membership.is_captain,
+    } as any,
+    201,
+  );
 };
 
 // ── PATCH /teams/:teamId/members/:membershipId ─────────────────────────────
@@ -88,7 +101,9 @@ export const updateTeamMemberRoute = createRoute({
   },
   responses: {
     200: {
-      content: { "application/json": { schema: z.object({ success: z.literal(true) }) } },
+      content: {
+        "application/json": { schema: z.object({ success: z.literal(true) }) },
+      },
       description: "Member updated",
     },
     403: {
@@ -102,18 +117,22 @@ export const updateTeamMemberRoute = createRoute({
   },
 });
 
-export const updateTeamMemberHandler: RouteHandler<typeof updateTeamMemberRoute, AppEnv> = async (c) => {
+export const updateTeamMemberHandler: RouteHandler<
+  typeof updateTeamMemberRoute,
+  AppEnv
+> = async (c) => {
   const teamId = Number(c.req.valid("param").teamId);
   const membershipId = Number(c.req.valid("param").membershipId);
   const { id: userId } = c.get("jwtPayload") as { id: string };
 
-  if (!await canAccessTeam(userId, teamId, c.get("db"))) {
+  if (!(await canAccessTeam(userId, teamId, c.get("db")))) {
     return c.json({ error: "Forbidden" }, 403);
   }
 
   const { is_captain } = c.req.valid("json");
 
-  const result = await c.get("db")
+  const result = await c
+    .get("db")
     .updateTable("membership")
     .set({ is_captain })
     .where("id", "=", membershipId)
@@ -136,7 +155,9 @@ export const removeTeamMemberRoute = createRoute({
   },
   responses: {
     200: {
-      content: { "application/json": { schema: z.object({ success: z.literal(true) }) } },
+      content: {
+        "application/json": { schema: z.object({ success: z.literal(true) }) },
+      },
       description: "Member removed",
     },
     403: {
@@ -150,16 +171,20 @@ export const removeTeamMemberRoute = createRoute({
   },
 });
 
-export const removeTeamMemberHandler: RouteHandler<typeof removeTeamMemberRoute, AppEnv> = async (c) => {
+export const removeTeamMemberHandler: RouteHandler<
+  typeof removeTeamMemberRoute,
+  AppEnv
+> = async (c) => {
   const teamId = Number(c.req.valid("param").teamId);
   const membershipId = Number(c.req.valid("param").membershipId);
   const { id: userId } = c.get("jwtPayload") as { id: string };
 
-  if (!await canAccessTeam(userId, teamId, c.get("db"))) {
+  if (!(await canAccessTeam(userId, teamId, c.get("db")))) {
     return c.json({ error: "Forbidden" }, 403);
   }
 
-  const result = await c.get("db")
+  const result = await c
+    .get("db")
     .updateTable("membership")
     .set({ left_date: new Date() })
     .where("id", "=", membershipId)
