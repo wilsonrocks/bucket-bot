@@ -137,6 +137,12 @@ export type GetVenues200Item = {
   [key: string]: unknown | null;
 };
 
+export type GetRegionsEventCounts200Item = {
+  id: number;
+  geojson_name: string;
+  event_count: number;
+};
+
 export type GetPlayers200Item = {
   id: number;
   name: string;

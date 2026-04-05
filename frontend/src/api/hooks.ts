@@ -1,6 +1,6 @@
 // TODO what is with all this as 200s what if these endpoints fail
 
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { customFetch } from './custom-instance'
 import {
   useGetAllDiscordUsers as useGetAllDiscordUsersGenerated,
@@ -501,3 +501,20 @@ export const uploadTeamImage = async (
   const { key } = (await response.json()) as { key: string }
   return key
 }
+
+// ── Regions ──────────────────────────────────────────────────────────────────
+
+export type RegionEventCount = {
+  id: number
+  geojson_name: string
+  event_count: number
+}
+
+export const useGetRegionEventCounts = () =>
+  useQuery({
+    queryKey: ['/v1/regions/event-counts'],
+    queryFn: () =>
+      customFetch<{ data: RegionEventCount[] }>('/v1/regions/event-counts').then(
+        (res) => res.data,
+      ),
+  })
