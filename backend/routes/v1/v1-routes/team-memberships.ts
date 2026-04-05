@@ -1,5 +1,6 @@
 import { createRoute, z, type RouteHandler } from "@hono/zod-openapi";
 import type { AppEnv } from "../../../hono-env.js";
+import { addTeamMember } from "../../../logic/team-memberships.js";
 import { canAccessTeam } from "../permissions.js";
 import { MemberSchema } from "./teams.js";
 
@@ -9,7 +10,7 @@ const ForbiddenSchema = z.object({ error: z.string() });
 // ── POST /teams/:teamId/members ────────────────────────────────────────────
 
 const AddMemberBodySchema = z.object({
-  player_id: z.number(),
+  discord_user_id: z.string().min(1),
   is_captain: z.boolean().default(false),
 });
 
@@ -31,6 +32,10 @@ export const addTeamMemberRoute = createRoute({
       content: { "application/json": { schema: ForbiddenSchema } },
       description: "Forbidden",
     },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Discord user not found",
+    },
     409: {
       content: { "application/json": { schema: ErrorSchema } },
       description: "Player already in a team",
@@ -46,39 +51,23 @@ export const addTeamMemberHandler: RouteHandler<typeof addTeamMemberRoute, AppEn
     return c.json({ error: "Forbidden" }, 403);
   }
 
-  const { player_id, is_captain } = c.req.valid("json");
+  const { discord_user_id, is_captain } = c.req.valid("json");
 
-  const conflict = await c.get("db")
-    .selectFrom("membership")
-    .select("id")
-    .where("player_id", "=", player_id)
-    .where((eb) => eb.or([
-      eb("left_date", "is", null),
-      eb("left_date", ">", new Date()),
-    ]))
-    .executeTakeFirst();
+  const result = await addTeamMember(c.get("db"), teamId, discord_user_id, is_captain);
 
-  if (conflict) {
+  if (result.type === "discord_user_not_found") {
+    return c.json({ error: "Discord user not found" }, 404);
+  }
+
+  if (result.type === "conflict") {
     return c.json({ error: "Player is already a member of another team" }, 409);
   }
 
-  const membership = await c.get("db")
-    .insertInto("membership")
-    .values({ team_id: teamId, player_id, is_captain })
-    .returningAll()
-    .executeTakeFirstOrThrow();
-
-  const player = await c.get("db")
-    .selectFrom("player")
-    .select(["name"])
-    .where("id", "=", player_id)
-    .executeTakeFirstOrThrow();
-
   return c.json({
-    membership_id: membership.id,
-    player_id: membership.player_id!,
-    player_name: player.name,
-    is_captain: membership.is_captain,
+    membership_id: result.membership.id,
+    player_id: result.membership.player_id!,
+    player_name: result.playerName,
+    is_captain: result.membership.is_captain,
   } as any, 201);
 };
 

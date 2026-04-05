@@ -1,6 +1,6 @@
 import {
   useDeleteTeamsTeamIdMembersMembershipId,
-  useGetPlayers,
+  useGetSearchDiscordUsers,
   useGetTeamsId,
   useGetVenues,
   usePatchTeamsTeamIdMembersMembershipId,
@@ -60,7 +60,6 @@ function RouteComponent() {
   }, [permissionsLoading, rankingReporter, id])
 
   const { data: team } = useGetTeamsId(id)
-  const { data: players } = useGetPlayers()
   const { data: venues } = useGetVenues()
 
   const updateTeam = usePutTeamsId(Number(id))
@@ -101,18 +100,16 @@ function RouteComponent() {
     }
   }, [team?.id])
 
-  const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null)
+  const [discordSearch, setDiscordSearch] = useState('')
+  const [selectedDiscordUserId, setSelectedDiscordUserId] = useState<string | null>(null)
+  const { data: discordResults } = useGetSearchDiscordUsers(
+    { text: discordSearch },
+    { query: { enabled: discordSearch.trim().length > 0 } },
+  )
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const { hovered: imageHovered, ref: imageHoverRef } = useHover()
   const imageInputRef = useRef<HTMLInputElement>(null)
-
-  const existingPlayerIds = new Set(team?.members.map((m) => m.player_id) ?? [])
-
-  const playerOptions =
-    players
-      ?.filter((p) => !existingPlayerIds.has(p.id))
-      .map((p) => ({ value: String(p.id), label: p.name })) ?? []
 
   if (!team) return <div>Loading...</div>
 
@@ -318,30 +315,38 @@ function RouteComponent() {
         <Group align="flex-end">
           <Select
             label="Add member"
-            placeholder="Search players..."
+            placeholder="Search Discord users..."
             searchable
-            data={playerOptions}
-            value={selectedPlayerId}
-            onChange={setSelectedPlayerId}
+            data={
+              discordResults?.map((u) => ({
+                value: u.discord_user_id,
+                label: u.discord_display_name || u.discord_username || u.discord_user_id,
+              })) ?? []
+            }
+            value={selectedDiscordUserId}
+            onChange={setSelectedDiscordUserId}
+            onSearchChange={setDiscordSearch}
+            searchValue={discordSearch}
             w={250}
           />
           <Button
             mb={4}
-            disabled={!selectedPlayerId}
+            disabled={!selectedDiscordUserId}
             loading={addMember.isPending}
             onClick={() => {
-              if (!selectedPlayerId) return
+              if (!selectedDiscordUserId) return
               addMember.mutate(
                 {
                   teamId: String(id),
                   data: {
-                    player_id: Number(selectedPlayerId),
+                    discord_user_id: selectedDiscordUserId,
                     is_captain: false,
                   },
                 },
                 {
                   onSuccess: () => {
-                    setSelectedPlayerId(null)
+                    setSelectedDiscordUserId(null)
+                    setDiscordSearch('')
                   },
                 },
               )
