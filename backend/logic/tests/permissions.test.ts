@@ -13,7 +13,7 @@ import { canAccessTeam, getCaptainTeamIds, isRankingReporter } from "../../route
 
 // ── constants & helpers ────────────────────────────────────────────────────
 
-// High IDs avoid colliding with the explicit IDs 1–5 inserted by addTestDataToDb
+// High IDs avoid colliding with the explicit IDs 10001–10005 inserted by addTestDataToDb
 const TEST_PLAYER_ALICE_ID = 9001;
 const TEST_PLAYER_BOB_ID = 9002;
 const TEST_DISCORD_ALICE = "test-permissions-discord-alice";

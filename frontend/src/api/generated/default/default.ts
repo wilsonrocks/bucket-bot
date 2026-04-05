@@ -102,6 +102,7 @@ import type {
   PostPostFactionRankingsParams,
   PostTeamsTeamIdMembers201,
   PostTeamsTeamIdMembers403,
+  PostTeamsTeamIdMembers404,
   PostTeamsTeamIdMembers409,
   PostTeamsTeamIdMembersBody,
   PostToken200,
@@ -3997,6 +3998,11 @@ export type postTeamsTeamIdMembersResponse403 = {
   status: 403
 }
 
+export type postTeamsTeamIdMembersResponse404 = {
+  data: PostTeamsTeamIdMembers404
+  status: 404
+}
+
 export type postTeamsTeamIdMembersResponse409 = {
   data: PostTeamsTeamIdMembers409
   status: 409
@@ -4005,7 +4011,7 @@ export type postTeamsTeamIdMembersResponse409 = {
 export type postTeamsTeamIdMembersResponseSuccess = (postTeamsTeamIdMembersResponse201) & {
   headers: Headers;
 };
-export type postTeamsTeamIdMembersResponseError = (postTeamsTeamIdMembersResponse403 | postTeamsTeamIdMembersResponse409) & {
+export type postTeamsTeamIdMembersResponseError = (postTeamsTeamIdMembersResponse403 | postTeamsTeamIdMembersResponse404 | postTeamsTeamIdMembersResponse409) & {
   headers: Headers;
 };
 
@@ -4035,7 +4041,7 @@ export const postTeamsTeamIdMembers = async (teamId: string,
 
 
 
-export const getPostTeamsTeamIdMembersMutationOptions = <TError = PostTeamsTeamIdMembers403 | PostTeamsTeamIdMembers409,
+export const getPostTeamsTeamIdMembersMutationOptions = <TError = PostTeamsTeamIdMembers403 | PostTeamsTeamIdMembers404 | PostTeamsTeamIdMembers409,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postTeamsTeamIdMembers>>, TError,{teamId: string;data: PostTeamsTeamIdMembersBody}, TContext>, request?: SecondParameter<typeof customFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof postTeamsTeamIdMembers>>, TError,{teamId: string;data: PostTeamsTeamIdMembersBody}, TContext> => {
 
@@ -4064,9 +4070,9 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type PostTeamsTeamIdMembersMutationResult = NonNullable<Awaited<ReturnType<typeof postTeamsTeamIdMembers>>>
     export type PostTeamsTeamIdMembersMutationBody = PostTeamsTeamIdMembersBody
-    export type PostTeamsTeamIdMembersMutationError = PostTeamsTeamIdMembers403 | PostTeamsTeamIdMembers409
+    export type PostTeamsTeamIdMembersMutationError = PostTeamsTeamIdMembers403 | PostTeamsTeamIdMembers404 | PostTeamsTeamIdMembers409
 
-    export const usePostTeamsTeamIdMembers = <TError = PostTeamsTeamIdMembers403 | PostTeamsTeamIdMembers409,
+    export const usePostTeamsTeamIdMembers = <TError = PostTeamsTeamIdMembers403 | PostTeamsTeamIdMembers404 | PostTeamsTeamIdMembers409,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postTeamsTeamIdMembers>>, TError,{teamId: string;data: PostTeamsTeamIdMembersBody}, TContext>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof postTeamsTeamIdMembers>>,

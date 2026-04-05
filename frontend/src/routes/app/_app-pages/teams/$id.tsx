@@ -1,12 +1,12 @@
 import {
+  uploadTeamImage,
   useDeleteTeamsTeamIdMembersMembershipId,
-  useGetPlayers,
+  useGetSearchDiscordUsers,
   useGetTeamsId,
   useGetVenues,
   usePatchTeamsTeamIdMembersMembershipId,
   usePostTeamsTeamIdMembers,
   usePutTeamsId,
-  uploadTeamImage,
 } from '@/api/hooks'
 import { usePermissions } from '@/hooks/usePermissions'
 import {
@@ -19,19 +19,19 @@ import {
   Grid,
   Group,
   Image,
+  Modal,
   Overlay,
   Paper,
   Select,
-  Stack,
   Table,
   Text,
   Textarea,
   TextInput,
   Title,
 } from '@mantine/core'
-import { IconAlertCircle } from '@tabler/icons-react'
 import { useForm } from '@mantine/form'
-import { useHover } from '@mantine/hooks'
+import { useDisclosure, useHover } from '@mantine/hooks'
+import { IconAlertCircle } from '@tabler/icons-react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect, useRef, useState } from 'react'
 import z from 'zod'
@@ -60,7 +60,6 @@ function RouteComponent() {
   }, [permissionsLoading, rankingReporter, id])
 
   const { data: team } = useGetTeamsId(id)
-  const { data: players } = useGetPlayers()
   const { data: venues } = useGetVenues()
 
   const updateTeam = usePutTeamsId(Number(id))
@@ -101,18 +100,20 @@ function RouteComponent() {
     }
   }, [team?.id])
 
-  const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null)
+  const [discordSearch, setDiscordSearch] = useState('')
+  const [selectedDiscordUserId, setSelectedDiscordUserId] = useState<
+    string | null
+  >(null)
+  const [joinModalOpened, { open: openJoinModal, close: closeJoinModal }] =
+    useDisclosure(false)
+  const { data: discordResults } = useGetSearchDiscordUsers(
+    { text: discordSearch },
+    { query: { enabled: discordSearch.trim().length > 0 } },
+  )
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const { hovered: imageHovered, ref: imageHoverRef } = useHover()
   const imageInputRef = useRef<HTMLInputElement>(null)
-
-  const existingPlayerIds = new Set(team?.members.map((m) => m.player_id) ?? [])
-
-  const playerOptions =
-    players
-      ?.filter((p) => !existingPlayerIds.has(p.id))
-      .map((p) => ({ value: String(p.id), label: p.name })) ?? []
 
   if (!team) return <div>Loading...</div>
 
@@ -318,34 +319,29 @@ function RouteComponent() {
         <Group align="flex-end">
           <Select
             label="Add member"
-            placeholder="Search players..."
+            placeholder="Search Discord users..."
             searchable
-            data={playerOptions}
-            value={selectedPlayerId}
-            onChange={setSelectedPlayerId}
+            data={
+              discordResults?.map((u) => {
+                return {
+                  value: u.discord_user_id,
+                  label:
+                    u.discord_display_name ||
+                    u.discord_username ||
+                    u.discord_user_id,
+                }
+              }) ?? []
+            }
+            value={selectedDiscordUserId}
+            onChange={setSelectedDiscordUserId}
+            onSearchChange={setDiscordSearch}
+            searchValue={discordSearch}
             w={250}
           />
           <Button
             mb={4}
-            disabled={!selectedPlayerId}
-            loading={addMember.isPending}
-            onClick={() => {
-              if (!selectedPlayerId) return
-              addMember.mutate(
-                {
-                  teamId: String(id),
-                  data: {
-                    player_id: Number(selectedPlayerId),
-                    is_captain: false,
-                  },
-                },
-                {
-                  onSuccess: () => {
-                    setSelectedPlayerId(null)
-                  },
-                },
-              )
-            }}
+            disabled={!selectedDiscordUserId}
+            onClick={openJoinModal}
           >
             Add
           </Button>
@@ -355,6 +351,71 @@ function RouteComponent() {
             {addMember.error?.message ?? 'Failed to add member'}
           </Alert>
         )}
+
+        <Modal
+          opened={joinModalOpened}
+          onClose={closeJoinModal}
+          title="When did this player join?"
+          centered
+        >
+          <Text size="sm" c="dimmed" mb="md">
+            Players added from the start will be included in early 2026 event
+            stats.
+          </Text>
+          <Group>
+            <Button
+              loading={addMember.isPending}
+              onClick={() => {
+                if (!selectedDiscordUserId) return
+                addMember.mutate(
+                  {
+                    teamId: String(id),
+                    data: {
+                      discord_user_id: selectedDiscordUserId,
+                      is_captain: false,
+                      founding_member: true,
+                    },
+                  },
+                  {
+                    onSuccess: () => {
+                      setSelectedDiscordUserId(null)
+                      setDiscordSearch('')
+                      closeJoinModal()
+                    },
+                  },
+                )
+              }}
+            >
+              From the start
+            </Button>
+            <Button
+              variant="default"
+              loading={addMember.isPending}
+              onClick={() => {
+                if (!selectedDiscordUserId) return
+                addMember.mutate(
+                  {
+                    teamId: String(id),
+                    data: {
+                      discord_user_id: selectedDiscordUserId,
+                      is_captain: false,
+                      founding_member: false,
+                    },
+                  },
+                  {
+                    onSuccess: () => {
+                      setSelectedDiscordUserId(null)
+                      setDiscordSearch('')
+                      closeJoinModal()
+                    },
+                  },
+                )
+              }}
+            >
+              Joining now
+            </Button>
+          </Group>
+        </Modal>
       </Paper>
     </div>
   )

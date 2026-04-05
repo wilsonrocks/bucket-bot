@@ -20,11 +20,11 @@ const monthsAgo = (months: number): string => {
 };
 
 const [Alice, Bob, Charlie, David, Eve] = [
-  { id: 1, name: "Alice" },
-  { id: 2, name: "Bob" },
-  { id: 3, name: "Charlie" },
-  { id: 4, name: "David" },
-  { id: 5, name: "Eve" },
+  { id: 10001, name: "Alice" },
+  { id: 10002, name: "Bob" },
+  { id: 10003, name: "Charlie" },
+  { id: 10004, name: "David" },
+  { id: 10005, name: "Eve" },
 ];
 
 interface TestTourney {

@@ -628,8 +628,10 @@ export type PostCreateTeam403 = {
 };
 
 export type PostTeamsTeamIdMembersBody = {
-  player_id: number;
+  /** @minLength 1 */
+  discord_user_id: string;
   is_captain?: boolean;
+  founding_member?: boolean;
 };
 
 export type PostTeamsTeamIdMembers201 = {
@@ -640,6 +642,10 @@ export type PostTeamsTeamIdMembers201 = {
 };
 
 export type PostTeamsTeamIdMembers403 = {
+  error: string;
+};
+
+export type PostTeamsTeamIdMembers404 = {
   error: string;
 };
 
