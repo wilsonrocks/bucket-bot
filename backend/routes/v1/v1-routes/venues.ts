@@ -2,13 +2,15 @@ import { createRoute, z, type RouteHandler } from "@hono/zod-openapi";
 import { sql } from "kysely";
 import type { AppEnv } from "../../../hono-env.js";
 
-const VenueSchema = z.object({
-  id: z.number(),
-  name: z.string(),
-  town: z.string(),
-  post_code: z.string().nullable(),
-  created_at: z.string().nullable(),
-}).passthrough();
+const VenueSchema = z
+  .object({
+    id: z.number(),
+    name: z.string(),
+    town: z.string(),
+    post_code: z.string().nullable(),
+    created_at: z.string().nullable(),
+  })
+  .passthrough();
 
 const ErrorSchema = z.object({ error: z.string() });
 
@@ -23,8 +25,16 @@ export const getAllVenuesRoute = createRoute({
   },
 });
 
-export const getAllVenuesHandler: RouteHandler<typeof getAllVenuesRoute, AppEnv> = async (c) => {
-  const venues = await c.get("db").selectFrom("venue").selectAll().orderBy("name").execute();
+export const getAllVenuesHandler: RouteHandler<
+  typeof getAllVenuesRoute,
+  AppEnv
+> = async (c) => {
+  const venues = await c
+    .get("db")
+    .selectFrom("venue")
+    .selectAll()
+    .orderBy("name")
+    .execute();
   return c.json(venues as any, 200);
 };
 
@@ -44,7 +54,9 @@ export const createVenueRoute = createRoute({
   },
   responses: {
     201: {
-      content: { "application/json": { schema: z.object({ success: z.literal(true) }) } },
+      content: {
+        "application/json": { schema: z.object({ success: z.literal(true) }) },
+      },
       description: "Venue created successfully",
     },
     400: {
@@ -54,25 +66,45 @@ export const createVenueRoute = createRoute({
   },
 });
 
-export const createVenueHandler: RouteHandler<typeof createVenueRoute, AppEnv> = async (c) => {
+export const createVenueHandler: RouteHandler<
+  typeof createVenueRoute,
+  AppEnv
+> = async (c) => {
   const { name, town, postCode } = c.req.valid("json");
 
-  const postcodeResponse = await fetch(`https://api.postcodes.io/postcodes/${postCode}`);
+  const postcodeResponse = await fetch(
+    `https://api.postcodes.io/postcodes/${postCode}`,
+  );
   const postcodeData = await postcodeResponse.json();
 
   if (postcodeData.status >= 400) {
     return c.json({ error: postcodeData.error as string }, 400);
   }
 
-  const { latitude, longitude } = postcodeData.result;
+  const {
+    latitude,
+    longitude,
+    region,
+    country,
+    postcode: post_code,
+  } = postcodeData.result;
 
-  await c.get("db")
+  const regionRow = await c
+    .get("db")
+    .selectFrom("region")
+    .select("id")
+    .where("postcodes_api_name", "=", region ?? country)
+    .executeTakeFirst();
+
+  await c
+    .get("db")
     .insertInto("venue")
     .values({
       name,
       town,
-      post_code: postCode,
+      post_code,
       geom: sql`ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326)`,
+      region_id: regionRow?.id ?? null,
     })
     .execute();
 
