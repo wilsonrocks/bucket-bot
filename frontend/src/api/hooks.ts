@@ -1,6 +1,7 @@
 // TODO what is with all this as 200s what if these endpoints fail
 
-import { useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { customFetch } from './custom-instance'
 import {
   useGetAllDiscordUsers as useGetAllDiscordUsersGenerated,
   useGetBotChatChannels as useGetBotChatChannelsGenerated,
@@ -316,6 +317,17 @@ export const usePostCreateVenue = () => {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: getGetVenuesQueryKey() })
       },
+    },
+  })
+}
+
+export const usePostVenueGeocode = () => {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: number) =>
+      customFetch(`/v1/venues/${id}/geocode`, { method: 'POST' }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: getGetVenuesQueryKey() })
     },
   })
 }

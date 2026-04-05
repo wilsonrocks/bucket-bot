@@ -115,6 +115,9 @@ import type {
   PostUpload400,
   PostUpload413,
   PostUploadParams,
+  PostVenuesIdGeocode200,
+  PostVenuesIdGeocode400,
+  PostVenuesIdGeocode404,
   PutPlayerId200,
   PutPlayerId400,
   PutPlayerId403,
@@ -2905,6 +2908,93 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getPostCreateVenueMutationOptions(options), queryClient);
+    }
+    export type postVenuesIdGeocodeResponse200 = {
+  data: PostVenuesIdGeocode200
+  status: 200
+}
+
+export type postVenuesIdGeocodeResponse400 = {
+  data: PostVenuesIdGeocode400
+  status: 400
+}
+
+export type postVenuesIdGeocodeResponse404 = {
+  data: PostVenuesIdGeocode404
+  status: 404
+}
+
+export type postVenuesIdGeocodeResponseSuccess = (postVenuesIdGeocodeResponse200) & {
+  headers: Headers;
+};
+export type postVenuesIdGeocodeResponseError = (postVenuesIdGeocodeResponse400 | postVenuesIdGeocodeResponse404) & {
+  headers: Headers;
+};
+
+export type postVenuesIdGeocodeResponse = (postVenuesIdGeocodeResponseSuccess | postVenuesIdGeocodeResponseError)
+
+export const getPostVenuesIdGeocodeUrl = (id: string,) => {
+
+
+  
+
+  return `/v1/venues/${id}/geocode`
+}
+
+export const postVenuesIdGeocode = async (id: string, options?: RequestInit): Promise<postVenuesIdGeocodeResponse> => {
+  
+  return customFetch<postVenuesIdGeocodeResponse>(getPostVenuesIdGeocodeUrl(id),
+  {      
+    ...options,
+    method: 'POST'
+    
+    
+  }
+);}
+  
+
+
+
+export const getPostVenuesIdGeocodeMutationOptions = <TError = PostVenuesIdGeocode400 | PostVenuesIdGeocode404,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postVenuesIdGeocode>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postVenuesIdGeocode>>, TError,{id: string}, TContext> => {
+
+const mutationKey = ['postVenuesIdGeocode'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postVenuesIdGeocode>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
+
+          return  postVenuesIdGeocode(id,requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostVenuesIdGeocodeMutationResult = NonNullable<Awaited<ReturnType<typeof postVenuesIdGeocode>>>
+    
+    export type PostVenuesIdGeocodeMutationError = PostVenuesIdGeocode400 | PostVenuesIdGeocode404
+
+    export const usePostVenuesIdGeocode = <TError = PostVenuesIdGeocode400 | PostVenuesIdGeocode404,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postVenuesIdGeocode>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postVenuesIdGeocode>>,
+        TError,
+        {id: string},
+        TContext
+      > => {
+      return useMutation(getPostVenuesIdGeocodeMutationOptions(options), queryClient);
     }
     export type postFetchDiscordUserIdsResponse200 = {
   data: PostFetchDiscordUserIds200

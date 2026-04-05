@@ -128,6 +128,12 @@ export type GetVenues200Item = {
   post_code: string | null;
   /** @nullable */
   created_at: string | null;
+  /** @nullable */
+  latitude: number | null;
+  /** @nullable */
+  longitude: number | null;
+  /** @nullable */
+  region_name: string | null;
   [key: string]: unknown | null;
 };
 
@@ -467,6 +473,18 @@ export type PostCreateVenue201 = {
 };
 
 export type PostCreateVenue400 = {
+  error: string;
+};
+
+export type PostVenuesIdGeocode200 = {
+  success: boolean;
+};
+
+export type PostVenuesIdGeocode400 = {
+  error: string;
+};
+
+export type PostVenuesIdGeocode404 = {
   error: string;
 };
 
