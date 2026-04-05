@@ -85,6 +85,8 @@ import {
   createVenueRoute,
   getAllVenuesHandler,
   getAllVenuesRoute,
+  reGeocodeVenueHandler,
+  reGeocodeVenueRoute,
 } from "./v1-routes/venues.js";
 import {
   getFactionsOverTime,
@@ -253,6 +255,7 @@ v1Router.openapi(newBotEventRoute, newBotEventHandler);
 v1Router.openapi(hasRankingReporterRoleRoute, hasRankingReporterRole);
 v1Router.openapi(generateRankingsRoute, generateRankingsHandler);
 v1Router.openapi(createVenueRoute, createVenueHandler);
+v1Router.openapi(reGeocodeVenueRoute, reGeocodeVenueHandler);
 v1Router.openapi(fetchDiscordUserIdsRoute, fetchAndStoreDiscordUserIds);
 v1Router.openapi(searchDiscordUsersRoute, searchDiscordUsersByName);
 v1Router.openapi(getAllDiscordUsersRoute, getAllDiscordUsers);

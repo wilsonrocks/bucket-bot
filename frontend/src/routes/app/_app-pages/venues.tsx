@@ -1,8 +1,9 @@
-import { useGetVenues, usePostCreateVenue } from '@/api/hooks'
+import { useGetVenues, usePostCreateVenue, usePostVenueGeocode } from '@/api/hooks'
 import { RequireRankingReporter } from '@/components/RequireRankingReporter'
 import { Box, Button, Grid, Paper, Table, TextInput } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { createFileRoute } from '@tanstack/react-router'
+import { useState } from 'react'
 
 export const Route = createFileRoute('/app/_app-pages/venues')({
   component: () => <RequireRankingReporter><RouteComponent /></RequireRankingReporter>,
@@ -20,6 +21,8 @@ function RouteComponent() {
 
   const { data: venuesData } = useGetVenues()
   const createVenueMutation = usePostCreateVenue()
+  const geocodeMutation = usePostVenueGeocode()
+  const [pendingGeocodeIds, setPendingGeocodeIds] = useState(new Set<number>())
 
   return (
     <div>
@@ -67,16 +70,51 @@ function RouteComponent() {
         </form>
       </Paper>
       {venuesData && (
-        <Table
-          data={{
-            head: ['Venue Name', 'Town', 'Post Code'],
-            body: venuesData.map((venue) => [
-              venue.name,
-              venue.town,
-              venue.post_code,
-            ]),
-          }}
-        />
+        <Table>
+          <Table.Thead>
+            <Table.Tr>
+              <Table.Th>Venue Name</Table.Th>
+              <Table.Th>Town</Table.Th>
+              <Table.Th>Post Code</Table.Th>
+              <Table.Th>Region</Table.Th>
+              <Table.Th>Lat</Table.Th>
+              <Table.Th>Long</Table.Th>
+              <Table.Th />
+            </Table.Tr>
+          </Table.Thead>
+          <Table.Tbody>
+            {venuesData.map((venue) => (
+              <Table.Tr key={venue.id}>
+                <Table.Td>{venue.name}</Table.Td>
+                <Table.Td>{venue.town}</Table.Td>
+                <Table.Td>{venue.post_code}</Table.Td>
+                <Table.Td>{venue.region_name ?? '—'}</Table.Td>
+                <Table.Td>{venue.latitude != null ? venue.latitude.toFixed(4) : '—'}</Table.Td>
+                <Table.Td>{venue.longitude != null ? venue.longitude.toFixed(4) : '—'}</Table.Td>
+                <Table.Td>
+                  <Button
+                    variant="subtle"
+                    size="xs"
+                    disabled={pendingGeocodeIds.has(venue.id)}
+                    onClick={() => {
+                      setPendingGeocodeIds((prev) => new Set(prev).add(venue.id))
+                      geocodeMutation.mutate(venue.id, {
+                        onSettled: () =>
+                          setPendingGeocodeIds((prev) => {
+                            const next = new Set(prev)
+                            next.delete(venue.id)
+                            return next
+                          }),
+                      })
+                    }}
+                  >
+                    Refresh location
+                  </Button>
+                </Table.Td>
+              </Table.Tr>
+            ))}
+          </Table.Tbody>
+        </Table>
       )}
     </div>
   )
