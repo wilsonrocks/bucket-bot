@@ -2,8 +2,9 @@ import { useGetRegionEventCounts } from '@/api/hooks'
 import { useResizeObserver } from '@mantine/hooks'
 import { Box, Group, Text } from '@mantine/core'
 import { createFileRoute } from '@tanstack/react-router'
+import { useQuery } from '@tanstack/react-query'
 import * as d3 from 'd3'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 
 export const Route = createFileRoute('/site/_site-pages/regions')({
   component: RouteComponent,
@@ -74,18 +75,18 @@ function rewindFeature(feature: GeoJsonFeature): GeoJsonFeature {
 }
 
 function RouteComponent() {
+  const { data: geoJson } = useQuery({
+    queryKey: ['ukRegions'],
+    queryFn: () =>
+      import('@/data/ukRegions').then((m) => {
+        const gj = m.default as GeoJsonCollection
+        return { ...gj, features: gj.features.map(rewindFeature) }
+      }),
+    staleTime: Infinity,
+  })
   const { data: regionCounts } = useGetRegionEventCounts()
-  const [geoJson, setGeoJson] = useState<GeoJsonCollection | null>(null)
   const [containerRef, containerRect] = useResizeObserver<HTMLDivElement>()
   const svgRef = useRef<SVGSVGElement | null>(null)
-
-  useEffect(() => {
-    fetch('/new_uk_regions.geojson')
-      .then((r) => r.json())
-      .then((gj: GeoJsonCollection) =>
-        setGeoJson({ ...gj, features: gj.features.map(rewindFeature) }),
-      )
-  }, [])
 
   const width = containerRect.width || 500
   const height = Math.round(width * 1.4)
