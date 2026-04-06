@@ -1,5 +1,4 @@
 import { useGetRegionEventCounts } from '@/api/hooks'
-import { useResizeObserver } from '@mantine/hooks'
 import { Box, Group, Text } from '@mantine/core'
 import { createFileRoute } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
@@ -85,14 +84,13 @@ function RouteComponent() {
     staleTime: Infinity,
   })
   const { data: regionCounts } = useGetRegionEventCounts()
-  const [containerRef, containerRect] = useResizeObserver<HTMLDivElement>()
   const svgRef = useRef<SVGSVGElement | null>(null)
 
-  const width = containerRect.width || 500
+  const width = 500
   const height = Math.round(width * 1.4)
 
   useEffect(() => {
-    if (!geoJson || !regionCounts || !svgRef.current || width === 0) return
+    if (!geoJson || !regionCounts || !svgRef.current) return
 
     const countMap = new Map(
       regionCounts.map((r) => [r.geojson_name, r.event_count]),
@@ -127,8 +125,8 @@ function RouteComponent() {
 
   return (
     <div>
-      <div ref={containerRef} style={{ maxWidth: 480, margin: '0 auto' }}>
-        <svg ref={svgRef} width={width} height={height} />
+      <div style={{ maxWidth: 480, margin: '0 auto' }}>
+        <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" />
       </div>
       <Group justify="center" mt="md" gap="lg">
         <LegendItem color={GREY} label="No events" />
