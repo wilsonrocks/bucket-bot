@@ -46,11 +46,29 @@ function rewindFeature(feature: GeoJsonFeature): GeoJsonFeature {
   const geom = feature.geometry as { type: string; coordinates: unknown }
   if (geom.type === 'Polygon') {
     const rings = geom.coordinates as number[][][]
-    return { ...feature, geometry: { ...geom, coordinates: rings.map((r, i) => (i === 0 ? rewindCoords(r) : rewindCoords(r).reverse())) } }
+    return {
+      ...feature,
+      geometry: {
+        ...geom,
+        coordinates: rings.map((r, i) =>
+          i === 0 ? rewindCoords(r) : rewindCoords(r).reverse(),
+        ),
+      },
+    }
   }
   if (geom.type === 'MultiPolygon') {
     const polys = geom.coordinates as number[][][][]
-    return { ...feature, geometry: { ...geom, coordinates: polys.map((p) => p.map((r, i) => (i === 0 ? rewindCoords(r) : rewindCoords(r).reverse()))) } }
+    return {
+      ...feature,
+      geometry: {
+        ...geom,
+        coordinates: polys.map((p) =>
+          p.map((r, i) =>
+            i === 0 ? rewindCoords(r) : rewindCoords(r).reverse(),
+          ),
+        ),
+      },
+    }
   }
   return feature
 }
@@ -62,9 +80,11 @@ function RouteComponent() {
   const svgRef = useRef<SVGSVGElement | null>(null)
 
   useEffect(() => {
-    fetch('/uk_regions.geojson')
+    fetch('/new_uk_regions.geojson')
       .then((r) => r.json())
-      .then((gj: GeoJsonCollection) => setGeoJson({ ...gj, features: gj.features.map(rewindFeature) }))
+      .then((gj: GeoJsonCollection) =>
+        setGeoJson({ ...gj, features: gj.features.map(rewindFeature) }),
+      )
   }, [])
 
   const width = containerRect.width || 500
@@ -73,13 +93,21 @@ function RouteComponent() {
   useEffect(() => {
     if (!geoJson || !regionCounts || !svgRef.current || width === 0) return
 
-    const countMap = new Map(regionCounts.map((r) => [r.geojson_name, r.event_count]))
+    const countMap = new Map(
+      regionCounts.map((r) => [r.geojson_name, r.event_count]),
+    )
 
     // fitSize on the FeatureCollection gives a world-sized bounding box due to polygon
     // winding order mismatch (D3 expects CCW exterior rings). Fit to a bounding box instead.
     const ukBbox = {
       type: 'Feature' as const,
-      geometry: { type: 'MultiPoint' as const, coordinates: [[-8.62, 49.94], [1.76, 60.85]] },
+      geometry: {
+        type: 'MultiPoint' as const,
+        coordinates: [
+          [-8.62, 49.94],
+          [1.76, 60.85],
+        ],
+      },
       properties: {},
     }
     const projection = d3.geoMercator().fitSize([width, height], ukBbox)
@@ -114,7 +142,11 @@ function RouteComponent() {
 function LegendItem({ color, label }: { color: string; label: string }) {
   return (
     <Group gap={6} align="center">
-      <Box w={16} h={16} style={{ backgroundColor: color, borderRadius: 3, flexShrink: 0 }} />
+      <Box
+        w={16}
+        h={16}
+        style={{ backgroundColor: color, borderRadius: 3, flexShrink: 0 }}
+      />
       <Text size="sm">{label}</Text>
     </Group>
   )
