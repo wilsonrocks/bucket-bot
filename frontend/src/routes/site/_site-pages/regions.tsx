@@ -104,7 +104,7 @@ function RouteComponent() {
         type: 'MultiPoint' as const,
         coordinates: [
           [-8.62, 49.94],
-          [1.76, 60.85],
+          [1.76, 58.8],
         ],
       },
       properties: {},
