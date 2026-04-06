@@ -89,7 +89,9 @@ function RouteComponent() {
   const svgRef = useRef<SVGSVGElement | null>(null)
   const hoveredNameRef = useRef<((name: string | null) => void) | null>(null)
   const [hoveredRegion, setHoveredRegion] = useState<string | null>(null)
-  const [mousePos, setMousePos] = useState<{ x: number; y: number } | null>(null)
+  const [mousePos, setMousePos] = useState<{ x: number; y: number } | null>(
+    null,
+  )
 
   const width = 500
   const height = Math.round(width * 1.4)
@@ -135,37 +137,40 @@ function RouteComponent() {
   }, [geoJson, regionCounts, width, height])
 
   return (
-    <Group align="flex-start" gap="xl" style={{ position: 'relative' }}>
-      <div
-        style={{ maxWidth: 480, flex: '1 1 auto', position: 'relative' }}
-        onMouseMove={(e) => {
-          const rect = e.currentTarget.getBoundingClientRect()
-          setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top })
-        }}
-        onMouseLeave={() => setMousePos(null)}
-      >
-        <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" />
-        {hoveredRegion && mousePos && (
-          <div
-            style={{
-              position: 'absolute',
-              left: mousePos.x + 12,
-              top: mousePos.y - 8,
-              background: 'rgba(0,0,0,0.75)',
-              color: '#fff',
-              padding: '4px 10px',
-              borderRadius: 4,
-              fontSize: 13,
-              pointerEvents: 'none',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            {hoveredRegion}
-          </div>
-        )}
-      </div>
+    <div
+      style={{ maxWidth: 480, margin: '0 auto', position: 'relative' }}
+      onMouseMove={(e) => {
+        const rect = e.currentTarget.getBoundingClientRect()
+        setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top })
+      }}
+      onMouseLeave={() => setMousePos(null)}
+    >
+      <svg
+        ref={svgRef}
+        viewBox={`0 0 ${width} ${height}`}
+        width="100%"
+        style={{ maxHeight: '70vh' }}
+      />
       <LadderLegend />
-    </Group>
+      {hoveredRegion && mousePos && (
+        <div
+          style={{
+            position: 'absolute',
+            left: mousePos.x + 12,
+            top: mousePos.y - 8,
+            background: 'rgba(0,0,0,0.75)',
+            color: '#fff',
+            padding: '4px 10px',
+            borderRadius: 4,
+            fontSize: 13,
+            pointerEvents: 'none',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {hoveredRegion}
+        </div>
+      )}
+    </div>
   )
 }
 
@@ -180,25 +185,31 @@ const LEGEND_ITEMS = [
 
 function LadderLegend() {
   return (
-    <div style={{ paddingTop: 8 }}>
+    <div style={{ position: 'absolute', top: 8, right: 8 }}>
       {LEGEND_ITEMS.map(({ count, label }, i) => (
-        <Group key={count} gap={8} align="center" wrap="nowrap">
+        <Group
+          key={count}
+          gap={8}
+          align="center"
+          wrap="nowrap"
+          justify="flex-end"
+        >
+          <Text size="sm" style={{ whiteSpace: 'nowrap' }}>
+            {label}
+          </Text>
           <Box
             w={20}
             h={28}
             style={{
               backgroundColor: COLORS[count],
               flexShrink: 0,
-              borderTop: i === 0 ? '1px solid #aaa' : 'none',
-              borderLeft: '1px solid #aaa',
-              borderRight: '1px solid #aaa',
+              borderTop: i === 0 ? '1px solid #000' : 'none',
+              borderLeft: '1px solid #000',
+              borderRight: '1px solid #000',
               borderBottom:
-                i === LEGEND_ITEMS.length - 1 ? '1px solid #aaa' : 'none',
+                i === LEGEND_ITEMS.length - 1 ? '1px solid #000' : 'none',
             }}
           />
-          <Text size="sm" style={{ whiteSpace: 'nowrap' }}>
-            {label}
-          </Text>
         </Group>
       ))}
     </div>
