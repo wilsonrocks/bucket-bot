@@ -19,6 +19,7 @@ const PlayerSchema = z.object({
 
 const PlayerListItemSchema = PlayerSchema.extend({
   current_team_name: z.string().nullable(),
+  current_team_id: z.number().nullable(),
   event_count: z.number(),
 });
 
@@ -84,6 +85,7 @@ export const getPlayers: RouteHandler<typeof getPlayersRoute, AppEnv> = async (
       "discord_user.discord_display_name",
       "discord_user.discord_avatar_url",
       "current_team.name as current_team_name",
+      "current_team.id as current_team_id",
       (eb) =>
         eb
           .selectFrom("result")

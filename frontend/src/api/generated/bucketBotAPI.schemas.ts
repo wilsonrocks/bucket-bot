@@ -143,6 +143,17 @@ export type GetRegionsEventCounts200Item = {
   event_count: number;
 };
 
+export type GetRegionsOverTime200ItemRegionsItem = {
+  region_id: number;
+  geojson_name: string;
+  event_count: number;
+};
+
+export type GetRegionsOverTime200Item = {
+  date: string;
+  regions: GetRegionsOverTime200ItemRegionsItem[];
+};
+
 export type GetPlayers200Item = {
   id: number;
   name: string;
@@ -164,6 +175,8 @@ export type GetPlayers200Item = {
   created_at: string | null;
   /** @nullable */
   current_team_name: string | null;
+  /** @nullable */
+  current_team_id: number | null;
   event_count: number;
 };
 
@@ -589,6 +602,10 @@ export type PostBotChatClearTestChannel200 = {
 
 export type PostBotChatClearTestChannel404 = {
   error: string;
+};
+
+export type PostGenerateRegionSnapshot200 = {
+  ok: boolean;
 };
 
 export type PostPostFactionRankingsParams = {
