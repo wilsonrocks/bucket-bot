@@ -1,4 +1,5 @@
 import { createRoute, z, type RouteHandler } from "@hono/zod-openapi";
+import { formatISO } from "date-fns";
 import type { AppEnv } from "../../../hono-env.js";
 
 const RegionSnapshotGroupSchema = z.object({
@@ -55,7 +56,7 @@ export const getRegionsOverTimeHandler: RouteHandler<
   // causing a visible pause since the data barely changes between them.
   const groupedByDate = rows.reduce(
     (acc, row) => {
-      const dateKey = row.snapshot_date.toISOString().split("T")[0];
+      const dateKey = formatISO(row.snapshot_date, { representation: "date" });
       // Rows are ordered by created_at asc, so later batches overwrite earlier ones
       // within the same day, leaving us with the latest snapshot for each date.
       if (!acc[dateKey]) {
@@ -86,8 +87,8 @@ export const getRegionsOverTimeHandler: RouteHandler<
 
   const zeroRecord = {
     date: "2026-01-01",
-    regions: grouped[0].regions.map((r) => ({ ...r, event_count: 0 })),
+    regions: (grouped[0]?.regions ?? []).map((r) => ({ ...r, event_count: 0 })),
   };
 
-  return c.json([zeroRecord, ...grouped] as any, 200);
+  return c.json([zeroRecord, ...grouped], 200);
 };
