@@ -20,6 +20,19 @@ type GeoJsonCollection = {
   features: GeoJsonFeature[]
 }
 
+function catmullRom(p0: number, p1: number, p2: number, p3: number, t: number) {
+  const t2 = t * t
+  const t3 = t2 * t
+  return Math.max(
+    0,
+    0.5 *
+      (2 * p1 +
+        (-p0 + p2) * t +
+        (2 * p0 - 5 * p1 + 4 * p2 - p3) * t2 +
+        (-p0 + 3 * p1 - 3 * p2 + p3) * t3),
+  )
+}
+
 const COLORS: Record<number, string> = {
   0: '#d1d5db',
   1: '#3b82f6',
@@ -48,12 +61,14 @@ type AnimatedRegionsProps = {
 export function AnimatedRegions({
   snapshots,
   geoJson,
-  duration = 1500,
+  duration = 750,
 }: AnimatedRegionsProps) {
   const svgRef = useRef<SVGSVGElement | null>(null)
   const hoveredNameRef = useRef<((name: string | null) => void) | null>(null)
   const [hoveredRegion, setHoveredRegion] = useState<string | null>(null)
-  const [mousePos, setMousePos] = useState<{ x: number; y: number } | null>(null)
+  const [mousePos, setMousePos] = useState<{ x: number; y: number } | null>(
+    null,
+  )
 
   const [isPlaying, setIsPlaying] = useState(false)
   const offsetRef = useRef(0)
@@ -124,27 +139,57 @@ export function AnimatedRegions({
     setIsPlaying(false)
   }
 
+  // Normalised cumulative date fractions (0..1) so animation time is proportional
+  // to real calendar time rather than equal per snapshot. Consecutive-day pairs
+  // (e.g. Feb 1 + Feb 2) then receive a proportionally tiny slice of total time
+  // instead of a full `duration` ms each, eliminating the "frozen" effect.
+  const dateFractions = useMemo(() => {
+    if (snapshots.length < 2) return snapshots.map((_, i) => i)
+    const ms = snapshots.map((s) => new Date(s.date).getTime())
+    const span = ms[ms.length - 1] - ms[0]
+    if (span === 0) return ms.map((_, i) => i / (ms.length - 1))
+    return ms.map((d) => (d - ms[0]) / span)
+  }, [snapshots])
+
   const { frame, t } = useMemo(() => {
     if (snapshots.length === 0) return { frame: 0, t: 0 }
     const frameCount = snapshots.length
-    const rawFrame = timeElapsed / duration
-    // Clamp to [0, frameCount-1] — negative timeElapsed (edge case) must not produce frame = -1
-    const frame = Math.max(0, Math.min(Math.floor(rawFrame), frameCount - 1))
-    const t = frame >= frameCount - 1 ? 0 : rawFrame % 1
-    return { frame, t }
-  }, [timeElapsed, snapshots, duration])
+    const totalTime = (frameCount - 1) * duration
+    const progress = Math.max(0, Math.min(timeElapsed / totalTime, 1))
+    // Map linear progress → calendar-proportional frame + t
+    for (let i = 0; i < frameCount - 1; i++) {
+      if (progress <= dateFractions[i + 1] || i === frameCount - 2) {
+        const segLen = dateFractions[i + 1] - dateFractions[i]
+        const segT = segLen === 0 ? 0 : (progress - dateFractions[i]) / segLen
+        return { frame: i, t: Math.max(0, Math.min(segT, 1)) }
+      }
+    }
+    return { frame: frameCount - 1, t: 0 }
+  }, [timeElapsed, snapshots, duration, dateFractions])
 
-  // Linearly interpolated event count per geojson_name
+  // Catmull-Rom interpolated event count per geojson_name (matches bar-race approach)
   const countMap = useMemo(() => {
-    const cur = snapshots[frame]
-    if (!cur) return new Map<string, number>()
-    const next = snapshots[Math.min(frame + 1, snapshots.length - 1)]
-    const curMap = new Map(cur.regions.map((r) => [r.geojson_name, r.event_count]))
-    const nextMap = new Map(next.regions.map((r) => [r.geojson_name, r.event_count]))
+    const frameCount = snapshots.length
+    if (frameCount === 0) return new Map<string, number>()
+    const iPrev = Math.max(frame - 1, 0)
+    const iCur = frame
+    const iNext = Math.min(frame + 1, frameCount - 1)
+    const iFar = Math.min(frame + 2, frameCount - 1)
+    const getCount = (snap: (typeof snapshots)[number], name: string) =>
+      snap.regions.find((r) => r.geojson_name === name)?.event_count ?? 0
+    const allNames = new Set(snapshots[iCur].regions.map((r) => r.geojson_name))
     const result = new Map<string, number>()
-    for (const [name, curVal] of curMap) {
-      const nextVal = nextMap.get(name) ?? curVal
-      result.set(name, curVal + (nextVal - curVal) * t)
+    for (const name of allNames) {
+      result.set(
+        name,
+        catmullRom(
+          getCount(snapshots[iPrev], name),
+          getCount(snapshots[iCur], name),
+          getCount(snapshots[iNext], name),
+          getCount(snapshots[iFar], name),
+          t,
+        ),
+      )
     }
     return result
   }, [frame, t, snapshots])
@@ -212,10 +257,18 @@ export function AnimatedRegions({
     >
       <Group mb={10} align="center">
         <strong>{displayedDate}</strong>
-        <ActionIcon onClick={handleReset} variant="subtle" disabled={!canAnimate}>
+        <ActionIcon
+          onClick={handleReset}
+          variant="subtle"
+          disabled={!canAnimate}
+        >
           <IconPlayerSkipBack size={16} />
         </ActionIcon>
-        <ActionIcon onClick={handlePlayPause} variant="subtle" disabled={!canAnimate}>
+        <ActionIcon
+          onClick={handlePlayPause}
+          variant="subtle"
+          disabled={!canAnimate}
+        >
           {isPlaying ? (
             <IconPlayerPause size={16} />
           ) : (
