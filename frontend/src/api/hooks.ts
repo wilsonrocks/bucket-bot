@@ -532,3 +532,11 @@ export const useGetRegionsOverTime = () =>
         '/v1/regions-over-time',
       ).then((res) => res.data),
   })
+
+export const usePostGenerateRegionSnapshot = () =>
+  useMutation({
+    mutationFn: () =>
+      customFetch<{ ok: boolean }>('/v1/generate-region-snapshot', {
+        method: 'POST',
+      }),
+  })

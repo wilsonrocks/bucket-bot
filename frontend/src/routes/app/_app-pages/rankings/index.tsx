@@ -8,6 +8,7 @@ import {
   useGetRankingTypes,
   usePostPostFactionRankings,
   usePostPostDiscordRankings,
+  usePostGenerateRegionSnapshot,
 } from '@/api/hooks'
 
 import { Button, Card, Grid, List, Text, Title } from '@mantine/core'
@@ -27,6 +28,7 @@ export const Route = createFileRoute('/app/_app-pages/rankings/')({
 function RouteComponent() {
   const generateRankings = usePostGenerateRankings()
   const generateFactionRankings = usePostFactionRankings()
+  const generateRegionSnapshot = usePostGenerateRegionSnapshot()
   const fetchDiscordUsers = usePostFetchDiscordUserIds()
   const postPlayerRankingsToDiscord = usePostPostDiscordRankings()
   const postFactionRankingsToDiscord = usePostPostFactionRankings()
@@ -213,6 +215,39 @@ function RouteComponent() {
             Generate Faction Rankings
           </Button>
         </Grid.Col>
+        <Grid.Col span={{ base: 12 }}>
+          <Title order={4} mb="md">
+            Region Rankings
+          </Title>
+          <Text mb="md">
+            Region Rankings capture a snapshot of event activity per region.
+            These are used to power the animated choropleth map.
+          </Text>
+        </Grid.Col>
+        <Grid.Col span={{ base: 12, sm: 6 }}>
+          <Button
+            disabled={generateRegionSnapshot.isPending}
+            onClick={() => {
+              modals.openConfirmModal({
+                onConfirm: () => {
+                  generateRegionSnapshot.mutate()
+                },
+                title: 'Generate a Region Snapshot',
+                children: (
+                  <div>
+                    Are you sure you want to generate a new region snapshot?
+                    This captures current event counts per region and is used
+                    to animate the choropleth map.
+                  </div>
+                ),
+                labels: { confirm: 'Generate', cancel: 'Cancel' },
+              })
+            }}
+          >
+            Generate a Region Snapshot
+          </Button>
+        </Grid.Col>
+        <Grid.Col span={{ base: 12, sm: 6 }} />
         <Grid.Col span={{ base: 12, sm: 6 }}>
           <Button
             onClick={() => {
