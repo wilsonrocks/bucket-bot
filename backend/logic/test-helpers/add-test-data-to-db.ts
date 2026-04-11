@@ -12,6 +12,9 @@ export const addTestDataToDb = async (db: Kysely<DB>) => {
   await db.deleteFrom("player").execute();
   await db.deleteFrom("faction_snapshot_batch").execute();
   await db.deleteFrom("faction_snapshot").execute();
+  await db.deleteFrom("region_snapshot").execute();
+  await db.deleteFrom("region_snapshot_batch").execute();
+  await db.deleteFrom("venue").execute();
 
   try {
     await addTestTourneyData(db);

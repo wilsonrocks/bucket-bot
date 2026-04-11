@@ -5,6 +5,10 @@ import { subMonths, format } from "date-fns";
 import { number } from "zod";
 import { Faction } from "../fixtures";
 
+// Region IDs as seeded by V069 migration (stable, never cleared between tests)
+export const TEST_REGION_NORTH_WEST = 2;
+export const TEST_REGION_LONDON = 7;
+
 interface TestPlayer {
   id: number;
   name: string;
@@ -32,31 +36,47 @@ interface TestTourney {
   name: string;
   date: string;
   number_of_players: number;
+  venue_id?: number;
 }
 
+// Venue IDs assigned after insertion — patched into tourneys below
+const TEST_VENUE_NW_ID = 5001;
+const TEST_VENUE_LDN_ID = 5002;
+
 const testTourneys: TestTourney[] = [
-  { id: 1, name: "Tourney 1", date: monthsAgo(1), number_of_players: 3 },
+  { id: 1, name: "Tourney 1", date: monthsAgo(1), number_of_players: 3, venue_id: TEST_VENUE_NW_ID },
   {
     id: 2,
     name: "Tourney 2 (masters)",
     date: monthsAgo(2),
     number_of_players: 4,
+    venue_id: TEST_VENUE_NW_ID,
   },
   {
     id: 3,
     name: "Tourney 3 (masters)",
     date: monthsAgo(3),
     number_of_players: 4,
+    venue_id: TEST_VENUE_LDN_ID,
   },
   {
     id: 4,
     name: "Tourney 4 (Over a year ago)",
     date: monthsAgo(13),
     number_of_players: 3,
+    venue_id: TEST_VENUE_NW_ID,
   },
 ] as const;
 
 export async function addTestTourneyData(db: Kysely<DB>) {
+  await db
+    .insertInto("venue")
+    .values([
+      { id: TEST_VENUE_NW_ID, name: "Test Venue North West", post_code: "TEST-NW-1", region_id: TEST_REGION_NORTH_WEST },
+      { id: TEST_VENUE_LDN_ID, name: "Test Venue London", post_code: "TEST-LDN-1", region_id: TEST_REGION_LONDON },
+    ])
+    .execute();
+
   const players = await db
     .insertInto("player")
     .values([Alice, Bob, Charlie, David, Eve])

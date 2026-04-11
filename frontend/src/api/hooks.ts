@@ -1,16 +1,29 @@
 // TODO what is with all this as 200s what if these endpoints fail
 
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { customFetch } from './custom-instance'
 import {
+  getGetPlayerIdQueryKey,
+  getGetPlayerNameExistsPlayerIdQueryKey,
+  getGetPlayersQueryKey,
+  getGetTeamsIdQueryKey,
+  getGetTeamsQueryKey,
+  getGetTourneyIdQueryKey,
+  getGetTourneyQueryKey,
+  getGetUnmappedIdentitiesQueryKey,
+  getGetVenuesQueryKey,
+  useDeleteTeamsId as useDeleteTeamsIdGenerated,
+  useDeleteTeamsTeamIdMembersMembershipId as useDeleteTeamsTeamIdMembersMembershipIdGenerated,
   useGetAllDiscordUsers as useGetAllDiscordUsersGenerated,
   useGetBotChatChannels as useGetBotChatChannelsGenerated,
   useGetFactionRankings as useGetFactionRankingsGenerated,
   useGetFactionsOverTime as useGetFactionsOverTimeGenerated,
-  useGetPlayersOverTimeTypeCode as useGetPlayersOverTimeTypeCodeGenerated,
   useGetHasRole as useGetHasRoleGenerated,
   useGetPlayerId as useGetPlayerIdGenerated,
+  useGetPlayerIdTeams as useGetPlayerIdTeamsGenerated,
+  useGetPlayerNameExistsPlayerId as useGetPlayerNameExistsPlayerIdGenerated,
   useGetPlayers as useGetPlayersGenerated,
+  useGetPlayersOverTimeTypeCode as useGetPlayersOverTimeTypeCodeGenerated,
   useGetRankingsPlayerIdTypeCode as useGetRankingsPlayerIdTypeCodeGenerated,
   useGetRankingsTypeCode as useGetRankingsTypeCodeGenerated,
   useGetRankingTypes as useGetRankingTypesGenerated,
@@ -23,6 +36,7 @@ import {
   useGetTourneysPlayerPlayerId as useGetTourneysPlayerPlayerIdGenerated,
   useGetUnmappedIdentities as useGetUnmappedIdentitiesGenerated,
   useGetVenues as useGetVenuesGenerated,
+  usePatchTeamsTeamIdMembersMembershipId as usePatchTeamsTeamIdMembersMembershipIdGenerated,
   usePostBotEventId as usePostBotEventIdGenerated,
   usePostCreateTeam as usePostCreateTeamGenerated,
   usePostCreateVenue as usePostCreateVenueGenerated,
@@ -32,33 +46,19 @@ import {
   usePostPostDiscordEventTourneyId as usePostPostDiscordEventTourneyIdGenerated,
   usePostTeamsTeamIdMembers as usePostTeamsTeamIdMembersGenerated,
   usePostTourney as usePostTourneyGenerated,
-  usePutTeamsId as usePutTeamsIdGenerated,
-  useDeleteTeamsId as useDeleteTeamsIdGenerated,
-  usePatchTeamsTeamIdMembersMembershipId as usePatchTeamsTeamIdMembersMembershipIdGenerated,
-  useDeleteTeamsTeamIdMembersMembershipId as useDeleteTeamsTeamIdMembersMembershipIdGenerated,
   usePutPlayerId as usePutPlayerIdGenerated,
-  useGetPlayerNameExistsPlayerId as useGetPlayerNameExistsPlayerIdGenerated,
-  useGetPlayerIdTeams as useGetPlayerIdTeamsGenerated,
-  getGetTourneyQueryKey,
-  getGetTourneyIdQueryKey,
-  getGetUnmappedIdentitiesQueryKey,
-  getGetVenuesQueryKey,
-  getGetTeamsQueryKey,
-  getGetTeamsIdQueryKey,
-  getGetPlayersQueryKey,
-  getGetPlayerIdQueryKey,
-  getGetPlayerNameExistsPlayerIdQueryKey,
+  usePutTeamsId as usePutTeamsIdGenerated,
 } from './generated/default/default'
 
 import type {
-  GetSearchDiscordUsersParams,
-  GetSearchDiscordUsers200Item,
-  GetRankingsPlayerIdTypeCode200,
-  GetTourneysPlayerPlayerId200Item,
-  GetPlayerId200,
   GetHasRole200,
-  GetPlayerNameExistsPlayerId200,
+  GetPlayerId200,
   GetPlayerIdTeams200Item,
+  GetPlayerNameExistsPlayerId200,
+  GetRankingsPlayerIdTypeCode200,
+  GetSearchDiscordUsers200Item,
+  GetSearchDiscordUsersParams,
+  GetTourneysPlayerPlayerId200Item,
 } from './generated/bucketBotAPI.schemas'
 
 // ── Re-export simple mutations (no invalidation needed) ────────────────────
@@ -501,3 +501,42 @@ export const uploadTeamImage = async (
   const { key } = (await response.json()) as { key: string }
   return key
 }
+
+// ── Regions ──────────────────────────────────────────────────────────────────
+
+export type RegionEventCount = {
+  id: number
+  geojson_name: string
+  event_count: number
+}
+
+export const useGetRegionEventCounts = () =>
+  useQuery({
+    queryKey: ['/v1/regions/event-counts'],
+    queryFn: () =>
+      customFetch<{ data: RegionEventCount[] }>(
+        '/v1/regions/event-counts',
+      ).then((res) => res.data),
+  })
+
+export type RegionSnapshot = {
+  date: string
+  regions: { region_id: number; geojson_name: string; event_count: number }[]
+}
+
+export const useGetRegionsOverTime = () =>
+  useQuery({
+    queryKey: ['/v1/regions-over-time'],
+    queryFn: () =>
+      customFetch<{ data: RegionSnapshot[] }>(
+        '/v1/regions-over-time',
+      ).then((res) => res.data),
+  })
+
+export const usePostGenerateRegionSnapshot = () =>
+  useMutation({
+    mutationFn: () =>
+      customFetch<{ ok: boolean }>('/v1/generate-region-snapshot', {
+        method: 'POST',
+      }),
+  })

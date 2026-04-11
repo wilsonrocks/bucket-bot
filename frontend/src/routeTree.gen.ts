@@ -16,6 +16,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as SiteIndexRouteImport } from './routes/site/index'
 import { Route as SiteLoginRouteImport } from './routes/site/login'
 import { Route as SiteSitePagesTeamsRouteImport } from './routes/site/_site-pages/teams'
+import { Route as SiteSitePagesRegionsRouteImport } from './routes/site/_site-pages/regions'
 import { Route as SiteSitePagesRankingsRouteImport } from './routes/site/_site-pages/rankings'
 import { Route as SiteSitePagesPlayersRouteImport } from './routes/site/_site-pages/players'
 import { Route as SiteSitePagesHowItWorksRouteImport } from './routes/site/_site-pages/how-it-works'
@@ -71,6 +72,11 @@ const SiteLoginRoute = SiteLoginRouteImport.update({
 const SiteSitePagesTeamsRoute = SiteSitePagesTeamsRouteImport.update({
   id: '/_site-pages/teams',
   path: '/teams',
+  getParentRoute: () => SiteRouteRoute,
+} as any)
+const SiteSitePagesRegionsRoute = SiteSitePagesRegionsRouteImport.update({
+  id: '/_site-pages/regions',
+  path: '/regions',
   getParentRoute: () => SiteRouteRoute,
 } as any)
 const SiteSitePagesRankingsRoute = SiteSitePagesRankingsRouteImport.update({
@@ -198,6 +204,7 @@ export interface FileRoutesByFullPath {
   '/site/how-it-works': typeof SiteSitePagesHowItWorksRoute
   '/site/players': typeof SiteSitePagesPlayersRoute
   '/site/rankings': typeof SiteSitePagesRankingsRoute
+  '/site/regions': typeof SiteSitePagesRegionsRoute
   '/site/teams': typeof SiteSitePagesTeamsRoute
   '/app/import/import-bot': typeof AppAppPagesImportImportBotRoute
   '/app/import/import-longshanks': typeof AppAppPagesImportImportLongshanksRoute
@@ -227,6 +234,7 @@ export interface FileRoutesByTo {
   '/site/how-it-works': typeof SiteSitePagesHowItWorksRoute
   '/site/players': typeof SiteSitePagesPlayersRoute
   '/site/rankings': typeof SiteSitePagesRankingsRoute
+  '/site/regions': typeof SiteSitePagesRegionsRoute
   '/site/teams': typeof SiteSitePagesTeamsRoute
   '/app/import/import-bot': typeof AppAppPagesImportImportBotRoute
   '/app/import/import-longshanks': typeof AppAppPagesImportImportLongshanksRoute
@@ -258,6 +266,7 @@ export interface FileRoutesById {
   '/site/_site-pages/how-it-works': typeof SiteSitePagesHowItWorksRoute
   '/site/_site-pages/players': typeof SiteSitePagesPlayersRoute
   '/site/_site-pages/rankings': typeof SiteSitePagesRankingsRoute
+  '/site/_site-pages/regions': typeof SiteSitePagesRegionsRoute
   '/site/_site-pages/teams': typeof SiteSitePagesTeamsRoute
   '/app/_app-pages/import/import-bot': typeof AppAppPagesImportImportBotRoute
   '/app/_app-pages/import/import-longshanks': typeof AppAppPagesImportImportLongshanksRoute
@@ -290,6 +299,7 @@ export interface FileRouteTypes {
     | '/site/how-it-works'
     | '/site/players'
     | '/site/rankings'
+    | '/site/regions'
     | '/site/teams'
     | '/app/import/import-bot'
     | '/app/import/import-longshanks'
@@ -319,6 +329,7 @@ export interface FileRouteTypes {
     | '/site/how-it-works'
     | '/site/players'
     | '/site/rankings'
+    | '/site/regions'
     | '/site/teams'
     | '/app/import/import-bot'
     | '/app/import/import-longshanks'
@@ -349,6 +360,7 @@ export interface FileRouteTypes {
     | '/site/_site-pages/how-it-works'
     | '/site/_site-pages/players'
     | '/site/_site-pages/rankings'
+    | '/site/_site-pages/regions'
     | '/site/_site-pages/teams'
     | '/app/_app-pages/import/import-bot'
     | '/app/_app-pages/import/import-longshanks'
@@ -421,6 +433,13 @@ declare module '@tanstack/react-router' {
       path: '/teams'
       fullPath: '/site/teams'
       preLoaderRoute: typeof SiteSitePagesTeamsRouteImport
+      parentRoute: typeof SiteRouteRoute
+    }
+    '/site/_site-pages/regions': {
+      id: '/site/_site-pages/regions'
+      path: '/regions'
+      fullPath: '/site/regions'
+      preLoaderRoute: typeof SiteSitePagesRegionsRouteImport
       parentRoute: typeof SiteRouteRoute
     }
     '/site/_site-pages/rankings': {
@@ -618,6 +637,7 @@ interface SiteRouteRouteChildren {
   SiteSitePagesHowItWorksRoute: typeof SiteSitePagesHowItWorksRoute
   SiteSitePagesPlayersRoute: typeof SiteSitePagesPlayersRoute
   SiteSitePagesRankingsRoute: typeof SiteSitePagesRankingsRoute
+  SiteSitePagesRegionsRoute: typeof SiteSitePagesRegionsRoute
   SiteSitePagesTeamsRoute: typeof SiteSitePagesTeamsRoute
   SiteSitePagesEventIdRoute: typeof SiteSitePagesEventIdRoute
   SiteSitePagesPlayerIdRoute: typeof SiteSitePagesPlayerIdRoute
@@ -632,6 +652,7 @@ const SiteRouteRouteChildren: SiteRouteRouteChildren = {
   SiteSitePagesHowItWorksRoute: SiteSitePagesHowItWorksRoute,
   SiteSitePagesPlayersRoute: SiteSitePagesPlayersRoute,
   SiteSitePagesRankingsRoute: SiteSitePagesRankingsRoute,
+  SiteSitePagesRegionsRoute: SiteSitePagesRegionsRoute,
   SiteSitePagesTeamsRoute: SiteSitePagesTeamsRoute,
   SiteSitePagesEventIdRoute: SiteSitePagesEventIdRoute,
   SiteSitePagesPlayerIdRoute: SiteSitePagesPlayerIdRoute,

@@ -52,6 +52,7 @@ import type {
   GetRankingsPlayerIdTypeCode200,
   GetRankingsPlayerIdTypeCode400,
   GetRankingsTypeCode200Item,
+  GetRegionsEventCounts200Item,
   GetSearchDiscordUsers200Item,
   GetSearchDiscordUsers400,
   GetSearchDiscordUsersParams,
@@ -1041,6 +1042,110 @@ export function useGetVenues<TData = Awaited<ReturnType<typeof getVenues>>, TErr
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetVenuesQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+export type getRegionsEventCountsResponse200 = {
+  data: GetRegionsEventCounts200Item[]
+  status: 200
+}
+
+export type getRegionsEventCountsResponseSuccess = (getRegionsEventCountsResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getRegionsEventCountsResponse = (getRegionsEventCountsResponseSuccess)
+
+export const getGetRegionsEventCountsUrl = () => {
+
+
+  
+
+  return `/v1/regions/event-counts`
+}
+
+export const getRegionsEventCounts = async ( options?: RequestInit): Promise<getRegionsEventCountsResponse> => {
+  
+  return customFetch<getRegionsEventCountsResponse>(getGetRegionsEventCountsUrl(),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
+
+export const getGetRegionsEventCountsQueryKey = () => {
+    return [
+    `/v1/regions/event-counts`
+    ] as const;
+    }
+
+    
+export const getGetRegionsEventCountsQueryOptions = <TData = Awaited<ReturnType<typeof getRegionsEventCounts>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRegionsEventCounts>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetRegionsEventCountsQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getRegionsEventCounts>>> = ({ signal }) => getRegionsEventCounts({ signal, ...requestOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getRegionsEventCounts>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetRegionsEventCountsQueryResult = NonNullable<Awaited<ReturnType<typeof getRegionsEventCounts>>>
+export type GetRegionsEventCountsQueryError = unknown
+
+
+export function useGetRegionsEventCounts<TData = Awaited<ReturnType<typeof getRegionsEventCounts>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRegionsEventCounts>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getRegionsEventCounts>>,
+          TError,
+          Awaited<ReturnType<typeof getRegionsEventCounts>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetRegionsEventCounts<TData = Awaited<ReturnType<typeof getRegionsEventCounts>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRegionsEventCounts>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getRegionsEventCounts>>,
+          TError,
+          Awaited<ReturnType<typeof getRegionsEventCounts>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetRegionsEventCounts<TData = Awaited<ReturnType<typeof getRegionsEventCounts>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRegionsEventCounts>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetRegionsEventCounts<TData = Awaited<ReturnType<typeof getRegionsEventCounts>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRegionsEventCounts>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetRegionsEventCountsQueryOptions(options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

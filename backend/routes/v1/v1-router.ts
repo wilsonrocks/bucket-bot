@@ -97,6 +97,18 @@ import {
   getPlayersOverTimeRoute,
 } from "./v1-routes/players-over-time.js";
 import {
+  getRegionEventCountsHandler,
+  getRegionEventCountsRoute,
+} from "./v1-routes/regions.js";
+import {
+  getRegionsOverTimeHandler,
+  getRegionsOverTimeRoute,
+} from "./v1-routes/regions-over-time.js";
+import {
+  generateRegionSnapshotHandler,
+  generateRegionSnapshotRoute,
+} from "./v1-routes/generate-region-snapshot.js";
+import {
   createTeamHandler,
   createTeamRoute,
   deleteTeamHandler,
@@ -233,6 +245,8 @@ v1Router.openapi(allTourneysRoute, allTourneys);
 v1Router.openapi(detailTourneyRoute, detailTourney);
 v1Router.openapi(getTourneysForPlayerRoute, getTourneysForPlayerHandler);
 v1Router.openapi(getAllVenuesRoute, getAllVenuesHandler);
+v1Router.openapi(getRegionEventCountsRoute, getRegionEventCountsHandler);
+v1Router.openapi(getRegionsOverTimeRoute, getRegionsOverTimeHandler);
 v1Router.openapi(getPlayersRoute, getPlayers);
 v1Router.openapi(getPlayerByIdRoute, getPlayerById);
 v1Router.openapi(getPlayerTeamsRoute, getPlayerTeams);
@@ -265,6 +279,7 @@ v1Router.openapi(postEventSummaryToDiscordRoute, postEventSummaryToDiscord);
 v1Router.openapi(updateTourneyRoute, updateTourney);
 v1Router.route("/bot-chat", botChatRouter);
 v1Router.openapi(generateFactionRankingsRoute, generateFactionRankingsHandler);
+v1Router.openapi(generateRegionSnapshotRoute, generateRegionSnapshotHandler);
 v1Router.openapi(postFactionRankingsRoute, postFactionRankingsHandler);
 v1Router.openapi(uploadRoute, uploadHandler);
 v1Router.openapi(createTeamRoute, createTeamHandler);
