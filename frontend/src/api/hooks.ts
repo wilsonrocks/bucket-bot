@@ -518,3 +518,17 @@ export const useGetRegionEventCounts = () =>
         '/v1/regions/event-counts',
       ).then((res) => res.data),
   })
+
+export type RegionSnapshot = {
+  date: string
+  regions: { region_id: number; geojson_name: string; event_count: number }[]
+}
+
+export const useGetRegionsOverTime = () =>
+  useQuery({
+    queryKey: ['/v1/regions-over-time'],
+    queryFn: () =>
+      customFetch<{ data: RegionSnapshot[] }>(
+        '/v1/regions-over-time',
+      ).then((res) => res.data),
+  })
