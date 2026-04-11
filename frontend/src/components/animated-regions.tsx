@@ -30,7 +30,11 @@ const COLORS: Record<number, string> = {
 }
 
 function getColor(count: number): string {
-  return COLORS[Math.min(Math.floor(count), 5)]
+  const lower = Math.min(Math.floor(count), 5)
+  const upper = Math.min(lower + 1, 5)
+  const frac = count % 1
+  if (lower === upper || frac === 0) return COLORS[lower]
+  return d3.interpolateRgb(COLORS[lower], COLORS[upper])(frac)
 }
 
 const formatDate = timeFormat('%d %b %Y')
