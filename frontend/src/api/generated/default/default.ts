@@ -53,6 +53,7 @@ import type {
   GetRankingsPlayerIdTypeCode400,
   GetRankingsTypeCode200Item,
   GetRegionsEventCounts200Item,
+  GetRegionsOverTime200Item,
   GetSearchDiscordUsers200Item,
   GetSearchDiscordUsers400,
   GetSearchDiscordUsersParams,
@@ -87,6 +88,7 @@ import type {
   PostFactionRankings200,
   PostFetchDiscordUserIds200,
   PostGenerateRankings200,
+  PostGenerateRegionSnapshot200,
   PostLongshanksEventId200,
   PostLongshanksEventId400,
   PostLongshanksEventId502,
@@ -1146,6 +1148,110 @@ export function useGetRegionsEventCounts<TData = Awaited<ReturnType<typeof getRe
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetRegionsEventCountsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+export type getRegionsOverTimeResponse200 = {
+  data: GetRegionsOverTime200Item[]
+  status: 200
+}
+
+export type getRegionsOverTimeResponseSuccess = (getRegionsOverTimeResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getRegionsOverTimeResponse = (getRegionsOverTimeResponseSuccess)
+
+export const getGetRegionsOverTimeUrl = () => {
+
+
+  
+
+  return `/v1/regions-over-time`
+}
+
+export const getRegionsOverTime = async ( options?: RequestInit): Promise<getRegionsOverTimeResponse> => {
+  
+  return customFetch<getRegionsOverTimeResponse>(getGetRegionsOverTimeUrl(),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
+
+export const getGetRegionsOverTimeQueryKey = () => {
+    return [
+    `/v1/regions-over-time`
+    ] as const;
+    }
+
+    
+export const getGetRegionsOverTimeQueryOptions = <TData = Awaited<ReturnType<typeof getRegionsOverTime>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRegionsOverTime>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetRegionsOverTimeQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getRegionsOverTime>>> = ({ signal }) => getRegionsOverTime({ signal, ...requestOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getRegionsOverTime>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetRegionsOverTimeQueryResult = NonNullable<Awaited<ReturnType<typeof getRegionsOverTime>>>
+export type GetRegionsOverTimeQueryError = unknown
+
+
+export function useGetRegionsOverTime<TData = Awaited<ReturnType<typeof getRegionsOverTime>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRegionsOverTime>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getRegionsOverTime>>,
+          TError,
+          Awaited<ReturnType<typeof getRegionsOverTime>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetRegionsOverTime<TData = Awaited<ReturnType<typeof getRegionsOverTime>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRegionsOverTime>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getRegionsOverTime>>,
+          TError,
+          Awaited<ReturnType<typeof getRegionsOverTime>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetRegionsOverTime<TData = Awaited<ReturnType<typeof getRegionsOverTime>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRegionsOverTime>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetRegionsOverTime<TData = Awaited<ReturnType<typeof getRegionsOverTime>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRegionsOverTime>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetRegionsOverTimeQueryOptions(options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -3911,6 +4017,81 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getPostBotChatClearTestChannelMutationOptions(options), queryClient);
+    }
+    export type postGenerateRegionSnapshotResponse200 = {
+  data: PostGenerateRegionSnapshot200
+  status: 200
+}
+
+export type postGenerateRegionSnapshotResponseSuccess = (postGenerateRegionSnapshotResponse200) & {
+  headers: Headers;
+};
+;
+
+export type postGenerateRegionSnapshotResponse = (postGenerateRegionSnapshotResponseSuccess)
+
+export const getPostGenerateRegionSnapshotUrl = () => {
+
+
+  
+
+  return `/v1/generate-region-snapshot`
+}
+
+export const postGenerateRegionSnapshot = async ( options?: RequestInit): Promise<postGenerateRegionSnapshotResponse> => {
+  
+  return customFetch<postGenerateRegionSnapshotResponse>(getPostGenerateRegionSnapshotUrl(),
+  {      
+    ...options,
+    method: 'POST'
+    
+    
+  }
+);}
+  
+
+
+
+export const getPostGenerateRegionSnapshotMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postGenerateRegionSnapshot>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postGenerateRegionSnapshot>>, TError,void, TContext> => {
+
+const mutationKey = ['postGenerateRegionSnapshot'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postGenerateRegionSnapshot>>, void> = () => {
+          
+
+          return  postGenerateRegionSnapshot(requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostGenerateRegionSnapshotMutationResult = NonNullable<Awaited<ReturnType<typeof postGenerateRegionSnapshot>>>
+    
+    export type PostGenerateRegionSnapshotMutationError = unknown
+
+    export const usePostGenerateRegionSnapshot = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postGenerateRegionSnapshot>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postGenerateRegionSnapshot>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getPostGenerateRegionSnapshotMutationOptions(options), queryClient);
     }
     export type postPostFactionRankingsResponse200 = {
   data: PostPostFactionRankings200
