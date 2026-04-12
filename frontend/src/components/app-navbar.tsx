@@ -11,6 +11,7 @@ import { Route as VenuesRoute } from '@/routes/app/_app-pages/venues'
 
 import { Badge, Divider, Group, ScrollArea, Stack } from '@mantine/core'
 import { AppNavLink } from './app-nav-link'
+import { Route as SiteRoute } from '@/routes/site/route'
 
 export const AppNavbar = () => {
   const unmappedIdentities = useGetUnmappedIdentities()
@@ -47,6 +48,7 @@ export const AppNavbar = () => {
           </>
         )}
         <Divider />
+        <AppNavLink to={SiteRoute.to} label="Main Site" />
       </Stack>
     </ScrollArea>
   )
