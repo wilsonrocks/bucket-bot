@@ -172,14 +172,14 @@ ${
   newPlayers &&
   newPlayers.length &&
   `
-It's really important the community keeps growing (or rebuilding with 4th Edition), so a huge shout out to 
+It's really exciting to see the community growing and new names joining the rankings for Fourth Edition Malifaux.
+Shout out to the the following players who completed their first ranked M4E event:
+
 ${newPlayers?.map((player) => mentionUser(player)).join("\n")}
  who are ranked for the first time(under this system)!
  
  `
-}
-
-        `);
+}`);
     }
   } else {
     // TODO come up with a nicer way of checking channels etc, maybe grab them all on initialisation?
