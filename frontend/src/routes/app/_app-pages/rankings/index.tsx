@@ -19,7 +19,11 @@ import { Route as IdentitiesRoute } from '../identities'
 import { Link } from '@/components/link'
 
 export const Route = createFileRoute('/app/_app-pages/rankings/')({
-  component: () => <RequireRankingReporter><RouteComponent /></RequireRankingReporter>,
+  component: () => (
+    <RequireRankingReporter>
+      <RouteComponent />
+    </RequireRankingReporter>
+  ),
   staticData: {
     title: 'Rankings',
   },
@@ -215,6 +219,38 @@ function RouteComponent() {
             Generate Faction Rankings
           </Button>
         </Grid.Col>
+
+        <Grid.Col span={{ base: 12, sm: 6 }}>
+          <Button
+            onClick={() => {
+              modals.openConfirmModal({
+                title: 'Post Faction Rankings to Discord',
+                children: (
+                  <div>
+                    <Text>
+                      Are you sure you want to post faction rankings to Discord?
+                    </Text>
+
+                    <Text>
+                      This will ping the Event Enthusiast role and might be
+                      spammy if you do it a lot. Eventually this will be
+                      automated to be done every Monday morning.
+                    </Text>
+                  </div>
+                ),
+                onConfirm: () => {
+                  postFactionRankingsToDiscord.mutate({
+                    params: { live: 'true' },
+                  })
+                },
+                labels: { confirm: 'Make it so', cancel: 'Wait...' },
+              })
+            }}
+          >
+            Post Faction Rankings
+          </Button>
+        </Grid.Col>
+
         <Grid.Col span={{ base: 12 }}>
           <Title order={4} mb="md">
             Region Rankings
@@ -236,8 +272,8 @@ function RouteComponent() {
                 children: (
                   <div>
                     Are you sure you want to generate a new region snapshot?
-                    This captures current event counts per region and is used
-                    to animate the choropleth map.
+                    This captures current event counts per region and is used to
+                    animate the choropleth map.
                   </div>
                 ),
                 labels: { confirm: 'Generate', cancel: 'Cancel' },
@@ -248,34 +284,6 @@ function RouteComponent() {
           </Button>
         </Grid.Col>
         <Grid.Col span={{ base: 12, sm: 6 }} />
-        <Grid.Col span={{ base: 12, sm: 6 }}>
-          <Button
-            onClick={() => {
-              modals.openConfirmModal({
-                title: 'Post Faction Rankings to Discord',
-                children: (
-                  <div>
-                    <Text>
-                      Are you sure you want to post faction rankings to Discord?
-                    </Text>
-
-                    <Text>
-                      This will ping the Event Enthusiast role and might be
-                      spammy if you do it a lot. Eventually this will be
-                      automated to be done every Monday morning.
-                    </Text>
-                  </div>
-                ),
-                onConfirm: () => {
-                  postFactionRankingsToDiscord.mutate({ params: { live: 'true' } })
-                },
-                labels: { confirm: 'Make it so', cancel: 'Wait...' },
-              })
-            }}
-          >
-            Post Faction Rankings
-          </Button>
-        </Grid.Col>
       </Grid>
     </div>
   )

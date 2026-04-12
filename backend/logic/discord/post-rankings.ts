@@ -11,6 +11,13 @@ import { mostRecentSnapshot } from "../most-recent-snapshot";
 
 const TOP_X_PLAYERS = 16;
 
+function formatRankChange(change: number | null, isNew: boolean): string {
+  if (isNew) return "(NEW)";
+  if (change === null) return "(BACK)";
+  if (change === 0) return "";
+  return change > 0 ? `(↑${change})` : `(↓${Math.abs(change)})`;
+}
+
 // TODO move to own file
 export function mentionIfPossible(player: {
   discord_user_id: string | null | undefined;
@@ -29,7 +36,10 @@ export const postDiscordRankings = async (db: Kysely<DB>) => {
     .where("display", "!=", false)
     .selectAll()
     .execute();
+
   let topPlayer;
+  let newPlayers;
+
   for (const { name, code: typeCode, description, hex_code } of rankingTypes) {
     const batch = await mostRecentSnapshot(db, typeCode);
     if (!batch) {
@@ -67,14 +77,30 @@ export const postDiscordRankings = async (db: Kysely<DB>) => {
         "player.longshanks_name",
         "ranking_snapshot.rank",
         "ranking_snapshot.total_points",
+        "ranking_snapshot.player_id",
         "ranking_snapshot_type.hex_code",
-      ])
+        "ranking_snapshot.rank_change",
+        "ranking_snapshot.new_player",
+      ] as const)
       .orderBy("rank", "asc")
       .limit(TOP_X_PLAYERS)
       .execute();
 
     if (typeCode === "ROLLING_YEAR") {
       topPlayer = rankings[0];
+
+      newPlayers = await db
+        .selectFrom("ranking_snapshot")
+        .innerJoin("player", "ranking_snapshot.player_id", "player.id")
+        .leftJoin(
+          "discord_user",
+          "player.discord_id",
+          "discord_user.discord_user_id",
+        )
+        .where("batch_id", "=", batch.id)
+        .where("new_player", "is", true)
+        .selectAll()
+        .execute();
     }
 
     const { discord_channel_id } = batch;
@@ -99,7 +125,9 @@ export const postDiscordRankings = async (db: Kysely<DB>) => {
     }
 
     const topPlayersText = rankings
-      .map((r) => `#${r.rank} - ${r.name} (${r.total_points.toFixed(2)} pts)`)
+      .map((r) => {
+        return `#**${r.rank}** ${formatRankChange(r.rank_change, r.new_player)} - **${r.name}** (${r.total_points.toFixed(2)} pts)`;
+      })
       .join("\n");
 
     const embed = new EmbedBuilder()
@@ -139,7 +167,16 @@ There's only a maximum of ${TOP_X_PLAYERS} players shown here. But you can see t
 New rankings are out! Please check all the channels for the different ranking types.
 
 ${topPlayer?.discord_user_id ? `Well done to ${mentionUser(topPlayer)} for being the current Top Dog. Please try to beat them.` : ""}
-        `);
+
+${
+  newPlayers &&
+  newPlayers.length &&
+  `
+It's really exciting to see the community growing and new names joining the rankings for Fourth Edition Malifaux.
+Shout out to the the following players who completed their first ranked M4E event:
+
+${newPlayers?.map((player) => mentionUser(player)).join("\n")}`
+}`);
     }
   } else {
     // TODO come up with a nicer way of checking channels etc, maybe grab them all on initialisation?

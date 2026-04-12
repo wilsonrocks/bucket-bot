@@ -11,6 +11,8 @@ const RankingEntrySchema = z.object({
   id: z.number(),
   name: z.string(),
   short_name: z.string().nullable(),
+  rank_change: z.number().nullable(),
+  new_player: z.boolean(),
 });
 
 export const rankingsRoute = createRoute({
@@ -29,9 +31,10 @@ export const rankingsRoute = createRoute({
 
 export const rankingsHandler: RouteHandler<typeof rankingsRoute, AppEnv> = async (c) => {
   const { typeCode } = c.req.valid("param");
-  const snapshot = await mostRecentSnapshot(c.get("db"), typeCode);
-  const snapshotId = snapshot.id;
-  const rankings = await c.get("db")
+  const db = c.get("db");
+  const snapshot = await mostRecentSnapshot(db, typeCode);
+
+  const rankings = await db
     .selectFrom("ranking_snapshot")
     .innerJoin("player", "ranking_snapshot.player_id", "player.id")
     .innerJoin(
@@ -39,7 +42,7 @@ export const rankingsHandler: RouteHandler<typeof rankingsRoute, AppEnv> = async
       "ranking_snapshot.batch_id",
       "ranking_snapshot_batch.id",
     )
-    .where("batch_id", "=", snapshotId)
+    .where("batch_id", "=", snapshot.id)
     .where("type_code", "=", typeCode)
     .selectAll()
     .orderBy("rank", "asc")

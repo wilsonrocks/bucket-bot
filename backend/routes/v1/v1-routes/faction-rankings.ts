@@ -22,7 +22,9 @@ const FactionRankingSchema = z.object({
   declaration_rate: z.number().nullable(),
   points_per_declaration: z.number().nullable(),
   hex_code: z.string(),
+  rank_change: z.number().nullable(),
 });
+
 
 const ErrorSchema = z.object({ error: z.string() });
 
@@ -64,6 +66,7 @@ export const getFactionRankings: RouteHandler<typeof getFactionRankingsRoute, Ap
       "faction_snapshot.declaration_rate as declaration_rate",
       "faction_snapshot.points_per_declaration as points_per_declaration",
       "faction.hex_code as hex_code",
+      "faction_snapshot.rank_change as rank_change",
     ])
     .where("faction_snapshot.batch_id", "=", newestBatch.id)
     .orderBy("rank")
@@ -118,6 +121,12 @@ export const postFactionRankingsRoute = createRoute({
   },
 });
 
+function formatRankChange(change: number | null): string {
+  if (change === null) return "`NEW`";
+  if (change === 0) return "-";
+  return change > 0 ? `↑${change}` : `↓${Math.abs(change)}`;
+}
+
 export const postFactionRankingsHandler: RouteHandler<typeof postFactionRankingsRoute, AppEnv> = async (c) => {
   const { live } = c.req.valid("query");
   const isLive = live !== undefined;
@@ -141,12 +150,14 @@ export const postFactionRankingsHandler: RouteHandler<typeof postFactionRankings
     .select([
       "faction.name as faction_name",
       "faction_snapshot.rank as rank",
+      "faction_snapshot.faction_code as faction_code",
       "faction_snapshot.total_points as total_points",
       "faction_snapshot.declarations as declarations",
       "faction_snapshot.declaration_rate as declaration_rate",
       "faction_snapshot.points_per_declaration as points_per_declaration",
       "faction.hex_code as hex_code",
       "faction.emoji as emoji",
+      "faction_snapshot.rank_change as rank_change",
     ])
     .where("faction_snapshot.batch_id", "=", mostRecentSnapshotBatch.id)
     .orderBy("faction_snapshot.rank")
@@ -169,8 +180,8 @@ export const postFactionRankingsHandler: RouteHandler<typeof postFactionRankings
     );
 
   const factionEmbeds = snapshot.map(
-    ({ faction_name, hex_code, rank, total_points, declarations, points_per_declaration, declaration_rate, emoji }) =>
-      new EmbedBuilder()
+    ({ faction_name, hex_code, rank, total_points, declarations, points_per_declaration, declaration_rate, emoji, rank_change }) => {
+      return new EmbedBuilder()
         .setTitle(`${rank}. ${faction_name} ${emoji}`)
         .setColor(hex_code as ColorResolvable)
         .addFields(
@@ -182,7 +193,9 @@ export const postFactionRankingsHandler: RouteHandler<typeof postFactionRankings
             value: points_per_declaration ? `**${points_per_declaration.toFixed(2)}**` : "",
             inline: true,
           },
-        ),
+          { name: "Change", value: formatRankChange(rank_change), inline: true },
+        );
+    },
   );
 
   await channel.send({ embeds: [introEmbed, ...factionEmbeds] });

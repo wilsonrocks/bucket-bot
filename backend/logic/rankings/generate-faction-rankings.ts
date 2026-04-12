@@ -9,6 +9,8 @@ export const generateFactionRankings = async (dbClient: Kysely<DB>) => {
     .returningAll()
     .execute();
 
+  const batchId = batch[0]!.id;
+
   await dbClient
     .with("stats", (queryBuilder) =>
       queryBuilder
@@ -46,7 +48,7 @@ export const generateFactionRankings = async (dbClient: Kysely<DB>) => {
       eb
         .selectFrom("stats")
         .select([
-          sql.lit<number>(batch[0]!.id).as("batch_id"),
+          sql.lit<number>(batchId).as("batch_id"),
           "faction_code",
           sql<number>`RANK() over (order by points_per_declaration desc)`.as(
             "rank",
@@ -63,4 +65,15 @@ export const generateFactionRankings = async (dbClient: Kysely<DB>) => {
     )
     .returningAll()
     .execute();
+
+  await sql`
+    UPDATE faction_snapshot fs
+    SET rank_change = prev.rank - fs.rank
+    FROM faction_snapshot prev
+    WHERE fs.batch_id = ${batchId}
+      AND prev.faction_code = fs.faction_code
+      AND prev.batch_id = (
+        SELECT MAX(id) FROM faction_snapshot_batch WHERE id < ${batchId}
+      )
+  `.execute(dbClient);
 };
