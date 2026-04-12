@@ -175,10 +175,7 @@ ${
 It's really exciting to see the community growing and new names joining the rankings for Fourth Edition Malifaux.
 Shout out to the the following players who completed their first ranked M4E event:
 
-${newPlayers?.map((player) => mentionUser(player)).join("\n")}
- who are ranked for the first time(under this system)!
- 
- `
+${newPlayers?.map((player) => mentionUser(player)).join("\n")}`
 }`);
     }
   } else {
