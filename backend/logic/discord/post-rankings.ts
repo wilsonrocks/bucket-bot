@@ -11,6 +11,12 @@ import { mostRecentSnapshot } from "../most-recent-snapshot";
 
 const TOP_X_PLAYERS = 16;
 
+function formatRankChange(change: number | null): string {
+  if (change === null) return " `NEW`";
+  if (change === 0) return " -";
+  return change > 0 ? ` ↑${change}` : ` ↓${Math.abs(change)}`;
+}
+
 // TODO move to own file
 export function mentionIfPossible(player: {
   discord_user_id: string | null | undefined;
@@ -39,39 +45,62 @@ export const postDiscordRankings = async (db: Kysely<DB>) => {
       continue;
     }
 
-    const rankings = await db
-      .selectFrom("ranking_snapshot")
-      .innerJoin("player", "ranking_snapshot.player_id", "player.id")
-      .innerJoin(
-        "ranking_snapshot_batch",
-        "ranking_snapshot.batch_id",
-        "ranking_snapshot_batch.id",
-      )
-      .innerJoin(
-        "ranking_snapshot_type",
-        "ranking_snapshot_batch.type_code",
-        "ranking_snapshot_type.code",
-      )
-      .leftJoin(
-        "discord_user",
-        "player.discord_id",
-        "discord_user.discord_user_id",
-      )
-      .where("batch_id", "=", batch.id)
-      .select([
-        "discord_user.discord_user_id",
-        "discord_user.discord_display_name",
-        "discord_user.discord_nickname",
-        "discord_user.discord_username",
-        "player.name",
-        "player.longshanks_name",
-        "ranking_snapshot.rank",
-        "ranking_snapshot.total_points",
-        "ranking_snapshot_type.hex_code",
-      ])
-      .orderBy("rank", "asc")
-      .limit(TOP_X_PLAYERS)
-      .execute();
+    const [rankings, previousBatch] = await Promise.all([
+      db
+        .selectFrom("ranking_snapshot")
+        .innerJoin("player", "ranking_snapshot.player_id", "player.id")
+        .innerJoin(
+          "ranking_snapshot_batch",
+          "ranking_snapshot.batch_id",
+          "ranking_snapshot_batch.id",
+        )
+        .innerJoin(
+          "ranking_snapshot_type",
+          "ranking_snapshot_batch.type_code",
+          "ranking_snapshot_type.code",
+        )
+        .leftJoin(
+          "discord_user",
+          "player.discord_id",
+          "discord_user.discord_user_id",
+        )
+        .where("batch_id", "=", batch.id)
+        .select([
+          "discord_user.discord_user_id",
+          "discord_user.discord_display_name",
+          "discord_user.discord_nickname",
+          "discord_user.discord_username",
+          "player.name",
+          "player.longshanks_name",
+          "ranking_snapshot.rank",
+          "ranking_snapshot.total_points",
+          "ranking_snapshot.player_id",
+          "ranking_snapshot_type.hex_code",
+        ])
+        .orderBy("rank", "asc")
+        .limit(TOP_X_PLAYERS)
+        .execute(),
+      db
+        .selectFrom("ranking_snapshot_batch")
+        .where("type_code", "=", typeCode)
+        .where("id", "<", batch.id)
+        .orderBy("id", "desc")
+        .limit(1)
+        .select("id")
+        .executeTakeFirst(),
+    ]);
+
+    const prevRankByPlayerId = new Map<number, number>();
+    if (previousBatch) {
+      const previousRankings = await db
+        .selectFrom("ranking_snapshot")
+        .where("batch_id", "=", previousBatch.id)
+        .select(["player_id", "rank"])
+        .execute();
+      for (const r of previousRankings) {
+        prevRankByPlayerId.set(r.player_id, r.rank);
+      }
+    }
 
     if (typeCode === "ROLLING_YEAR") {
       topPlayer = rankings[0];
@@ -99,7 +128,11 @@ export const postDiscordRankings = async (db: Kysely<DB>) => {
     }
 
     const topPlayersText = rankings
-      .map((r) => `#${r.rank} - ${r.name} (${r.total_points.toFixed(2)} pts)`)
+      .map((r) => {
+        const prevRank = prevRankByPlayerId.get(r.player_id);
+        const rankChange = prevRank != null && r.rank != null ? prevRank - r.rank : null;
+        return `#${r.rank} - ${r.name} (${r.total_points.toFixed(2)} pts)${formatRankChange(rankChange)}`;
+      })
       .join("\n");
 
     const embed = new EmbedBuilder()

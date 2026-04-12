@@ -1,4 +1,5 @@
 import { useGetRankingTypes, useGetRankingsTypeCode } from '@/api/hooks'
+import type { GetRankingsTypeCode200Item } from '@/api/generated/bucketBotAPI.schemas'
 import { playerShortName } from '@/helpers/player-short-name'
 import { Box, Group, Select, Table, Text } from '@mantine/core'
 import { useMediaQuery } from '@mantine/hooks'
@@ -8,6 +9,15 @@ import z from 'zod'
 import { Link } from '@/components/link'
 import { Tabs } from '@/components/routed-tabs'
 import { PlayersBarRace } from '@/components/animated-players'
+
+type RankingEntry = GetRankingsTypeCode200Item & { rank_change: number | null }
+
+function RankChange({ change }: { change: number | null | undefined }) {
+  if (change == null) return <Text span size="sm" c="green">NEW</Text>
+  if (change === 0) return <Text span size="sm" c="dimmed">-</Text>
+  if (change > 0) return <Text span size="sm" c="green">↑{change}</Text>
+  return <Text span size="sm" c="red">↓{Math.abs(change)}</Text>
+}
 
 export const Route = createFileRoute('/site/_site-pages/rankings')({
   component: RouteComponent,
@@ -63,9 +73,10 @@ function RouteComponent() {
             <Table
               tabularNums
               data={{
-                head: ['Rank', 'Player', 'Total Points'],
-                body: rankings.data.map((player) => [
+                head: ['Rank', 'Change', 'Player', 'Total Points'],
+                body: (rankings.data as RankingEntry[]).map((player) => [
                   <Box w={20}>{player.rank}</Box>,
+                  <Box w={40}><RankChange change={player.rank_change} /></Box>,
                   <Box w={150}>
                     <Link
                       to={PlayerRoute.to}

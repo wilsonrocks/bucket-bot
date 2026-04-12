@@ -1,9 +1,19 @@
 import { FactionsBarRace } from '@/components/animated-factions'
 import { useGetFactionRankings } from '@/api/hooks'
+import type { GetFactionRankings200Item } from '@/api/generated/bucketBotAPI.schemas'
 import { Select, Table, Text } from '@mantine/core'
 import { createFileRoute } from '@tanstack/react-router'
 import { Tabs } from '@/components/routed-tabs'
 import { useState } from 'react'
+
+type FactionRankingEntry = GetFactionRankings200Item & { rank_change: number | null }
+
+function RankChange({ change }: { change: number | null | undefined }) {
+  if (change == null) return <Text span size="sm" c="green">NEW</Text>
+  if (change === 0) return <Text span size="sm" c="dimmed">-</Text>
+  if (change > 0) return <Text span size="sm" c="green">↑{change}</Text>
+  return <Text span size="sm" c="red">↓{Math.abs(change)}</Text>
+}
 
 export const Route = createFileRoute('/site/_site-pages/faction-rankings')({
   component: RouteComponent,
@@ -36,13 +46,14 @@ function RouteComponent() {
             data={{
               head: [
                 'Rank',
+                'Change',
                 'Faction',
                 'Declarations',
                 'Play rate',
                 'Total Points',
                 'Average Points',
               ],
-              body: factionRankingsQuery.data.map((faction) => [
+              body: (factionRankingsQuery.data as FactionRankingEntry[]).map((faction) => [
                 <div
                   style={{
                     borderLeft: `3px solid ${faction.hex_code}`,
@@ -51,6 +62,7 @@ function RouteComponent() {
                 >
                   {(faction.rank ?? 0).toString()}
                 </div>,
+                <RankChange change={faction.rank_change} />,
                 faction.faction_name,
                 faction.declarations,
                 `${((faction.declaration_rate ?? 0) * 100).toFixed(2)}%`,
