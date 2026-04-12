@@ -125,11 +125,34 @@ export const generateRankings = async (
       )
       .returningAll();
 
-    return Promise.all([
+    await Promise.all([
       insertRankingsQuery.execute(),
       insertRankingEventsQuery.execute(),
     ]);
-  });
 
-  // Logic to generate rankings from the database
+    await sql`
+      UPDATE ranking_snapshot rs
+      SET rank_change = prev.rank - rs.rank
+      FROM ranking_snapshot prev
+      INNER JOIN ranking_snapshot_batch prev_b ON prev.batch_id = prev_b.id
+      WHERE rs.batch_id = ${batch.id}
+        AND prev_b.id = (
+          SELECT MAX(id) FROM ranking_snapshot_batch
+          WHERE type_code = ${rankingsType} AND id < ${batch.id}
+        )
+        AND prev.player_id = rs.player_id
+    `.execute(trx);
+
+    await sql`
+      UPDATE ranking_snapshot rs
+      SET new_player = NOT EXISTS (
+        SELECT 1 FROM ranking_snapshot prior
+        INNER JOIN ranking_snapshot_batch prior_b ON prior.batch_id = prior_b.id
+        WHERE prior.player_id = rs.player_id
+          AND prior_b.type_code = ${rankingsType}
+          AND prior.batch_id < ${batch.id}
+      )
+      WHERE rs.batch_id = ${batch.id}
+    `.execute(trx);
+  });
 };

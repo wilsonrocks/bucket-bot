@@ -44,6 +44,9 @@ export type GetRankingsTypeCode200Item = {
   name: string;
   /** @nullable */
   short_name: string | null;
+  /** @nullable */
+  rank_change: number | null;
+  new_player: boolean;
 };
 
 export type GetRankingsPlayerIdTypeCode200Metadata = {
@@ -286,6 +289,8 @@ export type GetFactionRankings200Item = {
   /** @nullable */
   points_per_declaration: number | null;
   hex_code: string;
+  /** @nullable */
+  rank_change: number | null;
 };
 
 export type PostFactionRankings200 = {

@@ -1,14 +1,9 @@
 import { FactionsBarRace } from '@/components/animated-factions'
 import { useGetFactionRankings } from '@/api/hooks'
-import type { GetFactionRankings200Item } from '@/api/hooks'
 import { Select, Table, Text } from '@mantine/core'
 import { createFileRoute } from '@tanstack/react-router'
 import { Tabs } from '@/components/routed-tabs'
 import { useState } from 'react'
-
-type FactionRankingEntry = GetFactionRankings200Item & {
-  rank_change: number | null
-}
 
 function RankChange({ change }: { change: number | null | undefined }) {
   if (change == null)
@@ -80,7 +75,7 @@ function RouteComponent() {
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
-              {(factionRankingsQuery.data as FactionRankingEntry[]).map(
+              {factionRankingsQuery.data.map(
                 (faction) => (
                   <Table.Tr key={faction.faction_code}>
                     <Table.Td w={1} style={{ whiteSpace: 'nowrap' }}>

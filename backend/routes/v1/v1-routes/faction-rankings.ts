@@ -25,6 +25,7 @@ const FactionRankingSchema = z.object({
   rank_change: z.number().nullable(),
 });
 
+
 const ErrorSchema = z.object({ error: z.string() });
 
 export const getFactionRankingsRoute = createRoute({
@@ -51,55 +52,27 @@ export const getFactionRankings: RouteHandler<typeof getFactionRankingsRoute, Ap
     return c.json([], 200);
   }
 
-  const [data, previousBatch] = await Promise.all([
-    db
-      .selectFrom("faction_snapshot")
-      .innerJoin("faction_snapshot_batch", "faction_snapshot.batch_id", "faction_snapshot_batch.id")
-      .innerJoin("faction", "faction_snapshot.faction_code", "faction.name_code")
-      .select([
-        "faction_snapshot_batch.created_at as snapshot_date",
-        "faction.name as faction_name",
-        "faction_snapshot.rank as rank",
-        "faction.name_code as faction_code",
-        "faction_snapshot.total_points as total_points",
-        "faction_snapshot.declarations as declarations",
-        "faction_snapshot.declaration_rate as declaration_rate",
-        "faction_snapshot.points_per_declaration as points_per_declaration",
-        "faction.hex_code as hex_code",
-      ])
-      .where("faction_snapshot.batch_id", "=", newestBatch.id)
-      .orderBy("rank")
-      .execute(),
-    db
-      .selectFrom("faction_snapshot_batch")
-      .where("id", "<", newestBatch.id)
-      .orderBy("id", "desc")
-      .limit(1)
-      .select("id")
-      .executeTakeFirst(),
-  ]);
+  const data = await db
+    .selectFrom("faction_snapshot")
+    .innerJoin("faction_snapshot_batch", "faction_snapshot.batch_id", "faction_snapshot_batch.id")
+    .innerJoin("faction", "faction_snapshot.faction_code", "faction.name_code")
+    .select([
+      "faction_snapshot_batch.created_at as snapshot_date",
+      "faction.name as faction_name",
+      "faction_snapshot.rank as rank",
+      "faction.name_code as faction_code",
+      "faction_snapshot.total_points as total_points",
+      "faction_snapshot.declarations as declarations",
+      "faction_snapshot.declaration_rate as declaration_rate",
+      "faction_snapshot.points_per_declaration as points_per_declaration",
+      "faction.hex_code as hex_code",
+      "faction_snapshot.rank_change as rank_change",
+    ])
+    .where("faction_snapshot.batch_id", "=", newestBatch.id)
+    .orderBy("rank")
+    .execute();
 
-  const prevRankByFactionCode = new Map<string, number>();
-  if (previousBatch) {
-    const previousRankings = await db
-      .selectFrom("faction_snapshot")
-      .where("batch_id", "=", previousBatch.id)
-      .select(["faction_code", "rank"])
-      .execute();
-    for (const r of previousRankings) {
-      if (r.faction_code) prevRankByFactionCode.set(r.faction_code, r.rank);
-    }
-  }
-
-  const dataWithChange = data.map((r) => {
-    const prevRank = prevRankByFactionCode.get(r.faction_code);
-    return {
-      ...r,
-      rank_change: prevRank != null && r.rank != null ? prevRank - r.rank : null,
-    };
-  });
-
-  return c.json(dataWithChange as any, 200);
+  return c.json(data as any, 200);
 };
 
 export const generateFactionRankingsRoute = createRoute({
@@ -171,44 +144,24 @@ export const postFactionRankingsHandler: RouteHandler<typeof postFactionRankings
     return c.json({ success: false as const, message: "No faction snapshot batch available." }, 400);
   }
 
-  const [snapshot, previousBatch] = await Promise.all([
-    db
-      .selectFrom("faction_snapshot")
-      .innerJoin("faction", "faction_snapshot.faction_code", "faction.name_code")
-      .select([
-        "faction.name as faction_name",
-        "faction_snapshot.rank as rank",
-        "faction_snapshot.faction_code as faction_code",
-        "faction_snapshot.total_points as total_points",
-        "faction_snapshot.declarations as declarations",
-        "faction_snapshot.declaration_rate as declaration_rate",
-        "faction_snapshot.points_per_declaration as points_per_declaration",
-        "faction.hex_code as hex_code",
-        "faction.emoji as emoji",
-      ])
-      .where("faction_snapshot.batch_id", "=", mostRecentSnapshotBatch.id)
-      .orderBy("faction_snapshot.rank")
-      .execute(),
-    db
-      .selectFrom("faction_snapshot_batch")
-      .where("id", "<", mostRecentSnapshotBatch.id)
-      .orderBy("id", "desc")
-      .limit(1)
-      .select("id")
-      .executeTakeFirst(),
-  ]);
-
-  const prevRankByFactionCode = new Map<string, number>();
-  if (previousBatch) {
-    const previousRankings = await db
-      .selectFrom("faction_snapshot")
-      .where("batch_id", "=", previousBatch.id)
-      .select(["faction_code", "rank"])
-      .execute();
-    for (const r of previousRankings) {
-      if (r.faction_code) prevRankByFactionCode.set(r.faction_code, r.rank);
-    }
-  }
+  const snapshot = await db
+    .selectFrom("faction_snapshot")
+    .innerJoin("faction", "faction_snapshot.faction_code", "faction.name_code")
+    .select([
+      "faction.name as faction_name",
+      "faction_snapshot.rank as rank",
+      "faction_snapshot.faction_code as faction_code",
+      "faction_snapshot.total_points as total_points",
+      "faction_snapshot.declarations as declarations",
+      "faction_snapshot.declaration_rate as declaration_rate",
+      "faction_snapshot.points_per_declaration as points_per_declaration",
+      "faction.hex_code as hex_code",
+      "faction.emoji as emoji",
+      "faction_snapshot.rank_change as rank_change",
+    ])
+    .where("faction_snapshot.batch_id", "=", mostRecentSnapshotBatch.id)
+    .orderBy("faction_snapshot.rank")
+    .execute();
 
   const discordClient = await getDiscordClient();
   const channel = await discordClient.channels.fetch(channelId);
@@ -227,9 +180,7 @@ export const postFactionRankingsHandler: RouteHandler<typeof postFactionRankings
     );
 
   const factionEmbeds = snapshot.map(
-    ({ faction_name, hex_code, rank, faction_code, total_points, declarations, points_per_declaration, declaration_rate, emoji }) => {
-      const prevRank = prevRankByFactionCode.get(faction_code);
-      const rankChange = prevRank != null && rank != null ? prevRank - rank : null;
+    ({ faction_name, hex_code, rank, total_points, declarations, points_per_declaration, declaration_rate, emoji, rank_change }) => {
       return new EmbedBuilder()
         .setTitle(`${rank}. ${faction_name} ${emoji}`)
         .setColor(hex_code as ColorResolvable)
@@ -242,7 +193,7 @@ export const postFactionRankingsHandler: RouteHandler<typeof postFactionRankings
             value: points_per_declaration ? `**${points_per_declaration.toFixed(2)}**` : "",
             inline: true,
           },
-          { name: "Change", value: formatRankChange(rankChange), inline: true },
+          { name: "Change", value: formatRankChange(rank_change), inline: true },
         );
     },
   );

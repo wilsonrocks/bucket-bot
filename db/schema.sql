@@ -1,5 +1,5 @@
 
-\restrict YP9fbB81dyWOhSSk6Im4eOPk7SqNiAR9vXb6xnHfaGVgRHx6piAchJXMM8OnK4n
+\restrict 3zR65FjEMOZOf01F0f0U70w9fYqRU71AHPdDFF7RKgS4dTatrNclfE9z6hD7nxP
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -62,7 +62,8 @@ CREATE TABLE public.faction_snapshot (
     created_at timestamp without time zone DEFAULT now() NOT NULL,
     declarations integer DEFAULT 0 NOT NULL,
     points_per_declaration double precision,
-    declaration_rate double precision NOT NULL
+    declaration_rate double precision NOT NULL,
+    rank_change integer
 );
 
 CREATE TABLE public.faction_snapshot_batch (
@@ -163,7 +164,9 @@ CREATE TABLE public.ranking_snapshot (
     batch_id integer NOT NULL,
     player_id integer NOT NULL,
     rank integer NOT NULL,
-    total_points double precision NOT NULL
+    total_points double precision NOT NULL,
+    rank_change integer,
+    new_player boolean DEFAULT false NOT NULL
 );
 
 CREATE TABLE public.ranking_snapshot_batch (
@@ -192,6 +195,37 @@ CREATE TABLE public.ranking_snapshot_type (
     hex_code text,
     discord_channel_id text
 );
+
+CREATE TABLE public.region (
+    id integer NOT NULL,
+    postcodes_api_name text NOT NULL,
+    geojson_name text NOT NULL
+);
+
+    AS integer
+    NO MINVALUE
+    NO MAXVALUE
+
+CREATE TABLE public.region_snapshot (
+    id integer NOT NULL,
+    batch_id integer NOT NULL,
+    region_id integer NOT NULL,
+    event_count integer DEFAULT 0 NOT NULL,
+    created_at timestamp without time zone DEFAULT now() NOT NULL
+);
+
+CREATE TABLE public.region_snapshot_batch (
+    id integer NOT NULL,
+    created_at timestamp without time zone DEFAULT now() NOT NULL
+);
+
+    AS integer
+    NO MINVALUE
+    NO MAXVALUE
+
+    AS integer
+    NO MINVALUE
+    NO MAXVALUE
 
 CREATE TABLE public.result (
     id integer NOT NULL,
@@ -257,7 +291,8 @@ CREATE TABLE public.venue (
     name text,
     town text,
     post_code text,
-    geom public.geometry(Point,4326)
+    geom public.geometry(Point,4326),
+    region_id integer
 );
 
     AS integer
@@ -323,6 +358,24 @@ ALTER TABLE ONLY public.ranking_snapshot
 
 ALTER TABLE ONLY public.ranking_snapshot_type
     ADD CONSTRAINT ranking_snapshot_type_pkey PRIMARY KEY (code);
+
+ALTER TABLE ONLY public.region
+    ADD CONSTRAINT region_geojson_name_key UNIQUE (geojson_name);
+
+ALTER TABLE ONLY public.region
+    ADD CONSTRAINT region_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY public.region
+    ADD CONSTRAINT region_postcodes_api_name_key UNIQUE (postcodes_api_name);
+
+ALTER TABLE ONLY public.region_snapshot
+    ADD CONSTRAINT region_snapshot_batch_id_region_id_key UNIQUE (batch_id, region_id);
+
+ALTER TABLE ONLY public.region_snapshot_batch
+    ADD CONSTRAINT region_snapshot_batch_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY public.region_snapshot
+    ADD CONSTRAINT region_snapshot_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY public.result
     ADD CONSTRAINT result_pkey PRIMARY KEY (id);
@@ -409,6 +462,12 @@ ALTER TABLE ONLY public.ranking_snapshot_event
 ALTER TABLE ONLY public.ranking_snapshot
     ADD CONSTRAINT ranking_snapshot_player_id_fkey FOREIGN KEY (player_id) REFERENCES public.player(id);
 
+ALTER TABLE ONLY public.region_snapshot
+    ADD CONSTRAINT region_snapshot_batch_id_fkey FOREIGN KEY (batch_id) REFERENCES public.region_snapshot_batch(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY public.region_snapshot
+    ADD CONSTRAINT region_snapshot_region_id_fkey FOREIGN KEY (region_id) REFERENCES public.region(id);
+
 ALTER TABLE ONLY public.result
     ADD CONSTRAINT result_player_identity_id_fkey FOREIGN KEY (player_identity_id) REFERENCES public.player_identity(id);
 
@@ -424,5 +483,8 @@ ALTER TABLE ONLY public.tourney
 ALTER TABLE ONLY public.tourney
     ADD CONSTRAINT tourney_venue_id_fkey FOREIGN KEY (venue_id) REFERENCES public.venue(id);
 
-\unrestrict YP9fbB81dyWOhSSk6Im4eOPk7SqNiAR9vXb6xnHfaGVgRHx6piAchJXMM8OnK4n
+ALTER TABLE ONLY public.venue
+    ADD CONSTRAINT venue_region_id_fkey FOREIGN KEY (region_id) REFERENCES public.region(id);
+
+\unrestrict 3zR65FjEMOZOf01F0f0U70w9fYqRU71AHPdDFF7RKgS4dTatrNclfE9z6hD7nxP
 

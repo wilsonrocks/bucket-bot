@@ -1,5 +1,4 @@
 import { useGetRankingTypes, useGetRankingsTypeCode } from '@/api/hooks'
-import type { GetRankingsTypeCode200Item } from '@/api/generated/bucketBotAPI.schemas'
 import { playerShortName } from '@/helpers/player-short-name'
 import { Group, Select, Table, Text } from '@mantine/core'
 import { useMediaQuery } from '@mantine/hooks'
@@ -10,13 +9,23 @@ import { Link } from '@/components/link'
 import { Tabs } from '@/components/routed-tabs'
 import { PlayersBarRace } from '@/components/animated-players'
 
-type RankingEntry = GetRankingsTypeCode200Item & { rank_change: number | null }
-
-function RankChange({ change }: { change: number | null | undefined }) {
-  if (change == null)
+function RankChange({
+  change,
+  newPlayer,
+}: {
+  change: number | null | undefined
+  newPlayer?: boolean
+}) {
+  if (newPlayer)
     return (
       <Text span size="sm" c="green">
         NEW
+      </Text>
+    )
+  if (change == null)
+    return (
+      <Text span size="sm" c="blue">
+        RE
       </Text>
     )
   if (change === 0)
@@ -103,13 +112,13 @@ function RouteComponent() {
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>
-                {(rankings.data as RankingEntry[]).map((player) => (
+                {rankings.data.map((player) => (
                   <Table.Tr key={player.id}>
                     <Table.Td w={1} style={{ whiteSpace: 'nowrap' }}>
                       {player.rank}
                     </Table.Td>
                     <Table.Td w={1} style={{ whiteSpace: 'nowrap' }}>
-                      <RankChange change={player.rank_change} />
+                      <RankChange change={player.rank_change} newPlayer={player.new_player} />
                     </Table.Td>
                     <Table.Td>
                       <Link
