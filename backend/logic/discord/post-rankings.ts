@@ -36,7 +36,10 @@ export const postDiscordRankings = async (db: Kysely<DB>) => {
     .where("display", "!=", false)
     .selectAll()
     .execute();
+
   let topPlayer;
+  let newPlayers;
+
   for (const { name, code: typeCode, description, hex_code } of rankingTypes) {
     const batch = await mostRecentSnapshot(db, typeCode);
     if (!batch) {
@@ -85,6 +88,19 @@ export const postDiscordRankings = async (db: Kysely<DB>) => {
 
     if (typeCode === "ROLLING_YEAR") {
       topPlayer = rankings[0];
+
+      newPlayers = await db
+        .selectFrom("ranking_snapshot")
+        .innerJoin("player", "ranking_snapshot.player_id", "player.id")
+        .leftJoin(
+          "discord_user",
+          "player.discord_id",
+          "discord_user.discord_user_id",
+        )
+        .where("batch_id", "=", batch.id)
+        .where("new_player", "is", true)
+        .selectAll()
+        .execute();
     }
 
     const { discord_channel_id } = batch;
@@ -151,6 +167,18 @@ There's only a maximum of ${TOP_X_PLAYERS} players shown here. But you can see t
 New rankings are out! Please check all the channels for the different ranking types.
 
 ${topPlayer?.discord_user_id ? `Well done to ${mentionUser(topPlayer)} for being the current Top Dog. Please try to beat them.` : ""}
+
+${
+  newPlayers &&
+  newPlayers.length &&
+  `
+It's really important the community keeps growing (or rebuilding with 4th Edition), so a huge shout out to 
+${newPlayers?.map((player) => mentionUser(player)).join("\n")}
+ who are ranked for the first time(under this system)!
+ 
+ `
+}
+
         `);
     }
   } else {
