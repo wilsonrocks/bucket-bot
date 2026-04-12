@@ -1,7 +1,7 @@
 import { useGetRankingTypes, useGetRankingsTypeCode } from '@/api/hooks'
 import type { GetRankingsTypeCode200Item } from '@/api/generated/bucketBotAPI.schemas'
 import { playerShortName } from '@/helpers/player-short-name'
-import { Box, Group, Select, Table, Text } from '@mantine/core'
+import { Group, Select, Table, Text } from '@mantine/core'
 import { useMediaQuery } from '@mantine/hooks'
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { Route as PlayerRoute } from '@/routes/site/_site-pages/player.$id'
@@ -13,10 +13,29 @@ import { PlayersBarRace } from '@/components/animated-players'
 type RankingEntry = GetRankingsTypeCode200Item & { rank_change: number | null }
 
 function RankChange({ change }: { change: number | null | undefined }) {
-  if (change == null) return <Text span size="sm" c="green">NEW</Text>
-  if (change === 0) return <Text span size="sm" c="dimmed">-</Text>
-  if (change > 0) return <Text span size="sm" c="green">↑{change}</Text>
-  return <Text span size="sm" c="red">↓{Math.abs(change)}</Text>
+  if (change == null)
+    return (
+      <Text span size="sm" c="green">
+        NEW
+      </Text>
+    )
+  if (change === 0)
+    return (
+      <Text span size="sm" c="dimmed">
+        -
+      </Text>
+    )
+  if (change > 0)
+    return (
+      <Text span size="sm" c="green">
+        ↑{change}
+      </Text>
+    )
+  return (
+    <Text span size="sm" c="red">
+      ↓{Math.abs(change)}
+    </Text>
+  )
 }
 
 export const Route = createFileRoute('/site/_site-pages/rankings')({
@@ -70,25 +89,41 @@ function RouteComponent() {
         </Tabs.List>
         <Tabs.Panel value="table">
           {rankings.data ? (
-            <Table
-              tabularNums
-              data={{
-                head: ['Rank', 'Change', 'Player', 'Total Points'],
-                body: (rankings.data as RankingEntry[]).map((player) => [
-                  <Box w={20}>{player.rank}</Box>,
-                  <Box w={40}><RankChange change={player.rank_change} /></Box>,
-                  <Box w={150}>
-                    <Link
-                      to={PlayerRoute.to}
-                      params={{ id: player.player_id! }}
-                    >
-                      {isMobile ? playerShortName(player) : player.name}
-                    </Link>
-                  </Box>,
-                  <Box w={50}>{(player.total_points ?? 0).toFixed(2)}</Box>,
-                ]),
-              }}
-            />
+            <Table tabularNums stickyHeader stickyHeaderOffset={80}>
+              <Table.Thead>
+                <Table.Tr>
+                  <Table.Th w={1} style={{ whiteSpace: 'nowrap' }}>
+                    Rank
+                  </Table.Th>
+                  <Table.Th w={1} style={{ whiteSpace: 'nowrap' }}>
+                    Change
+                  </Table.Th>
+                  <Table.Th>Player</Table.Th>
+                  <Table.Th>Total Points</Table.Th>
+                </Table.Tr>
+              </Table.Thead>
+              <Table.Tbody>
+                {(rankings.data as RankingEntry[]).map((player) => (
+                  <Table.Tr key={player.id}>
+                    <Table.Td w={1} style={{ whiteSpace: 'nowrap' }}>
+                      {player.rank}
+                    </Table.Td>
+                    <Table.Td w={1} style={{ whiteSpace: 'nowrap' }}>
+                      <RankChange change={player.rank_change} />
+                    </Table.Td>
+                    <Table.Td>
+                      <Link
+                        to={PlayerRoute.to}
+                        params={{ id: player.player_id! }}
+                      >
+                        {isMobile ? playerShortName(player) : player.name}
+                      </Link>
+                    </Table.Td>
+                    <Table.Td>{(player.total_points ?? 0).toFixed(2)}</Table.Td>
+                  </Table.Tr>
+                ))}
+              </Table.Tbody>
+            </Table>
           ) : (
             'Loading...'
           )}
