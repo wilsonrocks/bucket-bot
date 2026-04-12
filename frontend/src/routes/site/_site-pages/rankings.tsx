@@ -64,6 +64,9 @@ export const Route = createFileRoute('/site/_site-pages/rankings')({
 function RouteComponent() {
   const navigate = Route.useNavigate()
   const isMobile = useMediaQuery('(max-width: 600px)')
+  const isMd = useMediaQuery('(min-width: 992px)')
+  const isLg = useMediaQuery('(min-width: 1200px)')
+  const headerOffset = isLg ? 80 : isMd ? 70 : 60
 
   const { typeCode } = Route.useSearch()
   const rankingTypes = useGetRankingTypes()
@@ -98,7 +101,7 @@ function RouteComponent() {
         </Tabs.List>
         <Tabs.Panel value="table">
           {rankings.data ? (
-            <Table tabularNums stickyHeader stickyHeaderOffset={80}>
+            <Table tabularNums stickyHeader stickyHeaderOffset={headerOffset}>
               <Table.Thead>
                 <Table.Tr>
                   <Table.Th w={1} style={{ whiteSpace: 'nowrap' }}>
