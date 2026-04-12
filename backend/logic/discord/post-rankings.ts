@@ -12,10 +12,10 @@ import { mostRecentSnapshot } from "../most-recent-snapshot";
 const TOP_X_PLAYERS = 16;
 
 function formatRankChange(change: number | null, isNew: boolean): string {
-  if (isNew) return " `NEW`";
-  if (change === null) return " `RE`";
-  if (change === 0) return " -";
-  return change > 0 ? ` ↑${change}` : ` ↓${Math.abs(change)}`;
+  if (isNew) return "(NEW)";
+  if (change === null) return "(BACK)";
+  if (change === 0) return "";
+  return change > 0 ? `(↑${change})` : `(↓${Math.abs(change)})`;
 }
 
 // TODO move to own file
@@ -126,7 +126,7 @@ export const postDiscordRankings = async (db: Kysely<DB>) => {
 
     const topPlayersText = rankings
       .map((r) => {
-        return `#${r.rank} - ${r.name} (${r.total_points.toFixed(2)} pts)${formatRankChange(r.rank_change, r.new_player)}`;
+        return `#**${r.rank}** ${formatRankChange(r.rank_change, r.new_player)} - **${r.name}** (${r.total_points.toFixed(2)} pts)`;
       })
       .join("\n");
 

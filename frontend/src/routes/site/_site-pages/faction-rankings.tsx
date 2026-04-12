@@ -75,34 +75,32 @@ function RouteComponent() {
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
-              {factionRankingsQuery.data.map(
-                (faction) => (
-                  <Table.Tr key={faction.faction_code}>
-                    <Table.Td w={1} style={{ whiteSpace: 'nowrap' }}>
-                      <div
-                        style={{
-                          borderLeft: `3px solid ${faction.hex_code}`,
-                          paddingLeft: '0.5rem',
-                        }}
-                      >
-                        {(faction.rank ?? 0).toString()}
-                      </div>
-                    </Table.Td>
-                    <Table.Td w={1} style={{ whiteSpace: 'nowrap' }}>
-                      <RankChange change={faction.rank_change} />
-                    </Table.Td>
-                    <Table.Td>{faction.faction_name}</Table.Td>
-                    <Table.Td>{faction.declarations}</Table.Td>
-                    <Table.Td>{`${((faction.declaration_rate ?? 0) * 100).toFixed(2)}%`}</Table.Td>
-                    <Table.Td>{faction.total_points}</Table.Td>
-                    <Table.Td>
-                      <strong>
-                        {(faction.points_per_declaration ?? 0).toFixed(2)}
-                      </strong>
-                    </Table.Td>
-                  </Table.Tr>
-                ),
-              )}
+              {factionRankingsQuery.data.map((faction) => (
+                <Table.Tr key={faction.faction_code}>
+                  <Table.Td w={1} style={{ whiteSpace: 'nowrap' }}>
+                    <div
+                      style={{
+                        borderLeft: `3px solid ${faction.hex_code}`,
+                        paddingLeft: '0.5rem',
+                      }}
+                    >
+                      {(faction.rank ?? 0).toString()}
+                    </div>
+                  </Table.Td>
+                  <Table.Td w={1} style={{ whiteSpace: 'nowrap' }}>
+                    <RankChange change={faction.rank_change} />
+                  </Table.Td>
+                  <Table.Td>{faction.faction_name}</Table.Td>
+                  <Table.Td>{faction.declarations}</Table.Td>
+                  <Table.Td>{`${((faction.declaration_rate ?? 0) * 100).toFixed(2)}%`}</Table.Td>
+                  <Table.Td>{faction.total_points}</Table.Td>
+                  <Table.Td>
+                    <strong>
+                      {(faction.points_per_declaration ?? 0).toFixed(2)}
+                    </strong>
+                  </Table.Td>
+                </Table.Tr>
+              ))}
             </Table.Tbody>
           </Table>
         </Tabs.Panel>
