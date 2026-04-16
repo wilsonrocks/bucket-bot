@@ -70,6 +70,7 @@ BEGIN
                                        AND t.date >= m.join_date
                                        AND (m.left_date IS NULL OR t.date < m.left_date)
           WHERE  t.date >= $2
+            AND  t.date <= $3
           %s
         ) raw
         WHERE rn <= 5
@@ -78,7 +79,7 @@ BEGIN
       WHERE player_rn <= 5
       GROUP BY team_id
     $sql$, extra_where)
-    USING new_batch_id, cutoff_date;
+    USING new_batch_id, cutoff_date, pb.created_at::date;
 
     -- rank_change: difference from previous batch of the same type
     UPDATE team_ranking_snapshot trs

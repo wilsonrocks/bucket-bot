@@ -24,6 +24,7 @@ import {
   useGetPlayerNameExistsPlayerId as useGetPlayerNameExistsPlayerIdGenerated,
   useGetPlayers as useGetPlayersGenerated,
   useGetPlayersOverTimeTypeCode as useGetPlayersOverTimeTypeCodeGenerated,
+  useGetTeamsOverTimeTypeCode as useGetTeamsOverTimeTypeCodeGenerated,
   useGetRankingsPlayerIdTypeCode as useGetRankingsPlayerIdTypeCodeGenerated,
   useGetRankingsTypeCode as useGetRankingsTypeCodeGenerated,
   useGetTeamRankingsTypeCode as useGetTeamRankingsTypeCodeGenerated,
@@ -141,6 +142,15 @@ export const useGetPlayersOverTimeTypeCode = (
   options?: Parameters<typeof useGetPlayersOverTimeTypeCodeGenerated>[1],
 ) =>
   useGetPlayersOverTimeTypeCodeGenerated(typeCode, {
+    ...options,
+    query: { ...options?.query, select: (res) => res.data },
+  })
+
+export const useGetTeamsOverTimeTypeCode = (
+  typeCode: string,
+  options?: Parameters<typeof useGetTeamsOverTimeTypeCodeGenerated>[1],
+) =>
+  useGetTeamsOverTimeTypeCodeGenerated(typeCode, {
     ...options,
     query: { ...options?.query, select: (res) => res.data },
   })

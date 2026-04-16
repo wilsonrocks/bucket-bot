@@ -105,6 +105,10 @@ import {
   getRegionsOverTimeRoute,
 } from "./v1-routes/regions-over-time.js";
 import {
+  getTeamsOverTimeHandler,
+  getTeamsOverTimeRoute,
+} from "./v1-routes/teams-over-time.js";
+import {
   generateRegionSnapshotHandler,
   generateRegionSnapshotRoute,
 } from "./v1-routes/generate-region-snapshot.js";
@@ -264,6 +268,7 @@ v1Router.openapi(getAllTiersRoute, getAllTiers);
 v1Router.openapi(getFactionRankingsRoute, getFactionRankings);
 v1Router.openapi(getFactionsOverTimeRoute, getFactionsOverTime);
 v1Router.openapi(getPlayersOverTimeRoute, getPlayersOverTime);
+v1Router.openapi(getTeamsOverTimeRoute, getTeamsOverTimeHandler);
 v1Router.openapi(getUnmappedIdentitiesRoute, getUnmappedIdentities);
 v1Router.openapi(getTeamsRoute, getTeamsHandler);
 v1Router.openapi(getTeamByIdRoute, getTeamByIdHandler);

@@ -336,6 +336,20 @@ export type GetPlayersOverTimeTypeCode200Item = {
   players: GetPlayersOverTimeTypeCode200ItemPlayersItem[];
 };
 
+export type GetTeamsOverTimeTypeCode200ItemTeamsItem = {
+  team_id: number;
+  team_name: string;
+  total_points: number;
+  rank: number;
+  /** @nullable */
+  brand_colour: string | null;
+};
+
+export type GetTeamsOverTimeTypeCode200Item = {
+  date: string;
+  teams: GetTeamsOverTimeTypeCode200ItemTeamsItem[];
+};
+
 export type GetUnmappedIdentities200ItemResultsItem = {
   /** @nullable */
   tourney_id: number | null;
