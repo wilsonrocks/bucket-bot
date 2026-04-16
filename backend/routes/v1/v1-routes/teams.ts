@@ -1,4 +1,5 @@
 import { createRoute, z, type RouteHandler } from "@hono/zod-openapi";
+import { sql } from "kysely";
 import type { AppEnv } from "../../../hono-env.js";
 import { canAccessTeam, isRankingReporter } from "../permissions.js";
 
@@ -20,6 +21,8 @@ export const MemberSchema = z.object({
   player_id: z.number(),
   player_name: z.string(),
   is_captain: z.boolean(),
+  rolling_year_points: z.number().nullable(),
+  rolling_year_rank: z.number().nullable(),
 });
 
 const TeamWithMembersSchema = TeamSchema.extend({
@@ -70,8 +73,9 @@ export const getTeamByIdRoute = createRoute({
 
 export const getTeamByIdHandler: RouteHandler<typeof getTeamByIdRoute, AppEnv> = async (c) => {
   const id = Number(c.req.valid("param").id);
+  const db = c.get("db");
 
-  const team = await c.get("db")
+  const team = await db
     .selectFrom("team")
     .selectAll()
     .where("id", "=", id)
@@ -81,18 +85,33 @@ export const getTeamByIdHandler: RouteHandler<typeof getTeamByIdRoute, AppEnv> =
     return c.json({ error: "Team not found" }, 404);
   }
 
-  const members = await c.get("db")
+  const latestRollingYearBatch = await db
+    .selectFrom("ranking_snapshot_batch")
+    .select("id")
+    .where("type_code", "=", "ROLLING_YEAR")
+    .orderBy("created_at", "desc")
+    .limit(1)
+    .executeTakeFirst();
+
+  const members = await db
     .selectFrom("membership")
     .innerJoin("player", "player.id", "membership.player_id")
+    .leftJoin("ranking_snapshot", (join) =>
+      join
+        .onRef("ranking_snapshot.player_id", "=", "player.id")
+        .on("ranking_snapshot.batch_id", "=", latestRollingYearBatch?.id ?? 0),
+    )
     .select([
       "membership.id as membership_id",
       "membership.player_id",
       "player.name as player_name",
       "membership.is_captain",
+      "ranking_snapshot.total_points as rolling_year_points",
+      "ranking_snapshot.rank as rolling_year_rank",
     ])
     .where("membership.team_id", "=", id)
     .where("membership.left_date", "is", null)
-    .orderBy("player.name")
+    .orderBy(sql`ranking_snapshot.total_points desc nulls last`)
     .execute();
 
   return c.json({ ...team, members } as any, 200);

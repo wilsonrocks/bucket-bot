@@ -34,10 +34,11 @@ function RouteComponent() {
         />
       )}
 
-      <Table mt="md">
+      <Table mt="md" tabularNums>
         <Table.Thead>
           <Table.Tr>
             <Table.Th>Player</Table.Th>
+            <Table.Th>Rolling Year Points</Table.Th>
             <Table.Th />
           </Table.Tr>
         </Table.Thead>
@@ -48,6 +49,11 @@ function RouteComponent() {
                 <Link to={PlayerRoute.to} params={{ id: member.player_id }}>
                   {member.player_name}
                 </Link>
+              </Table.Td>
+              <Table.Td>
+                {member.rolling_year_points != null
+                  ? member.rolling_year_points.toFixed(2)
+                  : '-'}
               </Table.Td>
               <Table.Td>
                 {member.is_captain && <Badge color="yellow">Captain</Badge>}

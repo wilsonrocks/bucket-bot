@@ -376,6 +376,10 @@ export type GetTeamsId200MembersItem = {
   player_id: number;
   player_name: string;
   is_captain: boolean;
+  /** @nullable */
+  rolling_year_points: number | null;
+  /** @nullable */
+  rolling_year_rank: number | null;
 };
 
 export type GetTeamsId200 = {
@@ -444,6 +448,21 @@ export type DeleteTeamsId403 = {
 };
 
 export type DeleteTeamsId404 = {
+  error: string;
+};
+
+export type GetTeamRankingsTypeCode200Item = {
+  batch_id: number;
+  team_id: number;
+  team_name: string;
+  rank: number;
+  total_points: number;
+  /** @nullable */
+  rank_change: number | null;
+  new_team: boolean;
+};
+
+export type GetTeamRankingsTypeCode404 = {
   error: string;
 };
 
@@ -685,6 +704,10 @@ export type PostTeamsTeamIdMembers201 = {
   player_id: number;
   player_name: string;
   is_captain: boolean;
+  /** @nullable */
+  rolling_year_points: number | null;
+  /** @nullable */
+  rolling_year_rank: number | null;
 };
 
 export type PostTeamsTeamIdMembers403 = {
@@ -742,5 +765,13 @@ export type GetPlayerNameExistsPlayerId400 = {
 
 export type GetPlayerNameExistsPlayerId403 = {
   error: string;
+};
+
+export type PostPostTeamRankings200 = {
+  message: string;
+};
+
+export type PostGenerateTeamRankings200 = {
+  success: boolean;
 };
 

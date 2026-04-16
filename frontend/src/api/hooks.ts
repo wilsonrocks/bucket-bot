@@ -26,6 +26,7 @@ import {
   useGetPlayersOverTimeTypeCode as useGetPlayersOverTimeTypeCodeGenerated,
   useGetRankingsPlayerIdTypeCode as useGetRankingsPlayerIdTypeCodeGenerated,
   useGetRankingsTypeCode as useGetRankingsTypeCodeGenerated,
+  useGetTeamRankingsTypeCode as useGetTeamRankingsTypeCodeGenerated,
   useGetRankingTypes as useGetRankingTypesGenerated,
   useGetSearchDiscordUsers as useGetSearchDiscordUsersGenerated,
   useGetTeams as useGetTeamsGenerated,
@@ -67,8 +68,10 @@ export {
   usePostBotChatPostMessage,
   usePostFactionRankings,
   usePostGenerateRankings,
+  usePostGenerateTeamRankings,
   usePostPostDiscordRankings,
   usePostPostFactionRankings,
+  usePostPostTeamRankings,
   usePostToken,
 } from './generated/default/default'
 
@@ -386,6 +389,17 @@ export const usePostPostDiscordEventTourneyId = () => {
     },
   })
 }
+
+// ── Team Rankings ─────────────────────────────────────────────────────────
+
+export const useGetTeamRankingsTypeCode = (
+  typeCode: string,
+  options?: Parameters<typeof useGetTeamRankingsTypeCodeGenerated>[1],
+) =>
+  useGetTeamRankingsTypeCodeGenerated(typeCode, {
+    ...options,
+    query: { ...options?.query, select: (res) => res.data },
+  })
 
 // ── Teams ──────────────────────────────────────────────────────────────────
 
