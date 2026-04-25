@@ -1,4 +1,5 @@
 import { useGetRankingTypes, useGetTeamRankingsTypeCode } from '@/api/hooks'
+import { FeatureFlag } from '@/components/FeatureFlag'
 import { Group, Select, Table, Text } from '@mantine/core'
 import { useMediaQuery } from '@mantine/hooks'
 import { createFileRoute, redirect } from '@tanstack/react-router'
@@ -76,6 +77,7 @@ function RouteComponent() {
   })
 
   return (
+    <FeatureFlag flag="TEAM_STATS">
     <div>
       <Group align="center" mb="sm">
         <Select
@@ -141,5 +143,6 @@ function RouteComponent() {
         </Tabs.Panel>
       </Tabs>
     </div>
+    </FeatureFlag>
   )
 }

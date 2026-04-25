@@ -34,6 +34,7 @@ import type {
   GetBotChatChannels200Item,
   GetFactionRankings200Item,
   GetFactionsOverTime200Item,
+  GetFeatureFlags200Item,
   GetHasRole200,
   GetHasRole400,
   GetHasRole500,
@@ -2883,6 +2884,110 @@ export function useGetTeamRankingsTypeCode<TData = Awaited<ReturnType<typeof get
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetTeamRankingsTypeCodeQueryOptions(typeCode,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+export type getFeatureFlagsResponse200 = {
+  data: GetFeatureFlags200Item[]
+  status: 200
+}
+
+export type getFeatureFlagsResponseSuccess = (getFeatureFlagsResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getFeatureFlagsResponse = (getFeatureFlagsResponseSuccess)
+
+export const getGetFeatureFlagsUrl = () => {
+
+
+  
+
+  return `/v1/feature-flags`
+}
+
+export const getFeatureFlags = async ( options?: RequestInit): Promise<getFeatureFlagsResponse> => {
+  
+  return customFetch<getFeatureFlagsResponse>(getGetFeatureFlagsUrl(),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
+
+export const getGetFeatureFlagsQueryKey = () => {
+    return [
+    `/v1/feature-flags`
+    ] as const;
+    }
+
+    
+export const getGetFeatureFlagsQueryOptions = <TData = Awaited<ReturnType<typeof getFeatureFlags>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFeatureFlags>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetFeatureFlagsQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getFeatureFlags>>> = ({ signal }) => getFeatureFlags({ signal, ...requestOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getFeatureFlags>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetFeatureFlagsQueryResult = NonNullable<Awaited<ReturnType<typeof getFeatureFlags>>>
+export type GetFeatureFlagsQueryError = unknown
+
+
+export function useGetFeatureFlags<TData = Awaited<ReturnType<typeof getFeatureFlags>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFeatureFlags>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getFeatureFlags>>,
+          TError,
+          Awaited<ReturnType<typeof getFeatureFlags>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetFeatureFlags<TData = Awaited<ReturnType<typeof getFeatureFlags>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFeatureFlags>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getFeatureFlags>>,
+          TError,
+          Awaited<ReturnType<typeof getFeatureFlags>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetFeatureFlags<TData = Awaited<ReturnType<typeof getFeatureFlags>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFeatureFlags>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetFeatureFlags<TData = Awaited<ReturnType<typeof getFeatureFlags>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFeatureFlags>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetFeatureFlagsQueryOptions(options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

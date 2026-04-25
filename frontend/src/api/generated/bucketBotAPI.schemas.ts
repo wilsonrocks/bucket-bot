@@ -480,6 +480,11 @@ export type GetTeamRankingsTypeCode404 = {
   error: string;
 };
 
+export type GetFeatureFlags200Item = {
+  flag: string;
+  is_enabled: boolean;
+};
+
 export type PostLongshanksEventId200 = {[key: string]: unknown | null};
 
 export type PostLongshanksEventId400 = {

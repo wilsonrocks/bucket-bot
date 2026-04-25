@@ -28,6 +28,7 @@ import {
   useGetRankingsPlayerIdTypeCode as useGetRankingsPlayerIdTypeCodeGenerated,
   useGetRankingsTypeCode as useGetRankingsTypeCodeGenerated,
   useGetTeamRankingsTypeCode as useGetTeamRankingsTypeCodeGenerated,
+  useGetFeatureFlags as useGetFeatureFlagsGenerated,
   useGetRankingTypes as useGetRankingTypesGenerated,
   useGetSearchDiscordUsers as useGetSearchDiscordUsersGenerated,
   useGetTeams as useGetTeamsGenerated,
@@ -175,6 +176,14 @@ export const useGetUnmappedIdentities = (
   options?: Parameters<typeof useGetUnmappedIdentitiesGenerated>[0],
 ) =>
   useGetUnmappedIdentitiesGenerated({
+    ...options,
+    query: { ...options?.query, select: (res) => res.data },
+  })
+
+export const useGetFeatureFlags = (
+  options?: Parameters<typeof useGetFeatureFlagsGenerated>[0],
+) =>
+  useGetFeatureFlagsGenerated({
     ...options,
     query: { ...options?.query, select: (res) => res.data },
   })
