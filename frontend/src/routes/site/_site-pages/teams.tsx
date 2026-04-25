@@ -17,9 +17,13 @@ function RouteComponent() {
     <div>
       <Table
         data={{
-          head: ['Team', 'Description'],
+          head: ['Team', 'Location'],
           body: teams.map((team) => [
-            <Anchor component={Link} to={TeamRoute.to} params={{ id: String(team.id) }}>
+            <Anchor
+              component={Link}
+              to={TeamRoute.to}
+              params={{ id: String(team.id) }}
+            >
               {team.name}
             </Anchor>,
             team.description ?? '',

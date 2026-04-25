@@ -1,7 +1,8 @@
 import { useGetHasRole } from '@/api/hooks'
 
 export function usePermissions() {
-  const query = useGetHasRole()
+  const isLoggedIn = !!localStorage.getItem('auth')
+  const query = useGetHasRole({ query: { enabled: isLoggedIn } })
 
   return {
     rankingReporter: query.data?.rankingReporter ?? false,

@@ -1,4 +1,5 @@
 import { useGetTeamsId } from '@/api/hooks'
+import { FeatureFlag } from '@/components/FeatureFlag'
 import { Badge, Image, Table, Title } from '@mantine/core'
 import { createFileRoute } from '@tanstack/react-router'
 import { Link } from '@/components/link'
@@ -34,10 +35,13 @@ function RouteComponent() {
         />
       )}
 
-      <Table mt="md">
+      <Table mt="md" tabularNums>
         <Table.Thead>
           <Table.Tr>
             <Table.Th>Player</Table.Th>
+            <FeatureFlag flag="TEAM_STATS">
+              <Table.Th>Rolling Year Points</Table.Th>
+            </FeatureFlag>
             <Table.Th />
           </Table.Tr>
         </Table.Thead>
@@ -49,6 +53,13 @@ function RouteComponent() {
                   {member.player_name}
                 </Link>
               </Table.Td>
+              <FeatureFlag flag="TEAM_STATS">
+                <Table.Td>
+                  {member.rolling_year_points != null
+                    ? member.rolling_year_points.toFixed(2)
+                    : '-'}
+                </Table.Td>
+              </FeatureFlag>
               <Table.Td>
                 {member.is_captain && <Badge color="yellow">Captain</Badge>}
               </Table.Td>

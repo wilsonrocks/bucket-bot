@@ -34,6 +34,7 @@ import type {
   GetBotChatChannels200Item,
   GetFactionRankings200Item,
   GetFactionsOverTime200Item,
+  GetFeatureFlags200Item,
   GetHasRole200,
   GetHasRole400,
   GetHasRole500,
@@ -57,9 +58,12 @@ import type {
   GetSearchDiscordUsers200Item,
   GetSearchDiscordUsers400,
   GetSearchDiscordUsersParams,
+  GetTeamRankingsTypeCode200Item,
+  GetTeamRankingsTypeCode404,
   GetTeams200Item,
   GetTeamsId200,
   GetTeamsId404,
+  GetTeamsOverTimeTypeCode200Item,
   GetTiers200Item,
   GetTourney200Item,
   GetTourneyId200,
@@ -89,6 +93,7 @@ import type {
   PostFetchDiscordUserIds200,
   PostGenerateRankings200,
   PostGenerateRegionSnapshot200,
+  PostGenerateTeamRankings200,
   PostLongshanksEventId200,
   PostLongshanksEventId400,
   PostLongshanksEventId502,
@@ -103,6 +108,7 @@ import type {
   PostPostFactionRankings400,
   PostPostFactionRankings500,
   PostPostFactionRankingsParams,
+  PostPostTeamRankings200,
   PostTeamsTeamIdMembers201,
   PostTeamsTeamIdMembers403,
   PostTeamsTeamIdMembers404,
@@ -2177,6 +2183,110 @@ export function useGetPlayersOverTimeTypeCode<TData = Awaited<ReturnType<typeof 
 
 
 
+export type getTeamsOverTimeTypeCodeResponse200 = {
+  data: GetTeamsOverTimeTypeCode200Item[]
+  status: 200
+}
+
+export type getTeamsOverTimeTypeCodeResponseSuccess = (getTeamsOverTimeTypeCodeResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getTeamsOverTimeTypeCodeResponse = (getTeamsOverTimeTypeCodeResponseSuccess)
+
+export const getGetTeamsOverTimeTypeCodeUrl = (typeCode: string,) => {
+
+
+  
+
+  return `/v1/teams-over-time/${typeCode}`
+}
+
+export const getTeamsOverTimeTypeCode = async (typeCode: string, options?: RequestInit): Promise<getTeamsOverTimeTypeCodeResponse> => {
+  
+  return customFetch<getTeamsOverTimeTypeCodeResponse>(getGetTeamsOverTimeTypeCodeUrl(typeCode),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
+
+export const getGetTeamsOverTimeTypeCodeQueryKey = (typeCode: string,) => {
+    return [
+    `/v1/teams-over-time/${typeCode}`
+    ] as const;
+    }
+
+    
+export const getGetTeamsOverTimeTypeCodeQueryOptions = <TData = Awaited<ReturnType<typeof getTeamsOverTimeTypeCode>>, TError = unknown>(typeCode: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTeamsOverTimeTypeCode>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetTeamsOverTimeTypeCodeQueryKey(typeCode);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTeamsOverTimeTypeCode>>> = ({ signal }) => getTeamsOverTimeTypeCode(typeCode, { signal, ...requestOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(typeCode), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTeamsOverTimeTypeCode>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetTeamsOverTimeTypeCodeQueryResult = NonNullable<Awaited<ReturnType<typeof getTeamsOverTimeTypeCode>>>
+export type GetTeamsOverTimeTypeCodeQueryError = unknown
+
+
+export function useGetTeamsOverTimeTypeCode<TData = Awaited<ReturnType<typeof getTeamsOverTimeTypeCode>>, TError = unknown>(
+ typeCode: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTeamsOverTimeTypeCode>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTeamsOverTimeTypeCode>>,
+          TError,
+          Awaited<ReturnType<typeof getTeamsOverTimeTypeCode>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetTeamsOverTimeTypeCode<TData = Awaited<ReturnType<typeof getTeamsOverTimeTypeCode>>, TError = unknown>(
+ typeCode: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTeamsOverTimeTypeCode>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTeamsOverTimeTypeCode>>,
+          TError,
+          Awaited<ReturnType<typeof getTeamsOverTimeTypeCode>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetTeamsOverTimeTypeCode<TData = Awaited<ReturnType<typeof getTeamsOverTimeTypeCode>>, TError = unknown>(
+ typeCode: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTeamsOverTimeTypeCode>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetTeamsOverTimeTypeCode<TData = Awaited<ReturnType<typeof getTeamsOverTimeTypeCode>>, TError = unknown>(
+ typeCode: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTeamsOverTimeTypeCode>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetTeamsOverTimeTypeCodeQueryOptions(typeCode,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
 export type getUnmappedIdentitiesResponse200 = {
   data: GetUnmappedIdentities200Item[]
   status: 200
@@ -2672,7 +2782,222 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getDeleteTeamsIdMutationOptions(options), queryClient);
     }
-    export type postLongshanksEventIdResponse200 = {
+    export type getTeamRankingsTypeCodeResponse200 = {
+  data: GetTeamRankingsTypeCode200Item[]
+  status: 200
+}
+
+export type getTeamRankingsTypeCodeResponse404 = {
+  data: GetTeamRankingsTypeCode404
+  status: 404
+}
+
+export type getTeamRankingsTypeCodeResponseSuccess = (getTeamRankingsTypeCodeResponse200) & {
+  headers: Headers;
+};
+export type getTeamRankingsTypeCodeResponseError = (getTeamRankingsTypeCodeResponse404) & {
+  headers: Headers;
+};
+
+export type getTeamRankingsTypeCodeResponse = (getTeamRankingsTypeCodeResponseSuccess | getTeamRankingsTypeCodeResponseError)
+
+export const getGetTeamRankingsTypeCodeUrl = (typeCode: string,) => {
+
+
+  
+
+  return `/v1/team-rankings/${typeCode}`
+}
+
+export const getTeamRankingsTypeCode = async (typeCode: string, options?: RequestInit): Promise<getTeamRankingsTypeCodeResponse> => {
+  
+  return customFetch<getTeamRankingsTypeCodeResponse>(getGetTeamRankingsTypeCodeUrl(typeCode),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
+
+export const getGetTeamRankingsTypeCodeQueryKey = (typeCode: string,) => {
+    return [
+    `/v1/team-rankings/${typeCode}`
+    ] as const;
+    }
+
+    
+export const getGetTeamRankingsTypeCodeQueryOptions = <TData = Awaited<ReturnType<typeof getTeamRankingsTypeCode>>, TError = GetTeamRankingsTypeCode404>(typeCode: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTeamRankingsTypeCode>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetTeamRankingsTypeCodeQueryKey(typeCode);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTeamRankingsTypeCode>>> = ({ signal }) => getTeamRankingsTypeCode(typeCode, { signal, ...requestOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(typeCode), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTeamRankingsTypeCode>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetTeamRankingsTypeCodeQueryResult = NonNullable<Awaited<ReturnType<typeof getTeamRankingsTypeCode>>>
+export type GetTeamRankingsTypeCodeQueryError = GetTeamRankingsTypeCode404
+
+
+export function useGetTeamRankingsTypeCode<TData = Awaited<ReturnType<typeof getTeamRankingsTypeCode>>, TError = GetTeamRankingsTypeCode404>(
+ typeCode: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTeamRankingsTypeCode>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTeamRankingsTypeCode>>,
+          TError,
+          Awaited<ReturnType<typeof getTeamRankingsTypeCode>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetTeamRankingsTypeCode<TData = Awaited<ReturnType<typeof getTeamRankingsTypeCode>>, TError = GetTeamRankingsTypeCode404>(
+ typeCode: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTeamRankingsTypeCode>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTeamRankingsTypeCode>>,
+          TError,
+          Awaited<ReturnType<typeof getTeamRankingsTypeCode>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetTeamRankingsTypeCode<TData = Awaited<ReturnType<typeof getTeamRankingsTypeCode>>, TError = GetTeamRankingsTypeCode404>(
+ typeCode: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTeamRankingsTypeCode>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetTeamRankingsTypeCode<TData = Awaited<ReturnType<typeof getTeamRankingsTypeCode>>, TError = GetTeamRankingsTypeCode404>(
+ typeCode: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTeamRankingsTypeCode>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetTeamRankingsTypeCodeQueryOptions(typeCode,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+export type getFeatureFlagsResponse200 = {
+  data: GetFeatureFlags200Item[]
+  status: 200
+}
+
+export type getFeatureFlagsResponseSuccess = (getFeatureFlagsResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getFeatureFlagsResponse = (getFeatureFlagsResponseSuccess)
+
+export const getGetFeatureFlagsUrl = () => {
+
+
+  
+
+  return `/v1/feature-flags`
+}
+
+export const getFeatureFlags = async ( options?: RequestInit): Promise<getFeatureFlagsResponse> => {
+  
+  return customFetch<getFeatureFlagsResponse>(getGetFeatureFlagsUrl(),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
+
+export const getGetFeatureFlagsQueryKey = () => {
+    return [
+    `/v1/feature-flags`
+    ] as const;
+    }
+
+    
+export const getGetFeatureFlagsQueryOptions = <TData = Awaited<ReturnType<typeof getFeatureFlags>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFeatureFlags>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetFeatureFlagsQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getFeatureFlags>>> = ({ signal }) => getFeatureFlags({ signal, ...requestOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getFeatureFlags>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetFeatureFlagsQueryResult = NonNullable<Awaited<ReturnType<typeof getFeatureFlags>>>
+export type GetFeatureFlagsQueryError = unknown
+
+
+export function useGetFeatureFlags<TData = Awaited<ReturnType<typeof getFeatureFlags>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFeatureFlags>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getFeatureFlags>>,
+          TError,
+          Awaited<ReturnType<typeof getFeatureFlags>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetFeatureFlags<TData = Awaited<ReturnType<typeof getFeatureFlags>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFeatureFlags>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getFeatureFlags>>,
+          TError,
+          Awaited<ReturnType<typeof getFeatureFlags>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetFeatureFlags<TData = Awaited<ReturnType<typeof getFeatureFlags>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFeatureFlags>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetFeatureFlags<TData = Awaited<ReturnType<typeof getFeatureFlags>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFeatureFlags>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetFeatureFlagsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+export type postLongshanksEventIdResponse200 = {
   data: PostLongshanksEventId200
   status: 200
 }
@@ -4769,3 +5094,154 @@ export function useGetPlayerNameExistsPlayerId<TData = Awaited<ReturnType<typeof
 
 
 
+export type postPostTeamRankingsResponse200 = {
+  data: PostPostTeamRankings200
+  status: 200
+}
+
+export type postPostTeamRankingsResponseSuccess = (postPostTeamRankingsResponse200) & {
+  headers: Headers;
+};
+;
+
+export type postPostTeamRankingsResponse = (postPostTeamRankingsResponseSuccess)
+
+export const getPostPostTeamRankingsUrl = () => {
+
+
+  
+
+  return `/v1/post-team-rankings`
+}
+
+export const postPostTeamRankings = async ( options?: RequestInit): Promise<postPostTeamRankingsResponse> => {
+  
+  return customFetch<postPostTeamRankingsResponse>(getPostPostTeamRankingsUrl(),
+  {      
+    ...options,
+    method: 'POST'
+    
+    
+  }
+);}
+  
+
+
+
+export const getPostPostTeamRankingsMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postPostTeamRankings>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postPostTeamRankings>>, TError,void, TContext> => {
+
+const mutationKey = ['postPostTeamRankings'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postPostTeamRankings>>, void> = () => {
+          
+
+          return  postPostTeamRankings(requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostPostTeamRankingsMutationResult = NonNullable<Awaited<ReturnType<typeof postPostTeamRankings>>>
+    
+    export type PostPostTeamRankingsMutationError = unknown
+
+    export const usePostPostTeamRankings = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postPostTeamRankings>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postPostTeamRankings>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getPostPostTeamRankingsMutationOptions(options), queryClient);
+    }
+    export type postGenerateTeamRankingsResponse200 = {
+  data: PostGenerateTeamRankings200
+  status: 200
+}
+
+export type postGenerateTeamRankingsResponseSuccess = (postGenerateTeamRankingsResponse200) & {
+  headers: Headers;
+};
+;
+
+export type postGenerateTeamRankingsResponse = (postGenerateTeamRankingsResponseSuccess)
+
+export const getPostGenerateTeamRankingsUrl = () => {
+
+
+  
+
+  return `/v1/generate-team-rankings`
+}
+
+export const postGenerateTeamRankings = async ( options?: RequestInit): Promise<postGenerateTeamRankingsResponse> => {
+  
+  return customFetch<postGenerateTeamRankingsResponse>(getPostGenerateTeamRankingsUrl(),
+  {      
+    ...options,
+    method: 'POST'
+    
+    
+  }
+);}
+  
+
+
+
+export const getPostGenerateTeamRankingsMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postGenerateTeamRankings>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postGenerateTeamRankings>>, TError,void, TContext> => {
+
+const mutationKey = ['postGenerateTeamRankings'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postGenerateTeamRankings>>, void> = () => {
+          
+
+          return  postGenerateTeamRankings(requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostGenerateTeamRankingsMutationResult = NonNullable<Awaited<ReturnType<typeof postGenerateTeamRankings>>>
+    
+    export type PostGenerateTeamRankingsMutationError = unknown
+
+    export const usePostGenerateTeamRankings = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postGenerateTeamRankings>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postGenerateTeamRankings>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getPostGenerateTeamRankingsMutationOptions(options), queryClient);
+    }
+    

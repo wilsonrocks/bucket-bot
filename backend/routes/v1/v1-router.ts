@@ -105,6 +105,10 @@ import {
   getRegionsOverTimeRoute,
 } from "./v1-routes/regions-over-time.js";
 import {
+  getTeamsOverTimeHandler,
+  getTeamsOverTimeRoute,
+} from "./v1-routes/teams-over-time.js";
+import {
   generateRegionSnapshotHandler,
   generateRegionSnapshotRoute,
 } from "./v1-routes/generate-region-snapshot.js";
@@ -129,6 +133,20 @@ import {
   updateTeamMemberRoute,
 } from "./v1-routes/team-memberships";
 import { uploadHandler, uploadRoute } from "./v1-routes/upload";
+import {
+  teamRankingsHandler,
+  teamRankingsRoute,
+  postTeamRankingsHandler,
+  postTeamRankingsRoute,
+} from "./v1-routes/team-rankings";
+import {
+  generateTeamRankingsHandler,
+  generateTeamRankingsRoute,
+} from "./v1-routes/generate-team-rankings";
+import {
+  getAllFeatureFlags,
+  getAllFeatureFlagsRoute,
+} from "./v1-routes/feature-flags.js";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) throw new Error("JWT_SECRET is not defined");
@@ -254,9 +272,12 @@ v1Router.openapi(getAllTiersRoute, getAllTiers);
 v1Router.openapi(getFactionRankingsRoute, getFactionRankings);
 v1Router.openapi(getFactionsOverTimeRoute, getFactionsOverTime);
 v1Router.openapi(getPlayersOverTimeRoute, getPlayersOverTime);
+v1Router.openapi(getTeamsOverTimeRoute, getTeamsOverTimeHandler);
 v1Router.openapi(getUnmappedIdentitiesRoute, getUnmappedIdentities);
 v1Router.openapi(getTeamsRoute, getTeamsHandler);
 v1Router.openapi(getTeamByIdRoute, getTeamByIdHandler);
+v1Router.openapi(teamRankingsRoute, teamRankingsHandler);
+v1Router.openapi(getAllFeatureFlagsRoute, getAllFeatureFlags);
 
 // ── JWT middleware (all routes below require authentication) ───────────────
 
@@ -290,3 +311,5 @@ v1Router.openapi(updateTeamMemberRoute, updateTeamMemberHandler);
 v1Router.openapi(removeTeamMemberRoute, removeTeamMemberHandler);
 v1Router.openapi(updatePlayerRoute, updatePlayer);
 v1Router.openapi(playerNameExistsRoute, playerNameExistsHandler);
+v1Router.openapi(postTeamRankingsRoute, postTeamRankingsHandler);
+v1Router.openapi(generateTeamRankingsRoute, generateTeamRankingsHandler);

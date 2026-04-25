@@ -23,3 +23,6 @@ psql "$DATABASE_URL" -c "CREATE EXTENSION IF NOT EXISTS postgis;"
 
 echo "Overwriting player channel IDs to use test channel ID..."
 psql "$DATABASE_URL" -c "UPDATE ranking_snapshot_type SET discord_channel_id = '$DISCORD_TEST_CHANNEL_ID';"
+
+echo "Enabling all feature flags locally..."
+psql "$DATABASE_URL" -c "UPDATE feature_flag SET is_enabled = TRUE;"

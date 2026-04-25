@@ -24,8 +24,11 @@ import {
   useGetPlayerNameExistsPlayerId as useGetPlayerNameExistsPlayerIdGenerated,
   useGetPlayers as useGetPlayersGenerated,
   useGetPlayersOverTimeTypeCode as useGetPlayersOverTimeTypeCodeGenerated,
+  useGetTeamsOverTimeTypeCode as useGetTeamsOverTimeTypeCodeGenerated,
   useGetRankingsPlayerIdTypeCode as useGetRankingsPlayerIdTypeCodeGenerated,
   useGetRankingsTypeCode as useGetRankingsTypeCodeGenerated,
+  useGetTeamRankingsTypeCode as useGetTeamRankingsTypeCodeGenerated,
+  useGetFeatureFlags as useGetFeatureFlagsGenerated,
   useGetRankingTypes as useGetRankingTypesGenerated,
   useGetSearchDiscordUsers as useGetSearchDiscordUsersGenerated,
   useGetTeams as useGetTeamsGenerated,
@@ -67,8 +70,10 @@ export {
   usePostBotChatPostMessage,
   usePostFactionRankings,
   usePostGenerateRankings,
+  usePostGenerateTeamRankings,
   usePostPostDiscordRankings,
   usePostPostFactionRankings,
+  usePostPostTeamRankings,
   usePostToken,
 } from './generated/default/default'
 
@@ -142,6 +147,15 @@ export const useGetPlayersOverTimeTypeCode = (
     query: { ...options?.query, select: (res) => res.data },
   })
 
+export const useGetTeamsOverTimeTypeCode = (
+  typeCode: string,
+  options?: Parameters<typeof useGetTeamsOverTimeTypeCodeGenerated>[1],
+) =>
+  useGetTeamsOverTimeTypeCodeGenerated(typeCode, {
+    ...options,
+    query: { ...options?.query, select: (res) => res.data },
+  })
+
 export const useGetBotChatChannels = (
   options?: Parameters<typeof useGetBotChatChannelsGenerated>[0],
 ) =>
@@ -162,6 +176,14 @@ export const useGetUnmappedIdentities = (
   options?: Parameters<typeof useGetUnmappedIdentitiesGenerated>[0],
 ) =>
   useGetUnmappedIdentitiesGenerated({
+    ...options,
+    query: { ...options?.query, select: (res) => res.data },
+  })
+
+export const useGetFeatureFlags = (
+  options?: Parameters<typeof useGetFeatureFlagsGenerated>[0],
+) =>
+  useGetFeatureFlagsGenerated({
     ...options,
     query: { ...options?.query, select: (res) => res.data },
   })
@@ -386,6 +408,17 @@ export const usePostPostDiscordEventTourneyId = () => {
     },
   })
 }
+
+// ── Team Rankings ─────────────────────────────────────────────────────────
+
+export const useGetTeamRankingsTypeCode = (
+  typeCode: string,
+  options?: Parameters<typeof useGetTeamRankingsTypeCodeGenerated>[1],
+) =>
+  useGetTeamRankingsTypeCodeGenerated(typeCode, {
+    ...options,
+    query: { ...options?.query, select: (res) => res.data },
+  })
 
 // ── Teams ──────────────────────────────────────────────────────────────────
 

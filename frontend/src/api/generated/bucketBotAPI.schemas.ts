@@ -336,6 +336,20 @@ export type GetPlayersOverTimeTypeCode200Item = {
   players: GetPlayersOverTimeTypeCode200ItemPlayersItem[];
 };
 
+export type GetTeamsOverTimeTypeCode200ItemTeamsItem = {
+  team_id: number;
+  team_name: string;
+  total_points: number;
+  rank: number;
+  /** @nullable */
+  brand_colour: string | null;
+};
+
+export type GetTeamsOverTimeTypeCode200Item = {
+  date: string;
+  teams: GetTeamsOverTimeTypeCode200ItemTeamsItem[];
+};
+
 export type GetUnmappedIdentities200ItemResultsItem = {
   /** @nullable */
   tourney_id: number | null;
@@ -376,6 +390,10 @@ export type GetTeamsId200MembersItem = {
   player_id: number;
   player_name: string;
   is_captain: boolean;
+  /** @nullable */
+  rolling_year_points: number | null;
+  /** @nullable */
+  rolling_year_rank: number | null;
 };
 
 export type GetTeamsId200 = {
@@ -445,6 +463,26 @@ export type DeleteTeamsId403 = {
 
 export type DeleteTeamsId404 = {
   error: string;
+};
+
+export type GetTeamRankingsTypeCode200Item = {
+  batch_id: number;
+  team_id: number;
+  team_name: string;
+  rank: number;
+  total_points: number;
+  /** @nullable */
+  rank_change: number | null;
+  new_team: boolean;
+};
+
+export type GetTeamRankingsTypeCode404 = {
+  error: string;
+};
+
+export type GetFeatureFlags200Item = {
+  flag: string;
+  is_enabled: boolean;
 };
 
 export type PostLongshanksEventId200 = {[key: string]: unknown | null};
@@ -685,6 +723,10 @@ export type PostTeamsTeamIdMembers201 = {
   player_id: number;
   player_name: string;
   is_captain: boolean;
+  /** @nullable */
+  rolling_year_points: number | null;
+  /** @nullable */
+  rolling_year_rank: number | null;
 };
 
 export type PostTeamsTeamIdMembers403 = {
@@ -742,5 +784,13 @@ export type GetPlayerNameExistsPlayerId400 = {
 
 export type GetPlayerNameExistsPlayerId403 = {
   error: string;
+};
+
+export type PostPostTeamRankings200 = {
+  message: string;
+};
+
+export type PostGenerateTeamRankings200 = {
+  success: boolean;
 };
 
