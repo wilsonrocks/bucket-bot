@@ -64,10 +64,8 @@ export const Route = createFileRoute('/site/_site-pages/team-rankings')({
 function RouteComponent() {
   const navigate = Route.useNavigate()
   const isMd = useMediaQuery('(min-width: 992px)')
-  const isLg = useMediaQuery('(min-width: 1200px)')
-  const headerOffset = isLg ? 80 : isMd ? 70 : 60
 
-  const { typeCode } = Route.useSearch()
+const { typeCode } = Route.useSearch()
   const rankingTypes = useGetRankingTypes()
   const rankingDescription = rankingTypes.data?.find(
     (rt) => rt.code === typeCode,
@@ -101,6 +99,10 @@ function RouteComponent() {
             <Tabs.Tab value="animation">Animation</Tabs.Tab>
           </Tabs.List>
           <Tabs.Panel value="table">
+            Team ranking points are calculated as the sum of the ranking points
+            of the top five players in the team. Since individual points are
+            from a player's top 5 performances, there's a cap of 25 events for a
+            team.
             {rankings.data ? (
               <div
                 style={{
@@ -119,7 +121,7 @@ function RouteComponent() {
                   <Table
                     tabularNums
                     stickyHeader
-                    stickyHeaderOffset={headerOffset}
+                    stickyHeaderOffset={0}
                   >
                     <Table.Thead>
                       <Table.Tr>
@@ -132,10 +134,10 @@ function RouteComponent() {
                         <Table.Th>Team</Table.Th>
                         <Table.Th>Total Points</Table.Th>
                         <Table.Th w={1} style={{ whiteSpace: 'nowrap' }}>
-                          Players (top 5)
+                          Players
                         </Table.Th>
                         <Table.Th w={1} style={{ whiteSpace: 'nowrap' }}>
-                          Events (max 25)
+                          Events
                         </Table.Th>
                       </Table.Tr>
                     </Table.Thead>
@@ -161,10 +163,14 @@ function RouteComponent() {
                           </Table.Td>
                           <Table.Td>{team.total_points.toFixed(2)}</Table.Td>
                           <Table.Td w={1} style={{ whiteSpace: 'nowrap' }}>
-                            {team.player_count ?? '—'}
+                            {team.player_count != null
+                              ? `${team.player_count}/5`
+                              : '—'}
                           </Table.Td>
                           <Table.Td w={1} style={{ whiteSpace: 'nowrap' }}>
-                            {team.event_count ?? '—'}
+                            {team.event_count != null
+                              ? `${team.event_count}/25`
+                              : '—'}
                           </Table.Td>
                         </Table.Tr>
                       ))}
