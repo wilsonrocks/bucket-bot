@@ -10,6 +10,8 @@ const TeamRankingEntrySchema = z.object({
   total_points: z.number(),
   rank_change: z.number().nullable(),
   new_team: z.boolean(),
+  player_count: z.number().nullable(),
+  event_count: z.number().nullable(),
 });
 
 // ── GET /team-rankings/{typeCode} ──────────────────────────────────────────
@@ -60,6 +62,8 @@ export const teamRankingsHandler: RouteHandler<typeof teamRankingsRoute, AppEnv>
       "team_ranking_snapshot.total_points",
       "team_ranking_snapshot.rank_change",
       "team_ranking_snapshot.new_team",
+      "team_ranking_snapshot.player_count",
+      "team_ranking_snapshot.event_count",
     ])
     .orderBy("rank", "asc")
     .execute();

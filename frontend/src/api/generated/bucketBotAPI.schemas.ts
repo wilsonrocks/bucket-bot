@@ -474,6 +474,10 @@ export type GetTeamRankingsTypeCode200Item = {
   /** @nullable */
   rank_change: number | null;
   new_team: boolean;
+  /** @nullable */
+  player_count: number | null;
+  /** @nullable */
+  event_count: number | null;
 };
 
 export type GetTeamRankingsTypeCode404 = {

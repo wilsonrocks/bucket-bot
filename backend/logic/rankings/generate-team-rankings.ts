@@ -75,6 +75,7 @@ export const generateTeamRankings = async (
         "team_id",
         "player_id",
         sql<number>`sum(points)`.as("player_contribution"),
+        sql<number>`count(*)`.as("events_for_player"),
         sql<number>`
           row_number() over (
             partition by team_id
@@ -89,7 +90,7 @@ export const generateTeamRankings = async (
     // Layer 3: cap to top N players per team, sum to get team score, rank teams
     const insertTeamRankingsQuery = trx
       .insertInto("team_ranking_snapshot")
-      .columns(["batch_id", "team_id", "rank", "total_points"])
+      .columns(["batch_id", "team_id", "rank", "total_points", "player_count", "event_count"])
       .expression(
         trx
           .selectFrom(playerContributions)
@@ -98,6 +99,8 @@ export const generateTeamRankings = async (
             "team_id",
             sql<number>`rank() over (order by sum(player_contribution) desc)`.as("rank"),
             sql<number>`sum(player_contribution)`.as("total_points"),
+            sql<number>`count(*)`.as("player_count"),
+            sql<number>`sum(events_for_player)`.as("event_count"),
           ])
           .where("player_rn", "<=", config.topPlayersPerTeam)
           .groupBy("team_id"),
