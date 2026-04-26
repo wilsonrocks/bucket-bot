@@ -1,6 +1,6 @@
 import { useGetRankingTypes, useGetTeamRankingsTypeCode } from '@/api/hooks'
 import { FeatureFlag } from '@/components/FeatureFlag'
-import { Group, Select, Table, Text } from '@mantine/core'
+import { Group, ScrollArea, Select, Table, Text } from '@mantine/core'
 import { useMediaQuery } from '@mantine/hooks'
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { Route as TeamRoute } from '@/routes/site/_site-pages/team.$id'
@@ -102,53 +102,76 @@ function RouteComponent() {
           </Tabs.List>
           <Tabs.Panel value="table">
             {rankings.data ? (
-              <Table tabularNums stickyHeader stickyHeaderOffset={headerOffset}>
-                <Table.Thead>
-                  <Table.Tr>
-                    <Table.Th w={1} style={{ whiteSpace: 'nowrap' }}>
-                      Rank
-                    </Table.Th>
-                    <Table.Th w={1} style={{ whiteSpace: 'nowrap' }}>
-                      Change
-                    </Table.Th>
-                    <Table.Th>Team</Table.Th>
-                    <Table.Th>Total Points</Table.Th>
-                    <Table.Th w={1} style={{ whiteSpace: 'nowrap' }}>
-                      Players (max 5)
-                    </Table.Th>
-                    <Table.Th w={1} style={{ whiteSpace: 'nowrap' }}>
-                      Events (max 25)
-                    </Table.Th>
-                  </Table.Tr>
-                </Table.Thead>
-                <Table.Tbody>
-                  {rankings.data.map((team) => (
-                    <Table.Tr key={team.team_id}>
-                      <Table.Td w={1} style={{ whiteSpace: 'nowrap' }}>
-                        {team.rank}
-                      </Table.Td>
-                      <Table.Td w={1} style={{ whiteSpace: 'nowrap' }}>
-                        <RankChange
-                          change={team.rank_change}
-                          isNew={team.new_team}
-                        />
-                      </Table.Td>
-                      <Table.Td>
-                        <Link to={TeamRoute.to} params={{ id: team.team_id }}>
-                          {team.team_name}
-                        </Link>
-                      </Table.Td>
-                      <Table.Td>{team.total_points.toFixed(2)}</Table.Td>
-                      <Table.Td w={1} style={{ whiteSpace: 'nowrap' }}>
-                        {team.player_count ?? '—'}
-                      </Table.Td>
-                      <Table.Td w={1} style={{ whiteSpace: 'nowrap' }}>
-                        {team.event_count ?? '—'}
-                      </Table.Td>
-                    </Table.Tr>
-                  ))}
-                </Table.Tbody>
-              </Table>
+              <div
+                style={{
+                  position: 'relative',
+                  ...(!isMd
+                    ? {
+                        maskImage:
+                          'linear-gradient(to right, black 80%, transparent 100%)',
+                        WebkitMaskImage:
+                          'linear-gradient(to right, black 80%, transparent 100%)',
+                      }
+                    : {}),
+                }}
+              >
+                <ScrollArea type="auto">
+                  <Table
+                    tabularNums
+                    stickyHeader
+                    stickyHeaderOffset={headerOffset}
+                  >
+                    <Table.Thead>
+                      <Table.Tr>
+                        <Table.Th w={1} style={{ whiteSpace: 'nowrap' }}>
+                          Rank
+                        </Table.Th>
+                        <Table.Th w={1} style={{ whiteSpace: 'nowrap' }}>
+                          Change
+                        </Table.Th>
+                        <Table.Th>Team</Table.Th>
+                        <Table.Th>Total Points</Table.Th>
+                        <Table.Th w={1} style={{ whiteSpace: 'nowrap' }}>
+                          Players (top 5)
+                        </Table.Th>
+                        <Table.Th w={1} style={{ whiteSpace: 'nowrap' }}>
+                          Events (max 25)
+                        </Table.Th>
+                      </Table.Tr>
+                    </Table.Thead>
+                    <Table.Tbody>
+                      {rankings.data.map((team) => (
+                        <Table.Tr key={team.team_id}>
+                          <Table.Td w={1} style={{ whiteSpace: 'nowrap' }}>
+                            {team.rank}
+                          </Table.Td>
+                          <Table.Td w={1} style={{ whiteSpace: 'nowrap' }}>
+                            <RankChange
+                              change={team.rank_change}
+                              isNew={team.new_team}
+                            />
+                          </Table.Td>
+                          <Table.Td>
+                            <Link
+                              to={TeamRoute.to}
+                              params={{ id: team.team_id }}
+                            >
+                              {team.team_name}
+                            </Link>
+                          </Table.Td>
+                          <Table.Td>{team.total_points.toFixed(2)}</Table.Td>
+                          <Table.Td w={1} style={{ whiteSpace: 'nowrap' }}>
+                            {team.player_count ?? '—'}
+                          </Table.Td>
+                          <Table.Td w={1} style={{ whiteSpace: 'nowrap' }}>
+                            {team.event_count ?? '—'}
+                          </Table.Td>
+                        </Table.Tr>
+                      ))}
+                    </Table.Tbody>
+                  </Table>
+                </ScrollArea>
+              </div>
             ) : (
               'Loading...'
             )}
