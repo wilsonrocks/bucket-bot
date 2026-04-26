@@ -146,6 +146,8 @@ import {
 import {
   getAllFeatureFlags,
   getAllFeatureFlagsRoute,
+  updateFeatureFlag,
+  updateFeatureFlagRoute,
 } from "./v1-routes/feature-flags.js";
 
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -313,3 +315,4 @@ v1Router.openapi(updatePlayerRoute, updatePlayer);
 v1Router.openapi(playerNameExistsRoute, playerNameExistsHandler);
 v1Router.openapi(postTeamRankingsRoute, postTeamRankingsHandler);
 v1Router.openapi(generateTeamRankingsRoute, generateTeamRankingsHandler);
+v1Router.openapi(updateFeatureFlagRoute, updateFeatureFlag);

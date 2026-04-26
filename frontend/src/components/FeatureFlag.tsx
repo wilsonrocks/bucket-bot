@@ -38,7 +38,7 @@ export function FeatureFlag({
             userSelect: 'none',
           }}
         >
-          ---- preview
+          PREVIEW: {flag}
         </Box>
         {children}
       </Box>

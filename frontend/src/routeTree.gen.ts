@@ -25,6 +25,7 @@ import { Route as SiteSitePagesFactionRankingsRouteImport } from './routes/site/
 import { Route as SiteSitePagesEventsRouteImport } from './routes/site/_site-pages/events'
 import { Route as AppAppPagesVenuesRouteImport } from './routes/app/_app-pages/venues'
 import { Route as AppAppPagesIdentitiesRouteImport } from './routes/app/_app-pages/identities'
+import { Route as AppAppPagesFeatureFlagsRouteImport } from './routes/app/_app-pages/feature-flags'
 import { Route as AppAppPagesBotChatRouteImport } from './routes/app/_app-pages/bot-chat'
 import { Route as AppAppPagesTeamsIndexRouteImport } from './routes/app/_app-pages/teams/index'
 import { Route as AppAppPagesRankingsIndexRouteImport } from './routes/app/_app-pages/rankings/index'
@@ -122,6 +123,11 @@ const AppAppPagesIdentitiesRoute = AppAppPagesIdentitiesRouteImport.update({
   path: '/identities',
   getParentRoute: () => AppRouteRoute,
 } as any)
+const AppAppPagesFeatureFlagsRoute = AppAppPagesFeatureFlagsRouteImport.update({
+  id: '/_app-pages/feature-flags',
+  path: '/feature-flags',
+  getParentRoute: () => AppRouteRoute,
+} as any)
 const AppAppPagesBotChatRoute = AppAppPagesBotChatRouteImport.update({
   id: '/_app-pages/bot-chat',
   path: '/bot-chat',
@@ -204,6 +210,7 @@ export interface FileRoutesByFullPath {
   '/site/login': typeof SiteLoginRoute
   '/site/': typeof SiteIndexRoute
   '/app/bot-chat': typeof AppAppPagesBotChatRoute
+  '/app/feature-flags': typeof AppAppPagesFeatureFlagsRoute
   '/app/identities': typeof AppAppPagesIdentitiesRoute
   '/app/venues': typeof AppAppPagesVenuesRoute
   '/site/events': typeof SiteSitePagesEventsRoute
@@ -235,6 +242,7 @@ export interface FileRoutesByTo {
   '/site/login': typeof SiteLoginRoute
   '/site': typeof SiteIndexRoute
   '/app/bot-chat': typeof AppAppPagesBotChatRoute
+  '/app/feature-flags': typeof AppAppPagesFeatureFlagsRoute
   '/app/identities': typeof AppAppPagesIdentitiesRoute
   '/app/venues': typeof AppAppPagesVenuesRoute
   '/site/events': typeof SiteSitePagesEventsRoute
@@ -268,6 +276,7 @@ export interface FileRoutesById {
   '/site/login': typeof SiteLoginRoute
   '/site/': typeof SiteIndexRoute
   '/app/_app-pages/bot-chat': typeof AppAppPagesBotChatRoute
+  '/app/_app-pages/feature-flags': typeof AppAppPagesFeatureFlagsRoute
   '/app/_app-pages/identities': typeof AppAppPagesIdentitiesRoute
   '/app/_app-pages/venues': typeof AppAppPagesVenuesRoute
   '/site/_site-pages/events': typeof SiteSitePagesEventsRoute
@@ -302,6 +311,7 @@ export interface FileRouteTypes {
     | '/site/login'
     | '/site/'
     | '/app/bot-chat'
+    | '/app/feature-flags'
     | '/app/identities'
     | '/app/venues'
     | '/site/events'
@@ -333,6 +343,7 @@ export interface FileRouteTypes {
     | '/site/login'
     | '/site'
     | '/app/bot-chat'
+    | '/app/feature-flags'
     | '/app/identities'
     | '/app/venues'
     | '/site/events'
@@ -365,6 +376,7 @@ export interface FileRouteTypes {
     | '/site/login'
     | '/site/'
     | '/app/_app-pages/bot-chat'
+    | '/app/_app-pages/feature-flags'
     | '/app/_app-pages/identities'
     | '/app/_app-pages/venues'
     | '/site/_site-pages/events'
@@ -511,6 +523,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAppPagesIdentitiesRouteImport
       parentRoute: typeof AppRouteRoute
     }
+    '/app/_app-pages/feature-flags': {
+      id: '/app/_app-pages/feature-flags'
+      path: '/feature-flags'
+      fullPath: '/app/feature-flags'
+      preLoaderRoute: typeof AppAppPagesFeatureFlagsRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
     '/app/_app-pages/bot-chat': {
       id: '/app/_app-pages/bot-chat'
       path: '/bot-chat'
@@ -614,6 +633,7 @@ declare module '@tanstack/react-router' {
 
 interface AppRouteRouteChildren {
   AppAppPagesBotChatRoute: typeof AppAppPagesBotChatRoute
+  AppAppPagesFeatureFlagsRoute: typeof AppAppPagesFeatureFlagsRoute
   AppAppPagesIdentitiesRoute: typeof AppAppPagesIdentitiesRoute
   AppAppPagesVenuesRoute: typeof AppAppPagesVenuesRoute
   AppAppPagesImportImportBotRoute: typeof AppAppPagesImportImportBotRoute
@@ -630,6 +650,7 @@ interface AppRouteRouteChildren {
 
 const AppRouteRouteChildren: AppRouteRouteChildren = {
   AppAppPagesBotChatRoute: AppAppPagesBotChatRoute,
+  AppAppPagesFeatureFlagsRoute: AppAppPagesFeatureFlagsRoute,
   AppAppPagesIdentitiesRoute: AppAppPagesIdentitiesRoute,
   AppAppPagesVenuesRoute: AppAppPagesVenuesRoute,
   AppAppPagesImportImportBotRoute: AppAppPagesImportImportBotRoute,

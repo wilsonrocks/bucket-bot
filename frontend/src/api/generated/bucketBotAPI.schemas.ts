@@ -474,6 +474,10 @@ export type GetTeamRankingsTypeCode200Item = {
   /** @nullable */
   rank_change: number | null;
   new_team: boolean;
+  /** @nullable */
+  player_count: number | null;
+  /** @nullable */
+  event_count: number | null;
 };
 
 export type GetTeamRankingsTypeCode404 = {
@@ -792,5 +796,22 @@ export type PostPostTeamRankings200 = {
 
 export type PostGenerateTeamRankings200 = {
   success: boolean;
+};
+
+export type PatchFeatureFlagsFlagBody = {
+  is_enabled: boolean;
+};
+
+export type PatchFeatureFlagsFlag200 = {
+  flag: string;
+  is_enabled: boolean;
+};
+
+export type PatchFeatureFlagsFlag403 = {
+  error: string;
+};
+
+export type PatchFeatureFlagsFlag404 = {
+  error: string;
 };
 
