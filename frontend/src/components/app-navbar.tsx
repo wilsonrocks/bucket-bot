@@ -8,6 +8,7 @@ import { Route as RankingsRoute } from '@/routes/app/_app-pages/rankings'
 import { Route as PlayersRoute } from '@/routes/app/_app-pages/players/'
 import { Route as TeamsRoute } from '@/routes/app/_app-pages/teams/'
 import { Route as VenuesRoute } from '@/routes/app/_app-pages/venues'
+import { Route as FeatureFlagsRoute } from '@/routes/app/_app-pages/feature-flags'
 
 import { Badge, Divider, Group, ScrollArea, Stack } from '@mantine/core'
 import { AppNavLink } from './app-nav-link'
@@ -44,6 +45,7 @@ export const AppNavbar = () => {
         {rankingReporter && (
           <>
             <AppNavLink to={VenuesRoute.to} label="Venues" />
+            <AppNavLink to={FeatureFlagsRoute.to} label="Feature Flags" />
             <AppNavLink to={BotChat.to} label="B(UK)et Bot Chat" />
           </>
         )}

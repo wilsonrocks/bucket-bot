@@ -71,6 +71,10 @@ import type {
   GetTourneysPlayerPlayerId400,
   GetUnmappedIdentities200Item,
   GetVenues200Item,
+  PatchFeatureFlagsFlag200,
+  PatchFeatureFlagsFlag403,
+  PatchFeatureFlagsFlag404,
+  PatchFeatureFlagsFlagBody,
   PatchTeamsTeamIdMembersMembershipId200,
   PatchTeamsTeamIdMembersMembershipId403,
   PatchTeamsTeamIdMembersMembershipId404,
@@ -5243,5 +5247,94 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getPostGenerateTeamRankingsMutationOptions(options), queryClient);
+    }
+    export type patchFeatureFlagsFlagResponse200 = {
+  data: PatchFeatureFlagsFlag200
+  status: 200
+}
+
+export type patchFeatureFlagsFlagResponse403 = {
+  data: PatchFeatureFlagsFlag403
+  status: 403
+}
+
+export type patchFeatureFlagsFlagResponse404 = {
+  data: PatchFeatureFlagsFlag404
+  status: 404
+}
+
+export type patchFeatureFlagsFlagResponseSuccess = (patchFeatureFlagsFlagResponse200) & {
+  headers: Headers;
+};
+export type patchFeatureFlagsFlagResponseError = (patchFeatureFlagsFlagResponse403 | patchFeatureFlagsFlagResponse404) & {
+  headers: Headers;
+};
+
+export type patchFeatureFlagsFlagResponse = (patchFeatureFlagsFlagResponseSuccess | patchFeatureFlagsFlagResponseError)
+
+export const getPatchFeatureFlagsFlagUrl = (flag: string,) => {
+
+
+  
+
+  return `/v1/feature-flags/${flag}`
+}
+
+export const patchFeatureFlagsFlag = async (flag: string,
+    patchFeatureFlagsFlagBody: PatchFeatureFlagsFlagBody, options?: RequestInit): Promise<patchFeatureFlagsFlagResponse> => {
+  
+  return customFetch<patchFeatureFlagsFlagResponse>(getPatchFeatureFlagsFlagUrl(flag),
+  {      
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      patchFeatureFlagsFlagBody,)
+  }
+);}
+  
+
+
+
+export const getPatchFeatureFlagsFlagMutationOptions = <TError = PatchFeatureFlagsFlag403 | PatchFeatureFlagsFlag404,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchFeatureFlagsFlag>>, TError,{flag: string;data: PatchFeatureFlagsFlagBody}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof patchFeatureFlagsFlag>>, TError,{flag: string;data: PatchFeatureFlagsFlagBody}, TContext> => {
+
+const mutationKey = ['patchFeatureFlagsFlag'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof patchFeatureFlagsFlag>>, {flag: string;data: PatchFeatureFlagsFlagBody}> = (props) => {
+          const {flag,data} = props ?? {};
+
+          return  patchFeatureFlagsFlag(flag,data,requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PatchFeatureFlagsFlagMutationResult = NonNullable<Awaited<ReturnType<typeof patchFeatureFlagsFlag>>>
+    export type PatchFeatureFlagsFlagMutationBody = PatchFeatureFlagsFlagBody
+    export type PatchFeatureFlagsFlagMutationError = PatchFeatureFlagsFlag403 | PatchFeatureFlagsFlag404
+
+    export const usePatchFeatureFlagsFlag = <TError = PatchFeatureFlagsFlag403 | PatchFeatureFlagsFlag404,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchFeatureFlagsFlag>>, TError,{flag: string;data: PatchFeatureFlagsFlagBody}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof patchFeatureFlagsFlag>>,
+        TError,
+        {flag: string;data: PatchFeatureFlagsFlagBody},
+        TContext
+      > => {
+      return useMutation(getPatchFeatureFlagsFlagMutationOptions(options), queryClient);
     }
     

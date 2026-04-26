@@ -3,6 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { customFetch } from './custom-instance'
 import {
+  getGetFeatureFlagsQueryKey,
   getGetPlayerIdQueryKey,
   getGetPlayerNameExistsPlayerIdQueryKey,
   getGetPlayersQueryKey,
@@ -187,6 +188,20 @@ export const useGetFeatureFlags = (
     ...options,
     query: { ...options?.query, select: (res) => res.data },
   })
+
+export const usePatchFeatureFlag = () => {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ flag, is_enabled }: { flag: string; is_enabled: boolean }) =>
+      customFetch<{ data: { flag: string; is_enabled: boolean } }>(
+        `/v1/feature-flags/${encodeURIComponent(flag)}`,
+        { method: 'PATCH', body: JSON.stringify({ is_enabled }) },
+      ),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: getGetFeatureFlagsQueryKey() })
+    },
+  })
+}
 
 export const useGetHasRole = (
   options?: Parameters<typeof useGetHasRoleGenerated>[0],

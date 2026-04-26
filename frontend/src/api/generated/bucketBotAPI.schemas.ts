@@ -794,3 +794,20 @@ export type PostGenerateTeamRankings200 = {
   success: boolean;
 };
 
+export type PatchFeatureFlagsFlagBody = {
+  is_enabled: boolean;
+};
+
+export type PatchFeatureFlagsFlag200 = {
+  flag: string;
+  is_enabled: boolean;
+};
+
+export type PatchFeatureFlagsFlag403 = {
+  error: string;
+};
+
+export type PatchFeatureFlagsFlag404 = {
+  error: string;
+};
+
