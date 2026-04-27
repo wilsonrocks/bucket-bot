@@ -1,5 +1,5 @@
 
-\restrict 3zR65FjEMOZOf01F0f0U70w9fYqRU71AHPdDFF7RKgS4dTatrNclfE9z6hD7nxP
+\restrict bb3o4JAvW8UF6wAPlcx1msNHUVo3rdYpmbEcAdWIFoVhXmVcRzAVrZYkvt85h4X
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -78,6 +78,11 @@ CREATE TABLE public.faction_snapshot_batch (
     AS integer
     NO MINVALUE
     NO MAXVALUE
+
+CREATE TABLE public.feature_flag (
+    flag text NOT NULL,
+    is_enabled boolean DEFAULT false NOT NULL
+);
 
 CREATE TABLE public.flyway_schema_history (
     installed_rank integer NOT NULL,
@@ -257,6 +262,27 @@ CREATE TABLE public.team (
     NO MINVALUE
     NO MAXVALUE
 
+CREATE TABLE public.team_ranking_snapshot (
+    batch_id integer NOT NULL,
+    team_id integer NOT NULL,
+    rank integer NOT NULL,
+    total_points double precision NOT NULL,
+    rank_change integer,
+    new_team boolean DEFAULT false NOT NULL,
+    player_count integer,
+    event_count integer
+);
+
+CREATE TABLE public.team_ranking_snapshot_batch (
+    id integer NOT NULL,
+    type_code text NOT NULL,
+    created_at timestamp without time zone DEFAULT now() NOT NULL
+);
+
+    AS integer
+    NO MINVALUE
+    NO MAXVALUE
+
 CREATE TABLE public.tier (
     code text NOT NULL,
     name text,
@@ -319,6 +345,9 @@ ALTER TABLE ONLY public.faction_snapshot_batch
 
 ALTER TABLE ONLY public.faction_snapshot
     ADD CONSTRAINT faction_snapshot_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY public.feature_flag
+    ADD CONSTRAINT feature_flag_pkey PRIMARY KEY (flag);
 
 ALTER TABLE ONLY public.flyway_schema_history
     ADD CONSTRAINT flyway_schema_history_pk PRIMARY KEY (installed_rank);
@@ -383,6 +412,12 @@ ALTER TABLE ONLY public.result
 ALTER TABLE ONLY public.team
     ADD CONSTRAINT team_pkey PRIMARY KEY (id);
 
+ALTER TABLE ONLY public.team_ranking_snapshot_batch
+    ADD CONSTRAINT team_ranking_snapshot_batch_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY public.team_ranking_snapshot
+    ADD CONSTRAINT team_ranking_snapshot_pkey PRIMARY KEY (batch_id, team_id);
+
 ALTER TABLE ONLY public.tier
     ADD CONSTRAINT tier_pkey PRIMARY KEY (code);
 
@@ -408,6 +443,46 @@ ALTER TABLE ONLY public.venue
     ADD CONSTRAINT venue_pkey PRIMARY KEY (id);
 
 CREATE INDEX flyway_schema_history_s_idx ON public.flyway_schema_history USING btree (success);
+
+CREATE INDEX idx_discord_user_display_name_trgm ON public.discord_user USING gin (discord_display_name public.gin_trgm_ops);
+
+CREATE INDEX idx_discord_user_nickname_trgm ON public.discord_user USING gin (discord_nickname public.gin_trgm_ops);
+
+CREATE INDEX idx_discord_user_username_trgm ON public.discord_user USING gin (discord_username public.gin_trgm_ops);
+
+CREATE INDEX idx_membership_player_id ON public.membership USING btree (player_id);
+
+CREATE INDEX idx_membership_team_id ON public.membership USING btree (team_id);
+
+CREATE INDEX idx_painting_category_tourney_id ON public.painting_category USING btree (tourney_id);
+
+CREATE INDEX idx_painting_winner_category_id ON public.painting_winner USING btree (category_id);
+
+CREATE INDEX idx_painting_winner_player_id ON public.painting_winner USING btree (player_id);
+
+CREATE INDEX idx_player_identity_provider_external ON public.player_identity USING btree (identity_provider_id, external_id);
+
+CREATE INDEX idx_ranking_snapshot_batch_type_code ON public.ranking_snapshot_batch USING btree (type_code);
+
+CREATE INDEX idx_ranking_snapshot_event_player_id ON public.ranking_snapshot_event USING btree (player_id);
+
+CREATE INDEX idx_ranking_snapshot_event_tourney_id ON public.ranking_snapshot_event USING btree (tourney_id);
+
+CREATE INDEX idx_result_faction_code ON public.result USING btree (faction_code);
+
+CREATE INDEX idx_result_player_identity_id ON public.result USING btree (player_identity_id);
+
+CREATE INDEX idx_result_tourney_id ON public.result USING btree (tourney_id);
+
+CREATE INDEX idx_team_ranking_snapshot_batch_type_code ON public.team_ranking_snapshot_batch USING btree (type_code);
+
+CREATE INDEX idx_team_venue_id ON public.team USING btree (venue_id);
+
+CREATE INDEX idx_tourney_bot_id ON public.tourney USING btree (bot_id);
+
+CREATE INDEX idx_tourney_venue_id ON public.tourney USING btree (venue_id);
+
+CREATE INDEX idx_venue_region_id ON public.venue USING btree (region_id);
 
 CREATE UNIQUE INDEX unique_display_order_true ON public.ranking_snapshot_type USING btree (display_order) WHERE (display = true);
 
@@ -474,6 +549,12 @@ ALTER TABLE ONLY public.result
 ALTER TABLE ONLY public.result
     ADD CONSTRAINT result_tourney_id_fkey FOREIGN KEY (tourney_id) REFERENCES public.tourney(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY public.team_ranking_snapshot
+    ADD CONSTRAINT team_ranking_snapshot_batch_id_fkey FOREIGN KEY (batch_id) REFERENCES public.team_ranking_snapshot_batch(id);
+
+ALTER TABLE ONLY public.team_ranking_snapshot
+    ADD CONSTRAINT team_ranking_snapshot_team_id_fkey FOREIGN KEY (team_id) REFERENCES public.team(id);
+
 ALTER TABLE ONLY public.team
     ADD CONSTRAINT team_venue_id_fkey FOREIGN KEY (venue_id) REFERENCES public.venue(id);
 
@@ -486,5 +567,5 @@ ALTER TABLE ONLY public.tourney
 ALTER TABLE ONLY public.venue
     ADD CONSTRAINT venue_region_id_fkey FOREIGN KEY (region_id) REFERENCES public.region(id);
 
-\unrestrict 3zR65FjEMOZOf01F0f0U70w9fYqRU71AHPdDFF7RKgS4dTatrNclfE9z6hD7nxP
+\unrestrict bb3o4JAvW8UF6wAPlcx1msNHUVo3rdYpmbEcAdWIFoVhXmVcRzAVrZYkvt85h4X
 
