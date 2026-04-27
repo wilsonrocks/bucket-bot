@@ -1,6 +1,6 @@
-import { usePostLongshanksEventId } from '@/api/hooks'
+import { usePostLongshanksEventId, useGetTiers } from '@/api/hooks'
 import { RequireRankingReporter } from '@/components/RequireRankingReporter'
-import { Button, Loader, TextInput } from '@mantine/core'
+import { Button, Loader, Select, TextInput } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { createFileRoute } from '@tanstack/react-router'
 import { Route as EventIdRoute } from '../events.$id.edit.tsx'
@@ -13,8 +13,9 @@ export const Route = createFileRoute(
 })
 
 function RouteComponent() {
+  const tiers = useGetTiers()
   const form = useForm({
-    initialValues: { longshanksIdOrUrl: '' },
+    initialValues: { longshanksIdOrUrl: '', tierCode: 'EVENT' },
     validate: {
       longshanksIdOrUrl: (value) => {
         const match = value.match(/([0-9]+)/)
@@ -28,6 +29,7 @@ function RouteComponent() {
       longshanksId: Number(
         values.longshanksIdOrUrl.match(/([0-9]+)/)?.[1] ?? NaN,
       ),
+      tierCode: values.tierCode,
     }),
   })
   const navigateToEventPage = EventIdRoute.useNavigate()
@@ -37,14 +39,17 @@ function RouteComponent() {
     <div>
       <form
         onSubmit={form.onSubmit((values) => {
-          newLongshanksEventMutation.mutate({ id: String(values.longshanksId) }, {
-            onSuccess: (response) => {
-              navigateToEventPage({ params: { id: (response.data as { id: number }).id }, search: { tab: undefined } })
+          newLongshanksEventMutation.mutate(
+            { id: String(values.longshanksId), data: { tierCode: values.tierCode } },
+            {
+              onSuccess: (response) => {
+                navigateToEventPage({ params: { id: (response.data as { id: number }).id }, search: { tab: undefined } })
+              },
+              onError: (error) => {
+                console.error(error)
+              },
             },
-            onError: (error) => {
-              console.error(error)
-            },
-          })
+          )
         })}
       >
         <TextInput
@@ -52,6 +57,15 @@ function RouteComponent() {
           label="Longshanks ID or URL"
           placeholder="Enter Longshanks ID or URL"
           {...form.getInputProps('longshanksIdOrUrl')}
+        />
+        <Select
+          mb="md"
+          label="Tier"
+          data={(tiers.data ?? []).map((tier) => ({
+            value: tier.code,
+            label: tier.name,
+          }))}
+          {...form.getInputProps('tierCode')}
         />
         <Button type="submit" disabled={newLongshanksEventMutation.isPending}>
           Create event

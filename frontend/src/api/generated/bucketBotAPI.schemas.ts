@@ -489,6 +489,10 @@ export type GetFeatureFlags200Item = {
   is_enabled: boolean;
 };
 
+export type PostLongshanksEventIdBody = {
+  tierCode?: string;
+};
+
 export type PostLongshanksEventId200 = {[key: string]: unknown | null};
 
 export type PostLongshanksEventId400 = {
@@ -497,6 +501,10 @@ export type PostLongshanksEventId400 = {
 
 export type PostLongshanksEventId502 = {
   error: string;
+};
+
+export type PostBotEventIdBody = {
+  tierCode?: string;
 };
 
 export type PostBotEventId200 = {

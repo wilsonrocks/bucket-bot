@@ -1,6 +1,6 @@
 import { Link } from '@/components/link'
-import { useGetTourney as useGetAllTourneys } from '@/api/hooks'
-import { Anchor, Table } from '@mantine/core'
+import { useGetTourney as useGetAllTourneys, useGetTiers } from '@/api/hooks'
+import { Anchor, Table, Text } from '@mantine/core'
 import { createFileRoute } from '@tanstack/react-router'
 import { format, parseISO } from 'date-fns'
 import { Route as EventIdRoute } from './event.$id'
@@ -12,21 +12,28 @@ export const Route = createFileRoute('/site/_site-pages/events')({
 
 function RouteComponent() {
   const tourneys = useGetAllTourneys()
+  const tiers = useGetTiers()
+  const tierNameByCode = new Map(
+    (tiers.data ?? []).map((t) => [t.code, t.name]),
+  )
   return (
     <div>
       {tourneys.data ? (
         <Table
           data={{
             body: tourneys.data.map(
-              ({ id, name, date, players }) => [
+              ({ id, name, date, players, tier_code }) => [
                 <Anchor component={Link} to={EventIdRoute.to} params={{ id }}>
                   {name}
                 </Anchor>,
                 date ? format(parseISO(date), 'dd MMM yyyy') : '',
                 players,
+                tier_code && tier_code !== 'EVENT'
+                  ? (tierNameByCode.get(tier_code) ?? tier_code)
+                  : <Text c="dimmed">—</Text>,
               ],
             ),
-            head: ['Name', 'Date', 'Players'],
+            head: ['Name', 'Date', 'Players', 'Tier'],
           }}
         />
       ) : (

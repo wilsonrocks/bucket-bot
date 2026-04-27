@@ -87,6 +87,7 @@ import type {
   PostBotEventId200,
   PostBotEventId400,
   PostBotEventId502,
+  PostBotEventIdBody,
   PostCreateTeam201,
   PostCreateTeam403,
   PostCreateTeamBody,
@@ -101,6 +102,7 @@ import type {
   PostLongshanksEventId200,
   PostLongshanksEventId400,
   PostLongshanksEventId502,
+  PostLongshanksEventIdBody,
   PostMatchPlayerToDiscordUser200,
   PostMatchPlayerToDiscordUser404,
   PostMatchPlayerToDiscordUserBody,
@@ -3033,14 +3035,16 @@ export const getPostLongshanksEventIdUrl = (id: string,) => {
   return `/v1/longshanks-event/${id}`
 }
 
-export const postLongshanksEventId = async (id: string, options?: RequestInit): Promise<postLongshanksEventIdResponse> => {
+export const postLongshanksEventId = async (id: string,
+    postLongshanksEventIdBody: PostLongshanksEventIdBody, options?: RequestInit): Promise<postLongshanksEventIdResponse> => {
   
   return customFetch<postLongshanksEventIdResponse>(getPostLongshanksEventIdUrl(id),
   {      
     ...options,
-    method: 'POST'
-    
-    
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      postLongshanksEventIdBody,)
   }
 );}
   
@@ -3048,8 +3052,8 @@ export const postLongshanksEventId = async (id: string, options?: RequestInit): 
 
 
 export const getPostLongshanksEventIdMutationOptions = <TError = PostLongshanksEventId400 | PostLongshanksEventId502,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postLongshanksEventId>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof postLongshanksEventId>>, TError,{id: string}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postLongshanksEventId>>, TError,{id: string;data: PostLongshanksEventIdBody}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postLongshanksEventId>>, TError,{id: string;data: PostLongshanksEventIdBody}, TContext> => {
 
 const mutationKey = ['postLongshanksEventId'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
@@ -3061,10 +3065,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postLongshanksEventId>>, {id: string}> = (props) => {
-          const {id} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postLongshanksEventId>>, {id: string;data: PostLongshanksEventIdBody}> = (props) => {
+          const {id,data} = props ?? {};
 
-          return  postLongshanksEventId(id,requestOptions)
+          return  postLongshanksEventId(id,data,requestOptions)
         }
 
 
@@ -3075,15 +3079,15 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type PostLongshanksEventIdMutationResult = NonNullable<Awaited<ReturnType<typeof postLongshanksEventId>>>
-    
+    export type PostLongshanksEventIdMutationBody = PostLongshanksEventIdBody
     export type PostLongshanksEventIdMutationError = PostLongshanksEventId400 | PostLongshanksEventId502
 
     export const usePostLongshanksEventId = <TError = PostLongshanksEventId400 | PostLongshanksEventId502,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postLongshanksEventId>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postLongshanksEventId>>, TError,{id: string;data: PostLongshanksEventIdBody}, TContext>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof postLongshanksEventId>>,
         TError,
-        {id: string},
+        {id: string;data: PostLongshanksEventIdBody},
         TContext
       > => {
       return useMutation(getPostLongshanksEventIdMutationOptions(options), queryClient);
@@ -3120,14 +3124,16 @@ export const getPostBotEventIdUrl = (id: string,) => {
   return `/v1/bot-event/${id}`
 }
 
-export const postBotEventId = async (id: string, options?: RequestInit): Promise<postBotEventIdResponse> => {
+export const postBotEventId = async (id: string,
+    postBotEventIdBody: PostBotEventIdBody, options?: RequestInit): Promise<postBotEventIdResponse> => {
   
   return customFetch<postBotEventIdResponse>(getPostBotEventIdUrl(id),
   {      
     ...options,
-    method: 'POST'
-    
-    
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      postBotEventIdBody,)
   }
 );}
   
@@ -3135,8 +3141,8 @@ export const postBotEventId = async (id: string, options?: RequestInit): Promise
 
 
 export const getPostBotEventIdMutationOptions = <TError = PostBotEventId400 | PostBotEventId502,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postBotEventId>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof postBotEventId>>, TError,{id: string}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postBotEventId>>, TError,{id: string;data: PostBotEventIdBody}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postBotEventId>>, TError,{id: string;data: PostBotEventIdBody}, TContext> => {
 
 const mutationKey = ['postBotEventId'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
@@ -3148,10 +3154,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postBotEventId>>, {id: string}> = (props) => {
-          const {id} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postBotEventId>>, {id: string;data: PostBotEventIdBody}> = (props) => {
+          const {id,data} = props ?? {};
 
-          return  postBotEventId(id,requestOptions)
+          return  postBotEventId(id,data,requestOptions)
         }
 
 
@@ -3162,15 +3168,15 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type PostBotEventIdMutationResult = NonNullable<Awaited<ReturnType<typeof postBotEventId>>>
-    
+    export type PostBotEventIdMutationBody = PostBotEventIdBody
     export type PostBotEventIdMutationError = PostBotEventId400 | PostBotEventId502
 
     export const usePostBotEventId = <TError = PostBotEventId400 | PostBotEventId502,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postBotEventId>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postBotEventId>>, TError,{id: string;data: PostBotEventIdBody}, TContext>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof postBotEventId>>,
         TError,
-        {id: string},
+        {id: string;data: PostBotEventIdBody},
         TContext
       > => {
       return useMutation(getPostBotEventIdMutationOptions(options), queryClient);
