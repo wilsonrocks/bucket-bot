@@ -19,6 +19,13 @@ export const newLongshanksEventRoute = createRoute({
   path: "/longshanks-event/{id}",
   request: {
     params: z.object({ id: z.string() }),
+    body: {
+      content: {
+        "application/json": {
+          schema: z.object({ tierCode: z.string().optional() }),
+        },
+      },
+    },
   },
   responses: {
     200: {
@@ -38,6 +45,7 @@ export const newLongshanksEventRoute = createRoute({
 
 export const newLongshanksEvent: RouteHandler<typeof newLongshanksEventRoute, AppEnv> = async (c) => {
   const { id: longshanksEventId } = c.req.valid("param");
+  const { tierCode } = c.req.valid("json");
 
   const [players, otherData] = await Promise.all([
     (async () => {
@@ -89,6 +97,7 @@ export const newLongshanksEvent: RouteHandler<typeof newLongshanksEventRoute, Ap
         venue: parsedOtherData.location,
         date: new Date(parsedOtherData.date),
         number_of_players: players.length,
+        ...(tierCode ? { tier_code: tierCode } : {}),
       })
       .returning("id")
       .executeTakeFirstOrThrow();

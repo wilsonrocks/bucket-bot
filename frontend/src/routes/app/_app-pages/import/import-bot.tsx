@@ -1,6 +1,6 @@
-import { usePostBotEventId } from '@/api/hooks'
+import { usePostBotEventId, useGetTiers } from '@/api/hooks'
 import { RequireRankingReporter } from '@/components/RequireRankingReporter'
-import { Button, Loader, TextInput } from '@mantine/core'
+import { Button, Loader, Select, TextInput } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { createFileRoute } from '@tanstack/react-router'
 import { Route as EventIdRoute } from '../events.$id.edit.tsx'
@@ -18,8 +18,9 @@ function extractBotId(input: string): string | null {
 }
 
 function RouteComponent() {
+  const tiers = useGetTiers()
   const form = useForm({
-    initialValues: { botIdOrUrl: '' },
+    initialValues: { botIdOrUrl: '', tierCode: 'EVENT' },
     validate: {
       botIdOrUrl: (value) => {
         if (!extractBotId(value)) {
@@ -30,6 +31,7 @@ function RouteComponent() {
     },
     transformValues: (values) => ({
       id: extractBotId(values.botIdOrUrl) ?? '',
+      tierCode: values.tierCode,
     }),
   })
   const navigateToEventPage = EventIdRoute.useNavigate()
@@ -39,14 +41,17 @@ function RouteComponent() {
     <div>
       <form
         onSubmit={form.onSubmit((values) => {
-          newBotEventMutation.mutate({ id: values.id }, {
-            onSuccess: (response) => {
-              navigateToEventPage({ params: { id: (response.data as { id: number }).id }, search: { tab: undefined } })
+          newBotEventMutation.mutate(
+            { id: values.id, data: { tierCode: values.tierCode } },
+            {
+              onSuccess: (response) => {
+                navigateToEventPage({ params: { id: (response.data as { id: number }).id }, search: { tab: undefined } })
+              },
+              onError: (error) => {
+                console.error(error)
+              },
             },
-            onError: (error) => {
-              console.error(error)
-            },
-          })
+          )
         })}
       >
         <TextInput
@@ -54,6 +59,15 @@ function RouteComponent() {
           label="BOT Event ID or URL"
           placeholder="Enter BOT event ID or URL"
           {...form.getInputProps('botIdOrUrl')}
+        />
+        <Select
+          mb="md"
+          label="Tier"
+          data={(tiers.data ?? []).map((tier) => ({
+            value: tier.code,
+            label: tier.name,
+          }))}
+          {...form.getInputProps('tierCode')}
         />
         <Button type="submit" disabled={newBotEventMutation.isPending}>
           Create event

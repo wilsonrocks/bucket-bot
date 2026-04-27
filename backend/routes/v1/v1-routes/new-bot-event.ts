@@ -29,6 +29,13 @@ export const newBotEventRoute = createRoute({
   path: "/bot-event/{id}",
   request: {
     params: z.object({ id: z.string() }),
+    body: {
+      content: {
+        "application/json": {
+          schema: z.object({ tierCode: z.string().optional() }),
+        },
+      },
+    },
   },
   responses: {
     200: {
@@ -48,6 +55,7 @@ export const newBotEventRoute = createRoute({
 
 export const newBotEventHandler: RouteHandler<typeof newBotEventRoute, AppEnv> = async (c) => {
   const { id: botEventId } = c.req.valid("param");
+  const { tierCode } = c.req.valid("json");
 
   const apiUrl = `https://bag-o-tools.web.app/api/event/${botEventId}`;
   const response = await fetch(apiUrl);
@@ -82,6 +90,7 @@ export const newBotEventHandler: RouteHandler<typeof newBotEventRoute, AppEnv> =
         date: new Date(apiData.date),
         number_of_players: apiData.league.length,
         rounds: apiData.rounds,
+        ...(tierCode ? { tier_code: tierCode } : {}),
       })
       .returning("id")
       .executeTakeFirstOrThrow();
