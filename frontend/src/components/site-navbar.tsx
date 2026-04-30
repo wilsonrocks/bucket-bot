@@ -1,4 +1,3 @@
-import { FeatureFlag } from './FeatureFlag'
 import { Route as EventsSiteRoute } from '@/routes/site/_site-pages/events'
 import { Route as FactionRankingsRoute } from '@/routes/site/_site-pages/faction-rankings'
 import { Route as HowItWorksRoute } from '@/routes/site/_site-pages/how-it-works'
@@ -20,9 +19,7 @@ export const SiteNavbar = () => {
         <AppNavLink to={RankingsRoute.to} label="Rankings" />
         <AppNavLink to={FactionRankingsRoute.to} label="Factions" />
         <AppNavLink to={TeamsRoute.to} label="Teams" />
-        <FeatureFlag flag="TEAM_STATS">
-          <AppNavLink to={TeamRankingsRoute.to} label="Team Rankings" />
-        </FeatureFlag>
+        <AppNavLink to={TeamRankingsRoute.to} label="Team Rankings" />
         <AppNavLink to={RegionsRoute.to} label="Regions" />
         <AppNavLink to={HowItWorksRoute.to} label="How It Works" />
         <Divider />
