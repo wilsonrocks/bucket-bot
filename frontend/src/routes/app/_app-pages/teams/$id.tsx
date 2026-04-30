@@ -9,18 +9,16 @@ import {
   usePutTeamsId,
 } from '@/api/hooks'
 import { usePermissions } from '@/hooks/usePermissions'
+import { ImageUploader } from '@/components/ImageUploader'
 import {
   Alert,
   Badge,
   Box,
   Button,
-  Center,
   ColorInput,
   Grid,
   Group,
-  Image,
   Modal,
-  Overlay,
   Paper,
   Select,
   Table,
@@ -30,10 +28,10 @@ import {
   Title,
 } from '@mantine/core'
 import { useForm } from '@mantine/form'
-import { useDisclosure, useHover } from '@mantine/hooks'
+import { useDisclosure } from '@mantine/hooks'
 import { IconAlertCircle } from '@tabler/icons-react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import z from 'zod'
 import { Route as TeamsRoute } from './index'
 
@@ -112,8 +110,6 @@ function RouteComponent() {
   )
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
-  const { hovered: imageHovered, ref: imageHoverRef } = useHover()
-  const imageInputRef = useRef<HTMLInputElement>(null)
 
   if (!team) return <div>Loading...</div>
 
@@ -185,49 +181,13 @@ function RouteComponent() {
               />
             </Grid.Col>
             <Grid.Col span={{ base: 12, xs: 4 }}>
-              <Text size="sm" fw={500} mb={4}>
-                Team Image
-              </Text>
-              <Box
-                ref={imageHoverRef}
-                w={120}
-                h={120}
-                style={{
-                  position: 'relative',
-                  cursor: 'pointer',
-                  borderRadius: 'var(--mantine-radius-sm)',
-                  border: '1px solid var(--mantine-color-default-border)',
-                  overflow: 'hidden',
-                }}
-                onClick={() => imageInputRef.current?.click()}
-              >
-                {imagePreview ? (
-                  <Image src={imagePreview} w={120} h={120} fit="contain" />
-                ) : (
-                  <Center h={120} c="dimmed">
-                    <Text size="xs">Click to upload</Text>
-                  </Center>
-                )}
-                {imageHovered && (
-                  <Overlay color="#000" backgroundOpacity={0.5} radius="sm">
-                    <Center h="100%">
-                      <Text size="xs" c="white">
-                        {imagePreview ? 'Change' : 'Upload'}
-                      </Text>
-                    </Center>
-                  </Overlay>
-                )}
-              </Box>
-              <input
-                ref={imageInputRef}
-                type="file"
-                accept="image/png,image/jpeg,image/webp"
-                style={{ display: 'none' }}
-                onChange={(e) => {
-                  const file = e.target.files?.[0] ?? null
+              <ImageUploader
+                label="Team Image"
+                value={editForm.values.image_key}
+                preview={imagePreview}
+                onChange={(file) => {
                   setImageFile(file)
-                  if (file) setImagePreview(URL.createObjectURL(file))
-                  e.target.value = ''
+                  setImagePreview(URL.createObjectURL(file))
                 }}
               />
             </Grid.Col>

@@ -15,6 +15,7 @@
   "dependencies": {
     "@mantine/charts": "^8.3.10",
     "@mantine/core": "^8.3.10",
+    "@mantine/dropzone": "^8.3.18",
     "@mantine/form": "^8.3.10",
     "@mantine/hooks": "^8.3.10",
     "@mantine/modals": "^8.3.10",
