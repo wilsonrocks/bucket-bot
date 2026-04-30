@@ -1,6 +1,6 @@
 import { useGetFeatureFlags, usePatchFeatureFlag } from '@/api/hooks'
 import { RequireRankingReporter } from '@/components/RequireRankingReporter'
-import { Switch, Table } from '@mantine/core'
+import { Switch, Table, Text } from '@mantine/core'
 import { modals } from '@mantine/modals'
 import { createFileRoute } from '@tanstack/react-router'
 
@@ -16,6 +16,10 @@ export const Route = createFileRoute('/app/_app-pages/feature-flags')({
 function RouteComponent() {
   const { data: flags } = useGetFeatureFlags()
   const patchFlag = usePatchFeatureFlag()
+
+  if (flags && flags.length === 0) {
+    return <Text c="dimmed">No feature flags defined.</Text>
+  }
 
   return (
     <Table>

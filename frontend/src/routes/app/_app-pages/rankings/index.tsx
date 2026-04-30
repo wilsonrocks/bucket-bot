@@ -1,4 +1,3 @@
-import { FeatureFlag } from '@/components/FeatureFlag'
 import { RequireRankingReporter } from '@/components/RequireRankingReporter'
 import { createFileRoute } from '@tanstack/react-router'
 
@@ -256,71 +255,69 @@ function RouteComponent() {
           </Button>
         </Grid.Col>
 
-        <FeatureFlag flag="TEAM_STATS">
-          <Grid.Col span={{ base: 12 }}>
-            <Title order={4} mb="md">
-              Team Rankings
-            </Title>
-            <Text mb="md">
-              Team Rankings are generated independently. A team's score is the
-              sum of its top 5 players' contributions, where each player's
-              contribution is based on their results while they were a member of
-              that team.
-            </Text>
-            <Text mb="md">
-              Team rankings are posted to a dedicated Discord channel.
-            </Text>
-          </Grid.Col>
-          <Grid.Col span={{ base: 12, sm: 6 }}>
-            <Button
-              disabled={generateTeamRankings.isPending}
-              onClick={() => {
-                modals.openConfirmModal({
-                  onConfirm: () => {
-                    generateTeamRankings.mutate()
-                  },
-                  title: 'Generate a Team Ranking Snapshot',
-                  children: (
-                    <div>
-                      Are you sure you want to generate a new team rankings
-                      snapshot? You probably only need to do this after generating
-                      player rankings.
-                    </div>
-                  ),
-                  labels: { confirm: 'Generate', cancel: 'Cancel' },
-                })
-              }}
-            >
-              Generate a Team Ranking Snapshot
-            </Button>
-          </Grid.Col>
-          <Grid.Col span={{ base: 12, sm: 6 }}>
-            <Button
-              onClick={() => {
-                modals.openConfirmModal({
-                  title: 'Post Team Rankings to Discord',
-                  children: (
-                    <div>
-                      <Text>
-                        Are you sure you want to post team rankings to Discord?
-                      </Text>
-                      <Text>
-                        This posts the current ROLLING_YEAR team rankings to the
-                        team rankings channel.
-                      </Text>
-                    </div>
-                  ),
-                  onConfirm: () => {
-                    postTeamRankingsToDiscord.mutate()
-                  },
-                  labels: { confirm: 'Make it so', cancel: 'Wait...' },
-                })
-              }}
-            >
-              Post Team Rankings to Discord
-            </Button>
-          </Grid.Col>
-        </FeatureFlag>
+        <Grid.Col span={{ base: 12 }}>
+          <Title order={4} mb="md">
+            Team Rankings
+          </Title>
+          <Text mb="md">
+            Team Rankings are generated independently. A team's score is the
+            sum of its top 5 players' contributions, where each player's
+            contribution is based on their results while they were a member of
+            that team.
+          </Text>
+          <Text mb="md">
+            Team rankings are posted to a dedicated Discord channel.
+          </Text>
+        </Grid.Col>
+        <Grid.Col span={{ base: 12, sm: 6 }}>
+          <Button
+            disabled={generateTeamRankings.isPending}
+            onClick={() => {
+              modals.openConfirmModal({
+                onConfirm: () => {
+                  generateTeamRankings.mutate()
+                },
+                title: 'Generate a Team Ranking Snapshot',
+                children: (
+                  <div>
+                    Are you sure you want to generate a new team rankings
+                    snapshot? You probably only need to do this after generating
+                    player rankings.
+                  </div>
+                ),
+                labels: { confirm: 'Generate', cancel: 'Cancel' },
+              })
+            }}
+          >
+            Generate a Team Ranking Snapshot
+          </Button>
+        </Grid.Col>
+        <Grid.Col span={{ base: 12, sm: 6 }}>
+          <Button
+            onClick={() => {
+              modals.openConfirmModal({
+                title: 'Post Team Rankings to Discord',
+                children: (
+                  <div>
+                    <Text>
+                      Are you sure you want to post team rankings to Discord?
+                    </Text>
+                    <Text>
+                      This posts the current ROLLING_YEAR team rankings to the
+                      team rankings channel.
+                    </Text>
+                  </div>
+                ),
+                onConfirm: () => {
+                  postTeamRankingsToDiscord.mutate()
+                },
+                labels: { confirm: 'Make it so', cancel: 'Wait...' },
+              })
+            }}
+          >
+            Post Team Rankings to Discord
+          </Button>
+        </Grid.Col>
 
         <Grid.Col span={{ base: 12 }}>
           <Title order={4} mb="md">
