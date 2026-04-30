@@ -124,12 +124,24 @@ export const detailTourney: RouteHandler<
 
   const paintingCategoriesPromise = db
     .selectFrom("painting_category")
-    .innerJoin(
-      "painting_winner",
-      "painting_category.id",
-      "painting_winner.category_id",
-    )
-    .where("tourney_id", "=", Number(id))
+    .leftJoin("painting_winner", "painting_category.id", "painting_winner.category_id")
+    .leftJoin("player_identity", "painting_winner.player_identity_id" as any, "player_identity.id")
+    .leftJoin("player", "player_identity.player_id", "player.id")
+    .where("painting_category.tourney_id", "=", Number(id))
+    .select([
+      "painting_category.id as categoryId",
+      "painting_category.name as categoryName",
+      "painting_winner.id as winnerId",
+      "painting_winner.player_identity_id as playerIdentityId" as any,
+      sql<string>`coalesce(${sql.ref("player.name")}, ${sql.ref("player_identity.provider_name")})`.as("playerName"),
+      "player.id as playerId",
+      "painting_winner.position",
+      "painting_winner.model",
+      "painting_winner.image_key as imageKey" as any,
+      "painting_winner.description as winnerDescription" as any,
+    ])
+    .orderBy("painting_category.id")
+    .orderBy("painting_winner.position")
     .execute();
 
   const [players, tourney, paintingCategories] = await Promise.all([
@@ -138,18 +150,25 @@ export const detailTourney: RouteHandler<
     paintingCategoriesPromise,
   ]);
 
-  const formattedPaintingCategories = paintingCategories.reduce(
+  const formattedPaintingCategories = (paintingCategories as any[]).reduce(
     (acc: any[], row: any) => {
-      let category = acc.find((cat) => cat.name === row.name);
+      let category = acc.find((cat: any) => cat.id === row.categoryId);
       if (!category) {
-        category = { name: row.name, winners: [] };
+        category = { id: row.categoryId, name: row.categoryName, winners: [] };
         acc.push(category);
       }
-      category.winners.push({
-        player_id: row.player_id,
-        position: row.position,
-        model: row.model,
-      });
+      if (row.winnerId !== null) {
+        category.winners.push({
+          id: row.winnerId,
+          playerIdentityId: row.playerIdentityId,
+          playerName: row.playerName,
+          playerId: row.playerId,
+          position: row.position,
+          model: row.model,
+          imageKey: row.imageKey,
+          description: row.winnerDescription,
+        });
+      }
       return acc;
     },
     [],
@@ -233,6 +252,17 @@ const TourneyUpdateBodySchema = z.object({
   rounds: z.number().int().min(1),
   days: z.number().int().min(1),
   tierCode: z.string(),
+  paintingCategories: z.array(z.object({
+    id: z.number().optional(),
+    name: z.string(),
+    winners: z.array(z.object({
+      playerIdentityId: z.number(),
+      position: z.number(),
+      model: z.string().optional().nullable(),
+      description: z.string().optional().nullable(),
+      imageKey: z.string().optional().nullable(),
+    }))
+  })).optional()
 });
 
 export const updateTourneyRoute = createRoute({
@@ -275,6 +305,66 @@ export const updateTourney: RouteHandler<
         })
         .where("id", "=", body.id)
         .execute();
+
+      if (body.paintingCategories !== undefined) {
+        // Get existing category IDs for this tourney
+        const existingCategories = await trx
+          .selectFrom("painting_category")
+          .where("tourney_id", "=", body.id)
+          .select("id")
+          .execute();
+
+        const incomingIds = body.paintingCategories
+          .filter(c => c.id !== undefined)
+          .map(c => c.id!);
+
+        // Delete categories not in the incoming payload
+        const toDelete = existingCategories
+          .map(c => c.id)
+          .filter(id => !incomingIds.includes(id));
+
+        if (toDelete.length > 0) {
+          await trx.deleteFrom("painting_category")
+            .where("id", "in", toDelete)
+            .execute();
+        }
+
+        for (const cat of body.paintingCategories) {
+          let categoryId: number;
+
+          if (cat.id) {
+            await trx.updateTable("painting_category")
+              .set({ name: cat.name })
+              .where("id", "=", cat.id)
+              .execute();
+            categoryId = cat.id;
+          } else {
+            const inserted = await trx.insertInto("painting_category")
+              .values({ tourney_id: body.id, name: cat.name })
+              .returning("id")
+              .executeTakeFirstOrThrow();
+            categoryId = inserted.id;
+          }
+
+          // Replace all winners for this category
+          await trx.deleteFrom("painting_winner")
+            .where("category_id", "=", categoryId)
+            .execute();
+
+          for (const winner of cat.winners) {
+            await trx.insertInto("painting_winner")
+              .values({
+                category_id: categoryId,
+                player_identity_id: winner.playerIdentityId,
+                position: winner.position,
+                model: winner.model ?? null,
+                description: winner.description ?? null,
+                image_key: winner.imageKey ?? null,
+              } as any)
+              .execute();
+          }
+        }
+      }
     });
 
   return c.json({ message: "success" }, 200);
@@ -481,6 +571,56 @@ export const postEventSummaryToDiscord: RouteHandler<
     content: `***BEEP BOOP!*** ${MENTION_EVENT_ENTHUSIAST}\n`,
     embeds: [introEmbed, ...factionEmbeds, communityEmbed],
   });
+
+  // Post painting embeds if any
+  const paintingData = await db
+    .selectFrom("painting_category")
+    .leftJoin("painting_winner", "painting_category.id", "painting_winner.category_id")
+    .leftJoin("player_identity", "painting_winner.player_identity_id" as any, "player_identity.id")
+    .leftJoin("player", "player_identity.player_id", "player.id")
+    .where("painting_category.tourney_id", "=", tourneyIdNum)
+    .select([
+      "painting_category.id as categoryId",
+      "painting_category.name as categoryName",
+      "painting_winner.position",
+      "painting_winner.model",
+      "painting_winner.image_key as imageKey" as any,
+      "painting_winner.description as winnerDescription" as any,
+      sql<string>`coalesce(${sql.ref("player.name")}, ${sql.ref("player_identity.provider_name")})`.as("playerName"),
+    ])
+    .orderBy("painting_category.id")
+    .orderBy("painting_winner.position")
+    .execute();
+
+  if (paintingData.length > 0) {
+    // Group into categories with winners
+    const categories = (paintingData as any[]).reduce((acc: any[], row: any) => {
+      if (!row.position) return acc; // skip categories with no winners
+      let cat = acc.find((c: any) => c.id === row.categoryId);
+      if (!cat) {
+        cat = { id: row.categoryId, name: row.categoryName, winners: [] };
+        acc.push(cat);
+      }
+      cat.winners.push({
+        playerName: row.playerName,
+        position: row.position,
+        model: row.model,
+        description: row.winnerDescription,
+        imageKey: row.imageKey,
+      });
+      return acc;
+    }, []);
+
+    const { buildPaintingEmbeds } = await import("../../../logic/discord/painting-embed.js");
+    const paintingEmbeds = buildPaintingEmbeds(categories);
+
+    if (paintingEmbeds.length > 0) {
+      // Discord allows max 10 embeds per message; batch if needed
+      for (let i = 0; i < paintingEmbeds.length; i += 10) {
+        await channel.send({ embeds: paintingEmbeds.slice(i, i + 10) });
+      }
+    }
+  }
 
   await db
     .updateTable("tourney")
