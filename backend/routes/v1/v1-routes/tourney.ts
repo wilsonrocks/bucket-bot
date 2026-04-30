@@ -105,6 +105,7 @@ export const detailTourney: RouteHandler<
     .where("tourney.id", "=", Number(id))
     .select([
       "player.id as playerId",
+      "player_identity.id as playerIdentityId",
       "faction.name as factionName",
       sql<string>`coalesce(${sql.ref("player.name")}, ${sql.ref("player_identity.provider_name")})`.as(
         "playerName",

@@ -12,6 +12,7 @@ type TourneyFields = {
 }
 
 import {
+  uploadTeamImage,
   useGetAllDiscordUsers,
   useGetTiers,
   useGetTourneyId,
@@ -20,12 +21,13 @@ import {
   usePostTourney,
 } from '@/api/hooks'
 import {
-  Alert,
+  ActionIcon,
   Button,
   Grid,
   NumberInput,
   Paper,
   Select,
+  Text,
   TextInput,
   Title,
 } from '@mantine/core'
@@ -35,6 +37,8 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useEffect } from 'react'
 import z from 'zod'
 import { Tabs } from '@/components/routed-tabs'
+import { IconTrash } from '@tabler/icons-react'
+import { ImageUploader } from '@/components/ImageUploader'
 
 const eventParamsValidator = z.object({ id: z.coerce.number() })
 
@@ -53,11 +57,16 @@ function RouteComponent() {
     rounds: number | null
     days: number | null
     tier: string
-    categories: {
+    paintingCategories: {
+      id?: number
       name: string
       winners: {
-        playerId: number
+        playerIdentityId: string
+        position: number
         model: string
+        description: string
+        imageKey: string | null
+        _pendingFile: File | null
       }[]
     }[]
   }>({
@@ -68,24 +77,9 @@ function RouteComponent() {
       rounds: 3,
       days: 1,
       tier: 'Event',
-      categories: [{ name: 'Totem', winners: [] }],
+      paintingCategories: [],
     },
   })
-
-  // TODO implement this, it's being done manually at the momen
-  // const bestPaintedForm = useForm<{
-  //   categories: {
-  //     name: string
-  //     winners: {
-  //       playerId: number
-  //       model: string
-  //     }[]
-  //   }[]
-  // }>({
-  //   initialValues: {
-  //     categories: [{ name: 'Crew', winners: [] }],
-  //   },
-  // })
 
   const tourneyDetail = useGetTourneyId(String(id))
 
@@ -100,6 +94,20 @@ function RouteComponent() {
         days: tourney.days ?? null,
         tier: tourney.tier_code,
       })
+
+      const rawCategories = (tourneyDetail.data.paintingCategories as any[]) ?? []
+      detailsForm.setFieldValue('paintingCategories', rawCategories.map((cat: any) => ({
+        id: cat.id,
+        name: cat.name,
+        winners: (cat.winners ?? []).map((w: any) => ({
+          playerIdentityId: String(w.playerIdentityId),
+          position: w.position,
+          model: w.model ?? '',
+          description: w.description ?? '',
+          imageKey: w.imageKey ?? null,
+          _pendingFile: null,
+        }))
+      })))
     }
   }, [tourneyDetail.isFetched])
 
@@ -224,122 +232,138 @@ function RouteComponent() {
           </Tabs.Panel>
         </Paper>
         <Tabs.Panel value="bestPainted">
-          <Title order={3} mb="md">
-            Best Painted
-          </Title>
-          <Alert title="Coming Soon">
-            This is a work in progress. For the moment speak to James about
-            doing this manually in the database.
-          </Alert>
-          {/* {false && (
-            <Paper p="md">
-              {detailsForm.values.categories.map((category, catIndex) => (
-                <Paper key={catIndex} withBorder m="md" p="md">
+          <Title order={3} mb="md">Best Painted</Title>
+
+          {detailsForm.values.paintingCategories.map((category, catIndex) => (
+            <Paper key={catIndex} withBorder m="md" p="md">
+              <Grid align="flex-end">
+                <Grid.Col span={{ base: 10, xs: 4 }}>
+                  <TextInput
+                    label="Category Name"
+                    {...detailsForm.getInputProps(`paintingCategories.${catIndex}.name`)}
+                  />
+                </Grid.Col>
+                <Grid.Col span={2}>
+                  <ActionIcon color="red" onClick={() => detailsForm.removeListItem('paintingCategories', catIndex)}>
+                    <IconTrash size={16} />
+                  </ActionIcon>
+                </Grid.Col>
+              </Grid>
+
+              {category.winners.map((winner, winIndex) => (
+                <Paper key={winIndex} withBorder mt="sm" p="sm">
                   <Grid align="flex-end">
-                    <Grid.Col span={{ base: 10, xs: 4 }}>
-                      <TextInput
-                        label="Painting Category"
-                        {...detailsForm.getInputProps(
-                          `categories.${catIndex}.name`,
-                        )}
+                    <Grid.Col span={{ base: 12, xs: 1 }}>
+                      <Text size="sm" c="dimmed">#{winner.position}</Text>
+                    </Grid.Col>
+                    <Grid.Col span={{ base: 12, xs: 3 }}>
+                      <Select
+                        label="Player"
+                        searchable
+                        data={tourneyDetail.data.players.map((player: any) => ({
+                          value: String(player.playerIdentityId),
+                          label: player.playerName,
+                        }))}
+                        {...detailsForm.getInputProps(`paintingCategories.${catIndex}.winners.${winIndex}.playerIdentityId`)}
                       />
                     </Grid.Col>
-                    <Grid.Col span={2}>
-                      <ActionIcon
-                        color="red"
-                        onClick={() =>
-                          detailsForm.removeListItem('categories', catIndex)
-                        }
-                      >
-                        <IconTrash />
-                      </ActionIcon>
-                    </Grid.Col>
-                  </Grid>
-                  {category.winners.map((winner, winIndex) => (
-                    <Paper>
-                      <Grid align="flex-end" key={winIndex}>
-                        <Grid.Col span={{ base: 12, xs: 1 }}>
-                          {winIndex + 1}.
-                        </Grid.Col>
-                        <Grid.Col span={{ base: 12, xs: 3 }}>
-                          <Select
-                            label="Player"
-                            searchable
-                            data={tourneyDetail.data.players.map((player) => ({
-                              value: player.playerId.toString(),
-                              label: player.playerName,
-                            }))}
-                            {...detailsForm.getInputProps(
-                              `categories.${catIndex}.winners.${winIndex}.playerId`,
-                            )}
-                          />
-                        </Grid.Col>
-                        <Grid.Col span={{ base: 12, xs: 4 }}>
-                          <TextInput
-                            label="Model(s)"
-                            {...detailsForm.getInputProps(
-                              `categories.${catIndex}.winners.${winIndex}.model`,
-                            )}
-                          />
-                        </Grid.Col>
-                        <Grid.Col
-                          span={{ base: 12, xs: 2 }}
-                          offset={{ base: 10, xs: 0 }}
-                        >
-                          <ActionIcon
-                            color="red"
-                            onClick={() =>
-                              detailsForm.removeListItem(
-                                `categories.${catIndex}.winners` as any,
-                                winIndex,
-                              )
-                            }
-                          >
-                            <IconTrash />
-                          </ActionIcon>
-                        </Grid.Col>
-                      </Grid>
-                    </Paper>
-                  ))}
-                  <Grid>
                     <Grid.Col span={{ base: 12, xs: 2 }}>
-                      <Button
-                        fullWidth
-                        onClick={() => {
-                          detailsForm.insertListItem(
-                            `categories.${catIndex}.winners`,
-                            {
-                              playerId: '',
-                              model: '',
-                            },
-                          )
+                      <TextInput label="Model(s)" {...detailsForm.getInputProps(`paintingCategories.${catIndex}.winners.${winIndex}.model`)} />
+                    </Grid.Col>
+                    <Grid.Col span={{ base: 12, xs: 2 }}>
+                      <TextInput label="Description" {...detailsForm.getInputProps(`paintingCategories.${catIndex}.winners.${winIndex}.description`)} />
+                    </Grid.Col>
+                    <Grid.Col span={{ base: 12, xs: 2 }}>
+                      <ImageUploader
+                        value={winner.imageKey}
+                        preview={winner._pendingFile ? URL.createObjectURL(winner._pendingFile) : null}
+                        onChange={(file) => {
+                          detailsForm.setFieldValue(`paintingCategories.${catIndex}.winners.${winIndex}._pendingFile`, file)
                         }}
-                      >
-                        Add Winner
-                      </Button>
+                      />
+                    </Grid.Col>
+                    <Grid.Col span={{ base: 12, xs: 1 }}>
+                      <ActionIcon color="red" onClick={() => detailsForm.removeListItem(`paintingCategories.${catIndex}.winners` as any, winIndex)}>
+                        <IconTrash size={16} />
+                      </ActionIcon>
                     </Grid.Col>
                   </Grid>
                 </Paper>
               ))}
-              <Paper p="xl">
-                <Grid>
-                  <Grid.Col span={{ base: 12, xs: 2 }}>
-                    <Button
-                      fullWidth
-                      onClick={() =>
-                        detailsForm.insertListItem('categories', {
-                          name: '',
-                          winners: [{ model: '', playerId: null }],
-                        })
-                      }
-                    >
-                      Add Category
-                    </Button>
-                  </Grid.Col>
-                </Grid>
-              </Paper>
+
+              <Button
+                mt="sm"
+                size="xs"
+                variant="light"
+                onClick={() => detailsForm.insertListItem(`paintingCategories.${catIndex}.winners`, {
+                  playerIdentityId: '',
+                  position: category.winners.length + 1,
+                  model: '',
+                  description: '',
+                  imageKey: null,
+                  _pendingFile: null,
+                })}
+              >
+                Add Winner
+              </Button>
             </Paper>
-          )} */}
+          ))}
+
+          <Button
+            mt="md"
+            variant="light"
+            onClick={() => detailsForm.insertListItem('paintingCategories', {
+              name: '',
+              winners: [],
+            })}
+          >
+            Add Category
+          </Button>
+
+          <Button
+            mt="md"
+            ml="sm"
+            color="green"
+            loading={updateTourney.isPending}
+            onClick={async () => {
+              const processedCategories = await Promise.all(
+                detailsForm.values.paintingCategories.map(async (cat) => ({
+                  id: cat.id,
+                  name: cat.name,
+                  winners: await Promise.all(
+                    cat.winners.map(async (winner, i) => {
+                      let imageKey = winner.imageKey
+                      if (winner._pendingFile) {
+                        imageKey = await uploadTeamImage(winner._pendingFile, 'painting')
+                      }
+                      return {
+                        playerIdentityId: Number(winner.playerIdentityId),
+                        position: i + 1,
+                        model: winner.model || null,
+                        description: winner.description || null,
+                        imageKey,
+                      }
+                    })
+                  )
+                }))
+              )
+
+              updateTourney.mutate({
+                data: {
+                  id,
+                  organiserDiscordId: detailsForm.values.organiserDiscordId,
+                  venueId: detailsForm.values.venueId ? Number(detailsForm.values.venueId) : undefined,
+                  name: detailsForm.values.eventName,
+                  rounds: detailsForm.values.rounds ?? 3,
+                  days: detailsForm.values.days ?? 1,
+                  tierCode: detailsForm.values.tier,
+                  paintingCategories: processedCategories,
+                } as any
+              })
+            }}
+          >
+            Save Best Painted
+          </Button>
         </Tabs.Panel>
         <Tabs.Panel value="players">
           <Title order={3} mb="md">
