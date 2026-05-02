@@ -2,7 +2,7 @@ import { defineConfig } from 'orval'
 
 export default defineConfig({
   'bucket-bot': {
-    input: 'http://localhost:9999/v1/doc',
+    input: '../openapi.json',
     output: {
       mode: 'tags-split',
       target: './src/api/generated',

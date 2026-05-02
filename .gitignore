@@ -1,5 +1,8 @@
 # built files
-backend/dist 
+backend/dist
+
+# generated OpenAPI schema (produced by backend/generate-schema.ts)
+openapi.json
 
 # certs
 certs/*.pem

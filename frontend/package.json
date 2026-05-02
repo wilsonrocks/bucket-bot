@@ -11,7 +11,7 @@
     "lint": "eslint",
     "format": "prettier",
     "check": "prettier --write . && eslint --fix",
-    "generate-client": "orval"
+    "generate-client": "npm run generate-schema --prefix ../backend && orval"
   },
   "dependencies": {
     "@mantine/charts": "^8.3.18",
