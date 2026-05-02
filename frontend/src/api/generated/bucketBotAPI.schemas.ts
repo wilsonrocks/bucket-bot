@@ -89,6 +89,23 @@ export type GetTourney200Item = {
   longshanks_id: string | null;
 };
 
+export type PostTourneyBodyPaintingCategoriesItemWinnersItem = {
+  playerIdentityId: number;
+  position: number;
+  /** @nullable */
+  model?: string | null;
+  /** @nullable */
+  description?: string | null;
+  /** @nullable */
+  imageKey?: string | null;
+};
+
+export type PostTourneyBodyPaintingCategoriesItem = {
+  id?: number;
+  name: string;
+  winners: PostTourneyBodyPaintingCategoriesItemWinnersItem[];
+};
+
 export type PostTourneyBody = {
   id: number;
   organiserDiscordId?: string;
@@ -99,6 +116,7 @@ export type PostTourneyBody = {
   /** @minimum 1 */
   days: number;
   tierCode: string;
+  paintingCategories?: PostTourneyBodyPaintingCategoriesItem[];
 };
 
 export type PostTourney200 = {

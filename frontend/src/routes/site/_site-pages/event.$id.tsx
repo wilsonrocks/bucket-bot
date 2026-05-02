@@ -1,8 +1,9 @@
-import { Table, Title } from '@mantine/core'
+import { Box, Image, Modal, SimpleGrid, Table, Tabs, Text, Title } from '@mantine/core'
 import { createFileRoute } from '@tanstack/react-router'
 import z from 'zod'
 import { useGetTourneyId } from '@/api/hooks'
 import { Link } from '@/components/link'
+import { FeatureFlag } from '@/components/FeatureFlag'
 import { Route as PlayerRoute } from '@/routes/site/_site-pages/player.$id'
 
 type TourneyPlayer = {
@@ -18,33 +19,143 @@ const eventParamsValidator = z.object({ id: z.coerce.number() })
 export const Route = createFileRoute('/site/_site-pages/event/$id')({
   component: RouteComponent,
   params: eventParamsValidator,
+  validateSearch: z.object({
+    tab: z.enum(['results', 'best-painted']).optional(),
+    painting: z.coerce.number().optional(),
+  }),
 })
+
+function positionLabel(position: number, total: number): string {
+  if (total === 1) return 'Winner'
+  const suffixes: Record<number, string> = { 1: 'st', 2: 'nd', 3: 'rd' }
+  return `${position}${suffixes[position] ?? 'th'}`
+}
 
 function RouteComponent() {
   const { id } = Route.useParams()
+  const { tab, painting: activePaintingId } = Route.useSearch()
+  const navigate = Route.useNavigate()
   const tourneyDetail = useGetTourneyId(String(id))
+
   if (!tourneyDetail.data) {
     return <div>Loading...</div>
   }
+
+  const paintingCategories = (tourneyDetail.data.paintingCategories as any[]) ?? []
+  const hasAnyImages = paintingCategories.some((cat: any) =>
+    (cat.winners ?? []).some((w: any) => w.imageKey)
+  )
+
+  const activeWinner = activePaintingId
+    ? paintingCategories
+        .flatMap((cat: any) =>
+          (cat.winners ?? []).map((w: any) => ({
+            ...w,
+            categoryName: cat.name,
+            totalWinners: cat.winners.length,
+          }))
+        )
+        .find((w: any) => w.id === activePaintingId)
+    : null
+
+  const activeTab = tab ?? 'results'
+
   return (
     <div>
       <Title order={1} mb="md">
         {(tourneyDetail.data.tourney as { name: string }).name}
       </Title>
-      <Table
-        tabularNums
-        data={{
-          head: ['Place', 'Name', 'Points', 'Faction'],
-          body: (tourneyDetail.data.players as TourneyPlayer[]).map((row) => [
-            row.place,
-            <Link to={PlayerRoute.to} params={{ id: row.playerId }} search={{ tab: undefined }}>
-              {row.playerName}
-            </Link>,
-            row.points.toFixed(2),
-            row.factionName,
-          ]),
-        }}
-      />
+
+      <Tabs
+        value={activeTab}
+        onChange={(value) =>
+          navigate({ search: (prev) => ({ ...prev, tab: value as 'results' | 'best-painted' | undefined }) })
+        }
+      >
+        <Tabs.List mb="md">
+          <Tabs.Tab value="results">Results</Tabs.Tab>
+          <FeatureFlag flag="BEST_PAINTED">{hasAnyImages && <Tabs.Tab value="best-painted">Best Painted</Tabs.Tab>}</FeatureFlag>
+        </Tabs.List>
+
+        <Tabs.Panel value="results">
+          <Table
+            tabularNums
+            data={{
+              head: ['Place', 'Name', 'Points', 'Faction'],
+              body: (tourneyDetail.data.players as TourneyPlayer[]).map((row) => [
+                row.place,
+                <Link to={PlayerRoute.to} params={{ id: row.playerId }} search={{ tab: undefined }}>
+                  {row.playerName}
+                </Link>,
+                row.points.toFixed(2),
+                row.factionName,
+              ]),
+            }}
+          />
+        </Tabs.Panel>
+
+        <Tabs.Panel value="best-painted">
+          <FeatureFlag flag="BEST_PAINTED">
+          {paintingCategories.map((cat: any) => {
+            const winnersWithImages = (cat.winners ?? []).filter((w: any) => w.imageKey)
+            if (winnersWithImages.length === 0) return null
+            return (
+              <Box key={cat.id} mb="lg">
+                <Title order={3} mb="sm">{cat.name}</Title>
+                <SimpleGrid cols={{ base: 2, sm: 3, md: 4 }} spacing="md">
+                  {winnersWithImages.map((winner: any) => (
+                    <Box
+                      key={winner.id}
+                      w={150}
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => navigate({ search: (prev) => ({ ...prev, painting: winner.id }) })}
+                    >
+                      <Image
+                        src={`${import.meta.env.VITE_ASSETS_URL}/${winner.imageKey}-w150.png`}
+                        alt={`${winner.playerName} — ${cat.name}`}
+                        radius="sm"
+                        w={150}
+                      />
+                      <Text size="xs" c="dimmed" mt={4} ta="center">
+                        {positionLabel(winner.position, cat.winners.length)} — {winner.playerName}
+                      </Text>
+                    </Box>
+                  ))}
+                </SimpleGrid>
+              </Box>
+            )
+          })}
+          </FeatureFlag>
+        </Tabs.Panel>
+      </Tabs>
+
+      <Modal
+        opened={!!activeWinner}
+        onClose={() => navigate({ search: (prev) => ({ ...prev, painting: undefined }) })}
+        size="xl"
+        centered
+        title={
+          activeWinner
+            ? `${activeWinner.categoryName} — ${positionLabel(activeWinner.position, activeWinner.totalWinners)}`
+            : ''
+        }
+      >
+        {activeWinner && (
+          <Box>
+            <Image
+              src={`${import.meta.env.VITE_ASSETS_URL}/${activeWinner.imageKey}-w800.png`}
+              alt={activeWinner.playerName}
+              radius="sm"
+              fit="contain"
+              mah={500}
+              mb="md"
+            />
+            <Text fw={600}>{activeWinner.playerName}</Text>
+            {activeWinner.model && <Text size="sm" c="dimmed">{activeWinner.model}</Text>}
+            {activeWinner.description && <Text size="sm" mt="xs">{activeWinner.description}</Text>}
+          </Box>
+        )}
+      </Modal>
     </div>
   )
 }
