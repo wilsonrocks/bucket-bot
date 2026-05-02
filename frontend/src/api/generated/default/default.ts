@@ -38,6 +38,8 @@ import type {
   GetHasRole200,
   GetHasRole400,
   GetHasRole500,
+  GetPaintingRecent200,
+  GetPaintingRecent404,
   GetPlayerId200,
   GetPlayerId400,
   GetPlayerId404,
@@ -60,6 +62,7 @@ import type {
   GetSearchDiscordUsers200Item,
   GetSearchDiscordUsers400,
   GetSearchDiscordUsersParams,
+  GetStatsCommunity200,
   GetTeamRankingsTypeCode200Item,
   GetTeamRankingsTypeCode404,
   GetTeams200Item,
@@ -3107,6 +3110,221 @@ export function useGetFeatureFlags<TData = Awaited<ReturnType<typeof getFeatureF
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetFeatureFlagsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+export type getPaintingRecentResponse200 = {
+  data: GetPaintingRecent200
+  status: 200
+}
+
+export type getPaintingRecentResponse404 = {
+  data: GetPaintingRecent404
+  status: 404
+}
+
+export type getPaintingRecentResponseSuccess = (getPaintingRecentResponse200) & {
+  headers: Headers;
+};
+export type getPaintingRecentResponseError = (getPaintingRecentResponse404) & {
+  headers: Headers;
+};
+
+export type getPaintingRecentResponse = (getPaintingRecentResponseSuccess | getPaintingRecentResponseError)
+
+export const getGetPaintingRecentUrl = () => {
+
+
+  
+
+  return `/v1/painting/recent`
+}
+
+export const getPaintingRecent = async ( options?: RequestInit): Promise<getPaintingRecentResponse> => {
+  
+  return customFetch<getPaintingRecentResponse>(getGetPaintingRecentUrl(),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
+
+export const getGetPaintingRecentQueryKey = () => {
+    return [
+    `/v1/painting/recent`
+    ] as const;
+    }
+
+    
+export const getGetPaintingRecentQueryOptions = <TData = Awaited<ReturnType<typeof getPaintingRecent>>, TError = GetPaintingRecent404>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPaintingRecent>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPaintingRecentQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPaintingRecent>>> = ({ signal }) => getPaintingRecent({ signal, ...requestOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPaintingRecent>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetPaintingRecentQueryResult = NonNullable<Awaited<ReturnType<typeof getPaintingRecent>>>
+export type GetPaintingRecentQueryError = GetPaintingRecent404
+
+
+export function useGetPaintingRecent<TData = Awaited<ReturnType<typeof getPaintingRecent>>, TError = GetPaintingRecent404>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPaintingRecent>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPaintingRecent>>,
+          TError,
+          Awaited<ReturnType<typeof getPaintingRecent>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPaintingRecent<TData = Awaited<ReturnType<typeof getPaintingRecent>>, TError = GetPaintingRecent404>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPaintingRecent>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPaintingRecent>>,
+          TError,
+          Awaited<ReturnType<typeof getPaintingRecent>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPaintingRecent<TData = Awaited<ReturnType<typeof getPaintingRecent>>, TError = GetPaintingRecent404>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPaintingRecent>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetPaintingRecent<TData = Awaited<ReturnType<typeof getPaintingRecent>>, TError = GetPaintingRecent404>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPaintingRecent>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetPaintingRecentQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+export type getStatsCommunityResponse200 = {
+  data: GetStatsCommunity200
+  status: 200
+}
+
+export type getStatsCommunityResponseSuccess = (getStatsCommunityResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getStatsCommunityResponse = (getStatsCommunityResponseSuccess)
+
+export const getGetStatsCommunityUrl = () => {
+
+
+  
+
+  return `/v1/stats/community`
+}
+
+export const getStatsCommunity = async ( options?: RequestInit): Promise<getStatsCommunityResponse> => {
+  
+  return customFetch<getStatsCommunityResponse>(getGetStatsCommunityUrl(),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
+
+export const getGetStatsCommunityQueryKey = () => {
+    return [
+    `/v1/stats/community`
+    ] as const;
+    }
+
+    
+export const getGetStatsCommunityQueryOptions = <TData = Awaited<ReturnType<typeof getStatsCommunity>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStatsCommunity>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetStatsCommunityQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getStatsCommunity>>> = ({ signal }) => getStatsCommunity({ signal, ...requestOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getStatsCommunity>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetStatsCommunityQueryResult = NonNullable<Awaited<ReturnType<typeof getStatsCommunity>>>
+export type GetStatsCommunityQueryError = unknown
+
+
+export function useGetStatsCommunity<TData = Awaited<ReturnType<typeof getStatsCommunity>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStatsCommunity>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getStatsCommunity>>,
+          TError,
+          Awaited<ReturnType<typeof getStatsCommunity>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetStatsCommunity<TData = Awaited<ReturnType<typeof getStatsCommunity>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStatsCommunity>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getStatsCommunity>>,
+          TError,
+          Awaited<ReturnType<typeof getStatsCommunity>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetStatsCommunity<TData = Awaited<ReturnType<typeof getStatsCommunity>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStatsCommunity>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetStatsCommunity<TData = Awaited<ReturnType<typeof getStatsCommunity>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStatsCommunity>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetStatsCommunityQueryOptions(options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

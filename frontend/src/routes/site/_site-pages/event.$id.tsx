@@ -3,7 +3,6 @@ import { createFileRoute } from '@tanstack/react-router'
 import z from 'zod'
 import { useGetTourneyId } from '@/api/hooks'
 import { Link } from '@/components/link'
-import { FeatureFlag } from '@/components/FeatureFlag'
 import { PaintingLightbox, positionLabel } from '@/components/painting-lightbox'
 import { Route as PlayerRoute } from '@/routes/site/_site-pages/player.$id'
 
@@ -69,7 +68,7 @@ function RouteComponent() {
       >
         <Tabs.List mb="md">
           <Tabs.Tab value="results">Results</Tabs.Tab>
-          <FeatureFlag flag="BEST_PAINTED">{hasAnyImages && <Tabs.Tab value="best-painted">Best Painted</Tabs.Tab>}</FeatureFlag>
+          {hasAnyImages && <Tabs.Tab value="best-painted">Best Painted</Tabs.Tab>}
         </Tabs.List>
 
         <Tabs.Panel value="results">
@@ -90,7 +89,6 @@ function RouteComponent() {
         </Tabs.Panel>
 
         <Tabs.Panel value="best-painted">
-          <FeatureFlag flag="BEST_PAINTED">
           {paintingCategories.map((cat: any) => {
             const winnersWithImages = (cat.winners ?? []).filter((w: any) => w.imageKey)
             if (winnersWithImages.length === 0) return null
@@ -134,7 +132,6 @@ function RouteComponent() {
               </Box>
             )
           })}
-          </FeatureFlag>
         </Tabs.Panel>
       </Tabs>
 

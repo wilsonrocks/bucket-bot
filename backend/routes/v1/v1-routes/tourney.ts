@@ -7,6 +7,7 @@ import {
   MENTION_EVENT_ENTHUSIAST,
   getDiscordClient,
 } from "../../../logic/discord-client.js";
+import { getCommunityTotals } from "../../../logic/stats/community-totals.js";
 
 const ErrorSchema = z.object({ error: z.string() });
 
@@ -501,19 +502,7 @@ export const postEventSummaryToDiscord: RouteHandler<
     .orderBy("faction.name", "asc")
     .execute();
 
-  const totals = await db
-    .selectFrom("result")
-    .innerJoin(
-      "player_identity",
-      "result.player_identity_id",
-      "player_identity.id",
-    )
-    .select((eb) => [
-      eb.fn.sum("rounds_played").as("games_played"),
-      sql`COUNT(DISTINCT tourney_id)`.as("total_events"),
-      sql`COUNT(DISTINCT player_identity.player_id)`.as("total_players"),
-    ])
-    .executeTakeFirstOrThrow();
+  const totals = await getCommunityTotals(db);
 
   const channelId = process.env.DISCORD_EVENTS_CHANNEL_ID;
   if (!channelId) {
@@ -565,7 +554,7 @@ export const postEventSummaryToDiscord: RouteHandler<
   const communityEmbed = new EmbedBuilder()
     .setTitle("Community Stats")
     .setDescription(
-      `***BEEP BOOP!***\n\n**${totals.total_players}** people have played **${totals.games_played}** games at **${totals.total_events}** event${totals.total_events == 1 ? "" : "s"} so far! This is really good, let's make it more! 🚀 🤖 🪣`,
+      `***BEEP BOOP!***\n\n**${totals.totalPlayers}** people have played **${totals.gamesPlayed}** games at **${totals.totalEvents}** event${totals.totalEvents == 1 ? "" : "s"} so far! This is really good, let's make it more! 🚀 🤖 🪣`,
     );
 
   const sentMessage = await channel.send({

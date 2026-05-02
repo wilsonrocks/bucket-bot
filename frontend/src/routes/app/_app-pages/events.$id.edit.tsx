@@ -39,7 +39,6 @@ import z from 'zod'
 import { Tabs } from '@/components/routed-tabs'
 import { IconTrash } from '@tabler/icons-react'
 import { ImageUploader } from '@/components/ImageUploader'
-import { FeatureFlag } from '@/components/FeatureFlag'
 
 const eventParamsValidator = z.object({ id: z.coerce.number() })
 
@@ -139,7 +138,7 @@ function RouteComponent() {
       <Tabs defaultValue="details">
         <Tabs.List>
           <Tabs.Tab value="details">Details</Tabs.Tab>
-          <FeatureFlag flag="BEST_PAINTED"><Tabs.Tab value="bestPainted">Best Painted</Tabs.Tab></FeatureFlag>
+          <Tabs.Tab value="bestPainted">Best Painted</Tabs.Tab>
           <Tabs.Tab value="players">Players</Tabs.Tab>
           <Tabs.Tab value="discord">Discord</Tabs.Tab>
         </Tabs.List>
@@ -233,7 +232,6 @@ function RouteComponent() {
           </Tabs.Panel>
         </Paper>
         <Tabs.Panel value="bestPainted">
-          <FeatureFlag flag="BEST_PAINTED">
           <Title order={3} mb="md">Best Painted</Title>
 
           {detailsForm.values.paintingCategories.map((category, catIndex) => (
@@ -371,7 +369,6 @@ function RouteComponent() {
           >
             Save Best Painted
           </Button>
-          </FeatureFlag>
         </Tabs.Panel>
         <Tabs.Panel value="players">
           <Title order={3} mb="md">

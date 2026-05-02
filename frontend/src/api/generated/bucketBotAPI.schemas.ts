@@ -47,6 +47,12 @@ export type GetRankingsTypeCode200Item = {
   /** @nullable */
   rank_change: number | null;
   new_player: boolean;
+  /** @nullable */
+  current_team_id: number | null;
+  /** @nullable */
+  current_team_name: string | null;
+  /** @nullable */
+  team_image_key: string | null;
 };
 
 export type GetRankingsPlayerIdTypeCode200Metadata = {
@@ -527,6 +533,29 @@ export type GetTeamRankingsTypeCode404 = {
 export type GetFeatureFlags200Item = {
   flag: string;
   is_enabled: boolean;
+};
+
+export type GetPaintingRecent200 = {
+  /** @nullable */
+  playerId: number | null;
+  playerName: string;
+  tourneyId: number;
+  tourneyName: string;
+  categoryName: string;
+  /** @nullable */
+  imageKey: string | null;
+  /** @nullable */
+  model: string | null;
+};
+
+export type GetPaintingRecent404 = {
+  error: string;
+};
+
+export type GetStatsCommunity200 = {
+  totalPlayers: number;
+  gamesPlayed: number;
+  totalEvents: number;
 };
 
 export type PostLongshanksEventIdBody = {
