@@ -15,11 +15,11 @@ export const Route = createFileRoute('/site/')({
 function HomePage() {
   return (
     <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
-      <PaintingHighlightCard />
       <TopPlayersCard />
+      <PaintingHighlightCard />
       <TeamStandingsCard />
-      <RecentEventCard />
       <RegionsMapCard />
+      <RecentEventCard />
       <CommunityStatsCard />
     </SimpleGrid>
   )

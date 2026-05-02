@@ -13,7 +13,6 @@ import z from 'zod'
 
 import { LazyPlayerRankingOverTimeChart } from '@/components/charts'
 import { Link } from '@/components/link'
-import { FeatureFlag } from '@/components/FeatureFlag'
 import { PaintingLightbox, positionLabel } from '@/components/painting-lightbox'
 import {
   useGetPlayerId,
@@ -86,9 +85,7 @@ function RouteComponent() {
           <Tabs.Tab value="events">Events</Tabs.Tab>
           <Tabs.Tab value="rankings">Rankings</Tabs.Tab>
           <Tabs.Tab value="teams">Teams</Tabs.Tab>
-          <FeatureFlag flag="BEST_PAINTED">
-            {wins.length > 0 && <Tabs.Tab value="painting">Painting</Tabs.Tab>}
-          </FeatureFlag>
+          {wins.length > 0 && <Tabs.Tab value="painting">Painting</Tabs.Tab>}
         </Tabs.List>
 
         <Tabs.Panel value="events">
@@ -183,8 +180,7 @@ function RouteComponent() {
           )}
         </Tabs.Panel>
         <Tabs.Panel value="painting">
-          <FeatureFlag flag="BEST_PAINTED">
-            <Table
+          <Table
               data={{
                 head: ['', 'Event', 'Category', 'Position', 'Date'],
                 body: wins.map((w) => [
@@ -215,18 +211,15 @@ function RouteComponent() {
                 ]),
               }}
             />
-          </FeatureFlag>
         </Tabs.Panel>
       </Tabs>
 
-      <FeatureFlag flag="BEST_PAINTED">
-        <PaintingLightbox
-          winner={activeWinnerForLightbox}
-          onClose={() =>
-            navigate({ search: (prev) => ({ ...prev, painting: undefined }) })
-          }
-        />
-      </FeatureFlag>
+      <PaintingLightbox
+        winner={activeWinnerForLightbox}
+        onClose={() =>
+          navigate({ search: (prev) => ({ ...prev, painting: undefined }) })
+        }
+      />
     </div>
   )
 }
