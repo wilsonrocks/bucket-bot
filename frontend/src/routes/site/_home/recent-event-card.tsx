@@ -1,4 +1,4 @@
-import { Anchor, Card, Divider, Skeleton, Stack, Text, Title } from '@mantine/core'
+import { Card, Divider, Skeleton, Stack, Text, Title } from '@mantine/core'
 import { Link } from '@/components/link'
 import { useGetTourney, useGetTourneyId } from '@/api/hooks'
 import { Route as PlayerRoute } from '@/routes/site/_site-pages/player.$id'
@@ -58,9 +58,9 @@ export function RecentEventCard() {
           </Stack>
         ) : tourney ? (
           <>
-            <Anchor component={Link} to={EventRoute.to} params={{ id: tourney.id }} search={{ tab: undefined }} fw={600}>
+            <Link to={EventRoute.to} params={{ id: tourney.id }} search={{ tab: undefined }} fw={600}>
               {tourney.name}
-            </Anchor>
+            </Link>
             {tourney.date && (
               <Text size="sm" c="dimmed" mb="xs">
                 {formatDate(new Date(tourney.date), 'd MMM yyyy')}

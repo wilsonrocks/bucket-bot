@@ -1,4 +1,4 @@
-import { Anchor, AspectRatio, Card, Image, Skeleton, Text, Title } from '@mantine/core'
+import { AspectRatio, Card, Image, Skeleton, Text, Title } from '@mantine/core'
 import { Link } from '@/components/link'
 import { useGetPaintingRecent } from '@/api/hooks'
 import { Route as PlayerRoute } from '@/routes/site/_site-pages/player.$id'

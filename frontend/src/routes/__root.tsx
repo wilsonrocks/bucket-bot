@@ -33,9 +33,15 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
   head: () => ({
     title: 'b(UK)et bot',
     meta: [
-      { name: 'description', content: "UK Malifaux rankings and tournament tracking" },
+      {
+        name: 'description',
+        content: 'UK Malifaux rankings and tournament tracking',
+      },
       { property: 'og:title', content: 'b(UK)et bot' },
-      { property: 'og:description', content: "UK Malifaux rankings and tournament tracking" },
+      {
+        property: 'og:description',
+        content: 'UK Malifaux rankings and tournament tracking',
+      },
       { property: 'og:image', content: 'https://malifaux.uk/logo512.png' },
       { property: 'og:url', content: 'https://malifaux.uk' },
       { property: 'og:type', content: 'website' },

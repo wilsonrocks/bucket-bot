@@ -47,6 +47,12 @@ export type GetRankingsTypeCode200Item = {
   /** @nullable */
   rank_change: number | null;
   new_player: boolean;
+  /** @nullable */
+  current_team_id: number | null;
+  /** @nullable */
+  current_team_name: string | null;
+  /** @nullable */
+  team_image_key: string | null;
 };
 
 export type GetRankingsPlayerIdTypeCode200Metadata = {

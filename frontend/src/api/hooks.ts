@@ -657,7 +657,13 @@ export const useGetPaintingRecent = (
 ) =>
   useGetPaintingRecentGenerated({
     ...options,
-    query: { ...options?.query, select: (res) => res.data },
+    query: {
+      ...options?.query,
+      select: (res) => {
+        if (res.status !== 200) throw new Error(`unexpected status ${res.status}`)
+        return res.data
+      },
+    },
   })
 
 // ── Community Stats ───────────────────────────────────────────────────────────
