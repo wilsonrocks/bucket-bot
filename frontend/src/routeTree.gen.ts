@@ -23,6 +23,7 @@ import { Route as SiteSitePagesPlayersRouteImport } from './routes/site/_site-pa
 import { Route as SiteSitePagesHowItWorksRouteImport } from './routes/site/_site-pages/how-it-works'
 import { Route as SiteSitePagesFactionRankingsRouteImport } from './routes/site/_site-pages/faction-rankings'
 import { Route as SiteSitePagesEventsRouteImport } from './routes/site/_site-pages/events'
+import { Route as SiteSitePagesBestPaintedRouteImport } from './routes/site/_site-pages/best-painted'
 import { Route as AppAppPagesVenuesRouteImport } from './routes/app/_app-pages/venues'
 import { Route as AppAppPagesIdentitiesRouteImport } from './routes/app/_app-pages/identities'
 import { Route as AppAppPagesFeatureFlagsRouteImport } from './routes/app/_app-pages/feature-flags'
@@ -113,6 +114,12 @@ const SiteSitePagesEventsRoute = SiteSitePagesEventsRouteImport.update({
   path: '/events',
   getParentRoute: () => SiteRouteRoute,
 } as any)
+const SiteSitePagesBestPaintedRoute =
+  SiteSitePagesBestPaintedRouteImport.update({
+    id: '/_site-pages/best-painted',
+    path: '/best-painted',
+    getParentRoute: () => SiteRouteRoute,
+  } as any)
 const AppAppPagesVenuesRoute = AppAppPagesVenuesRouteImport.update({
   id: '/_app-pages/venues',
   path: '/venues',
@@ -213,6 +220,7 @@ export interface FileRoutesByFullPath {
   '/app/feature-flags': typeof AppAppPagesFeatureFlagsRoute
   '/app/identities': typeof AppAppPagesIdentitiesRoute
   '/app/venues': typeof AppAppPagesVenuesRoute
+  '/site/best-painted': typeof SiteSitePagesBestPaintedRoute
   '/site/events': typeof SiteSitePagesEventsRoute
   '/site/faction-rankings': typeof SiteSitePagesFactionRankingsRoute
   '/site/how-it-works': typeof SiteSitePagesHowItWorksRoute
@@ -245,6 +253,7 @@ export interface FileRoutesByTo {
   '/app/feature-flags': typeof AppAppPagesFeatureFlagsRoute
   '/app/identities': typeof AppAppPagesIdentitiesRoute
   '/app/venues': typeof AppAppPagesVenuesRoute
+  '/site/best-painted': typeof SiteSitePagesBestPaintedRoute
   '/site/events': typeof SiteSitePagesEventsRoute
   '/site/faction-rankings': typeof SiteSitePagesFactionRankingsRoute
   '/site/how-it-works': typeof SiteSitePagesHowItWorksRoute
@@ -279,6 +288,7 @@ export interface FileRoutesById {
   '/app/_app-pages/feature-flags': typeof AppAppPagesFeatureFlagsRoute
   '/app/_app-pages/identities': typeof AppAppPagesIdentitiesRoute
   '/app/_app-pages/venues': typeof AppAppPagesVenuesRoute
+  '/site/_site-pages/best-painted': typeof SiteSitePagesBestPaintedRoute
   '/site/_site-pages/events': typeof SiteSitePagesEventsRoute
   '/site/_site-pages/faction-rankings': typeof SiteSitePagesFactionRankingsRoute
   '/site/_site-pages/how-it-works': typeof SiteSitePagesHowItWorksRoute
@@ -314,6 +324,7 @@ export interface FileRouteTypes {
     | '/app/feature-flags'
     | '/app/identities'
     | '/app/venues'
+    | '/site/best-painted'
     | '/site/events'
     | '/site/faction-rankings'
     | '/site/how-it-works'
@@ -346,6 +357,7 @@ export interface FileRouteTypes {
     | '/app/feature-flags'
     | '/app/identities'
     | '/app/venues'
+    | '/site/best-painted'
     | '/site/events'
     | '/site/faction-rankings'
     | '/site/how-it-works'
@@ -379,6 +391,7 @@ export interface FileRouteTypes {
     | '/app/_app-pages/feature-flags'
     | '/app/_app-pages/identities'
     | '/app/_app-pages/venues'
+    | '/site/_site-pages/best-painted'
     | '/site/_site-pages/events'
     | '/site/_site-pages/faction-rankings'
     | '/site/_site-pages/how-it-works'
@@ -507,6 +520,13 @@ declare module '@tanstack/react-router' {
       path: '/events'
       fullPath: '/site/events'
       preLoaderRoute: typeof SiteSitePagesEventsRouteImport
+      parentRoute: typeof SiteRouteRoute
+    }
+    '/site/_site-pages/best-painted': {
+      id: '/site/_site-pages/best-painted'
+      path: '/best-painted'
+      fullPath: '/site/best-painted'
+      preLoaderRoute: typeof SiteSitePagesBestPaintedRouteImport
       parentRoute: typeof SiteRouteRoute
     }
     '/app/_app-pages/venues': {
@@ -673,6 +693,7 @@ const AppRouteRouteWithChildren = AppRouteRoute._addFileChildren(
 interface SiteRouteRouteChildren {
   SiteLoginRoute: typeof SiteLoginRoute
   SiteIndexRoute: typeof SiteIndexRoute
+  SiteSitePagesBestPaintedRoute: typeof SiteSitePagesBestPaintedRoute
   SiteSitePagesEventsRoute: typeof SiteSitePagesEventsRoute
   SiteSitePagesFactionRankingsRoute: typeof SiteSitePagesFactionRankingsRoute
   SiteSitePagesHowItWorksRoute: typeof SiteSitePagesHowItWorksRoute
@@ -689,6 +710,7 @@ interface SiteRouteRouteChildren {
 const SiteRouteRouteChildren: SiteRouteRouteChildren = {
   SiteLoginRoute: SiteLoginRoute,
   SiteIndexRoute: SiteIndexRoute,
+  SiteSitePagesBestPaintedRoute: SiteSitePagesBestPaintedRoute,
   SiteSitePagesEventsRoute: SiteSitePagesEventsRoute,
   SiteSitePagesFactionRankingsRoute: SiteSitePagesFactionRankingsRoute,
   SiteSitePagesHowItWorksRoute: SiteSitePagesHowItWorksRoute,

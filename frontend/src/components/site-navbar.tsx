@@ -1,3 +1,4 @@
+import { Route as BestPaintedRoute } from '@/routes/site/_site-pages/best-painted'
 import { Route as EventsSiteRoute } from '@/routes/site/_site-pages/events'
 import { Route as FactionRankingsRoute } from '@/routes/site/_site-pages/faction-rankings'
 import { Route as HowItWorksRoute } from '@/routes/site/_site-pages/how-it-works'
@@ -21,6 +22,7 @@ export const SiteNavbar = () => {
         <AppNavLink to={TeamsRoute.to} label="Teams" />
         <AppNavLink to={TeamRankingsRoute.to} label="Team Rankings" />
         <AppNavLink to={RegionsRoute.to} label="Regions" />
+        <AppNavLink to={BestPaintedRoute.to} label="Best Painted" />
         <AppNavLink to={HowItWorksRoute.to} label="How It Works" />
         <Divider />
         <AppNavLink to={AppRoute.to} label="Admin" />

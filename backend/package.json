@@ -7,6 +7,7 @@
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
+    "typecheck": "tsc --noEmit",
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "node --inspect --enable-source-maps --import tsx --watch index.ts",
     "generate-db-types": "kysely-codegen"
