@@ -1,4 +1,3 @@
-import { LoginButton } from '@/components/LoginButton'
 import { NetworkIndicator } from '@/components/network-indicator'
 import { SiteNavbar } from '@/components/site-navbar'
 import {
@@ -55,11 +54,11 @@ export const Route = createFileRoute('/site')({
                 hiddenFrom="sm"
                 size="sm"
               />
-              <Link to="/">
+              <Link to="/" search={{ tab: undefined }}>
                 <Image src="/bucket-bot-logo.png" alt="b(UK)et bot" w={50} />
               </Link>
               <Text visibleFrom="xs">
-                <Link to="/">
+                <Link to="/" search={{ tab: undefined }}>
                   b(<b>UK</b>)et bot
                 </Link>
               </Text>

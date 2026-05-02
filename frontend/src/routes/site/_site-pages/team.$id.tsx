@@ -46,7 +46,7 @@ function RouteComponent() {
           {team.members.map((member) => (
             <Table.Tr key={member.membership_id}>
               <Table.Td>
-                <Link to={PlayerRoute.to} params={{ id: member.player_id }}>
+                <Link to={PlayerRoute.to} params={{ id: member.player_id }} search={{ tab: undefined }}>
                   {member.player_name}
                 </Link>
               </Table.Td>

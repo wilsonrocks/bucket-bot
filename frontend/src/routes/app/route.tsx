@@ -33,14 +33,14 @@ export const Route = createFileRoute('/app')({
     const authString = localStorage.getItem('auth')
 
     if (!authString) {
-      throw redirect({ to: LoginRoute.to })
+      throw redirect({ to: LoginRoute.to, search: { tab: undefined } })
     }
 
     try {
       JSON.parse(authString)
     } catch (e) {
       console.error('Bad auth in storage', authString)
-      throw redirect({ to: LoginRoute.to })
+      throw redirect({ to: LoginRoute.to, search: { tab: undefined } })
     }
   },
   component: () => {
@@ -63,12 +63,12 @@ export const Route = createFileRoute('/app')({
     useEffect(() => {
       if (permissionsLoading) return
       if (!rankingReporter && captainOfTeamIds.length === 0) {
-        navigate({ to: LoginRoute.to, search: { unauthorized: true } })
+        navigate({ to: LoginRoute.to, search: { unauthorized: true, tab: undefined } })
       }
     }, [permissionsLoading, rankingReporter, captainOfTeamIds.length])
 
     return (
-      <MantineProvider theme={{ defaultColorScheme: 'dark' }}>
+      <MantineProvider defaultColorScheme="dark">
         <HeadContent />
         <AppShell
           padding="md"
@@ -87,11 +87,11 @@ export const Route = createFileRoute('/app')({
                 hiddenFrom="sm"
                 size="sm"
               />
-              <Link to="/">
+              <Link to="/" search={{ tab: undefined }}>
                 <Image src="/bucket-bot-logo.png" alt="b(UK)et bot" w={50} />
               </Link>
               <Text visibleFrom="xs">
-                <Link to="/">
+                <Link to="/" search={{ tab: undefined }}>
                   b(<b>UK</b>)et bot
                 </Link>
               </Text>

@@ -55,7 +55,7 @@ export const Route = createFileRoute('/site/_site-pages/team-rankings')({
     if (!typeCode)
       throw redirect({
         to: '/site/team-rankings',
-        search: { typeCode: 'ROLLING_YEAR' },
+        search: { typeCode: 'ROLLING_YEAR', tab: undefined },
       })
   },
 })
@@ -154,7 +154,8 @@ const { typeCode } = Route.useSearch()
                         <Table.Td>
                           <Link
                             to={TeamRoute.to}
-                            params={{ id: team.team_id }}
+                            params={{ id: String(team.team_id) }}
+                            search={{ tab: undefined }}
                           >
                             {team.team_name}
                           </Link>

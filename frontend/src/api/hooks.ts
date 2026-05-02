@@ -1,5 +1,3 @@
-// TODO what is with all this as 200s what if these endpoints fail
-
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { notifications } from '@mantine/notifications'
 import { customFetch } from './custom-instance'
@@ -56,17 +54,7 @@ import {
   usePutTeamsId as usePutTeamsIdGenerated,
 } from './generated/default/default'
 
-import type {
-  GetHasRole200,
-  GetPlayerId200,
-  GetPlayerIdPaintingWins200Item,
-  GetPlayerIdTeams200Item,
-  GetPlayerNameExistsPlayerId200,
-  GetRankingsPlayerIdTypeCode200,
-  GetSearchDiscordUsers200Item,
-  GetSearchDiscordUsersParams,
-  GetTourneysPlayerPlayerId200Item,
-} from './generated/bucketBotAPI.schemas'
+import type { GetSearchDiscordUsersParams } from './generated/bucketBotAPI.schemas'
 
 // ── Re-export simple mutations (no invalidation needed) ────────────────────
 export {
@@ -211,7 +199,13 @@ export const useGetHasRole = (
 ) =>
   useGetHasRoleGenerated({
     ...options,
-    query: { ...options?.query, select: (res) => res.data as GetHasRole200 },
+    query: {
+      ...options?.query,
+      select: (res) => {
+        if (res.status !== 200) throw new Error(`unexpected status ${res.status}`)
+        return res.data
+      },
+    },
   })
 
 export const useGetTourneyId = (
@@ -229,7 +223,13 @@ export const useGetPlayerId = (
 ) =>
   useGetPlayerIdGenerated(id, {
     ...options,
-    query: { ...options?.query, select: (res) => res.data as GetPlayerId200 },
+    query: {
+      ...options?.query,
+      select: (res) => {
+        if (res.status !== 200) throw new Error(`unexpected status ${res.status}`)
+        return res.data
+      },
+    },
   })
 
 export const useGetPlayerIdTeams = (
@@ -240,7 +240,10 @@ export const useGetPlayerIdTeams = (
     ...options,
     query: {
       ...options?.query,
-      select: (res) => res.data as GetPlayerIdTeams200Item[],
+      select: (res) => {
+        if (res.status !== 200) throw new Error(`unexpected status ${res.status}`)
+        return res.data
+      },
     },
   })
 
@@ -252,7 +255,10 @@ export const useGetPlayerIdPaintingWins = (
     ...options,
     query: {
       ...options?.query,
-      select: (res) => res.data as GetPlayerIdPaintingWins200Item[],
+      select: (res) => {
+        if (res.status !== 200) throw new Error(`unexpected status ${res.status}`)
+        return res.data
+      },
     },
   })
 
@@ -265,7 +271,10 @@ export const useGetPlayerNameExistsPlayerId = (
     ...options,
     query: {
       ...options?.query,
-      select: (res) => res.data as GetPlayerNameExistsPlayerId200,
+      select: (res) => {
+        if (res.status !== 200) throw new Error(`unexpected status ${res.status}`)
+        return res.data
+      },
     },
   })
 
@@ -294,7 +303,10 @@ export const useGetTourneysPlayerPlayerId = (
     ...options,
     query: {
       ...options?.query,
-      select: (res) => res.data as GetTourneysPlayerPlayerId200Item[],
+      select: (res) => {
+        if (res.status !== 200) throw new Error(`unexpected status ${res.status}`)
+        return res.data
+      },
     },
   })
 
@@ -316,7 +328,10 @@ export const useGetRankingsPlayerIdTypeCode = (
     ...options,
     query: {
       ...options?.query,
-      select: (res) => res.data as GetRankingsPlayerIdTypeCode200,
+      select: (res) => {
+        if (res.status !== 200) throw new Error(`unexpected status ${res.status}`)
+        return res.data
+      },
     },
   })
 
@@ -328,7 +343,10 @@ export const useGetSearchDiscordUsers = (
     ...options,
     query: {
       ...options?.query,
-      select: (res) => res.data as GetSearchDiscordUsers200Item[],
+      select: (res) => {
+        if (res.status !== 200) throw new Error(`unexpected status ${res.status}`)
+        return res.data
+      },
     },
   })
 
@@ -447,7 +465,13 @@ export const useGetTeamRankingsTypeCode = (
 ) =>
   useGetTeamRankingsTypeCodeGenerated(typeCode, {
     ...options,
-    query: { ...options?.query, select: (res) => res.data },
+    query: {
+      ...options?.query,
+      select: (res) => {
+        if (res.status !== 200) throw new Error(`unexpected status ${res.status}`)
+        return res.data
+      },
+    },
   })
 
 // ── Teams ──────────────────────────────────────────────────────────────────
@@ -466,7 +490,13 @@ export const useGetTeamsId = (
 ) =>
   useGetTeamsIdGenerated(id, {
     ...options,
-    query: { ...options?.query, select: (res) => res.data },
+    query: {
+      ...options?.query,
+      select: (res) => {
+        if (res.status !== 200) throw new Error(`unexpected status ${res.status}`)
+        return res.data
+      },
+    },
   })
 
 export const usePostCreateTeam = () => {

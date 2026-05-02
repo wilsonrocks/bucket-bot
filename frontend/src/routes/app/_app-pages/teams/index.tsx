@@ -4,6 +4,7 @@ import {
   usePostCreateTeam,
 } from '@/api/hooks'
 import { usePermissions } from '@/hooks/usePermissions'
+import { Link } from '@/components/link'
 import {
   Anchor,
   Box,
@@ -18,7 +19,7 @@ import {
 } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { modals } from '@mantine/modals'
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 import { Route as TeamEditRoute } from './$id'
 
 export const Route = createFileRoute('/app/_app-pages/teams/')({
@@ -98,18 +99,18 @@ function RouteComponent() {
             {teams.map((team) => (
               <Table.Tr key={team.id}>
                 <Table.Td>
-                  <Anchor component={Link} to={TeamEditRoute.to} params={{ id: String(team.id) }}>
+                  <Link to={TeamEditRoute.to} params={{ id: String(team.id) }} search={{ tab: undefined }}>
                     {team.name}
-                  </Anchor>
+                  </Link>
                 </Table.Td>
                 <Table.Td>{team.description ?? ''}</Table.Td>
                 <Table.Td>{team.brand_colour ?? ''}</Table.Td>
                 <Table.Td w="fit-content">
                   {(rankingReporter || isTeamCaptain(team.id)) && (
                     <Group gap="xs" wrap="nowrap">
-                      <Anchor component={Link} to={TeamEditRoute.to} params={{ id: String(team.id) }}>
+                      <Link to={TeamEditRoute.to} params={{ id: String(team.id) }} search={{ tab: undefined }}>
                         Edit
-                      </Anchor>
+                      </Link>
                       {rankingReporter && (
                         <Anchor
                           c="red"

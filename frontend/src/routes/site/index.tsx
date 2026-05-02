@@ -1,6 +1,6 @@
 import { Link } from '@/components/link'
 import { Route as RankingsRoute } from '@/routes/site/_site-pages/rankings'
-import { Divider, Text } from '@mantine/core'
+import { Anchor, Divider, Text } from '@mantine/core'
 import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/site/')({
@@ -15,13 +15,13 @@ function App() {
 
       <Text>
         There's a good chance that you are looking for{' '}
-        <Link to={RankingsRoute.path}>the rankings</Link>.
+        <Link to={RankingsRoute.to} search={{ tab: undefined }}>the rankings</Link>.
       </Text>
       <Divider m={5} />
       <Text>
         This is very much a Work in Progress, and if you want to help or are
         nosy, the code is on{' '}
-        <Link href="https://github.com/wilsonrocks/bucket-bot">github</Link>.
+        <Anchor href="https://github.com/wilsonrocks/bucket-bot">github</Anchor>.
       </Text>
 
       <Text>

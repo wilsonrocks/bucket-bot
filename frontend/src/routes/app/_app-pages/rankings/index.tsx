@@ -78,7 +78,7 @@ function RouteComponent() {
             Discord won't let us query the UK server for users very often, so we
             maintain our own database. If new people join the server, we'll have
             to re-synchronise in order to be able to assign{' '}
-            <Link to={IdentitiesRoute.to}> player identities</Link> to players.
+            <Link to={IdentitiesRoute.to} search={{ tab: undefined }}> player identities</Link> to players.
           </Text>
         </Grid.Col>
         <Grid.Col span={{ base: 12, sm: 6 }}>

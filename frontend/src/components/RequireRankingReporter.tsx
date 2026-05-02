@@ -12,9 +12,9 @@ export function RequireRankingReporter({ children }: { children: ReactNode }) {
     if (isLoading) return
     if (rankingReporter) return
     if (captainOfTeamIds.length > 0) {
-      navigate({ to: TeamsRoute.to })
+      navigate({ to: TeamsRoute.to, search: { tab: undefined } })
     } else {
-      navigate({ to: LoginRoute.to })
+      navigate({ to: LoginRoute.to, search: { tab: undefined } })
     }
   }, [isLoading, rankingReporter, captainOfTeamIds.length])
 

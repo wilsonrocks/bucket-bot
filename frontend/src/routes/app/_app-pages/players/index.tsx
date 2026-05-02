@@ -1,7 +1,8 @@
 import { useGetPlayers } from '@/api/hooks'
 import { RequireRankingReporter } from '@/components/RequireRankingReporter'
-import { Anchor, Avatar, Table } from '@mantine/core'
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { Link } from '@/components/link'
+import { Avatar, Table } from '@mantine/core'
+import { createFileRoute } from '@tanstack/react-router'
 import { Route as PlayerEditRoute } from './$id'
 
 export const Route = createFileRoute('/app/_app-pages/players/')({
@@ -34,9 +35,9 @@ function RouteComponent() {
               <Avatar src={player.discord_avatar_url ?? undefined} size="sm" />
             </Table.Td>
             <Table.Td>
-              <Anchor component={Link} to={PlayerEditRoute.to} params={{ id: String(player.id) }}>
+              <Link to={PlayerEditRoute.to} params={{ id: String(player.id) }} search={{ tab: undefined }}>
                 {player.name}
-              </Anchor>
+              </Link>
             </Table.Td>
             <Table.Td>{player.discord_username ?? '—'}</Table.Td>
           </Table.Tr>

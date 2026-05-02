@@ -88,7 +88,7 @@ function RouteComponent() {
               children: 'This will delete all messages in the test channel. Are you sure?',
               labels: { confirm: 'Clear it', cancel: 'Cancel' },
               confirmProps: { color: 'red' },
-              onConfirm: () => clearTestChannelMutation.mutate({}),
+              onConfirm: () => clearTestChannelMutation.mutate(),
             })
           }
         >

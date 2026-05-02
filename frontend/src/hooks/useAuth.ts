@@ -23,7 +23,7 @@ export const useAuth = () => {
       removeAuthData()
       queryClient.invalidateQueries({ queryKey: getGetFeatureFlagsQueryKey() })
       queryClient.invalidateQueries({ queryKey: getGetHasRoleQueryKey() })
-      navigate({})
+      navigate({ search: { tab: undefined } })
     },
     headers: {
       Authorization: `Bearer ${authData.jwt}`,

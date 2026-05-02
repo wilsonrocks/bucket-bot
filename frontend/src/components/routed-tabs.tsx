@@ -20,14 +20,11 @@ export function Tabs({ defaultValue, children, ...props }: TabsComponentProps) {
       {...props}
       value={activeTab}
       onChange={(value) => {
-        const searchParams = new URLSearchParams(router.state.location.search)
-        if (value != null) searchParams.set('tab', value)
-        else searchParams.delete('tab')
-        void router.navigate({
-          to: router.state.location.pathname,
-          search: Object.fromEntries(searchParams) as Record<string, string>,
-          replace: true,
-        })
+        const params = new URLSearchParams(router.state.location.searchStr)
+        if (value !== null) params.set('tab', value)
+        else params.delete('tab')
+        const qs = params.size > 0 ? `?${params.toString()}` : ''
+        router.history.replace(router.state.location.pathname + qs)
       }}
     >
       {children}

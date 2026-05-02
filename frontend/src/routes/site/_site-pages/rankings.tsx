@@ -56,7 +56,7 @@ export const Route = createFileRoute('/site/_site-pages/rankings')({
     if (!typeCode)
       throw redirect({
         to: '/site/rankings',
-        search: { typeCode: 'ROLLING_YEAR' },
+        search: { typeCode: 'ROLLING_YEAR', tab: undefined },
       })
   },
 })
@@ -127,6 +127,7 @@ function RouteComponent() {
                       <Link
                         to={PlayerRoute.to}
                         params={{ id: player.player_id! }}
+                        search={{ tab: undefined }}
                       >
                         {isMobile ? playerShortName(player) : player.name}
                       </Link>

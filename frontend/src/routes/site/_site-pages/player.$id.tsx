@@ -101,7 +101,7 @@ function RouteComponent() {
                     <Link
                       to={EventRoute.to}
                       params={{ id: tourney.tourneyId }}
-                      search={{}}
+                      search={{ tab: undefined }}
                     >
                       {tourney.tourneyName}
                     </Link>,
@@ -133,9 +133,7 @@ function RouteComponent() {
             value={typeCode}
             onChange={(value) =>
               navigate({
-                search: (
-                  prev: Record<string, unknown>,
-                ): Record<string, unknown> => ({ ...prev, typeCode: value }),
+                search: (prev) => ({ ...prev, typeCode: value ?? undefined }),
               })
             }
           />
@@ -165,7 +163,7 @@ function RouteComponent() {
                     <Link
                       to={TeamRoute.to}
                       params={{ id: String(m.team_id) }}
-                      search={{}}
+                      search={{ tab: undefined }}
                     >
                       {m.team_name}
                     </Link>,

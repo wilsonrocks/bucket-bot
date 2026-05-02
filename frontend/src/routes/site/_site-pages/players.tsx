@@ -18,11 +18,11 @@ function RouteComponent() {
       data={{
         head: ['Name', 'Current Team', 'Events'],
         body: players.map((p) => [
-          <Link to={PlayerRoute.to} params={{ id: p.id }} search={{}}>
+          <Link to={PlayerRoute.to} params={{ id: p.id }} search={{ tab: undefined }}>
             {p.name}
           </Link>,
           p.current_team_id
-            ? <Link to={TeamRoute.to} params={{ id: p.current_team_id }} search={{}}>
+            ? <Link to={TeamRoute.to} params={{ id: String(p.current_team_id) }} search={{ tab: undefined }}>
                 {p.current_team_name}
               </Link>
             : (p.current_team_name ?? '—'),

@@ -27,7 +27,7 @@ export const Route = createFileRoute('/logged-in')({
 
     const json = await response.json()
     localStorage.setItem('auth', JSON.stringify(json))
-    throw redirect({ to: AppRoute.to })
+    throw redirect({ to: AppRoute.to, search: { tab: undefined } })
   },
 })
 

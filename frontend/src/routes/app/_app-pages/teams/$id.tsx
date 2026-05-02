@@ -53,7 +53,7 @@ function RouteComponent() {
   useEffect(() => {
     if (permissionsLoading) return
     if (!rankingReporter && !isTeamCaptain(Number(id))) {
-      navigate({ to: TeamsRoute.to })
+      navigate({ to: TeamsRoute.to, search: { tab: undefined } })
     }
   }, [permissionsLoading, rankingReporter, id])
 
@@ -312,7 +312,7 @@ function RouteComponent() {
         </Group>
         {addMember.isError && (
           <Alert icon={<IconAlertCircle size={16} />} color="red" mt="xs">
-            {addMember.error?.message ?? 'Failed to add member'}
+            {addMember.error?.error ?? 'Failed to add member'}
           </Alert>
         )}
 

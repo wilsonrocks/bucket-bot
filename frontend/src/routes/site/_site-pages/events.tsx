@@ -1,6 +1,6 @@
 import { Link } from '@/components/link'
 import { useGetTourney as useGetAllTourneys, useGetTiers } from '@/api/hooks'
-import { Anchor, Table, Text } from '@mantine/core'
+import { Table, Text } from '@mantine/core'
 import { createFileRoute } from '@tanstack/react-router'
 import { format, parseISO } from 'date-fns'
 import { Route as EventIdRoute } from './event.$id'
@@ -23,9 +23,9 @@ function RouteComponent() {
           data={{
             body: tourneys.data.map(
               ({ id, name, date, players, tier_code }) => [
-                <Anchor component={Link} to={EventIdRoute.to} params={{ id }}>
+                <Link to={EventIdRoute.to} params={{ id }} search={{ tab: undefined }}>
                   {name}
-                </Anchor>,
+                </Link>,
                 date ? format(parseISO(date), 'dd MMM yyyy') : '',
                 players,
                 tier_code && tier_code !== 'EVENT'
