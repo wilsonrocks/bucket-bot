@@ -5,11 +5,11 @@ import { useAuth } from '@/hooks/useAuth'
 import { usePermissions } from '@/hooks/usePermissions'
 import {
   AppShell,
+  Badge,
   Burger,
   Container,
   Group,
   Image,
-  MantineProvider,
   Text,
   Title,
 } from '@mantine/core'
@@ -68,7 +68,7 @@ export const Route = createFileRoute('/app')({
     }, [permissionsLoading, rankingReporter, captainOfTeamIds.length])
 
     return (
-      <MantineProvider defaultColorScheme="dark">
+      <>
         <HeadContent />
         <AppShell
           padding="md"
@@ -95,6 +95,7 @@ export const Route = createFileRoute('/app')({
                   b(<b>UK</b>)et bot
                 </Link>
               </Text>
+              <Badge color="red" variant="filled" size="lg">Admin mode</Badge>
 
               <Text>Hi, {auth?.global_name ?? auth?.username}</Text>
               <NetworkIndicator />
@@ -118,7 +119,7 @@ export const Route = createFileRoute('/app')({
             </Container>
           </AppShell.Main>
         </AppShell>
-      </MantineProvider>
+      </>
     )
   },
 })
