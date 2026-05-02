@@ -151,6 +151,14 @@ import {
   updateFeatureFlag,
   updateFeatureFlagRoute,
 } from "./v1-routes/feature-flags.js";
+import {
+  recentPaintingWinnerHandler,
+  recentPaintingWinnerRoute,
+} from "./v1-routes/painting.js";
+import {
+  communityStatsHandler,
+  communityStatsRoute,
+} from "./v1-routes/stats.js";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) throw new Error("JWT_SECRET is not defined");
@@ -283,6 +291,8 @@ v1Router.openapi(getTeamsRoute, getTeamsHandler);
 v1Router.openapi(getTeamByIdRoute, getTeamByIdHandler);
 v1Router.openapi(teamRankingsRoute, teamRankingsHandler);
 v1Router.openapi(getAllFeatureFlagsRoute, getAllFeatureFlags);
+v1Router.openapi(recentPaintingWinnerRoute, recentPaintingWinnerHandler);
+v1Router.openapi(communityStatsRoute, communityStatsHandler);
 
 // ── JWT middleware (all routes below require authentication) ───────────────
 

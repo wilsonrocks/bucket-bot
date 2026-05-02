@@ -529,6 +529,29 @@ export type GetFeatureFlags200Item = {
   is_enabled: boolean;
 };
 
+export type GetPaintingRecent200 = {
+  /** @nullable */
+  playerId: number | null;
+  playerName: string;
+  tourneyId: number;
+  tourneyName: string;
+  categoryName: string;
+  /** @nullable */
+  imageKey: string | null;
+  /** @nullable */
+  model: string | null;
+};
+
+export type GetPaintingRecent404 = {
+  error: string;
+};
+
+export type GetStatsCommunity200 = {
+  totalPlayers: number;
+  gamesPlayed: number;
+  totalEvents: number;
+};
+
 export type PostLongshanksEventIdBody = {
   tierCode?: string;
 };

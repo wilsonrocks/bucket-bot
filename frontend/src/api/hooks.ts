@@ -52,9 +52,17 @@ import {
   usePostTourney as usePostTourneyGenerated,
   usePutPlayerId as usePutPlayerIdGenerated,
   usePutTeamsId as usePutTeamsIdGenerated,
+  useGetPaintingRecent as useGetPaintingRecentGenerated,
+  useGetStatsCommunity as useGetStatsCommunityGenerated,
 } from './generated/default/default'
 
-import type { GetSearchDiscordUsersParams } from './generated/bucketBotAPI.schemas'
+import type {
+  GetSearchDiscordUsersParams,
+  GetPaintingRecent200,
+  GetStatsCommunity200,
+} from './generated/bucketBotAPI.schemas'
+
+export type { GetPaintingRecent200, GetStatsCommunity200 }
 
 // ── Re-export simple mutations (no invalidation needed) ────────────────────
 export {
@@ -640,4 +648,24 @@ export const usePostGenerateRegionSnapshot = () =>
       customFetch<{ ok: boolean }>('/v1/generate-region-snapshot', {
         method: 'POST',
       }),
+  })
+
+// ── Painting ──────────────────────────────────────────────────────────────────
+
+export const useGetPaintingRecent = (
+  options?: Parameters<typeof useGetPaintingRecentGenerated>[0],
+) =>
+  useGetPaintingRecentGenerated({
+    ...options,
+    query: { ...options?.query, select: (res) => res.data },
+  })
+
+// ── Community Stats ───────────────────────────────────────────────────────────
+
+export const useGetStatsCommunity = (
+  options?: Parameters<typeof useGetStatsCommunityGenerated>[0],
+) =>
+  useGetStatsCommunityGenerated({
+    ...options,
+    query: { ...options?.query, select: (res) => res.data },
   })
