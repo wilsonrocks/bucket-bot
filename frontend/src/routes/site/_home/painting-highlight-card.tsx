@@ -3,6 +3,7 @@ import { Link } from '@/components/link'
 import { useGetPaintingRecent } from '@/api/hooks'
 import { Route as PlayerRoute } from '@/routes/site/_site-pages/player.$id'
 import { Route as EventRoute } from '@/routes/site/_site-pages/event.$id'
+import { Route as BestPaintedRoute } from '@/routes/site/_site-pages/best-painted'
 
 export function PaintingHighlightCard() {
   const { data, isLoading } = useGetPaintingRecent()
@@ -49,6 +50,9 @@ export function PaintingHighlightCard() {
           </>
         )}
       </div>
+      <Link to={BestPaintedRoute.to} search={{ painting: undefined, tab: undefined }} size="sm" mt="sm">
+        All best painted →
+      </Link>
     </Card>
   )
 }

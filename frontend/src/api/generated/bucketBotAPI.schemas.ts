@@ -552,6 +552,26 @@ export type GetPaintingRecent404 = {
   error: string;
 };
 
+export type GetPaintingAll200Item = {
+  id: number;
+  /** @nullable */
+  playerId: number | null;
+  playerName: string;
+  tourneyId: number;
+  tourneyName: string;
+  tourneyDate: string;
+  categoryId: number;
+  categoryName: string;
+  /** @nullable */
+  imageKey: string | null;
+  /** @nullable */
+  model: string | null;
+  /** @nullable */
+  description: string | null;
+  position: number;
+  totalWinners: number;
+};
+
 export type GetStatsCommunity200 = {
   totalPlayers: number;
   gamesPlayed: number;

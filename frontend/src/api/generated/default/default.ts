@@ -38,6 +38,7 @@ import type {
   GetHasRole200,
   GetHasRole400,
   GetHasRole500,
+  GetPaintingAll200Item,
   GetPaintingRecent200,
   GetPaintingRecent404,
   GetPlayerId200,
@@ -3221,6 +3222,110 @@ export function useGetPaintingRecent<TData = Awaited<ReturnType<typeof getPainti
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetPaintingRecentQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+export type getPaintingAllResponse200 = {
+  data: GetPaintingAll200Item[]
+  status: 200
+}
+
+export type getPaintingAllResponseSuccess = (getPaintingAllResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getPaintingAllResponse = (getPaintingAllResponseSuccess)
+
+export const getGetPaintingAllUrl = () => {
+
+
+  
+
+  return `/v1/painting/all`
+}
+
+export const getPaintingAll = async ( options?: RequestInit): Promise<getPaintingAllResponse> => {
+  
+  return customFetch<getPaintingAllResponse>(getGetPaintingAllUrl(),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
+
+export const getGetPaintingAllQueryKey = () => {
+    return [
+    `/v1/painting/all`
+    ] as const;
+    }
+
+    
+export const getGetPaintingAllQueryOptions = <TData = Awaited<ReturnType<typeof getPaintingAll>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPaintingAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPaintingAllQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPaintingAll>>> = ({ signal }) => getPaintingAll({ signal, ...requestOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPaintingAll>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetPaintingAllQueryResult = NonNullable<Awaited<ReturnType<typeof getPaintingAll>>>
+export type GetPaintingAllQueryError = unknown
+
+
+export function useGetPaintingAll<TData = Awaited<ReturnType<typeof getPaintingAll>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPaintingAll>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPaintingAll>>,
+          TError,
+          Awaited<ReturnType<typeof getPaintingAll>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPaintingAll<TData = Awaited<ReturnType<typeof getPaintingAll>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPaintingAll>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPaintingAll>>,
+          TError,
+          Awaited<ReturnType<typeof getPaintingAll>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPaintingAll<TData = Awaited<ReturnType<typeof getPaintingAll>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPaintingAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetPaintingAll<TData = Awaited<ReturnType<typeof getPaintingAll>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPaintingAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetPaintingAllQueryOptions(options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

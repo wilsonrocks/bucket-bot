@@ -152,6 +152,8 @@ import {
   updateFeatureFlagRoute,
 } from "./v1-routes/feature-flags.js";
 import {
+  allPaintingWinnersHandler,
+  allPaintingWinnersRoute,
   recentPaintingWinnerHandler,
   recentPaintingWinnerRoute,
 } from "./v1-routes/painting.js";
@@ -292,6 +294,7 @@ v1Router.openapi(getTeamByIdRoute, getTeamByIdHandler);
 v1Router.openapi(teamRankingsRoute, teamRankingsHandler);
 v1Router.openapi(getAllFeatureFlagsRoute, getAllFeatureFlags);
 v1Router.openapi(recentPaintingWinnerRoute, recentPaintingWinnerHandler);
+v1Router.openapi(allPaintingWinnersRoute, allPaintingWinnersHandler);
 v1Router.openapi(communityStatsRoute, communityStatsHandler);
 
 // ── JWT middleware (all routes below require authentication) ───────────────

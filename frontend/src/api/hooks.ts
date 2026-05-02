@@ -52,17 +52,19 @@ import {
   usePostTourney as usePostTourneyGenerated,
   usePutPlayerId as usePutPlayerIdGenerated,
   usePutTeamsId as usePutTeamsIdGenerated,
+  useGetPaintingAll as useGetPaintingAllGenerated,
   useGetPaintingRecent as useGetPaintingRecentGenerated,
   useGetStatsCommunity as useGetStatsCommunityGenerated,
 } from './generated/default/default'
 
 import type {
   GetSearchDiscordUsersParams,
+  GetPaintingAll200Item,
   GetPaintingRecent200,
   GetStatsCommunity200,
 } from './generated/bucketBotAPI.schemas'
 
-export type { GetPaintingRecent200, GetStatsCommunity200 }
+export type { GetPaintingAll200Item, GetPaintingRecent200, GetStatsCommunity200 }
 
 // ── Re-export simple mutations (no invalidation needed) ────────────────────
 export {
@@ -651,6 +653,14 @@ export const usePostGenerateRegionSnapshot = () =>
   })
 
 // ── Painting ──────────────────────────────────────────────────────────────────
+
+export const useGetPaintingAll = (
+  options?: Parameters<typeof useGetPaintingAllGenerated>[0],
+) =>
+  useGetPaintingAllGenerated({
+    ...options,
+    query: { ...options?.query, select: (res) => res.data },
+  })
 
 export const useGetPaintingRecent = (
   options?: Parameters<typeof useGetPaintingRecentGenerated>[0],
