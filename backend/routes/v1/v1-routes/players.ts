@@ -1,5 +1,5 @@
 import { createRoute, z, type RouteHandler } from "@hono/zod-openapi";
-import type { Kysely } from "kysely";
+import { sql, type Kysely } from "kysely";
 import type { DB } from "kysely-codegen";
 import type { AppEnv } from "../../../hono-env.js";
 import { isRankingReporter } from "../permissions.js";
@@ -202,6 +202,109 @@ export const getPlayerTeams: RouteHandler<
     .execute();
 
   return c.json(memberships as any, 200);
+};
+
+const PlayerPaintingWinSchema = z.object({
+  id: z.number(),
+  tourneyId: z.number(),
+  tourneyName: z.string(),
+  tourneyDate: z.string().nullable(),
+  categoryId: z.number(),
+  categoryName: z.string(),
+  position: z.number(),
+  totalWinners: z.number(),
+  model: z.string().nullable(),
+  description: z.string().nullable(),
+  imageKey: z.string().nullable(),
+});
+
+export const getPlayerPaintingWinsRoute = createRoute({
+  method: "get",
+  path: "/player/{id}/painting-wins",
+  request: {
+    params: z.object({ id: z.string() }),
+  },
+  responses: {
+    200: {
+      content: {
+        "application/json": { schema: z.array(PlayerPaintingWinSchema) },
+      },
+      description: "Best-painted wins for a player",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Invalid player ID",
+    },
+  },
+});
+
+export const getPlayerPaintingWins: RouteHandler<
+  typeof getPlayerPaintingWinsRoute,
+  AppEnv
+> = async (c) => {
+  const { id } = c.req.valid("param");
+  const playerId = Number(id);
+  if (isNaN(playerId)) {
+    return c.json({ error: "Invalid player ID" }, 400);
+  }
+
+  const db = c.get("db");
+
+  const wins = await db
+    .selectFrom("painting_winner")
+    .innerJoin(
+      "painting_category",
+      "painting_winner.category_id" as any,
+      "painting_category.id",
+    )
+    .innerJoin("tourney", "painting_category.tourney_id", "tourney.id")
+    .innerJoin(
+      "player_identity",
+      "painting_winner.player_identity_id" as any,
+      "player_identity.id",
+    )
+    .where("player_identity.player_id", "=", playerId)
+    .select([
+      "painting_winner.id as id",
+      "tourney.id as tourneyId",
+      "tourney.name as tourneyName",
+      "tourney.date as tourneyDate",
+      "painting_category.id as categoryId",
+      "painting_category.name as categoryName",
+      "painting_winner.position",
+      "painting_winner.model",
+      "painting_winner.image_key as imageKey" as any,
+      "painting_winner.description" as any,
+    ])
+    .orderBy("tourney.date", "desc")
+    .orderBy("painting_winner.position", "asc")
+    .execute();
+
+  if (wins.length === 0) return c.json([], 200);
+
+  const categoryIds = Array.from(
+    new Set((wins as any[]).map((w) => w.categoryId)),
+  );
+  const totals = await db
+    .selectFrom("painting_winner")
+    .where("painting_winner.category_id" as any, "in", categoryIds)
+    .select([
+      "painting_winner.category_id as categoryId" as any,
+      sql<number>`count(*)::int`.as("totalWinners"),
+    ])
+    .groupBy("painting_winner.category_id" as any)
+    .execute();
+
+  const totalsByCat = new Map<number, number>(
+    (totals as any[]).map((t) => [t.categoryId, t.totalWinners]),
+  );
+
+  const result = (wins as any[]).map((w) => ({
+    ...w,
+    totalWinners: totalsByCat.get(w.categoryId) ?? 1,
+  }));
+
+  return c.json(result as any, 200);
 };
 
 const UpdatePlayerBodySchema = z.object({

@@ -22,6 +22,7 @@ import {
   useGetFactionsOverTime as useGetFactionsOverTimeGenerated,
   useGetHasRole as useGetHasRoleGenerated,
   useGetPlayerId as useGetPlayerIdGenerated,
+  useGetPlayerIdPaintingWins as useGetPlayerIdPaintingWinsGenerated,
   useGetPlayerIdTeams as useGetPlayerIdTeamsGenerated,
   useGetPlayerNameExistsPlayerId as useGetPlayerNameExistsPlayerIdGenerated,
   useGetPlayers as useGetPlayersGenerated,
@@ -58,6 +59,7 @@ import {
 import type {
   GetHasRole200,
   GetPlayerId200,
+  GetPlayerIdPaintingWins200Item,
   GetPlayerIdTeams200Item,
   GetPlayerNameExistsPlayerId200,
   GetRankingsPlayerIdTypeCode200,
@@ -239,6 +241,18 @@ export const useGetPlayerIdTeams = (
     query: {
       ...options?.query,
       select: (res) => res.data as GetPlayerIdTeams200Item[],
+    },
+  })
+
+export const useGetPlayerIdPaintingWins = (
+  id: string,
+  options?: Parameters<typeof useGetPlayerIdPaintingWinsGenerated>[1],
+) =>
+  useGetPlayerIdPaintingWinsGenerated(id, {
+    ...options,
+    query: {
+      ...options?.query,
+      select: (res) => res.data as GetPlayerIdPaintingWins200Item[],
     },
   })
 

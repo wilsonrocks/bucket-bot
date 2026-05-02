@@ -1,4 +1,4 @@
-import { Badge, Select, Table, Tabs, Title } from '@mantine/core'
+import { Badge, Image, Select, Table, Tabs, Title } from '@mantine/core'
 
 type PlayerTourneyItem = {
   tourneyId: number
@@ -13,8 +13,11 @@ import z from 'zod'
 
 import { LazyPlayerRankingOverTimeChart } from '@/components/charts'
 import { Link } from '@/components/link'
+import { FeatureFlag } from '@/components/FeatureFlag'
+import { PaintingLightbox, positionLabel } from '@/components/painting-lightbox'
 import {
   useGetPlayerId,
+  useGetPlayerIdPaintingWins,
   useGetPlayerIdTeams,
   useGetRankingTypes,
   useGetRankingsPlayerIdTypeCode,
@@ -29,6 +32,7 @@ export const Route = createFileRoute('/site/_site-pages/player/$id')({
   validateSearch: z.object({
     typeCode: z.string().default('ROLLING_YEAR'),
     tab: z.string().default('events'),
+    painting: z.coerce.number().optional(),
   }),
 
   component: RouteComponent,
@@ -38,14 +42,34 @@ export const Route = createFileRoute('/site/_site-pages/player/$id')({
 function RouteComponent() {
   const { id } = Route.useParams()
   const rankingTypes = useGetRankingTypes()
-  const { typeCode, tab } = Route.useSearch()
+  const { typeCode, tab, painting: activePaintingId } = Route.useSearch()
   const rankingsData = useGetRankingsPlayerIdTypeCode(String(id), typeCode, { query: { enabled: !!typeCode } })
   const playerData = useGetPlayerId(String(id))
   const navigate = Route.useNavigate()
   const tourneys = useGetTourneysPlayerPlayerId(String(id))
   const teams = useGetPlayerIdTeams(String(id))
+  const paintingWins = useGetPlayerIdPaintingWins(String(id))
 
   if (!playerData.data) return <div>Loading...</div>
+
+  const wins = paintingWins.data ?? []
+  const activeWinner = activePaintingId
+    ? wins.find((w) => w.id === activePaintingId) ?? null
+    : null
+  const activeWinnerForLightbox = activeWinner
+    ? {
+        id: activeWinner.id,
+        imageKey: activeWinner.imageKey,
+        playerName: playerData.data.name,
+        playerId: id,
+        model: activeWinner.model,
+        description: activeWinner.description,
+        categoryName: activeWinner.categoryName,
+        position: activeWinner.position,
+        totalWinners: activeWinner.totalWinners,
+      }
+    : null
+
   return (
     <div>
       <Title order={3} mb="md">
@@ -62,6 +86,9 @@ function RouteComponent() {
           <Tabs.Tab value="events">Events</Tabs.Tab>
           <Tabs.Tab value="rankings">Rankings</Tabs.Tab>
           <Tabs.Tab value="teams">Teams</Tabs.Tab>
+          <FeatureFlag flag="BEST_PAINTED">
+            {wins.length > 0 && <Tabs.Tab value="painting">Painting</Tabs.Tab>}
+          </FeatureFlag>
         </Tabs.List>
 
         <Tabs.Panel value="events">
@@ -157,7 +184,51 @@ function RouteComponent() {
             'Loading...'
           )}
         </Tabs.Panel>
+        <Tabs.Panel value="painting">
+          <FeatureFlag flag="BEST_PAINTED">
+            <Table
+              data={{
+                head: ['', 'Event', 'Category', 'Position', 'Date'],
+                body: wins.map((w) => [
+                  w.imageKey ? (
+                    <Image
+                      src={`${import.meta.env.VITE_ASSETS_URL}/${w.imageKey}-w150.png`}
+                      alt={`${w.categoryName} — ${w.tourneyName}`}
+                      radius="sm"
+                      w={80}
+                      style={{ cursor: 'pointer' }}
+                      onClick={() =>
+                        navigate({ search: (prev) => ({ ...prev, painting: w.id }) })
+                      }
+                    />
+                  ) : null,
+                  <Link
+                    to={EventRoute.to}
+                    params={{ id: w.tourneyId }}
+                    search={{ tab: 'best-painted' }}
+                  >
+                    {w.tourneyName}
+                  </Link>,
+                  w.categoryName,
+                  positionLabel(w.position, w.totalWinners),
+                  w.tourneyDate
+                    ? formatDate(new Date(w.tourneyDate), 'd MMMM yyyy')
+                    : '—',
+                ]),
+              }}
+            />
+          </FeatureFlag>
+        </Tabs.Panel>
       </Tabs>
+
+      <FeatureFlag flag="BEST_PAINTED">
+        <PaintingLightbox
+          winner={activeWinnerForLightbox}
+          onClose={() =>
+            navigate({ search: (prev) => ({ ...prev, painting: undefined }) })
+          }
+        />
+      </FeatureFlag>
     </div>
   )
 }

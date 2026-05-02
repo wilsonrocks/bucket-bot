@@ -284,6 +284,28 @@ export type GetPlayerIdTeams400 = {
   error: string;
 };
 
+export type GetPlayerIdPaintingWins200Item = {
+  id: number;
+  tourneyId: number;
+  tourneyName: string;
+  /** @nullable */
+  tourneyDate: string | null;
+  categoryId: number;
+  categoryName: string;
+  position: number;
+  totalWinners: number;
+  /** @nullable */
+  model: string | null;
+  /** @nullable */
+  description: string | null;
+  /** @nullable */
+  imageKey: string | null;
+};
+
+export type GetPlayerIdPaintingWins400 = {
+  error: string;
+};
+
 export type GetTiers200Item = {
   code: string;
   name: string;

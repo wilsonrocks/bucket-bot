@@ -41,6 +41,8 @@ import type {
   GetPlayerId200,
   GetPlayerId400,
   GetPlayerId404,
+  GetPlayerIdPaintingWins200Item,
+  GetPlayerIdPaintingWins400,
   GetPlayerIdTeams200Item,
   GetPlayerIdTeams400,
   GetPlayerNameExistsPlayerId200,
@@ -1689,6 +1691,117 @@ export function useGetPlayerIdTeams<TData = Awaited<ReturnType<typeof getPlayerI
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetPlayerIdTeamsQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+export type getPlayerIdPaintingWinsResponse200 = {
+  data: GetPlayerIdPaintingWins200Item[]
+  status: 200
+}
+
+export type getPlayerIdPaintingWinsResponse400 = {
+  data: GetPlayerIdPaintingWins400
+  status: 400
+}
+
+export type getPlayerIdPaintingWinsResponseSuccess = (getPlayerIdPaintingWinsResponse200) & {
+  headers: Headers;
+};
+export type getPlayerIdPaintingWinsResponseError = (getPlayerIdPaintingWinsResponse400) & {
+  headers: Headers;
+};
+
+export type getPlayerIdPaintingWinsResponse = (getPlayerIdPaintingWinsResponseSuccess | getPlayerIdPaintingWinsResponseError)
+
+export const getGetPlayerIdPaintingWinsUrl = (id: string,) => {
+
+
+  
+
+  return `/v1/player/${id}/painting-wins`
+}
+
+export const getPlayerIdPaintingWins = async (id: string, options?: RequestInit): Promise<getPlayerIdPaintingWinsResponse> => {
+  
+  return customFetch<getPlayerIdPaintingWinsResponse>(getGetPlayerIdPaintingWinsUrl(id),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
+
+export const getGetPlayerIdPaintingWinsQueryKey = (id: string,) => {
+    return [
+    `/v1/player/${id}/painting-wins`
+    ] as const;
+    }
+
+    
+export const getGetPlayerIdPaintingWinsQueryOptions = <TData = Awaited<ReturnType<typeof getPlayerIdPaintingWins>>, TError = GetPlayerIdPaintingWins400>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlayerIdPaintingWins>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPlayerIdPaintingWinsQueryKey(id);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPlayerIdPaintingWins>>> = ({ signal }) => getPlayerIdPaintingWins(id, { signal, ...requestOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPlayerIdPaintingWins>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetPlayerIdPaintingWinsQueryResult = NonNullable<Awaited<ReturnType<typeof getPlayerIdPaintingWins>>>
+export type GetPlayerIdPaintingWinsQueryError = GetPlayerIdPaintingWins400
+
+
+export function useGetPlayerIdPaintingWins<TData = Awaited<ReturnType<typeof getPlayerIdPaintingWins>>, TError = GetPlayerIdPaintingWins400>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlayerIdPaintingWins>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPlayerIdPaintingWins>>,
+          TError,
+          Awaited<ReturnType<typeof getPlayerIdPaintingWins>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPlayerIdPaintingWins<TData = Awaited<ReturnType<typeof getPlayerIdPaintingWins>>, TError = GetPlayerIdPaintingWins400>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlayerIdPaintingWins>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPlayerIdPaintingWins>>,
+          TError,
+          Awaited<ReturnType<typeof getPlayerIdPaintingWins>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPlayerIdPaintingWins<TData = Awaited<ReturnType<typeof getPlayerIdPaintingWins>>, TError = GetPlayerIdPaintingWins400>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlayerIdPaintingWins>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetPlayerIdPaintingWins<TData = Awaited<ReturnType<typeof getPlayerIdPaintingWins>>, TError = GetPlayerIdPaintingWins400>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPlayerIdPaintingWins>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetPlayerIdPaintingWinsQueryOptions(id,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
