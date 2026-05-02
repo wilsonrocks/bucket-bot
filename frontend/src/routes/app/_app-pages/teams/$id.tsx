@@ -127,8 +127,12 @@ function RouteComponent() {
           onSubmit={editForm.onSubmit(async (values) => {
             let image_key = values.image_key
             if (imageFile) {
-              image_key = await uploadTeamImage(imageFile, 'team')
-              setImageFile(null)
+              try {
+                image_key = await uploadTeamImage(imageFile, 'team')
+                setImageFile(null)
+              } catch {
+                return
+              }
             }
             updateTeam.mutate({
               id,

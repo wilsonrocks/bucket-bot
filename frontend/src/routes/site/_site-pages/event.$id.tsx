@@ -1,9 +1,10 @@
-import { Box, Image, Modal, SimpleGrid, Table, Tabs, Text, Title } from '@mantine/core'
+import { Box, Image, SimpleGrid, Table, Tabs, Text, Title } from '@mantine/core'
 import { createFileRoute } from '@tanstack/react-router'
 import z from 'zod'
 import { useGetTourneyId } from '@/api/hooks'
 import { Link } from '@/components/link'
 import { FeatureFlag } from '@/components/FeatureFlag'
+import { PaintingLightbox, positionLabel } from '@/components/painting-lightbox'
 import { Route as PlayerRoute } from '@/routes/site/_site-pages/player.$id'
 
 type TourneyPlayer = {
@@ -24,12 +25,6 @@ export const Route = createFileRoute('/site/_site-pages/event/$id')({
     painting: z.coerce.number().optional(),
   }),
 })
-
-function positionLabel(position: number, total: number): string {
-  if (total === 1) return 'Winner'
-  const suffixes: Record<number, string> = { 1: 'st', 2: 'nd', 3: 'rd' }
-  return `${position}${suffixes[position] ?? 'th'}`
-}
 
 function RouteComponent() {
   const { id } = Route.useParams()
@@ -55,7 +50,7 @@ function RouteComponent() {
             totalWinners: cat.winners.length,
           }))
         )
-        .find((w: any) => w.id === activePaintingId)
+        .find((w: any) => w.id === activePaintingId) ?? null
     : null
 
   const activeTab = tab ?? 'results'
@@ -117,7 +112,21 @@ function RouteComponent() {
                         w={150}
                       />
                       <Text size="xs" c="dimmed" mt={4} ta="center">
-                        {positionLabel(winner.position, cat.winners.length)} — {winner.playerName}
+                        {positionLabel(winner.position, cat.winners.length)} —{' '}
+                        {winner.playerId != null ? (
+                          <span onClick={(e) => e.stopPropagation()}>
+                            <Link
+                              to={PlayerRoute.to}
+                              params={{ id: winner.playerId }}
+                              search={{ tab: 'painting' }}
+                              target="painting"
+                            >
+                              {winner.playerName}
+                            </Link>
+                          </span>
+                        ) : (
+                          winner.playerName
+                        )}
                       </Text>
                     </Box>
                   ))}
@@ -129,33 +138,11 @@ function RouteComponent() {
         </Tabs.Panel>
       </Tabs>
 
-      <Modal
-        opened={!!activeWinner}
+      <PaintingLightbox
+        winner={activeWinner}
         onClose={() => navigate({ search: (prev) => ({ ...prev, painting: undefined }) })}
-        size="xl"
-        centered
-        title={
-          activeWinner
-            ? `${activeWinner.categoryName} — ${positionLabel(activeWinner.position, activeWinner.totalWinners)}`
-            : ''
-        }
-      >
-        {activeWinner && (
-          <Box>
-            <Image
-              src={`${import.meta.env.VITE_ASSETS_URL}/${activeWinner.imageKey}-w800.png`}
-              alt={activeWinner.playerName}
-              radius="sm"
-              fit="contain"
-              mah={500}
-              mb="md"
-            />
-            <Text fw={600}>{activeWinner.playerName}</Text>
-            {activeWinner.model && <Text size="sm" c="dimmed">{activeWinner.model}</Text>}
-            {activeWinner.description && <Text size="sm" mt="xs">{activeWinner.description}</Text>}
-          </Box>
-        )}
-      </Modal>
+        linkPlayerName
+      />
     </div>
   )
 }

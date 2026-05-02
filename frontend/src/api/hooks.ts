@@ -1,6 +1,7 @@
 // TODO what is with all this as 200s what if these endpoints fail
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { notifications } from '@mantine/notifications'
 import { customFetch } from './custom-instance'
 import {
   getGetFeatureFlagsQueryKey,
@@ -21,6 +22,7 @@ import {
   useGetFactionsOverTime as useGetFactionsOverTimeGenerated,
   useGetHasRole as useGetHasRoleGenerated,
   useGetPlayerId as useGetPlayerIdGenerated,
+  useGetPlayerIdPaintingWins as useGetPlayerIdPaintingWinsGenerated,
   useGetPlayerIdTeams as useGetPlayerIdTeamsGenerated,
   useGetPlayerNameExistsPlayerId as useGetPlayerNameExistsPlayerIdGenerated,
   useGetPlayers as useGetPlayersGenerated,
@@ -57,6 +59,7 @@ import {
 import type {
   GetHasRole200,
   GetPlayerId200,
+  GetPlayerIdPaintingWins200Item,
   GetPlayerIdTeams200Item,
   GetPlayerNameExistsPlayerId200,
   GetRankingsPlayerIdTypeCode200,
@@ -238,6 +241,18 @@ export const useGetPlayerIdTeams = (
     query: {
       ...options?.query,
       select: (res) => res.data as GetPlayerIdTeams200Item[],
+    },
+  })
+
+export const useGetPlayerIdPaintingWins = (
+  id: string,
+  options?: Parameters<typeof useGetPlayerIdPaintingWinsGenerated>[1],
+) =>
+  useGetPlayerIdPaintingWinsGenerated(id, {
+    ...options,
+    query: {
+      ...options?.query,
+      select: (res) => res.data as GetPlayerIdPaintingWins200Item[],
     },
   })
 
@@ -545,7 +560,15 @@ export const uploadTeamImage = async (
       body: formData,
     },
   )
-  if (!response.ok) throw new Error(`Upload failed: ${response.statusText}`)
+  if (!response.ok) {
+    let message = `Upload failed: ${response.statusText}`
+    try {
+      const body = await response.json()
+      if (body?.error) message = body.error
+    } catch {}
+    notifications.show({ title: 'Error', message, color: 'red' })
+    throw new Error(message)
+  }
   const { key } = (await response.json()) as { key: string }
   return key
 }
