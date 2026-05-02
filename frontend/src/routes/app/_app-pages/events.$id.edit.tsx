@@ -328,7 +328,9 @@ function RouteComponent() {
             color="green"
             loading={updateTourney.isPending}
             onClick={async () => {
-              const processedCategories = await Promise.all(
+              let processedCategories
+              try {
+                processedCategories = await Promise.all(
                 detailsForm.values.paintingCategories.map(async (cat) => ({
                   id: cat.id,
                   name: cat.name,
@@ -349,6 +351,9 @@ function RouteComponent() {
                   )
                 }))
               )
+              } catch {
+                return
+              }
 
               updateTourney.mutate({
                 data: {

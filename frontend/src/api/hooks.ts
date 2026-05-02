@@ -1,6 +1,7 @@
 // TODO what is with all this as 200s what if these endpoints fail
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { notifications } from '@mantine/notifications'
 import { customFetch } from './custom-instance'
 import {
   getGetFeatureFlagsQueryKey,
@@ -545,7 +546,15 @@ export const uploadTeamImage = async (
       body: formData,
     },
   )
-  if (!response.ok) throw new Error(`Upload failed: ${response.statusText}`)
+  if (!response.ok) {
+    let message = `Upload failed: ${response.statusText}`
+    try {
+      const body = await response.json()
+      if (body?.error) message = body.error
+    } catch {}
+    notifications.show({ title: 'Error', message, color: 'red' })
+    throw new Error(message)
+  }
   const { key } = (await response.json()) as { key: string }
   return key
 }
