@@ -1,5 +1,13 @@
 import { useGetRankingTypes, useGetTeamRankingsTypeCode } from '@/api/hooks'
-import { Group, ScrollArea, Select, Table, Text } from '@mantine/core'
+import {
+  Group,
+  ScrollArea,
+  Select,
+  Table,
+  Text,
+  Tooltip,
+} from '@mantine/core'
+import { TeamAvatar } from '@/components/team-avatar'
 import { useMediaQuery } from '@mantine/hooks'
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { Route as TeamRoute } from '@/routes/site/_site-pages/team.$id'
@@ -64,7 +72,7 @@ function RouteComponent() {
   const navigate = Route.useNavigate()
   const isMd = useMediaQuery('(min-width: 992px)')
 
-const { typeCode } = Route.useSearch()
+  const { typeCode } = Route.useSearch()
   const rankingTypes = useGetRankingTypes()
   const rankingDescription = rankingTypes.data?.find(
     (rt) => rt.code === typeCode,
@@ -97,10 +105,9 @@ const { typeCode } = Route.useSearch()
           <Tabs.Tab value="animation">Animation</Tabs.Tab>
         </Tabs.List>
         <Tabs.Panel value="table">
-          Team ranking points are calculated as the sum of the ranking points
-          of the top five players in the team. Since individual points are
-          from a player's top 5 performances, there's a cap of 25 events for a
-          team.
+          Team ranking points are calculated as the sum of the ranking points of
+          the top five players in the team. Since individual points are from a
+          player's top 5 performances, there's a cap of 25 events for a team.
           {rankings.data ? (
             <div
               style={{
@@ -116,11 +123,7 @@ const { typeCode } = Route.useSearch()
               }}
             >
               <ScrollArea type="auto">
-                <Table
-                  tabularNums
-                  stickyHeader
-                  stickyHeaderOffset={0}
-                >
+                <Table tabularNums stickyHeader stickyHeaderOffset={0}>
                   <Table.Thead>
                     <Table.Tr>
                       <Table.Th w={1} style={{ whiteSpace: 'nowrap' }}>
@@ -129,6 +132,7 @@ const { typeCode } = Route.useSearch()
                       <Table.Th w={1} style={{ whiteSpace: 'nowrap' }}>
                         Change
                       </Table.Th>
+                      <Table.Th w={1}>Logo</Table.Th>
                       <Table.Th>Team</Table.Th>
                       <Table.Th>Total Points</Table.Th>
                       <Table.Th w={1} style={{ whiteSpace: 'nowrap' }}>
@@ -150,6 +154,11 @@ const { typeCode } = Route.useSearch()
                             change={team.rank_change}
                             isNew={team.new_team}
                           />
+                        </Table.Td>
+                        <Table.Td w={1}>
+                          <Tooltip label={team.team_name} withArrow>
+                            <TeamAvatar image_key={team.image_key} name={team.team_name} />
+                          </Tooltip>
                         </Table.Td>
                         <Table.Td>
                           <Link
