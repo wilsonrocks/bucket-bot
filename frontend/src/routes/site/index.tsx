@@ -1,11 +1,12 @@
 import { SimpleGrid } from '@mantine/core'
 import { createFileRoute } from '@tanstack/react-router'
-import { PaintingHighlightCard } from './_home/painting-highlight-card'
-import { TopPlayersCard } from './_home/top-players-card'
-import { RecentEventCard } from './_home/recent-event-card'
-import { RegionsMapCard } from './_home/regions-map-card'
-import { CommunityStatsCard } from './_home/community-stats-card'
-import { TeamStandingsCard } from './_home/team-standings-card'
+import { PaintingHighlightCard } from '@/components/home/painting-highlight-card'
+import { TopPlayersCard } from '@/components/home/top-players-card'
+import { RecentEventCard } from '@/components/home/recent-event-card'
+import { RegionsMapCard } from '@/components/home/regions-map-card'
+import { CommunityStatsCard } from '@/components/home/community-stats-card'
+import { TeamStandingsCard } from '@/components/home/team-standings-card'
+import { FactionCard } from '@/components/home/faction-card'
 
 export const Route = createFileRoute('/site/')({
   component: HomePage,
@@ -21,6 +22,7 @@ function HomePage() {
       <RegionsMapCard />
       <RecentEventCard />
       <CommunityStatsCard />
+      <FactionCard />
     </SimpleGrid>
   )
 }
