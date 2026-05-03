@@ -515,6 +515,8 @@ export type GetTeamRankingsTypeCode200Item = {
   batch_id: number;
   team_id: number;
   team_name: string;
+  /** @nullable */
+  image_key: string | null;
   rank: number;
   total_points: number;
   /** @nullable */

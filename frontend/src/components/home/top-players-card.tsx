@@ -1,4 +1,14 @@
-import { Avatar, Card, Group, Skeleton, Stack, Table, Text, Title, Tooltip } from '@mantine/core'
+import {
+  Card,
+  Group,
+  Skeleton,
+  Stack,
+  Table,
+  Text,
+  Title,
+  Tooltip,
+} from '@mantine/core'
+import { TeamAvatar } from '@/components/team-avatar'
 import { Link } from '@/components/link'
 import { useGetRankingsTypeCode } from '@/api/hooks'
 import { Route as PlayerRoute } from '@/routes/site/_site-pages/player.$id'
@@ -10,8 +20,16 @@ export function TopPlayersCard() {
   const top5 = data?.slice(0, 5) ?? []
 
   return (
-    <Card withBorder padding="md" h="100%" mih={280} style={{ display: 'flex', flexDirection: 'column' }}>
-      <Title order={3} mb="sm">Top Players</Title>
+    <Card
+      withBorder
+      padding="md"
+      h="100%"
+      mih={280}
+      style={{ display: 'flex', flexDirection: 'column' }}
+    >
+      <Title order={3} mb="sm">
+        Top Players
+      </Title>
       <div style={{ flex: 1 }}>
         {isLoading ? (
           <Stack gap={8}>
@@ -24,25 +42,31 @@ export function TopPlayersCard() {
             <Table.Tbody>
               {top5.map((player) => (
                 <Table.Tr key={player.player_id}>
-                  <Table.Td w={30} c="dimmed">#{player.rank}</Table.Td>
+                  <Table.Td w={30} c="dimmed">
+                    #{player.rank}
+                  </Table.Td>
                   <Table.Td>
                     <Group gap="xs" wrap="nowrap">
                       {player.current_team_id != null && (
                         <Tooltip label={player.current_team_name} withArrow>
-                          <Link to={TeamRoute.to} params={{ id: String(player.current_team_id) }} search={{ tab: undefined }}>
-                            <Avatar
-                              src={player.team_image_key ? `${import.meta.env.VITE_ASSETS_URL}/${player.team_image_key}-w150.png` : null}
-                              alt={player.current_team_name ?? ''}
-                              size={22}
-                              radius="sm"
-                            >
-                              {(player.current_team_name ?? '?')[0]}
-                            </Avatar>
+                          <Link
+                            to={TeamRoute.to}
+                            params={{ id: String(player.current_team_id) }}
+                            search={{ tab: undefined }}
+                          >
+                            <TeamAvatar
+                              image_key={player.team_image_key}
+                              name={player.current_team_name ?? '?'}
+                            />
                           </Link>
                         </Tooltip>
                       )}
                       {player.player_id != null ? (
-                        <Link to={PlayerRoute.to} params={{ id: player.player_id }} search={{ tab: undefined }}>
+                        <Link
+                          to={PlayerRoute.to}
+                          params={{ id: player.player_id }}
+                          search={{ tab: undefined }}
+                        >
                           {player.name}
                         </Link>
                       ) : (
@@ -50,7 +74,9 @@ export function TopPlayersCard() {
                       )}
                     </Group>
                   </Table.Td>
-                  <Table.Td ta="right" c="dimmed">{player.total_points?.toFixed(0)} pts</Table.Td>
+                  <Table.Td ta="right" c="dimmed">
+                    {player.total_points?.toFixed(0)} pts
+                  </Table.Td>
                 </Table.Tr>
               ))}
             </Table.Tbody>

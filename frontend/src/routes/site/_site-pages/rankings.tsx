@@ -1,9 +1,11 @@
 import { useGetRankingTypes, useGetRankingsTypeCode } from '@/api/hooks'
 import { playerShortName } from '@/helpers/player-short-name'
-import { Group, Select, Table, Text } from '@mantine/core'
+import { Group, Select, Table, Text, Tooltip } from '@mantine/core'
+import { TeamAvatar } from '@/components/team-avatar'
 import { useMediaQuery } from '@mantine/hooks'
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { Route as PlayerRoute } from '@/routes/site/_site-pages/player.$id'
+import { Route as TeamRoute } from '@/routes/site/_site-pages/team.$id'
 import z from 'zod'
 import { Link } from '@/components/link'
 import { Tabs } from '@/components/routed-tabs'
@@ -121,16 +123,36 @@ function RouteComponent() {
                       {player.rank}
                     </Table.Td>
                     <Table.Td w={1} style={{ whiteSpace: 'nowrap' }}>
-                      <RankChange change={player.rank_change} newPlayer={player.new_player} />
+                      <RankChange
+                        change={player.rank_change}
+                        newPlayer={player.new_player}
+                      />
                     </Table.Td>
                     <Table.Td>
-                      <Link
-                        to={PlayerRoute.to}
-                        params={{ id: player.player_id! }}
-                        search={{ tab: undefined }}
-                      >
-                        {isMobile ? playerShortName(player) : player.name}
-                      </Link>
+                      <Group gap="xs" wrap="nowrap">
+                        <Link
+                          to={PlayerRoute.to}
+                          params={{ id: player.player_id! }}
+                          search={{ tab: undefined }}
+                        >
+                          {isMobile ? playerShortName(player) : player.name}
+                        </Link>
+                        {player.current_team_id != null && (
+                          <Tooltip label={player.current_team_name} withArrow>
+                            <Link
+                              to={TeamRoute.to}
+                              params={{ id: String(player.current_team_id) }}
+                              search={{ tab: undefined }}
+                            >
+                              <TeamAvatar
+                                image_key={player.team_image_key}
+                                name={player.current_team_name ?? '?'}
+                                size={22}
+                              />
+                            </Link>
+                          </Tooltip>
+                        )}
+                      </Group>
                     </Table.Td>
                     <Table.Td>{(player.total_points ?? 0).toFixed(2)}</Table.Td>
                   </Table.Tr>
