@@ -64,6 +64,16 @@ export const allTourneys: RouteHandler<
   );
 };
 
+const TourneyPlayerSchema = z.object({
+  playerId: z.number().nullable(),
+  playerIdentityId: z.number(),
+  factionName: z.string(),
+  playerName: z.string(),
+  place: z.number(),
+  points: z.number(),
+  factionHexCode: z.string(),
+});
+
 export const detailTourneyRoute = createRoute({
   method: "get",
   path: "/tourney/{id}",
@@ -75,7 +85,7 @@ export const detailTourneyRoute = createRoute({
       content: {
         "application/json": {
           schema: z.object({
-            players: z.array(z.object({}).passthrough()),
+            players: z.array(TourneyPlayerSchema),
             tourney: z.object({}).passthrough(),
             paintingCategories: z.array(z.object({}).passthrough()),
           }),

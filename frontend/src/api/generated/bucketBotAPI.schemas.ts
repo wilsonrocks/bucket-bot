@@ -129,7 +129,16 @@ export type PostTourney200 = {
   message: string;
 };
 
-export type GetTourneyId200PlayersItem = {[key: string]: unknown | null};
+export type GetTourneyId200PlayersItem = {
+  /** @nullable */
+  playerId: number | null;
+  playerIdentityId: number;
+  factionName: string;
+  playerName: string;
+  place: number;
+  points: number;
+  factionHexCode: string;
+};
 
 export type GetTourneyId200Tourney = {[key: string]: unknown | null};
 
