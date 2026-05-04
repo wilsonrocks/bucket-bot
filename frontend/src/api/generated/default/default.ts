@@ -112,6 +112,9 @@ import type {
   PostMatchPlayerToDiscordUser200,
   PostMatchPlayerToDiscordUser404,
   PostMatchPlayerToDiscordUserBody,
+  PostPlayerIdentityIdIgnore200,
+  PostPlayerIdentityIdIgnore404,
+  PostPlayerIdentityIdIgnoreBody,
   PostPostDiscordEventTourneyId200,
   PostPostDiscordEventTourneyId400,
   PostPostDiscordEventTourneyId500,
@@ -4357,6 +4360,90 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getPostMatchPlayerToDiscordUserMutationOptions(options), queryClient);
+    }
+    export type postPlayerIdentityIdIgnoreResponse200 = {
+  data: PostPlayerIdentityIdIgnore200
+  status: 200
+}
+
+export type postPlayerIdentityIdIgnoreResponse404 = {
+  data: PostPlayerIdentityIdIgnore404
+  status: 404
+}
+
+export type postPlayerIdentityIdIgnoreResponseSuccess = (postPlayerIdentityIdIgnoreResponse200) & {
+  headers: Headers;
+};
+export type postPlayerIdentityIdIgnoreResponseError = (postPlayerIdentityIdIgnoreResponse404) & {
+  headers: Headers;
+};
+
+export type postPlayerIdentityIdIgnoreResponse = (postPlayerIdentityIdIgnoreResponseSuccess | postPlayerIdentityIdIgnoreResponseError)
+
+export const getPostPlayerIdentityIdIgnoreUrl = (id: number,) => {
+
+
+  
+
+  return `/v1/player-identity/${id}/ignore`
+}
+
+export const postPlayerIdentityIdIgnore = async (id: number,
+    postPlayerIdentityIdIgnoreBody: PostPlayerIdentityIdIgnoreBody, options?: RequestInit): Promise<postPlayerIdentityIdIgnoreResponse> => {
+  
+  return customFetch<postPlayerIdentityIdIgnoreResponse>(getPostPlayerIdentityIdIgnoreUrl(id),
+  {      
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      postPlayerIdentityIdIgnoreBody,)
+  }
+);}
+  
+
+
+
+export const getPostPlayerIdentityIdIgnoreMutationOptions = <TError = PostPlayerIdentityIdIgnore404,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postPlayerIdentityIdIgnore>>, TError,{id: number;data: PostPlayerIdentityIdIgnoreBody}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postPlayerIdentityIdIgnore>>, TError,{id: number;data: PostPlayerIdentityIdIgnoreBody}, TContext> => {
+
+const mutationKey = ['postPlayerIdentityIdIgnore'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postPlayerIdentityIdIgnore>>, {id: number;data: PostPlayerIdentityIdIgnoreBody}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  postPlayerIdentityIdIgnore(id,data,requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostPlayerIdentityIdIgnoreMutationResult = NonNullable<Awaited<ReturnType<typeof postPlayerIdentityIdIgnore>>>
+    export type PostPlayerIdentityIdIgnoreMutationBody = PostPlayerIdentityIdIgnoreBody
+    export type PostPlayerIdentityIdIgnoreMutationError = PostPlayerIdentityIdIgnore404
+
+    export const usePostPlayerIdentityIdIgnore = <TError = PostPlayerIdentityIdIgnore404,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postPlayerIdentityIdIgnore>>, TError,{id: number;data: PostPlayerIdentityIdIgnoreBody}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postPlayerIdentityIdIgnore>>,
+        TError,
+        {id: number;data: PostPlayerIdentityIdIgnoreBody},
+        TContext
+      > => {
+      return useMutation(getPostPlayerIdentityIdIgnoreMutationOptions(options), queryClient);
     }
     export type postPostDiscordRankingsResponse200 = {
   data: PostPostDiscordRankings200
