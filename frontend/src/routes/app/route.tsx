@@ -1,7 +1,5 @@
-import { LogoutButton } from '@/components/LoginButton'
 import { AppNavbar } from '@/components/app-navbar'
 import { NetworkIndicator } from '@/components/network-indicator'
-import { useAuth } from '@/hooks/useAuth'
 import { usePermissions } from '@/hooks/usePermissions'
 import {
   AppShell,
@@ -56,7 +54,6 @@ export const Route = createFileRoute('/app')({
     const matches = useMatches()
     const title = matches.at(-1)?.staticData.title
 
-    const auth = useAuth()
     const { rankingReporter, captainOfTeamIds, isLoading: permissionsLoading } = usePermissions()
     const navigate = useNavigate()
 
@@ -96,12 +93,7 @@ export const Route = createFileRoute('/app')({
                 </Link>
               </Text>
               <Badge color="red" variant="filled" size="lg">Admin mode</Badge>
-
-              <Text>Hi, {auth?.global_name ?? auth?.username}</Text>
               <NetworkIndicator />
-              <div style={{ marginLeft: 'auto' }}>
-                <LogoutButton />
-              </div>
             </Group>
           </AppShell.Header>
           <AppShell.Navbar p="md" bg="gradient(white, lightgrey)">
