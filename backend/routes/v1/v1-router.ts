@@ -33,6 +33,8 @@ import {
 import {
   getUnmappedIdentities,
   getUnmappedIdentitiesRoute,
+  setIdentityIgnored,
+  setIdentityIgnoredRoute,
 } from "./v1-routes/identities.js";
 import {
   newBotEventHandler,
@@ -313,6 +315,7 @@ v1Router.openapi(fetchDiscordUserIdsRoute, fetchAndStoreDiscordUserIds);
 v1Router.openapi(searchDiscordUsersRoute, searchDiscordUsersByName);
 v1Router.openapi(getAllDiscordUsersRoute, getAllDiscordUsers);
 v1Router.openapi(matchPlayerToDiscordUserRoute, matchPlayerToDiscordUser);
+v1Router.openapi(setIdentityIgnoredRoute, setIdentityIgnored);
 v1Router.openapi(postDiscordRankingsRoute, postDiscordRankingsHandler);
 v1Router.openapi(postEventSummaryToDiscordRoute, postEventSummaryToDiscord);
 v1Router.openapi(updateTourneyRoute, updateTourney);

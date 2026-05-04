@@ -715,6 +715,18 @@ export type PostMatchPlayerToDiscordUser404 = {
   error: string;
 };
 
+export type PostPlayerIdentityIdIgnoreBody = {
+  ignored: boolean;
+};
+
+export type PostPlayerIdentityIdIgnore200 = {
+  message: string;
+};
+
+export type PostPlayerIdentityIdIgnore404 = {
+  error: string;
+};
+
 export type PostPostDiscordRankings200 = {
   message: string;
 };

@@ -1,8 +1,8 @@
 import { DiscordLookup } from '@/components/discord-lookup'
 import { toOrdinal } from '@/helpers/to-ordinal'
-import { useGetUnmappedIdentities } from '@/api/hooks'
+import { useGetUnmappedIdentities, usePostPlayerIdentityIdIgnore } from '@/api/hooks'
 import { RequireRankingReporter } from '@/components/RequireRankingReporter'
-import { List, Pagination, Table, Text } from '@mantine/core'
+import { Badge, Button, Card, Divider, Group, List, Stack, Text } from '@mantine/core'
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 
@@ -11,19 +11,65 @@ export const Route = createFileRoute('/app/_app-pages/identities')({
   staticData: { title: 'Identities' },
 })
 
-function RouteComponent() {
-  const unmappedIdentities = useGetUnmappedIdentities()
-
-  const [currentPage, setCurrentPage] = useState<number>(1)
-
-  const currentIdentity = (unmappedIdentities.data ?? [])[currentPage - 1]
+function IdentityCard({ identity }: { identity: NonNullable<ReturnType<typeof useGetUnmappedIdentities>['data']>[number] }) {
+  const ignoreMutation = usePostPlayerIdentityIdIgnore()
+  const [confirmingIgnore, setConfirmingIgnore] = useState(false)
 
   useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    if (!currentIdentity) {
-      setCurrentPage(1)
+    if (!confirmingIgnore) return
+    const timer = setTimeout(() => setConfirmingIgnore(false), 4000)
+    return () => clearTimeout(timer)
+  }, [confirmingIgnore])
+
+  const handleIgnore = () => {
+    if (!confirmingIgnore) {
+      setConfirmingIgnore(true)
+      return
     }
-  }, [JSON.stringify(currentIdentity)])
+    setConfirmingIgnore(false)
+    ignoreMutation.mutate({ id: identity.player_identity_id, data: { ignored: true } })
+  }
+
+  return (
+    <Card withBorder padding="md">
+      <Group justify="space-between" mb="xs">
+        <Group gap="sm">
+          <Badge variant="light">{identity.provider_name}</Badge>
+          <Text fw={600}>{identity.name}</Text>
+        </Group>
+        <Button
+          variant="subtle"
+          color={confirmingIgnore ? 'yellow' : 'gray'}
+          size="compact-sm"
+          loading={ignoreMutation.isPending}
+          onClick={handleIgnore}
+        >
+          {confirmingIgnore ? 'Confirm ignore?' : 'Ignore'}
+        </Button>
+      </Group>
+
+      {identity.results.length > 0 && (
+        <List listStyleType="disc" size="sm" mb="sm">
+          {identity.results.map(({ place, faction, tourney_name }) => (
+            <List.Item key={`${place}-${tourney_name}-${faction}`}>
+              {`${toOrdinal(place ?? 0)} place at ${tourney_name} with ${faction}`}
+            </List.Item>
+          ))}
+        </List>
+      )}
+
+      <Divider my="sm" />
+
+      <DiscordLookup
+        playerIdentityId={identity.player_identity_id}
+        initialText={identity.name ?? ''}
+      />
+    </Card>
+  )
+}
+
+function RouteComponent() {
+  const unmappedIdentities = useGetUnmappedIdentities()
 
   if (!unmappedIdentities.data) {
     return <div>Loading...</div>
@@ -34,52 +80,23 @@ function RouteComponent() {
   }
 
   return (
-    <div>
-      <Text mb="md">
-        An identity is a player's account with either Longshanks or Bag of
-        Tools. A player can have several identities - many players will have one
-        for Longshanks <em>and</em> Bag of Tools. It's possible to have more
-        than two - in the case of someone making a new Longshanks account.
-      </Text>
-      <Text mb="md">
-        Here is where we can take unassigned identities and map them to a player
-        on the UK Malifaux Discord.
-      </Text>
-      <Pagination
-        total={unmappedIdentities.data.length || 0}
-        value={currentPage}
-        onChange={setCurrentPage}
-      />
+    <Stack>
+      <div>
+        <Text mb="xs">
+          An identity is a player's account with either Longshanks or Bag of
+          Tools. A player can have several identities - many players will have one
+          for Longshanks <em>and</em> Bag of Tools. It's possible to have more
+          than two - in the case of someone making a new Longshanks account.
+        </Text>
+        <Text>
+          Here is where we can take unassigned identities and map them to a player
+          on the UK Malifaux Discord.
+        </Text>
+      </div>
 
-      {/* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition */}
-      {currentIdentity && (
-        <Table
-          layout="fixed"
-          styles={{ td: { verticalAlign: 'top' } }}
-          data={{
-            head: ['Provider', 'Name', 'Results', 'Map to?'],
-            body: [
-              [
-                currentIdentity.provider_name,
-                currentIdentity.name,
-                <List listStyleType="disc">
-                  {currentIdentity.results.map(
-                    ({ place, faction, tourney_name }) => (
-                      <List.Item key={`${place}-${tourney_name}-${faction}`}>
-                        {`${toOrdinal(place ?? 0)} place at ${tourney_name} with ${faction}`}
-                      </List.Item>
-                    ),
-                  )}
-                </List>,
-                <DiscordLookup
-                  playerIdentityId={currentIdentity.player_identity_id}
-                  initialText={currentIdentity.name ?? ''}
-                />,
-              ],
-            ],
-          }}
-        />
-      )}
-    </div>
+      {unmappedIdentities.data.map((identity) => (
+        <IdentityCard key={identity.player_identity_id} identity={identity} />
+      ))}
+    </Stack>
   )
 }

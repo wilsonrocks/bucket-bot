@@ -47,6 +47,7 @@ import {
   usePostFetchDiscordUserIds as usePostFetchDiscordUserIdsGenerated,
   usePostLongshanksEventId as usePostLongshanksEventIdGenerated,
   usePostMatchPlayerToDiscordUser as usePostMatchPlayerToDiscordUserGenerated,
+  usePostPlayerIdentityIdIgnore as usePostPlayerIdentityIdIgnoreGenerated,
   usePostPostDiscordEventTourneyId as usePostPostDiscordEventTourneyIdGenerated,
   usePostTeamsTeamIdMembers as usePostTeamsTeamIdMembersGenerated,
   usePostTourney as usePostTourneyGenerated,
@@ -433,6 +434,19 @@ export const usePostMatchPlayerToDiscordUser = () => {
         queryClient.invalidateQueries({
           queryKey: ['/v1/search-discord-users'],
         })
+        queryClient.invalidateQueries({
+          queryKey: getGetUnmappedIdentitiesQueryKey(),
+        })
+      },
+    },
+  })
+}
+
+export const usePostPlayerIdentityIdIgnore = () => {
+  const queryClient = useQueryClient()
+  return usePostPlayerIdentityIdIgnoreGenerated({
+    mutation: {
+      onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: getGetUnmappedIdentitiesQueryKey(),
         })

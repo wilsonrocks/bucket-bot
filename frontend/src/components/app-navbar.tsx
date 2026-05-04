@@ -1,4 +1,5 @@
 import { useGetUnmappedIdentities } from '@/api/hooks'
+import { useAuth } from '@/hooks/useAuth'
 import { usePermissions } from '@/hooks/usePermissions'
 import { Route as BotChat } from '@/routes/app/_app-pages/bot-chat'
 import { Route as EventsAppRoute } from '@/routes/app/_app-pages/events'
@@ -10,17 +11,23 @@ import { Route as TeamsRoute } from '@/routes/app/_app-pages/teams/'
 import { Route as VenuesRoute } from '@/routes/app/_app-pages/venues'
 import { Route as FeatureFlagsRoute } from '@/routes/app/_app-pages/feature-flags'
 
-import { Badge, Divider, Group, ScrollArea, Stack } from '@mantine/core'
+import { Anchor, Badge, Divider, Group, ScrollArea, Stack, Text } from '@mantine/core'
 import { AppNavLink } from './app-nav-link'
 import { Route as SiteRoute } from '@/routes/site/route'
 
 export const AppNavbar = () => {
   const unmappedIdentities = useGetUnmappedIdentities()
   const { rankingReporter } = usePermissions()
+  const auth = useAuth()
 
   return (
     <ScrollArea>
       <Stack>
+        <Group gap="xs">
+          <Text size="sm" fw={500}>{auth?.global_name ?? auth?.username}</Text>
+          <Anchor size="sm" onClick={auth?.logout}>logout</Anchor>
+        </Group>
+        <Divider />
         {rankingReporter && (
           <>
             <AppNavLink to={RankingsRoute.to} label="Rankings" />
