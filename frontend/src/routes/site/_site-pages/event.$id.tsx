@@ -2,17 +2,10 @@ import { Box, Image, SimpleGrid, Table, Tabs, Text, Title } from '@mantine/core'
 import { createFileRoute } from '@tanstack/react-router'
 import z from 'zod'
 import { useGetTourneyId } from '@/api/hooks'
+import type { GetTourneyId200PlayersItem } from '@/api/generated/bucketBotAPI.schemas'
 import { Link } from '@/components/link'
 import { PaintingLightbox, positionLabel } from '@/components/painting-lightbox'
 import { Route as PlayerRoute } from '@/routes/site/_site-pages/player.$id'
-
-type TourneyPlayer = {
-  place: number
-  playerId: number
-  playerName: string
-  points: number
-  factionName: string
-}
 
 const eventParamsValidator = z.object({ id: z.coerce.number() })
 
@@ -76,11 +69,11 @@ function RouteComponent() {
             tabularNums
             data={{
               head: ['Place', 'Name', 'Points', 'Faction'],
-              body: (tourneyDetail.data.players as TourneyPlayer[]).map((row) => [
+              body: (tourneyDetail.data.players as GetTourneyId200PlayersItem[]).map((row) => [
                 row.place,
-                <Link to={PlayerRoute.to} params={{ id: row.playerId }} search={{ tab: undefined }}>
-                  {row.playerName}
-                </Link>,
+                row.playerId != null
+                  ? <Link to={PlayerRoute.to} params={{ id: row.playerId }} search={{ tab: undefined }}>{row.playerName}</Link>
+                  : row.playerName,
                 row.points.toFixed(2),
                 row.factionName,
               ]),
