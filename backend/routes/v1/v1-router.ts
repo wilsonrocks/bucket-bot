@@ -33,6 +33,8 @@ import {
 import {
   getUnmappedIdentities,
   getUnmappedIdentitiesRoute,
+  mergeIdentityIntoPlayer,
+  mergeIdentityIntoPlayerRoute,
   setIdentityIgnored,
   setIdentityIgnoredRoute,
 } from "./v1-routes/identities.js";
@@ -55,6 +57,8 @@ import {
   getPlayersRoute,
   playerNameExistsHandler,
   playerNameExistsRoute,
+  searchPlayersHandler,
+  searchPlayersRoute,
   updatePlayer,
   updatePlayerRoute,
 } from "./v1-routes/players.js";
@@ -291,6 +295,7 @@ v1Router.openapi(getFactionsOverTimeRoute, getFactionsOverTime);
 v1Router.openapi(getPlayersOverTimeRoute, getPlayersOverTime);
 v1Router.openapi(getTeamsOverTimeRoute, getTeamsOverTimeHandler);
 v1Router.openapi(getUnmappedIdentitiesRoute, getUnmappedIdentities);
+v1Router.openapi(searchPlayersRoute, searchPlayersHandler);
 v1Router.openapi(getTeamsRoute, getTeamsHandler);
 v1Router.openapi(getTeamByIdRoute, getTeamByIdHandler);
 v1Router.openapi(teamRankingsRoute, teamRankingsHandler);
@@ -316,6 +321,7 @@ v1Router.openapi(searchDiscordUsersRoute, searchDiscordUsersByName);
 v1Router.openapi(getAllDiscordUsersRoute, getAllDiscordUsers);
 v1Router.openapi(matchPlayerToDiscordUserRoute, matchPlayerToDiscordUser);
 v1Router.openapi(setIdentityIgnoredRoute, setIdentityIgnored);
+v1Router.openapi(mergeIdentityIntoPlayerRoute, mergeIdentityIntoPlayer);
 v1Router.openapi(postDiscordRankingsRoute, postDiscordRankingsHandler);
 v1Router.openapi(postEventSummaryToDiscordRoute, postEventSummaryToDiscord);
 v1Router.openapi(updateTourneyRoute, updateTourney);

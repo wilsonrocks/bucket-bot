@@ -2,6 +2,7 @@ import { createRoute, z, type RouteHandler } from "@hono/zod-openapi";
 import { sql } from "kysely";
 import type { AppEnv } from "../../../hono-env.js";
 import { UK_MALIFAUX_SERVER_ID, getDiscordClient } from "../../../logic/discord-client.js";
+import { mergePlaceholderIntoPlayer } from "../../../logic/identities/merge-player.js";
 
 const ErrorSchema = z.object({ error: z.string() });
 
@@ -161,16 +162,24 @@ export const matchPlayerToDiscordUser: RouteHandler<typeof matchPlayerToDiscordU
   }
 
   await db.transaction().execute(async (trx) => {
-    let player = await trx
+    const identity = await trx
+      .selectFrom("player_identity")
+      .where("id", "=", playerIdentityId)
+      .select("player_id")
+      .executeTakeFirstOrThrow();
+
+    const placeholderId = identity.player_id!;
+
+    const existingPlayer = await trx
       .selectFrom("player")
       .where("discord_id", "=", discordUserId)
-      .selectAll()
+      .select("id")
       .executeTakeFirst();
 
-    if (!player) {
-      player = await trx
-        .insertInto("player")
-        .values({
+    if (!existingPlayer || existingPlayer.id === placeholderId) {
+      await trx
+        .updateTable("player")
+        .set({
           discord_id: discordUserId,
           name:
             discordUser.discord_display_name ||
@@ -178,15 +187,11 @@ export const matchPlayerToDiscordUser: RouteHandler<typeof matchPlayerToDiscordU
             discordUser.discord_nickname ||
             "Unknown User",
         })
-        .returningAll()
-        .executeTakeFirstOrThrow();
+        .where("id", "=", placeholderId)
+        .execute();
+    } else {
+      await mergePlaceholderIntoPlayer(trx, placeholderId, existingPlayer.id);
     }
-
-    await trx
-      .updateTable("player_identity")
-      .set({ player_id: player.id })
-      .where("id", "=", playerIdentityId)
-      .executeTakeFirst();
   });
 
   return c.json({ message: "Player matched to Discord user successfully" }, 200);

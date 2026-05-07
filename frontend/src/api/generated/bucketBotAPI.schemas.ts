@@ -424,6 +424,21 @@ export type GetUnmappedIdentities200Item = {
   results: GetUnmappedIdentities200ItemResultsItem[];
 };
 
+export type GetSearchPlayersParams = {
+text: string;
+};
+
+export type GetSearchPlayers200Item = {
+  id: number;
+  name: string;
+  /** @nullable */
+  discord_username: string | null;
+  /** @nullable */
+  discord_display_name: string | null;
+  /** @nullable */
+  discord_avatar_url: string | null;
+};
+
 export type GetTeams200Item = {
   id: number;
   name: string;
@@ -724,6 +739,23 @@ export type PostPlayerIdentityIdIgnore200 = {
 };
 
 export type PostPlayerIdentityIdIgnore404 = {
+  error: string;
+};
+
+export type PostPlayerIdentityIdMergeIntoPlayerBody = {
+  /** @exclusiveMinimum 0 */
+  targetPlayerId: number;
+};
+
+export type PostPlayerIdentityIdMergeIntoPlayer200 = {
+  message: string;
+};
+
+export type PostPlayerIdentityIdMergeIntoPlayer400 = {
+  error: string;
+};
+
+export type PostPlayerIdentityIdMergeIntoPlayer404 = {
   error: string;
 };
 

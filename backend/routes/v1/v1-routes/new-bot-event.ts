@@ -3,6 +3,7 @@ import type { AppEnv } from "../../../hono-env.js";
 import { IdentityProvider } from "../../../logic/fixtures.js";
 import { mapBotFactionToFactionCode } from "../../../logic/bot/map-bot-faction.js";
 import { calculatePoints, maxPoints } from "../../../logic/points.js";
+import { createIdentityWithPlaceholderPlayer } from "../../../logic/identities/create-identity-with-placeholder.js";
 
 const BotApiLeagueEntrySchema = z.object({
   position: z.number(),
@@ -105,15 +106,11 @@ export const newBotEventHandler: RouteHandler<typeof newBotEventRoute, AppEnv> =
           .executeTakeFirst();
 
         if (!dbPlayerIdentity) {
-          dbPlayerIdentity = await trx
-            .insertInto("player_identity")
-            .values({
-              identity_provider_id: IdentityProvider.BOT,
-              external_id: entry.name,
-              provider_name: entry.name,
-            })
-            .returning("id")
-            .executeTakeFirstOrThrow();
+          dbPlayerIdentity = await createIdentityWithPlaceholderPlayer(trx, {
+            providerId: IdentityProvider.BOT,
+            externalId: entry.name,
+            providerName: entry.name,
+          });
         }
 
         const points = calculatePoints(

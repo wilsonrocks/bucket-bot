@@ -32,6 +32,8 @@ import {
   useGetFeatureFlags as useGetFeatureFlagsGenerated,
   useGetRankingTypes as useGetRankingTypesGenerated,
   useGetSearchDiscordUsers as useGetSearchDiscordUsersGenerated,
+  useGetSearchPlayers as useGetSearchPlayersGenerated,
+  usePostPlayerIdentityIdMergeIntoPlayer as usePostPlayerIdentityIdMergeIntoPlayerGenerated,
   useGetTeams as useGetTeamsGenerated,
   useGetTeamsId as useGetTeamsIdGenerated,
   useGetTiers as useGetTiersGenerated,
@@ -60,6 +62,7 @@ import {
 
 import type {
   GetSearchDiscordUsersParams,
+  GetSearchPlayersParams,
   GetPaintingAll200Item,
   GetPaintingRecent200,
   GetStatsCommunity200,
@@ -361,6 +364,21 @@ export const useGetSearchDiscordUsers = (
     },
   })
 
+export const useGetSearchPlayers = (
+  params: GetSearchPlayersParams,
+  options?: Parameters<typeof useGetSearchPlayersGenerated>[1],
+) =>
+  useGetSearchPlayersGenerated(params, {
+    ...options,
+    query: {
+      ...options?.query,
+      select: (res) => {
+        if (res.status !== 200) throw new Error(`unexpected status ${res.status}`)
+        return res.data
+      },
+    },
+  })
+
 // ── Wrapped mutations with query invalidation ──────────────────────────────
 
 export const usePostLongshanksEventId = () => {
@@ -445,6 +463,19 @@ export const usePostMatchPlayerToDiscordUser = () => {
 export const usePostPlayerIdentityIdIgnore = () => {
   const queryClient = useQueryClient()
   return usePostPlayerIdentityIdIgnoreGenerated({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: getGetUnmappedIdentitiesQueryKey(),
+        })
+      },
+    },
+  })
+}
+
+export const usePostPlayerIdentityIdMergeIntoPlayer = () => {
+  const queryClient = useQueryClient()
+  return usePostPlayerIdentityIdMergeIntoPlayerGenerated({
     mutation: {
       onSuccess: () => {
         queryClient.invalidateQueries({
