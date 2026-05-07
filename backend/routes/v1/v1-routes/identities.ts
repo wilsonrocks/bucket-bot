@@ -1,5 +1,6 @@
 import { createRoute, z, type RouteHandler } from "@hono/zod-openapi";
 import type { AppEnv } from "../../../hono-env.js";
+import { mergePlaceholderIntoPlayer } from "../../../logic/identities/merge-player.js";
 
 const ErrorSchema = z.object({ error: z.string() });
 
@@ -25,7 +26,7 @@ export const getUnmappedIdentitiesRoute = createRoute({
   responses: {
     200: {
       content: { "application/json": { schema: z.array(UnmappedIdentitySchema) } },
-      description: "Player identities not linked to a player",
+      description: "Players not yet linked to a Discord user",
     },
   },
 });
@@ -33,11 +34,12 @@ export const getUnmappedIdentitiesRoute = createRoute({
 export const getUnmappedIdentities: RouteHandler<typeof getUnmappedIdentitiesRoute, AppEnv> = async (c) => {
   const allUnmappedPlayers = await c.get("db")
     .selectFrom("player_identity")
+    .innerJoin("player", "player.id", "player_identity.player_id")
     .innerJoin("identity_provider", "player_identity.identity_provider_id", "identity_provider.id")
     .innerJoin("result", "result.player_identity_id", "player_identity.id")
     .innerJoin("tourney", "result.tourney_id", "tourney.id")
     .innerJoin("faction", "result.faction_code", "faction.name_code")
-    .where("player_identity.player_id", "is", null)
+    .where("player.discord_id", "is", null)
     .where("player_identity.is_ignored", "=", false)
     .select([
       "player_identity.id as player_identity_id",
@@ -113,4 +115,62 @@ export const setIdentityIgnored: RouteHandler<typeof setIdentityIgnoredRoute, Ap
   }
 
   return c.json({ message: "Identity updated" }, 200);
+};
+
+const MergeIntoPlayerBodySchema = z.object({
+  targetPlayerId: z.number().int().positive(),
+});
+
+export const mergeIdentityIntoPlayerRoute = createRoute({
+  method: "post",
+  path: "/player-identity/{id}/merge-into-player",
+  request: {
+    params: z.object({ id: z.coerce.number().int().positive() }),
+    body: {
+      content: { "application/json": { schema: MergeIntoPlayerBodySchema } },
+    },
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.object({ message: z.string() }) } },
+      description: "Identity merged into target player",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Identity has no placeholder player",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Identity not found",
+    },
+  },
+});
+
+export const mergeIdentityIntoPlayer: RouteHandler<typeof mergeIdentityIntoPlayerRoute, AppEnv> = async (c) => {
+  const { id } = c.req.valid("param");
+  const { targetPlayerId } = c.req.valid("json");
+
+  const db = c.get("db");
+
+  const identity = await db
+    .selectFrom("player_identity")
+    .where("id", "=", id)
+    .select("player_id")
+    .executeTakeFirst();
+
+  if (!identity) {
+    return c.json({ error: "Identity not found" }, 404);
+  }
+
+  if (!identity.player_id) {
+    return c.json({ error: "Identity has no placeholder player" }, 400);
+  }
+
+  if (identity.player_id !== targetPlayerId) {
+    await db.transaction().execute(async (trx) => {
+      await mergePlaceholderIntoPlayer(trx, identity.player_id!, targetPlayerId);
+    });
+  }
+
+  return c.json({ message: "Merged successfully" }, 200);
 };

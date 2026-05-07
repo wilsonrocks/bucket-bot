@@ -63,6 +63,8 @@ import type {
   GetSearchDiscordUsers200Item,
   GetSearchDiscordUsers400,
   GetSearchDiscordUsersParams,
+  GetSearchPlayers200Item,
+  GetSearchPlayersParams,
   GetStatsCommunity200,
   GetTeamRankingsTypeCode200Item,
   GetTeamRankingsTypeCode404,
@@ -115,6 +117,10 @@ import type {
   PostPlayerIdentityIdIgnore200,
   PostPlayerIdentityIdIgnore404,
   PostPlayerIdentityIdIgnoreBody,
+  PostPlayerIdentityIdMergeIntoPlayer200,
+  PostPlayerIdentityIdMergeIntoPlayer400,
+  PostPlayerIdentityIdMergeIntoPlayer404,
+  PostPlayerIdentityIdMergeIntoPlayerBody,
   PostPostDiscordEventTourneyId200,
   PostPostDiscordEventTourneyId400,
   PostPostDiscordEventTourneyId500,
@@ -2517,6 +2523,117 @@ export function useGetUnmappedIdentities<TData = Awaited<ReturnType<typeof getUn
 
 
 
+export type getSearchPlayersResponse200 = {
+  data: GetSearchPlayers200Item[]
+  status: 200
+}
+
+export type getSearchPlayersResponseSuccess = (getSearchPlayersResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getSearchPlayersResponse = (getSearchPlayersResponseSuccess)
+
+export const getGetSearchPlayersUrl = (params: GetSearchPlayersParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/v1/search-players?${stringifiedParams}` : `/v1/search-players`
+}
+
+export const getSearchPlayers = async (params: GetSearchPlayersParams, options?: RequestInit): Promise<getSearchPlayersResponse> => {
+  
+  return customFetch<getSearchPlayersResponse>(getGetSearchPlayersUrl(params),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
+
+export const getGetSearchPlayersQueryKey = (params?: GetSearchPlayersParams,) => {
+    return [
+    `/v1/search-players`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+    
+export const getGetSearchPlayersQueryOptions = <TData = Awaited<ReturnType<typeof getSearchPlayers>>, TError = unknown>(params: GetSearchPlayersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSearchPlayers>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetSearchPlayersQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getSearchPlayers>>> = ({ signal }) => getSearchPlayers(params, { signal, ...requestOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getSearchPlayers>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetSearchPlayersQueryResult = NonNullable<Awaited<ReturnType<typeof getSearchPlayers>>>
+export type GetSearchPlayersQueryError = unknown
+
+
+export function useGetSearchPlayers<TData = Awaited<ReturnType<typeof getSearchPlayers>>, TError = unknown>(
+ params: GetSearchPlayersParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSearchPlayers>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getSearchPlayers>>,
+          TError,
+          Awaited<ReturnType<typeof getSearchPlayers>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetSearchPlayers<TData = Awaited<ReturnType<typeof getSearchPlayers>>, TError = unknown>(
+ params: GetSearchPlayersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSearchPlayers>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getSearchPlayers>>,
+          TError,
+          Awaited<ReturnType<typeof getSearchPlayers>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetSearchPlayers<TData = Awaited<ReturnType<typeof getSearchPlayers>>, TError = unknown>(
+ params: GetSearchPlayersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSearchPlayers>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetSearchPlayers<TData = Awaited<ReturnType<typeof getSearchPlayers>>, TError = unknown>(
+ params: GetSearchPlayersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSearchPlayers>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetSearchPlayersQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
 export type getTeamsResponse200 = {
   data: GetTeams200Item[]
   status: 200
@@ -4444,6 +4561,95 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getPostPlayerIdentityIdIgnoreMutationOptions(options), queryClient);
+    }
+    export type postPlayerIdentityIdMergeIntoPlayerResponse200 = {
+  data: PostPlayerIdentityIdMergeIntoPlayer200
+  status: 200
+}
+
+export type postPlayerIdentityIdMergeIntoPlayerResponse400 = {
+  data: PostPlayerIdentityIdMergeIntoPlayer400
+  status: 400
+}
+
+export type postPlayerIdentityIdMergeIntoPlayerResponse404 = {
+  data: PostPlayerIdentityIdMergeIntoPlayer404
+  status: 404
+}
+
+export type postPlayerIdentityIdMergeIntoPlayerResponseSuccess = (postPlayerIdentityIdMergeIntoPlayerResponse200) & {
+  headers: Headers;
+};
+export type postPlayerIdentityIdMergeIntoPlayerResponseError = (postPlayerIdentityIdMergeIntoPlayerResponse400 | postPlayerIdentityIdMergeIntoPlayerResponse404) & {
+  headers: Headers;
+};
+
+export type postPlayerIdentityIdMergeIntoPlayerResponse = (postPlayerIdentityIdMergeIntoPlayerResponseSuccess | postPlayerIdentityIdMergeIntoPlayerResponseError)
+
+export const getPostPlayerIdentityIdMergeIntoPlayerUrl = (id: number,) => {
+
+
+  
+
+  return `/v1/player-identity/${id}/merge-into-player`
+}
+
+export const postPlayerIdentityIdMergeIntoPlayer = async (id: number,
+    postPlayerIdentityIdMergeIntoPlayerBody: PostPlayerIdentityIdMergeIntoPlayerBody, options?: RequestInit): Promise<postPlayerIdentityIdMergeIntoPlayerResponse> => {
+  
+  return customFetch<postPlayerIdentityIdMergeIntoPlayerResponse>(getPostPlayerIdentityIdMergeIntoPlayerUrl(id),
+  {      
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      postPlayerIdentityIdMergeIntoPlayerBody,)
+  }
+);}
+  
+
+
+
+export const getPostPlayerIdentityIdMergeIntoPlayerMutationOptions = <TError = PostPlayerIdentityIdMergeIntoPlayer400 | PostPlayerIdentityIdMergeIntoPlayer404,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postPlayerIdentityIdMergeIntoPlayer>>, TError,{id: number;data: PostPlayerIdentityIdMergeIntoPlayerBody}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postPlayerIdentityIdMergeIntoPlayer>>, TError,{id: number;data: PostPlayerIdentityIdMergeIntoPlayerBody}, TContext> => {
+
+const mutationKey = ['postPlayerIdentityIdMergeIntoPlayer'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postPlayerIdentityIdMergeIntoPlayer>>, {id: number;data: PostPlayerIdentityIdMergeIntoPlayerBody}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  postPlayerIdentityIdMergeIntoPlayer(id,data,requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostPlayerIdentityIdMergeIntoPlayerMutationResult = NonNullable<Awaited<ReturnType<typeof postPlayerIdentityIdMergeIntoPlayer>>>
+    export type PostPlayerIdentityIdMergeIntoPlayerMutationBody = PostPlayerIdentityIdMergeIntoPlayerBody
+    export type PostPlayerIdentityIdMergeIntoPlayerMutationError = PostPlayerIdentityIdMergeIntoPlayer400 | PostPlayerIdentityIdMergeIntoPlayer404
+
+    export const usePostPlayerIdentityIdMergeIntoPlayer = <TError = PostPlayerIdentityIdMergeIntoPlayer400 | PostPlayerIdentityIdMergeIntoPlayer404,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postPlayerIdentityIdMergeIntoPlayer>>, TError,{id: number;data: PostPlayerIdentityIdMergeIntoPlayerBody}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postPlayerIdentityIdMergeIntoPlayer>>,
+        TError,
+        {id: number;data: PostPlayerIdentityIdMergeIntoPlayerBody},
+        TContext
+      > => {
+      return useMutation(getPostPlayerIdentityIdMergeIntoPlayerMutationOptions(options), queryClient);
     }
     export type postPostDiscordRankingsResponse200 = {
   data: PostPostDiscordRankings200

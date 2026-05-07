@@ -4,6 +4,57 @@ import type { DB } from "kysely-codegen";
 import type { AppEnv } from "../../../hono-env.js";
 import { isRankingReporter } from "../permissions.js";
 
+const PlayerSearchResultSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  discord_username: z.string().nullable(),
+  discord_display_name: z.string().nullable(),
+  discord_avatar_url: z.string().nullable(),
+});
+
+export const searchPlayersRoute = createRoute({
+  method: "get",
+  path: "/search-players",
+  request: {
+    query: z.object({ text: z.string() }),
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.array(PlayerSearchResultSchema) } },
+      description: "Players matching search text",
+    },
+  },
+});
+
+export const searchPlayersHandler: RouteHandler<typeof searchPlayersRoute, AppEnv> = async (c) => {
+  const { text } = c.req.valid("query");
+
+  const players = await c.get("db")
+    .selectFrom("player")
+    .leftJoin("discord_user", "discord_user.discord_user_id", "player.discord_id")
+    .select([
+      "player.id",
+      "player.name",
+      "discord_user.discord_username",
+      "discord_user.discord_display_name",
+      "discord_user.discord_avatar_url",
+    ])
+    .where(
+      sql<boolean>`player.name % ${text} OR player.short_name % ${text}`,
+    )
+    .orderBy(
+      sql<number>`GREATEST(
+        similarity(player.name, ${text}),
+        COALESCE(similarity(player.short_name, ${text}), 0)
+      )`,
+      "desc",
+    )
+    .limit(10)
+    .execute();
+
+  return c.json(players as any, 200);
+};
+
 const PlayerSchema = z.object({
   id: z.number(),
   name: z.string(),

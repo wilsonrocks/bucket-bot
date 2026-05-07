@@ -3,6 +3,7 @@ import type { AppEnv } from "../../../hono-env.js";
 import { extractPlayersFromLongshanksHTML } from "../../../logic/longshanks/extract-longshanks-players.js";
 import { extractTourneyFromLongshanksHtml } from "../../../logic/longshanks/extract-longshanks-tourney-data.js";
 import { calculatePoints, maxPoints } from "../../../logic/points.js";
+import { createIdentityWithPlaceholderPlayer } from "../../../logic/identities/create-identity-with-placeholder.js";
 
 const otherDataValidator = z.object({
   longshanksId: z.string(),
@@ -117,15 +118,12 @@ export const newLongshanksEvent: RouteHandler<typeof newLongshanksEventRoute, Ap
           .executeTakeFirst();
 
         if (dbPlayerIdentity === undefined) {
-          dbPlayerIdentity = await trx
-            .insertInto("player_identity")
-            .values({
-              identity_provider_id: "LONGSHANKS",
-              external_id: longshanksPlayer.longshanksId,
-              provider_name: longshanksPlayer.name,
-            })
-            .returningAll()
-            .executeTakeFirstOrThrow();
+          dbPlayerIdentity = await createIdentityWithPlaceholderPlayer(trx, {
+            providerId: "LONGSHANKS",
+            externalId: longshanksPlayer.longshanksId,
+            providerName: longshanksPlayer.name,
+            longshanksName: longshanksPlayer.name,
+          });
         }
 
         const points = calculatePoints(
