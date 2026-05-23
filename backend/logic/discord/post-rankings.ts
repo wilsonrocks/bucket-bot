@@ -5,7 +5,8 @@ import { DB } from "kysely-codegen";
 import {
   getDiscordClient,
   MENTION_EVENT_ENTHUSIAST,
-  mentionUser,
+  mentionUserInGuild,
+  UK_MALIFAUX_SERVER_ID,
 } from "../discord-client";
 import { mostRecentSnapshot } from "../most-recent-snapshot";
 
@@ -18,17 +19,7 @@ function formatRankChange(change: number | null, isNew: boolean): string {
   return change > 0 ? `(↑${change})` : `(↓${Math.abs(change)})`;
 }
 
-// TODO move to own file
-export function mentionIfPossible(player: {
-  discord_user_id: string | null | undefined;
-  name: string;
-}): string {
-  if (player.discord_user_id) {
-    return `<@${player.discord_user_id}>`;
-  } else {
-    return player.name;
-  }
-}
+
 export const postDiscordRankings = async (db: Kysely<DB>) => {
   const discordClient = await getDiscordClient();
   const rankingTypes = await db
@@ -99,7 +90,11 @@ export const postDiscordRankings = async (db: Kysely<DB>) => {
         )
         .where("batch_id", "=", batch.id)
         .where("new_player", "is", true)
-        .selectAll()
+        .select([
+          "player.name",
+          "discord_user.discord_user_id",
+          "discord_user.discord_display_name",
+        ] as const)
         .execute();
     }
 
@@ -162,20 +157,30 @@ There's only a maximum of ${TOP_X_PLAYERS} players shown here. But you can see t
 
     const isSendable = announceChannel?.isSendable();
     if (isSendable) {
+      const guild = await discordClient.guilds.fetch(UK_MALIFAUX_SERVER_ID);
+
+      const topPlayerMention = topPlayer?.discord_user_id
+        ? await mentionUserInGuild(guild, topPlayer)
+        : null;
+
+      const resolvedNewPlayers = newPlayers
+        ? await Promise.all(newPlayers.map((p) => mentionUserInGuild(guild, p)))
+        : [];
+
       announceChannel.send(`***BEEP-BOOP*** ${MENTION_EVENT_ENTHUSIAST}
 
 New rankings are out! Please check all the channels for the different ranking types.
 
-${topPlayer?.discord_user_id ? `Well done to ${mentionUser(topPlayer)} for being the current Top Dog. Please try to beat them.` : ""}
+${topPlayerMention ? `Well done to ${topPlayerMention} for being the current Top Dog. Please try to beat them.` : ""}
 
 ${
-  newPlayers &&
-  newPlayers.length &&
-  `
+  resolvedNewPlayers.length > 0
+    ? `
 It's really exciting to see the community growing and new names joining the rankings for Fourth Edition Malifaux.
 Shout out to the the following players who completed their first ranked M4E event:
 
-${newPlayers?.map((player) => mentionUser(player)).join("\n")}`
+${resolvedNewPlayers.join("\n")}`
+    : ""
 }`);
     }
   } else {

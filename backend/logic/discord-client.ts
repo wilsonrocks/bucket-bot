@@ -14,8 +14,24 @@ export const mentionUser = ({
   name: string;
 }) => (process.env.MENTION_FOR_REAL ? `<@${discord_user_id}>` : `\`${name}\``);
 
-import { Client, GatewayIntentBits, Events } from "discord.js";
-import { string } from "zod";
+export async function mentionUserInGuild(
+  guild: Guild,
+  player: {
+    discord_user_id: string | null;
+    discord_display_name?: string | null;
+    name: string;
+  },
+): Promise<string> {
+  if (!player.discord_user_id) return player.name;
+  try {
+    await guild.members.fetch(player.discord_user_id);
+    return `<@${player.discord_user_id}>`;
+  } catch {
+    return player.discord_display_name ?? player.name;
+  }
+}
+
+import { Client, Guild, GatewayIntentBits, Events } from "discord.js";
 
 let client: Client | null = null;
 let readyPromise: Promise<Client> | null = null;
