@@ -7,7 +7,14 @@ import { v1Router } from "./routes/v1/v1-router.js";
 
 const app = new OpenAPIHono<AppEnv>();
 
-app.use("*", cors());
+app.use("*", cors({
+  origin: [
+    "https://malifaux.uk",
+    ...(process.env.ADMIN_SITE_URL ? [process.env.ADMIN_SITE_URL] : []),
+    "http://localhost:3000",
+    "http://localhost:3001",
+  ],
+}));
 app.use("*", logger());
 app.use("*", async (c, next) => {
   c.set("db", dbClient);

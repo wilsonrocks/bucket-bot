@@ -5,7 +5,8 @@ A Discord bot + web dashboard for tracking Warhammer tournament rankings.
 ## Architecture
 
 - **Backend**: Node.js + TypeScript, Hono framework, OpenAPI/Zod, runs on a VPS
-- **Frontend**: React 19 + Vite, TanStack Router/Query, Mantine,
+- **Site** (`site/`): React 19 + TanStack Start (SSR), Mantine, direct DB access via Kysely — public-facing at `malifaux.uk`
+- **Admin** (`admin/`): React 19 + Vite, TanStack Router/Query, Mantine — admin-only at `admin.malifaux.uk`
 - **Database**: PostgreSQL with PostGIS (Aiven in production, Docker locally)
 - **Bot**: discord.js, posts ranking updates to Discord channels
 
@@ -23,6 +24,12 @@ cd backend && npm run generate-db-types
 
 This generates Kysely types used throughout the backend. After schema changes, regenerate before editing queries.
 
+Database types for the site are generated separately:
+
+```bash
+cd site && npm run generate-db-types
+```
+
 ## Development
 
 Use `npm` (not pnpm or yarn).
@@ -34,23 +41,29 @@ docker compose up -d
 # Backend (port 9999, hot reload)
 cd backend && npm run dev
 
-# Frontend (port 3000)
-cd frontend && npm run dev
+# Site — public SSR app (port 3001)
+cd site && npm run dev
+
+# Admin — Vite SPA (port 3000)
+cd admin && npm run dev
 ```
 
 ## Code generation
 
-The frontend API client is generated from the backend's OpenAPI spec:
+The admin API client is generated from the backend's OpenAPI spec:
 
 ```bash
-cd frontend && npm run generate-client
+cd admin && npm run generate-client
 ```
 
 Run this after adding/changing backend routes.
 
-## Frontend sections
+## App sections
 
-- `_site` — public-facing pages (no auth required), e.g. rankings, events, team pages
+### site/ (public, SSR)
+All pages are public. Data fetched server-side via Kysely in TanStack Start loaders (no React Query, no API client).
+
+### admin/ (auth-required, SPA)
 - `_app` — restricted admin pages (requires JWT / ranking reporter role), e.g. import, identity management, team management
 
 ## Key directories

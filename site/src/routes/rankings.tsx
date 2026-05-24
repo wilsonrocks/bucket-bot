@@ -1,0 +1,112 @@
+import { fetchRankingTypes, fetchRankings, fetchPlayersOverTime } from '@/queries'
+import { playerShortName } from '@/helpers/player-short-name'
+import { Group, Select, Table, Text, Tooltip } from '@mantine/core'
+import { TeamAvatar } from '@/components/team-avatar'
+import { useMediaQuery } from '@mantine/hooks'
+import { createFileRoute, redirect } from '@tanstack/react-router'
+import { Link } from '@/components/link'
+import { Tabs } from '@/components/routed-tabs'
+import { PlayersBarRace } from '@/components/animated-players'
+import z from 'zod'
+
+function RankChange({ change, newPlayer }: { change: number | null | undefined; newPlayer?: boolean }) {
+  if (newPlayer) return <Text span size="sm" c="green">NEW</Text>
+  if (change == null) return <Text span size="sm" c="blue">RE</Text>
+  if (change === 0) return <Text span size="sm" c="dimmed">-</Text>
+  if (change > 0) return <Text span size="sm" c="green">↑{change}</Text>
+  return <Text span size="sm" c="red">↓{Math.abs(change)}</Text>
+}
+
+export const Route = createFileRoute('/rankings')({
+  validateSearch: z.object({ typeCode: z.string().optional().catch('') }),
+  staticData: { title: 'Rankings' },
+  beforeLoad: (context) => {
+    if (!context.search.typeCode)
+      throw redirect({ to: '/rankings', search: { typeCode: 'ROLLING_YEAR' } })
+  },
+  loader: async ({ location }) => {
+    const params = new URLSearchParams(location.search)
+    const typeCode = params.get('typeCode') ?? 'ROLLING_YEAR'
+    const [rankingTypes, rankings, playersOverTime] = await Promise.all([
+      fetchRankingTypes(),
+      fetchRankings({ data: { typeCode } }),
+      fetchPlayersOverTime({ data: { typeCode } }),
+    ])
+    return { rankingTypes, rankings, playersOverTime, typeCode }
+  },
+  component: RouteComponent,
+})
+
+function RouteComponent() {
+  const { rankingTypes, rankings, playersOverTime, typeCode } = Route.useLoaderData()
+  const navigate = Route.useNavigate()
+  const isMobile = useMediaQuery('(max-width: 600px)')
+  const isMd = useMediaQuery('(min-width: 992px)')
+  const isLg = useMediaQuery('(min-width: 1200px)')
+  const headerOffset = isLg ? 80 : isMd ? 70 : 60
+
+  const rankingDescription = rankingTypes.find((rt) => rt.code === typeCode)?.description
+
+  return (
+    <div>
+      <Group align="center" mb="sm">
+        <Select
+          searchable
+          w={200}
+          placeholder="Choose a ranking"
+          data={rankingTypes.map((rt) => ({ value: rt.code, label: rt.name }))}
+          value={typeCode}
+          onChange={(value) => navigate({ search: (prev) => ({ ...prev, typeCode: value ?? undefined }) })}
+        />
+        {rankingDescription && <Text>{rankingDescription}</Text>}
+      </Group>
+      <Tabs defaultValue="table">
+        <Tabs.List>
+          <Tabs.Tab value="table">Table View</Tabs.Tab>
+          <Tabs.Tab value="animation">Animation</Tabs.Tab>
+        </Tabs.List>
+        <Tabs.Panel value="table">
+          <Table tabularNums stickyHeader stickyHeaderOffset={headerOffset}>
+            <Table.Thead>
+              <Table.Tr>
+                <Table.Th w={1} style={{ whiteSpace: 'nowrap' }}>Rank</Table.Th>
+                <Table.Th w={1} style={{ whiteSpace: 'nowrap' }}>Change</Table.Th>
+                <Table.Th>Player</Table.Th>
+                <Table.Th>Total Points</Table.Th>
+              </Table.Tr>
+            </Table.Thead>
+            <Table.Tbody>
+              {rankings.map((player) => (
+                <Table.Tr key={player.id}>
+                  <Table.Td w={1} style={{ whiteSpace: 'nowrap' }}>{player.rank}</Table.Td>
+                  <Table.Td w={1} style={{ whiteSpace: 'nowrap' }}>
+                    <RankChange change={player.rank_change} newPlayer={player.new_player} />
+                  </Table.Td>
+                  <Table.Td>
+                    <Group gap="xs" wrap="nowrap">
+                      <Link to="/player/$id" params={{ id: player.player_id! }} search={{ tab: undefined, typeCode: undefined, painting: undefined }}>
+                        {isMobile ? playerShortName(player) : player.name}
+                      </Link>
+                      {player.current_team_id != null && (
+                        <Tooltip label={player.current_team_name} withArrow>
+                          <Link to="/team/$id" params={{ id: String(player.current_team_id) }} search={{ tab: undefined }}>
+                            <TeamAvatar image_key={player.team_image_key} name={player.current_team_name ?? '?'} size={22} />
+                          </Link>
+                        </Tooltip>
+                      )}
+                    </Group>
+                  </Table.Td>
+                  <Table.Td>{(player.total_points ?? 0).toFixed(2)}</Table.Td>
+                </Table.Tr>
+              ))}
+            </Table.Tbody>
+          </Table>
+        </Tabs.Panel>
+        <Tabs.Panel value="animation">
+          <Text size="sm" c="dimmed" mt="xs">Showing top 16 players</Text>
+          <PlayersBarRace data={playersOverTime as any} />
+        </Tabs.Panel>
+      </Tabs>
+    </div>
+  )
+}
