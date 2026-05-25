@@ -1,5 +1,9 @@
 import { LineChart } from '@mantine/charts'
 import { formatDate } from 'date-fns'
+import { useEffect, useSyncExternalStore } from 'react'
+
+const subscribe = () => () => {}
+const useIsClient = () => useSyncExternalStore(subscribe, () => true, () => false)
 
 type RankingsData = {
   metadata: { number_of_players: number | null }
@@ -7,7 +11,10 @@ type RankingsData = {
 }
 
 export const PlayerRankingOverTime = ({ rankingsData }: { rankingsData: RankingsData }) => {
-  if (!rankingsData) return <div>Loading...</div>
+  const isClient = useIsClient()
+  useEffect(() => { window.dispatchEvent(new Event('resize')) }, [])
+  if (!isClient) return null
+
   return (
     <LineChart
       h={300}

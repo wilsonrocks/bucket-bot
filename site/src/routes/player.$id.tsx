@@ -2,11 +2,10 @@ import { fetchPlayer, fetchPlayerRankingHistory, fetchPlayerTeams, fetchPlayerTo
 import { Badge, Image, Select, Table, Tabs, Title } from '@mantine/core'
 import { createFileRoute, notFound } from '@tanstack/react-router'
 import z from 'zod'
-import { Suspense } from 'react'
 import { Link } from '@/components/link'
 import { PaintingLightbox, positionLabel } from '@/components/painting-lightbox'
 import { formatDate } from 'date-fns'
-import { LazyPlayerRankingOverTimeChart } from '@/components/charts'
+import { PlayerRankingOverTime } from '@/components/charts'
 
 export const Route = createFileRoute('/player/$id')({
   params: z.object({ id: z.coerce.number() }),
@@ -90,9 +89,7 @@ function RouteComponent() {
             onChange={(value) => navigate({ search: (prev) => ({ ...prev, typeCode: value ?? undefined }) })}
           />
           {rankingsData.rankings.length > 0 ? (
-            <Suspense fallback={<div>Loading chart...</div>}>
-              <LazyPlayerRankingOverTimeChart rankingsData={rankingsData as any} />
-            </Suspense>
+            <PlayerRankingOverTime rankingsData={rankingsData as any} />
           ) : (
             <div>No ranking data available for {rankingTypes.find((rt) => rt.code === typeCode)?.name}.</div>
           )}
