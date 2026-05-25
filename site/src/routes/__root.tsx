@@ -1,4 +1,3 @@
-import { ColorSchemeScript, MantineProvider } from "@mantine/core";
 import { SiteNavbar } from "@/components/site-navbar";
 import {
   AppShell,
@@ -6,6 +5,7 @@ import {
   Container,
   Group,
   Image,
+  MantineProvider,
   Text,
   Title,
 } from "@mantine/core";
@@ -47,11 +47,10 @@ function RootDocument({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <head>
-        <ColorSchemeScript />
         <HeadContent />
       </head>
       <body>
-        <MantineProvider>{children}</MantineProvider>
+        <MantineProvider defaultColorScheme="light">{children}</MantineProvider>
         <Scripts />
       </body>
     </html>
@@ -86,7 +85,11 @@ function SiteLayout() {
             <Image src="/bucket-bot-logo.png" alt="b(UK)et bot" w={50} />
           </Link>
           <Text visibleFrom="xs" fw={700}>
-            <Link to="/" search={{}} style={{ color: "inherit", textDecoration: "none" }}>
+            <Link
+              to="/"
+              search={{}}
+              style={{ color: "inherit", textDecoration: "none" }}
+            >
               UK Malifaux Community
             </Link>
           </Text>
