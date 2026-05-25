@@ -1,5 +1,4 @@
-import { AspectRatio, Card, Image, Text, Title } from '@mantine/core'
-import { Link } from '@/components/link'
+import { Link } from '#/components/link'
 
 type RecentPainting = {
   playerId: number | null
@@ -13,42 +12,49 @@ type RecentPainting = {
 
 export function PaintingHighlightCard({ data }: { data: RecentPainting }) {
   return (
-    <Card withBorder padding="md" h="100%" mih={320} style={{ display: 'flex', flexDirection: 'column' }}>
-      <Title order={3} mb="sm">Latest Best Painted</Title>
-      <div style={{ flex: 1 }}>
+    <div className="flex h-full min-h-[320px] flex-col rounded-lg border border-gray-200 bg-white p-4">
+      <h3 className="mb-2 text-lg font-semibold">Latest Best Painted</h3>
+      <div className="flex-1">
         {data ? (
           <>
             {data.imageKey && (
-              <AspectRatio ratio={4 / 3} mb="sm">
-                <Image
+              <div className="mb-2 aspect-[4/3] w-full overflow-hidden rounded-sm">
+                <img
                   src={`${import.meta.env.VITE_ASSETS_URL}/${data.imageKey}-w800.png`}
                   alt={data.playerName}
-                  radius="sm"
-                  fit="contain"
+                  className="h-full w-full object-contain"
                 />
-              </AspectRatio>
+              </div>
             )}
-            <Text fw={600}>
+            <p className="font-semibold">
               {data.playerId != null ? (
-                <Link to="/player/$id" params={{ id: data.playerId }} search={{ tab: 'painting', typeCode: undefined, painting: undefined }}>
+                <Link
+                  to="/player/$id"
+                  params={{ id: data.playerId }}
+                  search={{ tab: 'painting', typeCode: undefined, painting: undefined }}
+                >
                   {data.playerName}
                 </Link>
               ) : (
                 data.playerName
               )}
-            </Text>
-            {data.model && <Text size="sm" c="dimmed">{data.model}</Text>}
-            <Text size="sm" c="dimmed" mt={4}>
-              <Link to="/event/$id" params={{ id: data.tourneyId }} search={{ tab: 'best-painted', painting: undefined }}>
+            </p>
+            {data.model && <p className="text-sm text-gray-500">{data.model}</p>}
+            <p className="mt-1 text-sm text-gray-500">
+              <Link
+                to="/event/$id"
+                params={{ id: data.tourneyId }}
+                search={{ tab: 'best-painted', painting: undefined }}
+              >
                 {data.tourneyName}
               </Link>
-            </Text>
+            </p>
           </>
         ) : null}
       </div>
-      <Link to="/best-painted" search={{ painting: undefined }} size="sm" mt="sm">
+      <Link to="/best-painted" search={{ painting: undefined }} className="mt-2 text-sm">
         All best painted →
       </Link>
-    </Card>
+    </div>
   )
 }

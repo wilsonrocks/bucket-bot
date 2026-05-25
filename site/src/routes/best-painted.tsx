@@ -1,9 +1,8 @@
-import { fetchAllPainting } from '@/queries'
-import { Box, Image, Paper, SimpleGrid, Stack, Text } from '@mantine/core'
+import { fetchAllPainting } from '#/queries'
 import { createFileRoute } from '@tanstack/react-router'
 import z from 'zod'
-import { Link } from '@/components/link'
-import { PaintingLightbox, positionLabel } from '@/components/painting-lightbox'
+import { Link } from '#/components/link'
+import { PaintingLightbox, positionLabel } from '#/components/painting-lightbox'
 
 type PaintingItem = {
   id: number
@@ -22,44 +21,56 @@ type PaintingItem = {
 }
 
 function WinnerCard({ winner, onClick }: { winner: PaintingItem; onClick: () => void }) {
+  const clickable = !!winner.imageKey
   return (
-    <Paper
-      radius="sm"
-      style={{ display: 'grid', gridTemplateRows: 'subgrid', gridRow: 'span 2', cursor: winner.imageKey ? 'pointer' : 'default' }}
-      onClick={winner.imageKey ? onClick : undefined}
+    <div
+      className={`grid grid-rows-subgrid row-span-2 rounded-sm bg-white ${clickable ? 'cursor-pointer' : ''}`}
+      onClick={clickable ? onClick : undefined}
     >
-      <Box style={{ display: 'flex', alignItems: 'flex-end' }}>
+      <div className="flex items-end">
         {winner.imageKey && (
-          <Image
+          <img
             src={`${import.meta.env.VITE_ASSETS_URL}/${winner.imageKey}-w150.png`}
             alt={winner.playerName}
-            style={{ borderRadius: 'var(--mantine-radius-sm) var(--mantine-radius-sm) 0 0' }}
+            className="rounded-t-sm"
           />
         )}
-      </Box>
-      <Stack gap={2} p="sm" pt="xs">
-        <Text fw={600} size="sm" lineClamp={1}>
+      </div>
+      <div className="flex flex-col gap-0.5 px-3 pb-3 pt-2">
+        <p className="line-clamp-1 text-sm font-semibold">
           {winner.playerId != null ? (
             <span onClick={(e) => e.stopPropagation()}>
-              <Link to="/player/$id" params={{ id: winner.playerId }} search={{ tab: 'painting', typeCode: undefined, painting: undefined }}>
+              <Link
+                to="/player/$id"
+                params={{ id: winner.playerId }}
+                search={{ tab: 'painting', typeCode: undefined, painting: undefined }}
+              >
                 {winner.playerName}
               </Link>
             </span>
-          ) : winner.playerName}
-        </Text>
+          ) : (
+            winner.playerName
+          )}
+        </p>
         {(winner.model || winner.description) && (
-          <Text size="xs" c="dimmed" lineClamp={1}>{winner.model ?? winner.description}</Text>
+          <p className="line-clamp-1 text-xs text-gray-500">{winner.model ?? winner.description}</p>
         )}
-        <Text size="xs" c="dimmed" lineClamp={1}>
+        <p className="line-clamp-1 text-xs text-gray-500">
           <span onClick={(e) => e.stopPropagation()}>
-            <Link to="/event/$id" params={{ id: winner.tourneyId }} search={{ tab: 'best-painted', painting: undefined }}>
+            <Link
+              to="/event/$id"
+              params={{ id: winner.tourneyId }}
+              search={{ tab: 'best-painted', painting: undefined }}
+            >
               {winner.tourneyName}
             </Link>
           </span>
-        </Text>
-        <Text size="xs" c="dimmed">{winner.categoryName} — {positionLabel(winner.position, winner.totalWinners)}</Text>
-      </Stack>
-    </Paper>
+        </p>
+        <p className="text-xs text-gray-500">
+          {winner.categoryName} — {positionLabel(winner.position, winner.totalWinners)}
+        </p>
+      </div>
+    </div>
   )
 }
 
@@ -90,7 +101,7 @@ function RouteComponent() {
 
   return (
     <div>
-      <SimpleGrid cols={{ base: 2, sm: 3, md: 4, lg: 5 }} spacing="md">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
         {data.map((winner) => (
           <WinnerCard
             key={winner.id}
@@ -98,7 +109,7 @@ function RouteComponent() {
             onClick={() => navigate({ search: (prev) => ({ ...prev, painting: winner.id }) })}
           />
         ))}
-      </SimpleGrid>
+      </div>
       <PaintingLightbox
         winner={lightboxWinner}
         onClose={() => navigate({ search: (prev) => ({ ...prev, painting: undefined }) })}

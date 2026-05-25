@@ -1,15 +1,5 @@
-import { SiteNavbar } from "@/components/site-navbar";
-import {
-  AppShell,
-  Burger,
-  Container,
-  Group,
-  Image,
-  MantineProvider,
-  Text,
-  Title,
-} from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
+import { SiteNavbar } from '#/components/site-navbar'
+import { Menu, X } from 'lucide-react'
 import {
   createRootRoute,
   HeadContent,
@@ -18,30 +8,29 @@ import {
   Scripts,
   useMatches,
   useRouterState,
-} from "@tanstack/react-router";
+} from '@tanstack/react-router'
+import { useEffect, useState } from 'react'
 
-declare module "@tanstack/react-router" {
+declare module '@tanstack/react-router' {
   interface StaticDataRouteOption {
-    title?: string;
+    title?: string
   }
 }
 
-import { useEffect } from "react";
-
-import appCss from "../styles.css?url";
+import appCss from '../styles.css?url'
 
 export const Route = createRootRoute({
   head: () => ({
     meta: [
-      { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "b(UK)et bot" },
+      { charSet: 'utf-8' },
+      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+      { title: 'b(UK)et bot' },
     ],
-    links: [{ rel: "stylesheet", href: appCss }],
+    links: [{ rel: 'stylesheet', href: appCss }],
   }),
   shellComponent: RootDocument,
   component: SiteLayout,
-});
+})
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
@@ -50,64 +39,68 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        <MantineProvider defaultColorScheme="light">{children}</MantineProvider>
+        {children}
         <Scripts />
       </body>
     </html>
-  );
+  )
 }
 
 function SiteLayout() {
-  const [opened, { toggle, close }] = useDisclosure();
+  const [navOpen, setNavOpen] = useState(false)
 
-  const location = useRouterState({ select: (s) => s.location });
+  const location = useRouterState({ select: (s) => s.location })
   useEffect(() => {
-    close();
-  }, [location.pathname]);
+    setNavOpen(false)
+  }, [location.pathname])
 
-  const matches = useMatches();
-  const title = matches.at(-1)?.staticData.title;
+  const matches = useMatches()
+  const title = matches.at(-1)?.staticData.title
 
   return (
-    <AppShell
-      padding="md"
-      header={{ height: { base: 60, md: 70, lg: 80 } }}
-      navbar={{
-        width: { base: 200, md: 250, lg: 300 },
-        breakpoint: "sm",
-        collapsed: { mobile: !opened },
-      }}
-    >
-      <AppShell.Header>
-        <Group h="100%" px="md">
-          <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
-          <Link to="/" search={{}}>
-            <Image src="/bucket-bot-logo.png" alt="b(UK)et bot" w={50} />
-          </Link>
-          <Text visibleFrom="xs" fw={700}>
-            <Link
-              to="/"
-              search={{}}
-              style={{ color: "inherit", textDecoration: "none" }}
-            >
-              UK Malifaux Community
-            </Link>
-          </Text>
-        </Group>
-      </AppShell.Header>
-      <AppShell.Navbar p="md">
-        <SiteNavbar />
-      </AppShell.Navbar>
-      <AppShell.Main>
-        <Container>
-          {title && (
-            <Title order={3} mb="md">
-              {title}
-            </Title>
-          )}
-          <Outlet />
-        </Container>
-      </AppShell.Main>
-    </AppShell>
-  );
+    <div className="flex min-h-screen flex-col">
+      <header className="sticky top-0 z-30 flex h-[60px] items-center gap-3 border-b border-gray-200 bg-white px-4 md:h-[70px] lg:h-[80px]">
+        <button
+          type="button"
+          onClick={() => setNavOpen((o) => !o)}
+          className="inline-flex h-9 w-9 items-center justify-center rounded hover:bg-gray-100 sm:hidden"
+          aria-label="Toggle navigation"
+        >
+          {navOpen ? <X size={20} /> : <Menu size={20} />}
+        </button>
+        <Link to="/" search={{}}>
+          <img src="/bucket-bot-logo.png" alt="b(UK)et bot" className="w-[50px]" />
+        </Link>
+        <Link
+          to="/"
+          search={{}}
+          className="hidden font-bold text-inherit no-underline xs:inline"
+        >
+          UK Malifaux Community
+        </Link>
+      </header>
+
+      <div className="flex flex-1">
+        <aside
+          className={`${
+            navOpen ? 'block' : 'hidden'
+          } fixed inset-y-0 top-[60px] z-20 w-[200px] border-r border-gray-200 bg-white p-4 sm:static sm:block sm:w-[250px] sm:top-0 lg:w-[300px]`}
+        >
+          <SiteNavbar />
+        </aside>
+        {navOpen && (
+          <div
+            className="fixed inset-0 top-[60px] z-10 bg-black/20 sm:hidden"
+            onClick={() => setNavOpen(false)}
+          />
+        )}
+        <main className="flex-1 p-4">
+          <div className="mx-auto max-w-6xl">
+            {title && <h2 className="mb-4 text-xl font-semibold">{title}</h2>}
+            <Outlet />
+          </div>
+        </main>
+      </div>
+    </div>
+  )
 }

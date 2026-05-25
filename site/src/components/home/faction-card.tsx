@@ -1,7 +1,6 @@
-import { Card, Title } from '@mantine/core'
-import { useResizeObserver } from '@mantine/hooks'
+import { useLayoutEffect, useRef, useState } from 'react'
 import { scaleBand, scaleLinear } from 'd3'
-import { Link } from '@/components/link'
+import { Link } from '#/components/link'
 
 type FactionRanking = {
   rank: number | null
@@ -15,10 +14,18 @@ const MARGIN = { top: 4, right: 90, bottom: 4, left: 24 }
 const BAR_COUNT = 8
 
 export function FactionCard({ data }: { data: FactionRanking[] }) {
-  const [containerRef, containerRect] = useResizeObserver<HTMLDivElement>()
+  const containerRef = useRef<HTMLDivElement | null>(null)
+  const [containerWidth, setContainerWidth] = useState(0)
+  useLayoutEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+    const ro = new ResizeObserver((entries) => setContainerWidth(entries[0].contentRect.width))
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
 
   const top = data.slice(0, BAR_COUNT)
-  const width = containerRect.width || 300
+  const width = containerWidth || 300
   const innerWidth = width - MARGIN.left - MARGIN.right
   const innerHeight = BAR_COUNT * 26
   const height = innerHeight + MARGIN.top + MARGIN.bottom
@@ -31,9 +38,9 @@ export function FactionCard({ data }: { data: FactionRanking[] }) {
     .padding(0.15)
 
   return (
-    <Card withBorder padding="md" h="100%" mih={280} style={{ display: 'flex', flexDirection: 'column' }}>
-      <Title order={3} mb="sm">Faction Rankings</Title>
-      <div style={{ flex: 1 }} ref={containerRef}>
+    <div className="flex h-full min-h-[280px] flex-col rounded-lg border border-gray-200 bg-white p-4">
+      <h3 className="mb-2 text-lg font-semibold">Faction Rankings</h3>
+      <div className="flex-1" ref={containerRef}>
         <svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`}>
           <g transform={`translate(${MARGIN.left},${MARGIN.top})`}>
             {top.map((faction) => {
@@ -64,9 +71,9 @@ export function FactionCard({ data }: { data: FactionRanking[] }) {
           </g>
         </svg>
       </div>
-      <Link to="/faction-rankings" search={{ tab: undefined }} size="sm" mt="sm">
+      <Link to="/faction-rankings" search={{ tab: undefined }} className="mt-2 text-sm">
         Full faction rankings →
       </Link>
-    </Card>
+    </div>
   )
 }

@@ -1,19 +1,19 @@
-import { fetchRankingTypes, fetchTeamRankings, fetchTeamsOverTime } from '@/queries'
-import { Group, ScrollArea, Select, Table, Text, Tooltip } from '@mantine/core'
-import { TeamAvatar } from '@/components/team-avatar'
-import { useMediaQuery } from '@mantine/hooks'
+import { fetchRankingTypes, fetchTeamRankings, fetchTeamsOverTime } from '#/queries'
+import { TeamAvatar } from '#/components/team-avatar'
+import { Tooltip } from '#/components/ui/tooltip'
+import { useMediaQuery } from '#/helpers/use-media-query'
 import { createFileRoute, redirect } from '@tanstack/react-router'
-import { Link } from '@/components/link'
-import { Tabs } from '@/components/routed-tabs'
-import { TeamsBarRace } from '@/components/animated-teams'
+import { Link } from '#/components/link'
+import { Tabs } from '#/components/routed-tabs'
+import { TeamsBarRace } from '#/components/animated-teams'
 import z from 'zod'
 
 function RankChange({ change, isNew }: { change: number | null | undefined; isNew?: boolean }) {
-  if (isNew) return <Text span size="sm" c="green">NEW</Text>
-  if (change == null) return <Text span size="sm" c="blue">RE</Text>
-  if (change === 0) return <Text span size="sm" c="dimmed">-</Text>
-  if (change > 0) return <Text span size="sm" c="green">↑{change}</Text>
-  return <Text span size="sm" c="red">↓{Math.abs(change)}</Text>
+  if (isNew) return <span className="text-sm text-green-600">NEW</span>
+  if (change == null) return <span className="text-sm text-blue-600">RE</span>
+  if (change === 0) return <span className="text-sm text-gray-500">-</span>
+  if (change > 0) return <span className="text-sm text-green-600">↑{change}</span>
+  return <span className="text-sm text-red-600">↓{Math.abs(change)}</span>
 }
 
 export const Route = createFileRoute('/team-rankings')({
@@ -44,59 +44,78 @@ function RouteComponent() {
 
   return (
     <div>
-      <Group align="center" mb="sm">
-        <Select
-          searchable w={200} placeholder="Choose a ranking"
-          data={rankingTypes.map((rt) => ({ value: rt.code, label: rt.name }))}
+      <div className="mb-2 flex flex-wrap items-center gap-3">
+        <select
+          className="w-[200px] rounded border border-gray-300 px-2 py-1 text-sm"
           value={typeCode}
-          onChange={(value) => navigate({ search: (prev) => ({ ...prev, typeCode: value ?? undefined }) })}
-        />
-        {rankingDescription && <Text>{rankingDescription}</Text>}
-      </Group>
+          onChange={(e) => navigate({ search: (prev) => ({ ...prev, typeCode: e.target.value || undefined }) })}
+        >
+          {rankingTypes.map((rt) => (
+            <option key={rt.code} value={rt.code}>{rt.name}</option>
+          ))}
+        </select>
+        {rankingDescription && <p>{rankingDescription}</p>}
+      </div>
       <Tabs defaultValue="table">
         <Tabs.List>
           <Tabs.Tab value="table">Table View</Tabs.Tab>
           <Tabs.Tab value="animation">Animation</Tabs.Tab>
         </Tabs.List>
         <Tabs.Panel value="table">
-          <Text size="sm" c="dimmed" mb="sm">
+          <p className="mb-2 text-sm text-gray-500">
             Team ranking points are calculated as the sum of the ranking points of the top five players in the team.
-          </Text>
-          <div style={!isMd ? { maskImage: 'linear-gradient(to right, black 80%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to right, black 80%, transparent 100%)' } : {}}>
-            <ScrollArea type="auto">
-              <Table tabularNums stickyHeader stickyHeaderOffset={0}>
-                <Table.Thead>
-                  <Table.Tr>
-                    <Table.Th w={1} style={{ whiteSpace: 'nowrap' }}>Rank</Table.Th>
-                    <Table.Th w={1} style={{ whiteSpace: 'nowrap' }}>Change</Table.Th>
-                    <Table.Th w={1}>Logo</Table.Th>
-                    <Table.Th>Team</Table.Th>
-                    <Table.Th>Total Points</Table.Th>
-                    <Table.Th w={1} style={{ whiteSpace: 'nowrap' }}>Players</Table.Th>
-                    <Table.Th w={1} style={{ whiteSpace: 'nowrap' }}>Events</Table.Th>
-                  </Table.Tr>
-                </Table.Thead>
-                <Table.Tbody>
-                  {(rankings as any[]).map((team: any) => (
-                    <Table.Tr key={team.team_id}>
-                      <Table.Td w={1} style={{ whiteSpace: 'nowrap' }}>{team.rank}</Table.Td>
-                      <Table.Td w={1} style={{ whiteSpace: 'nowrap' }}><RankChange change={team.rank_change} isNew={team.new_team} /></Table.Td>
-                      <Table.Td w={1}>
-                        <Tooltip label={team.team_name} withArrow>
-                          <TeamAvatar image_key={team.image_key} name={team.team_name} />
-                        </Tooltip>
-                      </Table.Td>
-                      <Table.Td>
-                        <Link to="/team/$id" params={{ id: String(team.team_id) }} search={{ tab: undefined }}>{team.team_name}</Link>
-                      </Table.Td>
-                      <Table.Td>{team.total_points.toFixed(2)}</Table.Td>
-                      <Table.Td w={1} style={{ whiteSpace: 'nowrap' }}>{team.player_count != null ? `${team.player_count}/5` : '—'}</Table.Td>
-                      <Table.Td w={1} style={{ whiteSpace: 'nowrap' }}>{team.event_count != null ? `${team.event_count}/25` : '—'}</Table.Td>
-                    </Table.Tr>
-                  ))}
-                </Table.Tbody>
-              </Table>
-            </ScrollArea>
+          </p>
+          <div
+            className="overflow-x-auto"
+            style={
+              !isMd
+                ? {
+                    maskImage: 'linear-gradient(to right, black 80%, transparent 100%)',
+                    WebkitMaskImage: 'linear-gradient(to right, black 80%, transparent 100%)',
+                  }
+                : {}
+            }
+          >
+            <table className="min-w-full text-sm tabular-nums">
+              <thead className="sticky top-0 bg-white">
+                <tr className="border-b border-gray-200 text-left">
+                  <th className="whitespace-nowrap px-2 py-2 font-semibold">Rank</th>
+                  <th className="whitespace-nowrap px-2 py-2 font-semibold">Change</th>
+                  <th className="px-2 py-2 font-semibold">Logo</th>
+                  <th className="px-2 py-2 font-semibold">Team</th>
+                  <th className="px-2 py-2 font-semibold">Total Points</th>
+                  <th className="whitespace-nowrap px-2 py-2 font-semibold">Players</th>
+                  <th className="whitespace-nowrap px-2 py-2 font-semibold">Events</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(rankings as any[]).map((team: any) => (
+                  <tr key={team.team_id} className="border-b border-gray-100">
+                    <td className="whitespace-nowrap px-2 py-1.5">{team.rank}</td>
+                    <td className="whitespace-nowrap px-2 py-1.5">
+                      <RankChange change={team.rank_change} isNew={team.new_team} />
+                    </td>
+                    <td className="px-2 py-1.5">
+                      <Tooltip label={team.team_name}>
+                        <TeamAvatar image_key={team.image_key} name={team.team_name} />
+                      </Tooltip>
+                    </td>
+                    <td className="px-2 py-1.5">
+                      <Link to="/team/$id" params={{ id: String(team.team_id) }} search={{ tab: undefined }}>
+                        {team.team_name}
+                      </Link>
+                    </td>
+                    <td className="px-2 py-1.5">{team.total_points.toFixed(2)}</td>
+                    <td className="whitespace-nowrap px-2 py-1.5">
+                      {team.player_count != null ? `${team.player_count}/5` : '—'}
+                    </td>
+                    <td className="whitespace-nowrap px-2 py-1.5">
+                      {team.event_count != null ? `${team.event_count}/25` : '—'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </Tabs.Panel>
         <Tabs.Panel value="animation">

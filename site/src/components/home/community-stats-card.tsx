@@ -1,19 +1,17 @@
-import { Card, Text, Title } from '@mantine/core'
-
 type CommunityStats = { totalPlayers: number; gamesPlayed: number; totalEvents: number }
 
 export function CommunityStatsCard({ data }: { data: CommunityStats }) {
   return (
-    <Card withBorder padding="md" h="100%" mih={160}>
-      <Title order={3} mb="sm">Community Stats</Title>
-      <Text>
-        <Text span fw={700}>{data.totalPlayers.toLocaleString()}</Text>
+    <div className="h-full min-h-[160px] rounded-lg border border-gray-200 bg-white p-4">
+      <h3 className="mb-2 text-lg font-semibold">Community Stats</h3>
+      <p>
+        <span className="font-bold">{data.totalPlayers.toLocaleString()}</span>
         {' '}people have played{' '}
-        <Text span fw={700}>{data.gamesPlayed.toLocaleString()}</Text>
+        <span className="font-bold">{data.gamesPlayed.toLocaleString()}</span>
         {' '}games at{' '}
-        <Text span fw={700}>{data.totalEvents.toLocaleString()}</Text>
+        <span className="font-bold">{data.totalEvents.toLocaleString()}</span>
         {' '}event{data.totalEvents === 1 ? '' : 's'} so far!
-      </Text>
-    </Card>
+      </p>
+    </div>
   )
 }

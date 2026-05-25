@@ -1,6 +1,5 @@
-import { fetchTourneys, fetchTiers } from '@/queries'
-import { Link } from '@/components/link'
-import { Table, Text } from '@mantine/core'
+import { fetchTourneys, fetchTiers } from '#/queries'
+import { Link } from '#/components/link'
 import { createFileRoute } from '@tanstack/react-router'
 import { format } from 'date-fns'
 
@@ -17,16 +16,35 @@ function RouteComponent() {
   const { tourneys, tiers } = Route.useLoaderData()
   const tierNameByCode = new Map((tiers as any[]).map((t: any) => [t.code, t.name]))
   return (
-    <Table data={{
-      head: ['Name', 'Date', 'Players', 'Tier'],
-      body: tourneys.map(({ id, name, date, players, tier_code }) => [
-        <Link to="/event/$id" params={{ id }} search={{ tab: undefined, painting: undefined }}>{name}</Link>,
-        date ? format(new Date(date), 'dd MMM yyyy') : '',
-        players,
-        tier_code && tier_code !== 'EVENT'
-          ? (tierNameByCode.get(tier_code) ?? tier_code)
-          : <Text c="dimmed">—</Text>,
-      ]),
-    }} />
+    <table className="min-w-full text-sm">
+      <thead>
+        <tr className="border-b border-gray-200 text-left">
+          <th className="px-2 py-2 font-semibold">Name</th>
+          <th className="px-2 py-2 font-semibold">Date</th>
+          <th className="px-2 py-2 font-semibold">Players</th>
+          <th className="px-2 py-2 font-semibold">Tier</th>
+        </tr>
+      </thead>
+      <tbody>
+        {tourneys.map(({ id, name, date, players, tier_code }) => (
+          <tr key={id} className="border-b border-gray-100">
+            <td className="px-2 py-1.5">
+              <Link to="/event/$id" params={{ id }} search={{ tab: undefined, painting: undefined }}>
+                {name}
+              </Link>
+            </td>
+            <td className="px-2 py-1.5">{date ? format(new Date(date), 'dd MMM yyyy') : ''}</td>
+            <td className="px-2 py-1.5">{players}</td>
+            <td className="px-2 py-1.5">
+              {tier_code && tier_code !== 'EVENT' ? (
+                tierNameByCode.get(tier_code) ?? tier_code
+              ) : (
+                <span className="text-gray-500">—</span>
+              )}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
   )
 }

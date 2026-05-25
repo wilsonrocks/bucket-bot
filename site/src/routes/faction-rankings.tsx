@@ -1,15 +1,14 @@
-import { fetchFactionRankings, fetchFactionsOverTime } from '@/queries'
-import { FactionsBarRace } from '@/components/animated-factions'
-import { Select, Table, Text } from '@mantine/core'
+import { fetchFactionRankings, fetchFactionsOverTime } from '#/queries'
+import { FactionsBarRace } from '#/components/animated-factions'
 import { createFileRoute } from '@tanstack/react-router'
-import { Tabs } from '@/components/routed-tabs'
+import { Tabs } from '#/components/routed-tabs'
 import { useState } from 'react'
 
 function RankChange({ change }: { change: number | null | undefined }) {
-  if (change == null) return <Text span size="sm" c="green">NEW</Text>
-  if (change === 0) return <Text span size="sm" c="dimmed">-</Text>
-  if (change > 0) return <Text span size="sm" c="green">↑{change}</Text>
-  return <Text span size="sm" c="red">↓{Math.abs(change)}</Text>
+  if (change == null) return <span className="text-sm text-green-600">NEW</span>
+  if (change === 0) return <span className="text-sm text-gray-500">-</span>
+  if (change > 0) return <span className="text-sm text-green-600">↑{change}</span>
+  return <span className="text-sm text-red-600">↓{Math.abs(change)}</span>
 }
 
 export const Route = createFileRoute('/faction-rankings')({
@@ -36,48 +35,54 @@ function RouteComponent() {
           <Tabs.Tab value="animation">Animation</Tabs.Tab>
         </Tabs.List>
         <Tabs.Panel value="table">
-          <Table tabularNums>
-            <Table.Thead>
-              <Table.Tr>
-                <Table.Th w={1} style={{ whiteSpace: 'nowrap' }}>Rank</Table.Th>
-                <Table.Th w={1} style={{ whiteSpace: 'nowrap' }}>Change</Table.Th>
-                <Table.Th>Faction</Table.Th>
-                <Table.Th>Declarations</Table.Th>
-                <Table.Th>Play rate</Table.Th>
-                <Table.Th>Total Points</Table.Th>
-                <Table.Th>Average Points</Table.Th>
-              </Table.Tr>
-            </Table.Thead>
-            <Table.Tbody>
+          <table className="min-w-full text-sm tabular-nums">
+            <thead>
+              <tr className="border-b border-gray-200 text-left">
+                <th className="whitespace-nowrap px-2 py-2 font-semibold">Rank</th>
+                <th className="whitespace-nowrap px-2 py-2 font-semibold">Change</th>
+                <th className="px-2 py-2 font-semibold">Faction</th>
+                <th className="px-2 py-2 font-semibold">Declarations</th>
+                <th className="px-2 py-2 font-semibold">Play rate</th>
+                <th className="px-2 py-2 font-semibold">Total Points</th>
+                <th className="px-2 py-2 font-semibold">Average Points</th>
+              </tr>
+            </thead>
+            <tbody>
               {(factionRankings as any[]).map((faction: any) => (
-                <Table.Tr key={faction.faction_code}>
-                  <Table.Td w={1} style={{ whiteSpace: 'nowrap' }}>
+                <tr key={faction.faction_code} className="border-b border-gray-100">
+                  <td className="whitespace-nowrap px-2 py-1.5">
                     <div style={{ borderLeft: `3px solid ${faction.hex_code}`, paddingLeft: '0.5rem' }}>
                       {(faction.rank ?? 0).toString()}
                     </div>
-                  </Table.Td>
-                  <Table.Td w={1} style={{ whiteSpace: 'nowrap' }}><RankChange change={faction.rank_change} /></Table.Td>
-                  <Table.Td>{faction.faction_name}</Table.Td>
-                  <Table.Td>{faction.declarations}</Table.Td>
-                  <Table.Td>{`${((faction.declaration_rate ?? 0) * 100).toFixed(2)}%`}</Table.Td>
-                  <Table.Td>{faction.total_points}</Table.Td>
-                  <Table.Td><strong>{(faction.points_per_declaration ?? 0).toFixed(2)}</strong></Table.Td>
-                </Table.Tr>
+                  </td>
+                  <td className="whitespace-nowrap px-2 py-1.5">
+                    <RankChange change={faction.rank_change} />
+                  </td>
+                  <td className="px-2 py-1.5">{faction.faction_name}</td>
+                  <td className="px-2 py-1.5">{faction.declarations}</td>
+                  <td className="px-2 py-1.5">
+                    {`${((faction.declaration_rate ?? 0) * 100).toFixed(2)}%`}
+                  </td>
+                  <td className="px-2 py-1.5">{faction.total_points}</td>
+                  <td className="px-2 py-1.5">
+                    <strong>{(faction.points_per_declaration ?? 0).toFixed(2)}</strong>
+                  </td>
+                </tr>
               ))}
-            </Table.Tbody>
-          </Table>
+            </tbody>
+          </table>
         </Tabs.Panel>
         <Tabs.Panel value="animation">
-          <Text size="sm" c="dimmed" mt="xs">Showing top 16 factions</Text>
-          <Select
-            mt="sm" w={220} value={metric}
-            onChange={(v) => setMetric((v ?? 'points_per_declaration') as typeof metric)}
-            data={[
-              { value: 'points_per_declaration', label: 'Average Points' },
-              { value: 'declarations', label: 'Declarations' },
-              { value: 'total_points', label: 'Total Points' },
-            ]}
-          />
+          <p className="mt-1 text-sm text-gray-500">Showing top 16 factions</p>
+          <select
+            className="mt-2 w-[220px] rounded border border-gray-300 px-2 py-1 text-sm"
+            value={metric}
+            onChange={(e) => setMetric(e.target.value as typeof metric)}
+          >
+            <option value="points_per_declaration">Average Points</option>
+            <option value="declarations">Declarations</option>
+            <option value="total_points">Total Points</option>
+          </select>
           <FactionsBarRace data={factionsOverTime as any} metric={metric} />
         </Tabs.Panel>
       </Tabs>

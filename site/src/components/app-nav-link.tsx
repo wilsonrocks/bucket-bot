@@ -1,6 +1,4 @@
-import { NavLink } from '@mantine/core'
 import { Link, useMatchRoute } from '@tanstack/react-router'
-import type React from 'react'
 import type { ReactNode } from 'react'
 
 type AppNavLinkProps = {
@@ -9,22 +7,26 @@ type AppNavLinkProps = {
   icon?: ReactNode
   fuzzy?: boolean
   children?: ReactNode
-} & Omit<React.ComponentProps<typeof NavLink>, 'component' | 'to' | 'label' | 'active'>
+}
 
-export function AppNavLink({ to, label, icon, fuzzy = true, children, ...props }: AppNavLinkProps) {
+export function AppNavLink({ to, label, icon, fuzzy = true, children }: AppNavLinkProps) {
   const matchRoute = useMatchRoute()
   const active = !!matchRoute({ to, fuzzy })
   return (
-    <NavLink
-      from="/"
-      component={Link}
-      to={to}
-      label={label}
-      leftSection={icon}
-      active={active}
-      {...props}
-    >
-      {children}
-    </NavLink>
+    <div>
+      <Link
+        from="/"
+        to={to}
+        className={`flex items-center gap-2 rounded px-3 py-2 text-sm no-underline ${
+          active
+            ? 'bg-blue-50 text-blue-700 font-medium'
+            : 'text-gray-700 hover:bg-gray-100'
+        }`}
+      >
+        {icon && <span className="inline-flex h-5 w-5 items-center justify-center">{icon}</span>}
+        <span>{label}</span>
+      </Link>
+      {children && <div className="ml-6">{children}</div>}
+    </div>
   )
 }

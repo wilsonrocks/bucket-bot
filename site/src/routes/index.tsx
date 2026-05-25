@@ -1,4 +1,3 @@
-import { SimpleGrid } from '@mantine/core'
 import { createFileRoute } from '@tanstack/react-router'
 import {
   fetchCommunityStats,
@@ -10,15 +9,15 @@ import {
   fetchTeams,
   fetchTourneys,
   fetchTourney,
-} from '@/queries'
-import { CommunityStatsCard } from '@/components/home/community-stats-card'
-import { FactionCard } from '@/components/home/faction-card'
-import { PaintingHighlightCard } from '@/components/home/painting-highlight-card'
-import { RecentEventCard } from '@/components/home/recent-event-card'
-import { RegionsMapCard } from '@/components/home/regions-map-card'
-import { TeamStandingsCard } from '@/components/home/team-standings-card'
-import { TopPlayersCard } from '@/components/home/top-players-card'
-import ukRegionsRaw from '@/data/ukRegions'
+} from '#/queries'
+import { CommunityStatsCard } from '#/components/home/community-stats-card'
+import { FactionCard } from '#/components/home/faction-card'
+import { PaintingHighlightCard } from '#/components/home/painting-highlight-card'
+import { RecentEventCard } from '#/components/home/recent-event-card'
+import { RegionsMapCard } from '#/components/home/regions-map-card'
+import { TeamStandingsCard } from '#/components/home/team-standings-card'
+import { TopPlayersCard } from '#/components/home/top-players-card'
+import ukRegionsRaw from '#/data/ukRegions'
 
 function rewindCoords(coords: number[][]): number[][] {
   let area = 0
@@ -106,7 +105,7 @@ function HomePage() {
     : null
 
   return (
-    <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
       <TopPlayersCard data={rankings as any} />
       <PaintingHighlightCard data={painting} />
       <TeamStandingsCard data={teamRankings as any} />
@@ -114,6 +113,6 @@ function HomePage() {
       <RecentEventCard data={recentEvent} />
       <CommunityStatsCard data={communityStats} />
       <FactionCard data={factionRankings as any} />
-    </SimpleGrid>
+    </div>
   )
 }

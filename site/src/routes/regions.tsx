@@ -1,7 +1,7 @@
-import { fetchRegionsOverTime } from '@/queries'
-import { AnimatedRegions } from '@/components/animated-regions'
+import { fetchRegionsOverTime } from '#/queries'
+import { AnimatedRegions } from '#/components/animated-regions'
 import { createFileRoute } from '@tanstack/react-router'
-import ukRegionsRaw from '@/data/ukRegions'
+import ukRegionsRaw from '#/data/ukRegions'
 
 function rewindCoords(coords: number[][]): number[][] {
   let area = 0

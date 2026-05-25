@@ -1,13 +1,8 @@
-import { ActionIcon, Group } from '@mantine/core'
-import { useMediaQuery, useResizeObserver } from '@mantine/hooks'
-import {
-  IconPlayerPause,
-  IconPlayerPlay,
-  IconPlayerSkipBack,
-} from '@tabler/icons-react'
+import { useMediaQuery } from '#/helpers/use-media-query'
+import { Pause, Play, SkipBack } from 'lucide-react'
 import { max, scaleBand, scaleLinear, select } from 'd3'
 import { timeFormat } from 'd3-time-format'
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 
 export type BarDatum = {
   id: string
@@ -100,9 +95,19 @@ function BarRaceInner<T extends BarDatum>({
   formatValue = (v) => v.toFixed(2),
   duration = 1500,
 }: BarRaceProps<T>) {
-  const [containerRef, containerRect] = useResizeObserver<HTMLDivElement>()
+  const containerRef = useRef<HTMLDivElement | null>(null)
+  const [containerWidth, setContainerWidth] = useState(0)
+  useLayoutEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+    const ro = new ResizeObserver((entries) => {
+      setContainerWidth(entries[0].contentRect.width)
+    })
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
   const isMobile = useMediaQuery('(max-width: 600px)')
-  const width = containerRect.width || 700
+  const width = containerWidth || 700
   const height = 400
   const margin = { top: 20, right: 100, bottom: 20, left: 30 }
   const innerWidth = width - margin.left - margin.right
@@ -336,19 +341,23 @@ function BarRaceInner<T extends BarDatum>({
 
   return (
     <div ref={containerRef}>
-      <Group mb={10} align="center">
+      <div className="mb-2.5 flex items-center gap-3">
         <strong>{displayedDate}</strong>
-        <ActionIcon onClick={handleReset} variant="subtle">
-          <IconPlayerSkipBack size={16} />
-        </ActionIcon>
-        <ActionIcon onClick={handlePlayPause} variant="subtle">
-          {isPlaying ? (
-            <IconPlayerPause size={16} />
-          ) : (
-            <IconPlayerPlay size={16} />
-          )}
-        </ActionIcon>
-      </Group>
+        <button
+          type="button"
+          onClick={handleReset}
+          className="inline-flex h-8 w-8 items-center justify-center rounded hover:bg-gray-100"
+        >
+          <SkipBack size={16} />
+        </button>
+        <button
+          type="button"
+          onClick={handlePlayPause}
+          className="inline-flex h-8 w-8 items-center justify-center rounded hover:bg-gray-100"
+        >
+          {isPlaying ? <Pause size={16} /> : <Play size={16} />}
+        </button>
+      </div>
       <svg
         ref={svgRef}
         width="100%"

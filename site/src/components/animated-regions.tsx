@@ -1,9 +1,4 @@
-import { ActionIcon, Box, Group, Text } from '@mantine/core'
-import {
-  IconPlayerPause,
-  IconPlayerPlay,
-  IconPlayerSkipBack,
-} from '@tabler/icons-react'
+import { Pause, Play, SkipBack } from 'lucide-react'
 import * as d3 from 'd3'
 import { timeFormat } from 'd3-time-format'
 import { useEffect, useMemo, useRef, useState } from 'react'
@@ -258,27 +253,25 @@ export function AnimatedRegions({
       }}
       onMouseLeave={() => setMousePos(null)}
     >
-      <Group mb={10} align="center">
+      <div className="mb-2.5 flex items-center gap-3">
         <strong>{displayedDate}</strong>
-        <ActionIcon
+        <button
+          type="button"
           onClick={handleReset}
-          variant="subtle"
           disabled={!canAnimate}
+          className="inline-flex h-8 w-8 items-center justify-center rounded hover:bg-gray-100 disabled:opacity-40"
         >
-          <IconPlayerSkipBack size={16} />
-        </ActionIcon>
-        <ActionIcon
+          <SkipBack size={16} />
+        </button>
+        <button
+          type="button"
           onClick={handlePlayPause}
-          variant="subtle"
           disabled={!canAnimate}
+          className="inline-flex h-8 w-8 items-center justify-center rounded hover:bg-gray-100 disabled:opacity-40"
         >
-          {isPlaying ? (
-            <IconPlayerPause size={16} />
-          ) : (
-            <IconPlayerPlay size={16} />
-          )}
-        </ActionIcon>
-      </Group>
+          {isPlaying ? <Pause size={16} /> : <Play size={16} />}
+        </button>
+      </div>
       <svg
         ref={svgRef}
         viewBox={`0 0 ${width} ${height}`}
@@ -321,30 +314,21 @@ function LadderLegend() {
   return (
     <div style={{ position: 'absolute', top: 8, right: 8 }}>
       {LEGEND_ITEMS.map(({ count, label }, i) => (
-        <Group
-          key={count}
-          gap={8}
-          align="center"
-          wrap="nowrap"
-          justify="flex-end"
-        >
-          <Text size="sm" style={{ whiteSpace: 'nowrap' }}>
-            {label}
-          </Text>
-          <Box
-            w={20}
-            h={28}
+        <div key={count} className="flex items-center justify-end gap-2 whitespace-nowrap">
+          <span className="text-sm">{label}</span>
+          <div
             style={{
+              width: 20,
+              height: 28,
               backgroundColor: COLORS[count],
               flexShrink: 0,
               borderTop: i === 0 ? '1px solid #000' : 'none',
               borderLeft: '1px solid #000',
               borderRight: '1px solid #000',
-              borderBottom:
-                i === LEGEND_ITEMS.length - 1 ? '1px solid #000' : 'none',
+              borderBottom: i === LEGEND_ITEMS.length - 1 ? '1px solid #000' : 'none',
             }}
           />
-        </Group>
+        </div>
       ))}
     </div>
   )

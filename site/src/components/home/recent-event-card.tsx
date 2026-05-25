@@ -1,5 +1,4 @@
-import { Card, Divider, Stack, Text, Title } from '@mantine/core'
-import { Link } from '@/components/link'
+import { Link } from '#/components/link'
 import { formatDate } from 'date-fns'
 
 type Player = {
@@ -20,17 +19,21 @@ type RecentEvent = {
 
 function PlayerRow({ player }: { player: Player }) {
   return (
-    <Text size="sm">
-      <Text span c="dimmed">#{player.place} </Text>
+    <p className="text-sm">
+      <span className="text-gray-500">#{player.place} </span>
       {player.playerId != null ? (
-        <Link to="/player/$id" params={{ id: player.playerId }} search={{ tab: undefined, typeCode: undefined, painting: undefined }}>
+        <Link
+          to="/player/$id"
+          params={{ id: player.playerId }}
+          search={{ tab: undefined, typeCode: undefined, painting: undefined }}
+        >
           {player.playerName}
         </Link>
       ) : (
         player.playerName
       )}
-      <Text span c="dimmed"> · {player.factionName}</Text>
-    </Text>
+      <span className="text-gray-500"> · {player.factionName}</span>
+    </p>
   )
 }
 
@@ -41,29 +44,36 @@ export function RecentEventCard({ data }: { data: RecentEvent }) {
   const spoon = data.players.length > 3 ? data.players[data.players.length - 1] : null
 
   return (
-    <Card withBorder padding="md" h="100%" mih={280} style={{ display: 'flex', flexDirection: 'column' }}>
-      <Title order={3} mb="sm">Latest Event</Title>
-      <div style={{ flex: 1 }}>
-        <Link to="/event/$id" params={{ id: data.id }} search={{ tab: undefined, painting: undefined }} fw={600}>
+    <div className="flex h-full min-h-[280px] flex-col rounded-lg border border-gray-200 bg-white p-4">
+      <h3 className="mb-2 text-lg font-semibold">Latest Event</h3>
+      <div className="flex-1">
+        <Link
+          to="/event/$id"
+          params={{ id: data.id }}
+          search={{ tab: undefined, painting: undefined }}
+          className="font-semibold"
+        >
           {data.name}
         </Link>
         {data.date && (
-          <Text size="sm" c="dimmed" mb="xs">
+          <p className="mb-2 text-sm text-gray-500">
             {formatDate(new Date(data.date), 'd MMM yyyy')}
             {data.venue ? ` · ${data.venue}` : ''}
-          </Text>
+          </p>
         )}
-        <Stack gap={4}>
-          {top3.map((p) => <PlayerRow key={p.place} player={p} />)}
+        <div className="flex flex-col gap-1">
+          {top3.map((p) => (
+            <PlayerRow key={p.place} player={p} />
+          ))}
           {spoon && (
             <>
-              <Divider my={4} />
-              <Text size="xs" c="dimmed">Wooden spoon</Text>
+              <hr className="my-1 border-gray-200" />
+              <p className="text-xs text-gray-500">Wooden spoon</p>
               <PlayerRow player={spoon} />
             </>
           )}
-        </Stack>
+        </div>
       </div>
-    </Card>
+    </div>
   )
 }

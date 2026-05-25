@@ -1,5 +1,4 @@
-import { Card, Title } from '@mantine/core'
-import { Link } from '@/components/link'
+import { Link } from '#/components/link'
 import { useEffect, useRef } from 'react'
 import * as d3 from 'd3'
 
@@ -48,20 +47,20 @@ function RegionsThumbnail({ geoJson, countMap }: { geoJson: GeoJsonCollection; c
       .attr('fill', (feat) => getColor(countMap.get(feat.properties.rgn19nm) ?? 0))
   }, [geoJson, countMap, width, height])
 
-  return <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" style={{ display: 'block' }} />
+  return <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} width="100%" className="block" />
 }
 
 export function RegionsMapCard({ regions, geoJson }: { regions: RegionData[]; geoJson: GeoJsonCollection }) {
   const countMap = new Map<string, number>(regions.map((r) => [r.geojson_name, r.event_count]))
 
   return (
-    <Card withBorder padding="md" h="100%" mih={280} style={{ display: 'flex', flexDirection: 'column' }}>
-      <Title order={3} mb="sm">Regions</Title>
-      <div style={{ flex: 1 }}>
+    <div className="flex h-full min-h-[280px] flex-col rounded-lg border border-gray-200 bg-white p-4">
+      <h3 className="mb-2 text-lg font-semibold">Regions</h3>
+      <div className="flex-1">
         <Link to="/regions" search={{}}>
           <RegionsThumbnail geoJson={geoJson} countMap={countMap} />
         </Link>
       </div>
-    </Card>
+    </div>
   )
 }

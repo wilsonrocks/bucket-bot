@@ -1,20 +1,20 @@
-import { fetchRankingTypes, fetchRankings, fetchPlayersOverTime } from '@/queries'
-import { playerShortName } from '@/helpers/player-short-name'
-import { Group, Select, Table, Text, Tooltip } from '@mantine/core'
-import { TeamAvatar } from '@/components/team-avatar'
-import { useMediaQuery } from '@mantine/hooks'
+import { fetchRankingTypes, fetchRankings, fetchPlayersOverTime } from '#/queries'
+import { playerShortName } from '#/helpers/player-short-name'
+import { TeamAvatar } from '#/components/team-avatar'
+import { Tooltip } from '#/components/ui/tooltip'
+import { useMediaQuery } from '#/helpers/use-media-query'
 import { createFileRoute, redirect } from '@tanstack/react-router'
-import { Link } from '@/components/link'
-import { Tabs } from '@/components/routed-tabs'
-import { PlayersBarRace } from '@/components/animated-players'
+import { Link } from '#/components/link'
+import { Tabs } from '#/components/routed-tabs'
+import { PlayersBarRace } from '#/components/animated-players'
 import z from 'zod'
 
 function RankChange({ change, newPlayer }: { change: number | null | undefined; newPlayer?: boolean }) {
-  if (newPlayer) return <Text span size="sm" c="green">NEW</Text>
-  if (change == null) return <Text span size="sm" c="blue">RE</Text>
-  if (change === 0) return <Text span size="sm" c="dimmed">-</Text>
-  if (change > 0) return <Text span size="sm" c="green">↑{change}</Text>
-  return <Text span size="sm" c="red">↓{Math.abs(change)}</Text>
+  if (newPlayer) return <span className="text-sm text-green-600">NEW</span>
+  if (change == null) return <span className="text-sm text-blue-600">RE</span>
+  if (change === 0) return <span className="text-sm text-gray-500">-</span>
+  if (change > 0) return <span className="text-sm text-green-600">↑{change}</span>
+  return <span className="text-sm text-red-600">↓{Math.abs(change)}</span>
 }
 
 export const Route = createFileRoute('/rankings')({
@@ -41,69 +41,79 @@ function RouteComponent() {
   const { rankingTypes, rankings, playersOverTime, typeCode } = Route.useLoaderData()
   const navigate = Route.useNavigate()
   const isMobile = useMediaQuery('(max-width: 600px)')
-  const isMd = useMediaQuery('(min-width: 992px)')
-  const isLg = useMediaQuery('(min-width: 1200px)')
-  const headerOffset = isLg ? 80 : isMd ? 70 : 60
 
   const rankingDescription = rankingTypes.find((rt) => rt.code === typeCode)?.description
 
   return (
     <div>
-      <Group align="center" mb="sm">
-        <Select
-          searchable
-          w={200}
-          placeholder="Choose a ranking"
-          data={rankingTypes.map((rt) => ({ value: rt.code, label: rt.name }))}
+      <div className="mb-2 flex flex-wrap items-center gap-3">
+        <select
+          className="w-[200px] rounded border border-gray-300 px-2 py-1 text-sm"
           value={typeCode}
-          onChange={(value) => navigate({ search: (prev) => ({ ...prev, typeCode: value ?? undefined }) })}
-        />
-        {rankingDescription && <Text>{rankingDescription}</Text>}
-      </Group>
+          onChange={(e) => navigate({ search: (prev) => ({ ...prev, typeCode: e.target.value || undefined }) })}
+        >
+          {rankingTypes.map((rt) => (
+            <option key={rt.code} value={rt.code}>{rt.name}</option>
+          ))}
+        </select>
+        {rankingDescription && <p>{rankingDescription}</p>}
+      </div>
       <Tabs defaultValue="table">
         <Tabs.List>
           <Tabs.Tab value="table">Table View</Tabs.Tab>
           <Tabs.Tab value="animation">Animation</Tabs.Tab>
         </Tabs.List>
         <Tabs.Panel value="table">
-          <Table tabularNums stickyHeader stickyHeaderOffset={headerOffset}>
-            <Table.Thead>
-              <Table.Tr>
-                <Table.Th w={1} style={{ whiteSpace: 'nowrap' }}>Rank</Table.Th>
-                <Table.Th w={1} style={{ whiteSpace: 'nowrap' }}>Change</Table.Th>
-                <Table.Th>Player</Table.Th>
-                <Table.Th>Total Points</Table.Th>
-              </Table.Tr>
-            </Table.Thead>
-            <Table.Tbody>
+          <table className="min-w-full text-sm tabular-nums">
+            <thead className="sticky top-0 bg-white">
+              <tr className="border-b border-gray-200 text-left">
+                <th className="whitespace-nowrap px-2 py-2 font-semibold">Rank</th>
+                <th className="whitespace-nowrap px-2 py-2 font-semibold">Change</th>
+                <th className="px-2 py-2 font-semibold">Player</th>
+                <th className="px-2 py-2 font-semibold">Total Points</th>
+              </tr>
+            </thead>
+            <tbody>
               {rankings.map((player) => (
-                <Table.Tr key={player.id}>
-                  <Table.Td w={1} style={{ whiteSpace: 'nowrap' }}>{player.rank}</Table.Td>
-                  <Table.Td w={1} style={{ whiteSpace: 'nowrap' }}>
+                <tr key={player.id} className="border-b border-gray-100">
+                  <td className="whitespace-nowrap px-2 py-1.5">{player.rank}</td>
+                  <td className="whitespace-nowrap px-2 py-1.5">
                     <RankChange change={player.rank_change} newPlayer={player.new_player} />
-                  </Table.Td>
-                  <Table.Td>
-                    <Group gap="xs" wrap="nowrap">
-                      <Link to="/player/$id" params={{ id: player.player_id! }} search={{ tab: undefined, typeCode: undefined, painting: undefined }}>
+                  </td>
+                  <td className="px-2 py-1.5">
+                    <div className="flex items-center gap-2 whitespace-nowrap">
+                      <Link
+                        to="/player/$id"
+                        params={{ id: player.player_id! }}
+                        search={{ tab: undefined, typeCode: undefined, painting: undefined }}
+                      >
                         {isMobile ? playerShortName(player) : player.name}
                       </Link>
                       {player.current_team_id != null && (
-                        <Tooltip label={player.current_team_name} withArrow>
-                          <Link to="/team/$id" params={{ id: String(player.current_team_id) }} search={{ tab: undefined }}>
-                            <TeamAvatar image_key={player.team_image_key} name={player.current_team_name ?? '?'} size={22} />
+                        <Tooltip label={player.current_team_name}>
+                          <Link
+                            to="/team/$id"
+                            params={{ id: String(player.current_team_id) }}
+                            search={{ tab: undefined }}
+                          >
+                            <TeamAvatar
+                              image_key={player.team_image_key}
+                              name={player.current_team_name ?? '?'}
+                              size={22}
+                            />
                           </Link>
                         </Tooltip>
                       )}
-                    </Group>
-                  </Table.Td>
-                  <Table.Td>{(player.total_points ?? 0).toFixed(2)}</Table.Td>
-                </Table.Tr>
+                    </div>
+                  </td>
+                  <td className="px-2 py-1.5">{(player.total_points ?? 0).toFixed(2)}</td>
+                </tr>
               ))}
-            </Table.Tbody>
-          </Table>
+            </tbody>
+          </table>
         </Tabs.Panel>
         <Tabs.Panel value="animation">
-          <Text size="sm" c="dimmed" mt="xs">Showing top 16 players</Text>
+          <p className="mt-1 text-sm text-gray-500">Showing top 16 players</p>
           <PlayersBarRace data={playersOverTime as any} />
         </Tabs.Panel>
       </Tabs>
