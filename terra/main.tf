@@ -56,7 +56,7 @@ resource "aws_cloudfront_distribution" "frontend" {
   default_root_object = "index.html"
 
 
-  aliases = ["malifaux.uk", "www.malifaux.uk"]
+  aliases = ["admin.malifaux.uk"]
 
   depends_on = [aws_acm_certificate_validation.frontend]
   origin {
@@ -91,11 +91,6 @@ resource "aws_cloudfront_distribution" "frontend" {
 
     allowed_methods = ["GET", "HEAD"]
     cached_methods  = ["GET", "HEAD"]
-
-    function_association {
-      event_type   = "viewer-request"
-      function_arn = aws_cloudfront_function.www_redirect.arn
-    }
 
     forwarded_values {
       query_string = false
@@ -171,23 +166,27 @@ resource "aws_route53_zone" "primary" {
 }
 
 
-# Apex domain → CloudFront
+# Apex domain → VPS (SSR site container)
 resource "aws_route53_record" "apex" {
   zone_id = aws_route53_zone.primary.zone_id
   name    = "malifaux.uk"
   type    = "A"
-  alias {
-    name                   = aws_cloudfront_distribution.frontend.domain_name
-    zone_id                = aws_cloudfront_distribution.frontend.hosted_zone_id
-    evaluate_target_health = false
-  }
+  ttl     = 300
+  records = ["212.227.84.191"]
 }
 
 resource "aws_route53_record" "www" {
   zone_id = aws_route53_zone.primary.zone_id
   name    = "www.malifaux.uk"
   type    = "A"
+  ttl     = 300
+  records = ["212.227.84.191"]
+}
 
+resource "aws_route53_record" "admin" {
+  zone_id = aws_route53_zone.primary.zone_id
+  name    = "admin.malifaux.uk"
+  type    = "A"
   alias {
     name                   = aws_cloudfront_distribution.frontend.domain_name
     zone_id                = aws_cloudfront_distribution.frontend.hosted_zone_id
@@ -203,35 +202,10 @@ resource "aws_route53_record" "api" {
   records = ["212.227.84.191"]
 }
 
-resource "aws_cloudfront_function" "www_redirect" {
-  name    = "bucket-bot-www-redirect-function"
-  runtime = "cloudfront-js-1.0"
-
-  code = <<EOF
-function handler(event) {
-    var request = event.request;
-    var host = request.headers.host.value;
-
-    if (host === "www.malifaux.uk") {
-        return {
-            statusCode: 301,
-            statusDescription: "Moved Permanently",
-            headers: {
-                location: { value: "https://malifaux.uk" + request.uri }
-            }
-        };
-    }
-    return request;
-}
-EOF
-}
-
-
 resource "aws_acm_certificate" "frontend" {
-  provider                  = aws.us_east_1
-  domain_name               = "malifaux.uk"
-  validation_method         = "DNS"
-  subject_alternative_names = ["www.malifaux.uk"]
+  provider          = aws.us_east_1
+  domain_name       = "admin.malifaux.uk"
+  validation_method = "DNS"
 
   lifecycle {
     create_before_destroy = true
