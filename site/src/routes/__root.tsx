@@ -1,5 +1,5 @@
-import { SiteNavbar } from '#/components/site-navbar'
-import { Menu, X } from 'lucide-react'
+import { SiteNavbar } from "#/components/site-navbar";
+import { Menu, X } from "lucide-react";
 import {
   createRootRoute,
   HeadContent,
@@ -8,29 +8,33 @@ import {
   Scripts,
   useMatches,
   useRouterState,
-} from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
+} from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 
-declare module '@tanstack/react-router' {
+declare module "@tanstack/react-router" {
   interface StaticDataRouteOption {
-    title?: string
+    title?: string;
   }
 }
 
-import appCss from '../styles.css?url'
+import appCss from "../styles.css?url";
+import logoUrl from "#/assets/bucket-bot-logo.png?inline";
 
 export const Route = createRootRoute({
   head: () => ({
     meta: [
-      { charSet: 'utf-8' },
-      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { title: 'b(UK)et bot' },
+      { charSet: "utf-8" },
+      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { title: "b(UK)et bot" },
     ],
-    links: [{ rel: 'stylesheet', href: appCss }],
+    links: [
+      { rel: "stylesheet", href: appCss },
+      { rel: "icon", type: "image/png", href: logoUrl },
+    ],
   }),
   shellComponent: RootDocument,
   component: SiteLayout,
-})
+});
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
@@ -43,19 +47,19 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <Scripts />
       </body>
     </html>
-  )
+  );
 }
 
 function SiteLayout() {
-  const [navOpen, setNavOpen] = useState(false)
+  const [navOpen, setNavOpen] = useState(false);
 
-  const location = useRouterState({ select: (s) => s.location })
+  const location = useRouterState({ select: (s) => s.location });
   useEffect(() => {
-    setNavOpen(false)
-  }, [location.pathname])
+    setNavOpen(false);
+  }, [location.pathname]);
 
-  const matches = useMatches()
-  const title = matches.at(-1)?.staticData.title
+  const matches = useMatches();
+  const title = matches.at(-1)?.staticData.title;
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -69,12 +73,18 @@ function SiteLayout() {
           {navOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
         <Link to="/" search={{}}>
-          <img src="/bucket-bot-logo.png" alt="b(UK)et bot" className="w-[50px]" />
+          <img
+            src={logoUrl}
+            alt="b(UK)et bot"
+            width={50}
+            height={53}
+            className="w-[50px]"
+          />
         </Link>
         <Link
           to="/"
           search={{}}
-          className="hidden font-bold text-inherit no-underline xs:inline"
+          className="font-bold text-inherit no-underline xs:inline"
         >
           UK Malifaux Community
         </Link>
@@ -83,7 +93,7 @@ function SiteLayout() {
       <div className="flex flex-1">
         <aside
           className={`${
-            navOpen ? 'block' : 'hidden'
+            navOpen ? "block" : "hidden"
           } fixed inset-y-0 top-[60px] z-20 w-[200px] border-r border-gray-200 bg-white p-4 sm:static sm:block sm:w-[250px] sm:top-0 lg:w-[300px]`}
         >
           <SiteNavbar />
@@ -102,5 +112,5 @@ function SiteLayout() {
         </main>
       </div>
     </div>
-  )
+  );
 }
