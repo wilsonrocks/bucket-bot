@@ -81,10 +81,11 @@ function SiteLayout() {
             className="w-[50px]"
           />
         </Link>
+        {title && <span className="truncate font-semibold">{title}</span>}
         <Link
           to="/"
           search={{}}
-          className="font-bold text-inherit no-underline xs:inline"
+          className="ml-auto hidden font-bold text-inherit no-underline sm:inline"
         >
           UK Malifaux Community
         </Link>
@@ -106,7 +107,6 @@ function SiteLayout() {
         )}
         <main className="flex-1 p-4">
           <div className="mx-auto max-w-6xl">
-            {title && <h2 className="mb-4 text-xl font-semibold">{title}</h2>}
             <Outlet />
           </div>
         </main>

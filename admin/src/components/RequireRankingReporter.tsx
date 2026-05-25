@@ -1,6 +1,6 @@
 import { usePermissions } from '@/hooks/usePermissions'
 import { Route as LoginRoute } from '@/routes/login'
-import { Route as TeamsRoute } from '@/routes/app/teams/'
+import { Route as TeamsRoute } from '@/routes/_app/teams/'
 import { useNavigate } from '@tanstack/react-router'
 import { useEffect, type ReactNode } from 'react'
 

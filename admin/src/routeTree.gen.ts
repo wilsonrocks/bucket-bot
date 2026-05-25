@@ -11,22 +11,22 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LoggedInRouteImport } from './routes/logged-in'
-import { Route as AppRouteRouteImport } from './routes/app/route'
+import { Route as AppRouteRouteImport } from './routes/_app/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AppVenuesRouteImport } from './routes/app/venues'
-import { Route as AppIdentitiesRouteImport } from './routes/app/identities'
-import { Route as AppFeatureFlagsRouteImport } from './routes/app/feature-flags'
-import { Route as AppBotChatRouteImport } from './routes/app/bot-chat'
-import { Route as AppTeamsIndexRouteImport } from './routes/app/teams/index'
-import { Route as AppRankingsIndexRouteImport } from './routes/app/rankings/index'
-import { Route as AppPlayersIndexRouteImport } from './routes/app/players/index'
-import { Route as AppImportIndexRouteImport } from './routes/app/import/index'
-import { Route as AppEventsIndexRouteImport } from './routes/app/events/index'
-import { Route as AppTeamsIdRouteImport } from './routes/app/teams/$id'
-import { Route as AppPlayersIdRouteImport } from './routes/app/players/$id'
-import { Route as AppImportImportLongshanksRouteImport } from './routes/app/import/import-longshanks'
-import { Route as AppImportImportBotRouteImport } from './routes/app/import/import-bot'
-import { Route as AppEventsIdEditRouteImport } from './routes/app/events.$id.edit'
+import { Route as AppVenuesRouteImport } from './routes/_app/venues'
+import { Route as AppIdentitiesRouteImport } from './routes/_app/identities'
+import { Route as AppFeatureFlagsRouteImport } from './routes/_app/feature-flags'
+import { Route as AppBotChatRouteImport } from './routes/_app/bot-chat'
+import { Route as AppTeamsIndexRouteImport } from './routes/_app/teams/index'
+import { Route as AppRankingsIndexRouteImport } from './routes/_app/rankings/index'
+import { Route as AppPlayersIndexRouteImport } from './routes/_app/players/index'
+import { Route as AppImportIndexRouteImport } from './routes/_app/import/index'
+import { Route as AppEventsIndexRouteImport } from './routes/_app/events/index'
+import { Route as AppTeamsIdRouteImport } from './routes/_app/teams/$id'
+import { Route as AppPlayersIdRouteImport } from './routes/_app/players/$id'
+import { Route as AppImportImportLongshanksRouteImport } from './routes/_app/import/import-longshanks'
+import { Route as AppImportImportBotRouteImport } from './routes/_app/import/import-bot'
+import { Route as AppEventsIdEditRouteImport } from './routes/_app/events.$id.edit'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -39,8 +39,7 @@ const LoggedInRoute = LoggedInRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppRouteRoute = AppRouteRouteImport.update({
-  id: '/app',
-  path: '/app',
+  id: '/_app',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -122,126 +121,122 @@ const AppEventsIdEditRoute = AppEventsIdEditRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/app': typeof AppRouteRouteWithChildren
   '/logged-in': typeof LoggedInRoute
   '/login': typeof LoginRoute
-  '/app/bot-chat': typeof AppBotChatRoute
-  '/app/feature-flags': typeof AppFeatureFlagsRoute
-  '/app/identities': typeof AppIdentitiesRoute
-  '/app/venues': typeof AppVenuesRoute
-  '/app/import/import-bot': typeof AppImportImportBotRoute
-  '/app/import/import-longshanks': typeof AppImportImportLongshanksRoute
-  '/app/players/$id': typeof AppPlayersIdRoute
-  '/app/teams/$id': typeof AppTeamsIdRoute
-  '/app/events/': typeof AppEventsIndexRoute
-  '/app/import/': typeof AppImportIndexRoute
-  '/app/players/': typeof AppPlayersIndexRoute
-  '/app/rankings/': typeof AppRankingsIndexRoute
-  '/app/teams/': typeof AppTeamsIndexRoute
-  '/app/events/$id/edit': typeof AppEventsIdEditRoute
+  '/bot-chat': typeof AppBotChatRoute
+  '/feature-flags': typeof AppFeatureFlagsRoute
+  '/identities': typeof AppIdentitiesRoute
+  '/venues': typeof AppVenuesRoute
+  '/import/import-bot': typeof AppImportImportBotRoute
+  '/import/import-longshanks': typeof AppImportImportLongshanksRoute
+  '/players/$id': typeof AppPlayersIdRoute
+  '/teams/$id': typeof AppTeamsIdRoute
+  '/events': typeof AppEventsIndexRoute
+  '/import': typeof AppImportIndexRoute
+  '/players': typeof AppPlayersIndexRoute
+  '/rankings': typeof AppRankingsIndexRoute
+  '/teams': typeof AppTeamsIndexRoute
+  '/events/$id/edit': typeof AppEventsIdEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/app': typeof AppRouteRouteWithChildren
   '/logged-in': typeof LoggedInRoute
   '/login': typeof LoginRoute
-  '/app/bot-chat': typeof AppBotChatRoute
-  '/app/feature-flags': typeof AppFeatureFlagsRoute
-  '/app/identities': typeof AppIdentitiesRoute
-  '/app/venues': typeof AppVenuesRoute
-  '/app/import/import-bot': typeof AppImportImportBotRoute
-  '/app/import/import-longshanks': typeof AppImportImportLongshanksRoute
-  '/app/players/$id': typeof AppPlayersIdRoute
-  '/app/teams/$id': typeof AppTeamsIdRoute
-  '/app/events': typeof AppEventsIndexRoute
-  '/app/import': typeof AppImportIndexRoute
-  '/app/players': typeof AppPlayersIndexRoute
-  '/app/rankings': typeof AppRankingsIndexRoute
-  '/app/teams': typeof AppTeamsIndexRoute
-  '/app/events/$id/edit': typeof AppEventsIdEditRoute
+  '/bot-chat': typeof AppBotChatRoute
+  '/feature-flags': typeof AppFeatureFlagsRoute
+  '/identities': typeof AppIdentitiesRoute
+  '/venues': typeof AppVenuesRoute
+  '/import/import-bot': typeof AppImportImportBotRoute
+  '/import/import-longshanks': typeof AppImportImportLongshanksRoute
+  '/players/$id': typeof AppPlayersIdRoute
+  '/teams/$id': typeof AppTeamsIdRoute
+  '/events': typeof AppEventsIndexRoute
+  '/import': typeof AppImportIndexRoute
+  '/players': typeof AppPlayersIndexRoute
+  '/rankings': typeof AppRankingsIndexRoute
+  '/teams': typeof AppTeamsIndexRoute
+  '/events/$id/edit': typeof AppEventsIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/app': typeof AppRouteRouteWithChildren
+  '/_app': typeof AppRouteRouteWithChildren
   '/logged-in': typeof LoggedInRoute
   '/login': typeof LoginRoute
-  '/app/bot-chat': typeof AppBotChatRoute
-  '/app/feature-flags': typeof AppFeatureFlagsRoute
-  '/app/identities': typeof AppIdentitiesRoute
-  '/app/venues': typeof AppVenuesRoute
-  '/app/import/import-bot': typeof AppImportImportBotRoute
-  '/app/import/import-longshanks': typeof AppImportImportLongshanksRoute
-  '/app/players/$id': typeof AppPlayersIdRoute
-  '/app/teams/$id': typeof AppTeamsIdRoute
-  '/app/events/': typeof AppEventsIndexRoute
-  '/app/import/': typeof AppImportIndexRoute
-  '/app/players/': typeof AppPlayersIndexRoute
-  '/app/rankings/': typeof AppRankingsIndexRoute
-  '/app/teams/': typeof AppTeamsIndexRoute
-  '/app/events/$id/edit': typeof AppEventsIdEditRoute
+  '/_app/bot-chat': typeof AppBotChatRoute
+  '/_app/feature-flags': typeof AppFeatureFlagsRoute
+  '/_app/identities': typeof AppIdentitiesRoute
+  '/_app/venues': typeof AppVenuesRoute
+  '/_app/import/import-bot': typeof AppImportImportBotRoute
+  '/_app/import/import-longshanks': typeof AppImportImportLongshanksRoute
+  '/_app/players/$id': typeof AppPlayersIdRoute
+  '/_app/teams/$id': typeof AppTeamsIdRoute
+  '/_app/events/': typeof AppEventsIndexRoute
+  '/_app/import/': typeof AppImportIndexRoute
+  '/_app/players/': typeof AppPlayersIndexRoute
+  '/_app/rankings/': typeof AppRankingsIndexRoute
+  '/_app/teams/': typeof AppTeamsIndexRoute
+  '/_app/events/$id/edit': typeof AppEventsIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/app'
     | '/logged-in'
     | '/login'
-    | '/app/bot-chat'
-    | '/app/feature-flags'
-    | '/app/identities'
-    | '/app/venues'
-    | '/app/import/import-bot'
-    | '/app/import/import-longshanks'
-    | '/app/players/$id'
-    | '/app/teams/$id'
-    | '/app/events/'
-    | '/app/import/'
-    | '/app/players/'
-    | '/app/rankings/'
-    | '/app/teams/'
-    | '/app/events/$id/edit'
+    | '/bot-chat'
+    | '/feature-flags'
+    | '/identities'
+    | '/venues'
+    | '/import/import-bot'
+    | '/import/import-longshanks'
+    | '/players/$id'
+    | '/teams/$id'
+    | '/events'
+    | '/import'
+    | '/players'
+    | '/rankings'
+    | '/teams'
+    | '/events/$id/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/app'
     | '/logged-in'
     | '/login'
-    | '/app/bot-chat'
-    | '/app/feature-flags'
-    | '/app/identities'
-    | '/app/venues'
-    | '/app/import/import-bot'
-    | '/app/import/import-longshanks'
-    | '/app/players/$id'
-    | '/app/teams/$id'
-    | '/app/events'
-    | '/app/import'
-    | '/app/players'
-    | '/app/rankings'
-    | '/app/teams'
-    | '/app/events/$id/edit'
+    | '/bot-chat'
+    | '/feature-flags'
+    | '/identities'
+    | '/venues'
+    | '/import/import-bot'
+    | '/import/import-longshanks'
+    | '/players/$id'
+    | '/teams/$id'
+    | '/events'
+    | '/import'
+    | '/players'
+    | '/rankings'
+    | '/teams'
+    | '/events/$id/edit'
   id:
     | '__root__'
     | '/'
-    | '/app'
+    | '/_app'
     | '/logged-in'
     | '/login'
-    | '/app/bot-chat'
-    | '/app/feature-flags'
-    | '/app/identities'
-    | '/app/venues'
-    | '/app/import/import-bot'
-    | '/app/import/import-longshanks'
-    | '/app/players/$id'
-    | '/app/teams/$id'
-    | '/app/events/'
-    | '/app/import/'
-    | '/app/players/'
-    | '/app/rankings/'
-    | '/app/teams/'
-    | '/app/events/$id/edit'
+    | '/_app/bot-chat'
+    | '/_app/feature-flags'
+    | '/_app/identities'
+    | '/_app/venues'
+    | '/_app/import/import-bot'
+    | '/_app/import/import-longshanks'
+    | '/_app/players/$id'
+    | '/_app/teams/$id'
+    | '/_app/events/'
+    | '/_app/import/'
+    | '/_app/players/'
+    | '/_app/rankings/'
+    | '/_app/teams/'
+    | '/_app/events/$id/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -267,10 +262,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoggedInRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/app': {
-      id: '/app'
-      path: '/app'
-      fullPath: '/app'
+    '/_app': {
+      id: '/_app'
+      path: ''
+      fullPath: ''
       preLoaderRoute: typeof AppRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
@@ -281,101 +276,101 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/app/venues': {
-      id: '/app/venues'
+    '/_app/venues': {
+      id: '/_app/venues'
       path: '/venues'
-      fullPath: '/app/venues'
+      fullPath: '/venues'
       preLoaderRoute: typeof AppVenuesRouteImport
       parentRoute: typeof AppRouteRoute
     }
-    '/app/identities': {
-      id: '/app/identities'
+    '/_app/identities': {
+      id: '/_app/identities'
       path: '/identities'
-      fullPath: '/app/identities'
+      fullPath: '/identities'
       preLoaderRoute: typeof AppIdentitiesRouteImport
       parentRoute: typeof AppRouteRoute
     }
-    '/app/feature-flags': {
-      id: '/app/feature-flags'
+    '/_app/feature-flags': {
+      id: '/_app/feature-flags'
       path: '/feature-flags'
-      fullPath: '/app/feature-flags'
+      fullPath: '/feature-flags'
       preLoaderRoute: typeof AppFeatureFlagsRouteImport
       parentRoute: typeof AppRouteRoute
     }
-    '/app/bot-chat': {
-      id: '/app/bot-chat'
+    '/_app/bot-chat': {
+      id: '/_app/bot-chat'
       path: '/bot-chat'
-      fullPath: '/app/bot-chat'
+      fullPath: '/bot-chat'
       preLoaderRoute: typeof AppBotChatRouteImport
       parentRoute: typeof AppRouteRoute
     }
-    '/app/teams/': {
-      id: '/app/teams/'
+    '/_app/teams/': {
+      id: '/_app/teams/'
       path: '/teams'
-      fullPath: '/app/teams/'
+      fullPath: '/teams'
       preLoaderRoute: typeof AppTeamsIndexRouteImport
       parentRoute: typeof AppRouteRoute
     }
-    '/app/rankings/': {
-      id: '/app/rankings/'
+    '/_app/rankings/': {
+      id: '/_app/rankings/'
       path: '/rankings'
-      fullPath: '/app/rankings/'
+      fullPath: '/rankings'
       preLoaderRoute: typeof AppRankingsIndexRouteImport
       parentRoute: typeof AppRouteRoute
     }
-    '/app/players/': {
-      id: '/app/players/'
+    '/_app/players/': {
+      id: '/_app/players/'
       path: '/players'
-      fullPath: '/app/players/'
+      fullPath: '/players'
       preLoaderRoute: typeof AppPlayersIndexRouteImport
       parentRoute: typeof AppRouteRoute
     }
-    '/app/import/': {
-      id: '/app/import/'
+    '/_app/import/': {
+      id: '/_app/import/'
       path: '/import'
-      fullPath: '/app/import/'
+      fullPath: '/import'
       preLoaderRoute: typeof AppImportIndexRouteImport
       parentRoute: typeof AppRouteRoute
     }
-    '/app/events/': {
-      id: '/app/events/'
+    '/_app/events/': {
+      id: '/_app/events/'
       path: '/events'
-      fullPath: '/app/events/'
+      fullPath: '/events'
       preLoaderRoute: typeof AppEventsIndexRouteImport
       parentRoute: typeof AppRouteRoute
     }
-    '/app/teams/$id': {
-      id: '/app/teams/$id'
+    '/_app/teams/$id': {
+      id: '/_app/teams/$id'
       path: '/teams/$id'
-      fullPath: '/app/teams/$id'
+      fullPath: '/teams/$id'
       preLoaderRoute: typeof AppTeamsIdRouteImport
       parentRoute: typeof AppRouteRoute
     }
-    '/app/players/$id': {
-      id: '/app/players/$id'
+    '/_app/players/$id': {
+      id: '/_app/players/$id'
       path: '/players/$id'
-      fullPath: '/app/players/$id'
+      fullPath: '/players/$id'
       preLoaderRoute: typeof AppPlayersIdRouteImport
       parentRoute: typeof AppRouteRoute
     }
-    '/app/import/import-longshanks': {
-      id: '/app/import/import-longshanks'
+    '/_app/import/import-longshanks': {
+      id: '/_app/import/import-longshanks'
       path: '/import/import-longshanks'
-      fullPath: '/app/import/import-longshanks'
+      fullPath: '/import/import-longshanks'
       preLoaderRoute: typeof AppImportImportLongshanksRouteImport
       parentRoute: typeof AppRouteRoute
     }
-    '/app/import/import-bot': {
-      id: '/app/import/import-bot'
+    '/_app/import/import-bot': {
+      id: '/_app/import/import-bot'
       path: '/import/import-bot'
-      fullPath: '/app/import/import-bot'
+      fullPath: '/import/import-bot'
       preLoaderRoute: typeof AppImportImportBotRouteImport
       parentRoute: typeof AppRouteRoute
     }
-    '/app/events/$id/edit': {
-      id: '/app/events/$id/edit'
+    '/_app/events/$id/edit': {
+      id: '/_app/events/$id/edit'
       path: '/events/$id/edit'
-      fullPath: '/app/events/$id/edit'
+      fullPath: '/events/$id/edit'
       preLoaderRoute: typeof AppEventsIdEditRouteImport
       parentRoute: typeof AppRouteRoute
     }

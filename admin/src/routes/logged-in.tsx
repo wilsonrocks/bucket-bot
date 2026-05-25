@@ -26,7 +26,7 @@ export const Route = createFileRoute('/logged-in')({
 
     const json = await response.json()
     localStorage.setItem('auth', JSON.stringify(json))
-    throw redirect({ to: '/app/events' })
+    throw redirect({ to: '/events' })
   },
 })
 

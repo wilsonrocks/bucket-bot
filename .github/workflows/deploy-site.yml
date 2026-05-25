@@ -1,0 +1,78 @@
+name: Deploy / Site
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "site/**"
+      - ".github/workflows/deploy-site.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  test:
+    uses: ./.github/workflows/ci-tests.yml
+
+  build:
+    needs: test
+    environment: prod
+    env:
+      GCP_PROJECT: ${{ vars.GCP_PROJECT }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Node.js 24
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Set up CA Certificate
+        run: |
+          printf "%s\n" "${{ secrets.DB_CA_CERT }}" > site/ca.pem
+
+      - name: Build Site
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          NODE_EXTRA_CA_CERTS: ca.pem
+          VITE_ASSETS_URL: ${{ vars.VITE_ASSETS_URL }}
+        working-directory: site
+        run: |
+          npm ci
+          ./build-for-prod.sh
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Docker image
+        run: |
+          docker build -t ghcr.io/${{ github.repository }}/site:${{ github.sha }} ./site
+
+      - name: Push Docker image
+        run: |
+          docker push ghcr.io/${{ github.repository }}/site:${{ github.sha }}
+          docker tag ghcr.io/${{ github.repository }}/site:${{ github.sha }} ghcr.io/${{ github.repository }}/site:latest
+          docker push ghcr.io/${{ github.repository }}/site:latest
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: prod
+    env:
+      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      BACKEND_IP: ${{ vars.BACKEND_IP }}
+      BACKEND_USER: deploy
+    steps:
+      - name: Deploy to VPS
+        shell: bash
+        run: |
+          eval "$(ssh-agent -s)"
+          echo "$SSH_PRIVATE_KEY" | ssh-add -
+          ssh -o "StrictHostKeyChecking=no" $BACKEND_USER@$BACKEND_IP \
+            "docker pull ghcr.io/${{ github.repository }}/site:latest && sudo systemctl restart bucket-bot-site"
