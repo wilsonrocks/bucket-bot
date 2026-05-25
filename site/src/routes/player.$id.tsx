@@ -2,14 +2,11 @@ import { fetchPlayer, fetchPlayerRankingHistory, fetchPlayerTeams, fetchPlayerTo
 import { Badge, Image, Select, Table, Tabs, Title } from '@mantine/core'
 import { createFileRoute, notFound } from '@tanstack/react-router'
 import z from 'zod'
-import { lazy, Suspense } from 'react'
+import { Suspense } from 'react'
 import { Link } from '@/components/link'
 import { PaintingLightbox, positionLabel } from '@/components/painting-lightbox'
 import { formatDate } from 'date-fns'
-
-const LazyPlayerRankingOverTimeChart = lazy(() =>
-  import('@/components/charts').then((m) => ({ default: m.LazyPlayerRankingOverTimeChart }))
-)
+import { LazyPlayerRankingOverTimeChart } from '@/components/charts'
 
 export const Route = createFileRoute('/player/$id')({
   params: z.object({ id: z.coerce.number() }),
