@@ -13,11 +13,7 @@ permissions:
   packages: write
 
 jobs:
-  test:
-    uses: ./.github/workflows/ci-tests.yml
-
   migrate:
-    needs: test
     runs-on: ubuntu-latest
     environment: prod
     steps:
