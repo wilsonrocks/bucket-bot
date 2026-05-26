@@ -23,6 +23,9 @@ export const Route = createFileRoute('/team/$id')({
     const team = loaderData
     const members = (team.members as any[]) ?? []
     const logo = teamLogoUrl(team.image_key as string | null | undefined)
+    const ogImage = team.image_key
+      ? `${import.meta.env.VITE_ASSETS_URL}/${team.image_key}-ogp.jpg`
+      : undefined
     const topMember = members[0]
     const captain = members.find((m) => m.is_captain)
     const description = [
@@ -54,7 +57,7 @@ export const Route = createFileRoute('/team/$id')({
         title: `${team.name} — ${SITE_NAME}`,
         description,
         path: `/team/${params.id}`,
-        image: logo,
+        image: ogImage,
         type: 'profile',
       }),
       scripts: [jsonLd(schema)],
