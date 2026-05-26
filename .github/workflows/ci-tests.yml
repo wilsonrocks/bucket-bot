@@ -6,57 +6,201 @@ on:
   workflow_call:
 
 jobs:
-  vitest:
+  codegen:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: backend
+    services:
+      postgres:
+        image: postgis/postgis:17-3.5
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: testdb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U test -d testdb"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=10
+    env:
+      DATABASE_URL: postgres://test:test@localhost:5432/testdb
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
           node-version: "24.11.1"
-      - name: Install dependencies
-        run: npm ci
 
       - name: Install Flyway
         uses: ./.github/actions/install-flyway
 
-      - name: Run Vitest
-        run: npx vitest run --reporter=github-actions
+      - name: Install backend deps
+        run: npm ci
+        working-directory: backend
 
-  # vitest-frontend:
-  #   runs-on: ubuntu-latest
-  #   defaults:
-  #     run:
-  #       working-directory: frontend
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v6
-  #     - name: Set up Node.js
-  #       uses: actions/setup-node@v6
-  #       with:
-  #         node-version: "24.11.1"
-  #     - name: Install dependencies
-  #       run: npm ci
-  #     - name: Run Vitest
-  #       run: npx vitest run --reporter=github-actions
+      - name: Install site deps
+        run: npm ci
+        working-directory: site
 
-  # typecheck-frontend:
-  #   runs-on: ubuntu-latest
-  #   defaults:
-  #     run:
-  #       working-directory: frontend
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v6
-  #     - name: Set up Node.js
-  #       uses: actions/setup-node@v6
-  #       with:
-  #         node-version: "24.11.1"
-  #     - name: Install dependencies
-  #       run: npm ci
-  #     - name: Typecheck
-  #       run: npx tsc --noEmit
+      - name: Install admin deps
+        run: npm ci
+        working-directory: admin
+
+      - name: Run Flyway migrations
+        run: flyway migrate -url=jdbc:postgresql://localhost:5432/testdb -user=test -password=test -locations=filesystem:./migrations
+        working-directory: db
+
+      - name: Generate backend DB types
+        run: npm run generate-db-types
+        working-directory: backend
+
+      - name: Generate site DB types
+        run: npm run generate-db-types
+        working-directory: site
+
+      - name: Generate OpenAPI schema
+        run: npm run generate-schema
+        working-directory: backend
+        env:
+          JWT_SECRET: placeholder
+          DISCORD_REDIRECT_URL: placeholder
+          DISCORD_CLIENT_ID: placeholder
+          DISCORD_CLIENT_SECRET: placeholder
+          DISCORD_FACTION_CHANNEL_ID: placeholder
+          DISCORD_TEST_CHANNEL_ID: placeholder
+          ASSETS_ACCESS_KEY_ID: placeholder
+          ASSETS_SECRET_ACCESS_KEY: placeholder
+          ASSETS_BUCKET_NAME: placeholder
+
+      - name: Generate admin API client (orval)
+        run: npx orval
+        working-directory: admin
+
+      - name: Upload backend DB types
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-db-types
+          path: backend/node_modules/kysely-codegen/dist/db.d.ts
+
+      - name: Upload site DB types
+        uses: actions/upload-artifact@v4
+        with:
+          name: site-db-types
+          path: site/src/db.d.ts
+
+      - name: Upload OpenAPI schema
+        uses: actions/upload-artifact@v4
+        with:
+          name: openapi
+          path: openapi.json
+
+      - name: Upload admin generated client
+        uses: actions/upload-artifact@v4
+        with:
+          name: admin-generated
+          path: admin/src/api/generated
+
+  backend-typecheck:
+    runs-on: ubuntu-latest
+    needs: codegen
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24.11.1"
+      - run: npm ci
+        working-directory: backend
+      - uses: actions/download-artifact@v4
+        with:
+          name: backend-db-types
+          path: backend/node_modules/kysely-codegen/dist
+      - run: npx tsc --noEmit
+        working-directory: backend
+
+  backend-test:
+    runs-on: ubuntu-latest
+    needs: codegen
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24.11.1"
+      - uses: ./.github/actions/install-flyway
+      - run: npm ci
+        working-directory: backend
+      - uses: actions/download-artifact@v4
+        with:
+          name: backend-db-types
+          path: backend/node_modules/kysely-codegen/dist
+      - run: npx vitest run --reporter=github-actions
+        working-directory: backend
+
+  site-typecheck:
+    runs-on: ubuntu-latest
+    needs: codegen
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24.11.1"
+      - run: npm ci
+        working-directory: site
+      - uses: actions/download-artifact@v4
+        with:
+          name: site-db-types
+          path: site/src
+      - run: npx tsc --noEmit
+        working-directory: site
+
+  site-test:
+    runs-on: ubuntu-latest
+    needs: codegen
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24.11.1"
+      - run: npm ci
+        working-directory: site
+      - uses: actions/download-artifact@v4
+        with:
+          name: site-db-types
+          path: site/src
+      - run: npx vitest run --reporter=github-actions
+        working-directory: site
+
+  admin-typecheck:
+    runs-on: ubuntu-latest
+    needs: codegen
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24.11.1"
+      - run: npm ci
+        working-directory: admin
+      - uses: actions/download-artifact@v4
+        with:
+          name: admin-generated
+          path: admin/src/api/generated
+      - run: npx tsc --noEmit
+        working-directory: admin
+
+  admin-test:
+    runs-on: ubuntu-latest
+    needs: codegen
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24.11.1"
+      - run: npm ci
+        working-directory: admin
+      - uses: actions/download-artifact@v4
+        with:
+          name: admin-generated
+          path: admin/src/api/generated
+      - run: npx vitest run --reporter=github-actions
+        working-directory: admin

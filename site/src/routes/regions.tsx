@@ -2,6 +2,7 @@ import { fetchRegionsOverTime } from '#/queries'
 import { AnimatedRegions } from '#/components/animated-regions'
 import { createFileRoute } from '@tanstack/react-router'
 import ukRegionsRaw from '#/data/ukRegions'
+import { SITE_NAME, seo } from '#/helpers/seo'
 
 function rewindCoords(coords: number[][]): number[][] {
   let area = 0
@@ -37,6 +38,12 @@ export const Route = createFileRoute('/regions')({
     const geoJson = { ...ukRegionsRaw, features: (ukRegionsRaw as any).features.map(rewindFeature) }
     return { snapshots, geoJson }
   },
+  head: () =>
+    seo({
+      title: `Regions — ${SITE_NAME}`,
+      description: 'UK Malifaux activity by region over time.',
+      path: '/regions',
+    }),
   component: RouteComponent,
 })
 

@@ -3,6 +3,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import z from 'zod'
 import { Link } from '#/components/link'
 import { PaintingLightbox, positionLabel } from '#/components/painting-lightbox'
+import { SITE_NAME, seo } from '#/helpers/seo'
 
 type PaintingItem = {
   id: number
@@ -78,6 +79,13 @@ export const Route = createFileRoute('/best-painted')({
   validateSearch: z.object({ painting: z.coerce.number().optional() }),
   staticData: { title: 'Best Painted' },
   loader: () => fetchAllPainting(),
+  head: () =>
+    seo({
+      title: `Best Painted — ${SITE_NAME}`,
+      description:
+        'Best painted winners from UK Malifaux tournaments.',
+      path: '/best-painted',
+    }),
   component: RouteComponent,
 })
 

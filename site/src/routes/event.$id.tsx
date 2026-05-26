@@ -4,6 +4,8 @@ import z from 'zod'
 import { Link } from '#/components/link'
 import { Tabs } from '#/components/routed-tabs'
 import { PaintingLightbox, positionLabel } from '#/components/painting-lightbox'
+import { SITE_NAME, SITE_URL, absoluteUrl, jsonLd, seo } from '#/helpers/seo'
+import type { SportsEvent, WithContext } from 'schema-dts'
 
 export const Route = createFileRoute('/event/$id')({
   params: z.object({ id: z.coerce.number() }),
@@ -18,13 +20,42 @@ export const Route = createFileRoute('/event/$id')({
       throw notFound()
     }
   },
-  head: ({ loaderData }) => loaderData ? ({
-    meta: [
-      { title: `${(loaderData.tourney as any).name} — b(UK)et bot` },
-      { property: 'og:title', content: (loaderData.tourney as any).name },
-      { property: 'og:description', content: `Warhammer tournament: ${(loaderData.tourney as any).name}` },
-    ],
-  }) : {},
+  head: ({ loaderData, params }) => {
+    if (!loaderData) return {}
+    const t = loaderData.tourney as any
+    const players = loaderData.players as any[]
+    const winnerName = players[0]?.playerName
+    const description = winnerName
+      ? `${t.name} — ${players.length} players. Won by ${winnerName}.`
+      : `${t.name} — Malifaux tournament results on ${SITE_NAME}.`
+
+    const schema: WithContext<SportsEvent> = {
+      '@context': 'https://schema.org',
+      '@type': 'SportsEvent',
+      name: t.name,
+      startDate: t.date,
+      url: absoluteUrl(`/event/${params.id}`),
+      sport: 'Malifaux',
+      ...(t.venue
+        ? { location: { '@type': 'Place', name: t.venue } }
+        : { location: { '@type': 'Place', name: 'United Kingdom' } }),
+      competitor: players.slice(0, 5).map((p) => ({
+        '@type': 'Person',
+        name: p.playerName,
+        ...(p.playerId ? { url: `${SITE_URL}/player/${p.playerId}` } : {}),
+      })),
+    }
+
+    return {
+      ...seo({
+        title: `${t.name} — ${SITE_NAME}`,
+        description,
+        path: `/event/${params.id}`,
+        type: 'article',
+      }),
+      scripts: [jsonLd(schema)],
+    }
+  },
   component: RouteComponent,
 })
 

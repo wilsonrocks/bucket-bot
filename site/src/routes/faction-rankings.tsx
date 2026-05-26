@@ -3,6 +3,7 @@ import { FactionsBarRace } from '#/components/animated-factions'
 import { createFileRoute } from '@tanstack/react-router'
 import { Tabs } from '#/components/routed-tabs'
 import { useState } from 'react'
+import { SITE_NAME, seo } from '#/helpers/seo'
 
 function RankChange({ change }: { change: number | null | undefined }) {
   if (change == null) return <span className="text-sm text-green-600">NEW</span>
@@ -20,6 +21,12 @@ export const Route = createFileRoute('/faction-rankings')({
     ])
     return { factionRankings, factionsOverTime }
   },
+  head: () =>
+    seo({
+      title: `Faction Rankings — ${SITE_NAME}`,
+      description: 'Malifaux faction rankings — see which factions are dominating UK tournaments.',
+      path: '/faction-rankings',
+    }),
   component: RouteComponent,
 })
 

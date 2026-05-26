@@ -1,4 +1,5 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute } from "@tanstack/react-router";
+import { SITE_NAME, seo } from "#/helpers/seo";
 import {
   fetchCommunityStats,
   fetchFactionRankings,
@@ -9,66 +10,97 @@ import {
   fetchTeams,
   fetchTourneys,
   fetchTourney,
-} from '#/queries'
-import { CommunityStatsCard } from '#/components/home/community-stats-card'
-import { FactionCard } from '#/components/home/faction-card'
-import { PaintingHighlightCard } from '#/components/home/painting-highlight-card'
-import { RecentEventCard } from '#/components/home/recent-event-card'
-import { RegionsMapCard } from '#/components/home/regions-map-card'
-import { TeamStandingsCard } from '#/components/home/team-standings-card'
-import { TopPlayersCard } from '#/components/home/top-players-card'
-import ukRegionsRaw from '#/data/ukRegions'
+} from "#/queries";
+import { CommunityStatsCard } from "#/components/home/community-stats-card";
+import { FactionCard } from "#/components/home/faction-card";
+import { PaintingHighlightCard } from "#/components/home/painting-highlight-card";
+import { RecentEventCard } from "#/components/home/recent-event-card";
+import { RegionsMapCard } from "#/components/home/regions-map-card";
+import { TeamStandingsCard } from "#/components/home/team-standings-card";
+import { TopPlayersCard } from "#/components/home/top-players-card";
+import ukRegionsRaw from "#/data/ukRegions";
 
 function rewindCoords(coords: number[][]): number[][] {
-  let area = 0
+  let area = 0;
   for (let i = 0, n = coords.length - 1; i < n; i++) {
-    area += coords[i][0] * coords[i + 1][1] - coords[i + 1][0] * coords[i][1]
+    area += coords[i][0] * coords[i + 1][1] - coords[i + 1][0] * coords[i][1];
   }
-  return area > 0 ? [...coords].reverse() : coords
+  return area > 0 ? [...coords].reverse() : coords;
 }
 
 type GeoJsonFeature = {
-  type: string
-  geometry: { type: string; coordinates: unknown }
-  properties: { rgn19nm: string; [key: string]: unknown }
-}
+  type: string;
+  geometry: { type: string; coordinates: unknown };
+  properties: { rgn19nm: string; [key: string]: unknown };
+};
 
 function rewindFeature(feature: GeoJsonFeature): GeoJsonFeature {
-  const geom = feature.geometry
-  if (geom.type === 'Polygon') {
-    const rings = geom.coordinates as number[][][]
-    return { ...feature, geometry: { ...geom, coordinates: rings.map((r, i) => i === 0 ? rewindCoords(r) : rewindCoords(r).reverse()) } }
+  const geom = feature.geometry;
+  if (geom.type === "Polygon") {
+    const rings = geom.coordinates as number[][][];
+    return {
+      ...feature,
+      geometry: {
+        ...geom,
+        coordinates: rings.map((r, i) =>
+          i === 0 ? rewindCoords(r) : rewindCoords(r).reverse(),
+        ),
+      },
+    };
   }
-  if (geom.type === 'MultiPolygon') {
-    const polys = geom.coordinates as number[][][][]
-    return { ...feature, geometry: { ...geom, coordinates: polys.map((p) => p.map((r, i) => i === 0 ? rewindCoords(r) : rewindCoords(r).reverse())) } }
+  if (geom.type === "MultiPolygon") {
+    const polys = geom.coordinates as number[][][][];
+    return {
+      ...feature,
+      geometry: {
+        ...geom,
+        coordinates: polys.map((p) =>
+          p.map((r, i) =>
+            i === 0 ? rewindCoords(r) : rewindCoords(r).reverse(),
+          ),
+        ),
+      },
+    };
   }
-  return feature
+  return feature;
 }
 
-export const Route = createFileRoute('/')({
+export const Route = createFileRoute("/")({
   loader: async () => {
-    const [rankings, teamRankings, teams, factionRankings, tourneys, painting, communityStats, regionsOverTime] =
-      await Promise.all([
-        fetchRankings({ data: { typeCode: 'ROLLING_YEAR' } }),
-        fetchTeamRankings({ data: { typeCode: 'ROLLING_YEAR' } }),
-        fetchTeams(),
-        fetchFactionRankings(),
-        fetchTourneys(),
-        fetchRecentPainting(),
-        fetchCommunityStats(),
-        fetchRegionsOverTime(),
-      ])
+    const [
+      rankings,
+      teamRankings,
+      teams,
+      factionRankings,
+      tourneys,
+      painting,
+      communityStats,
+      regionsOverTime,
+    ] = await Promise.all([
+      fetchRankings({ data: { typeCode: "ROLLING_YEAR" } }),
+      fetchTeamRankings({ data: { typeCode: "ROLLING_YEAR" } }),
+      fetchTeams(),
+      fetchFactionRankings(),
+      fetchTourneys(),
+      fetchRecentPainting(),
+      fetchCommunityStats(),
+      fetchRegionsOverTime(),
+    ]);
 
-    const latestTourney = tourneys[0] ? await fetchTourney({ data: { id: tourneys[0].id } }) : null
-    const geoJson = { ...ukRegionsRaw, features: (ukRegionsRaw as any).features.map(rewindFeature) }
-    const latestRegions = regionsOverTime.at(-1)?.regions ?? []
+    const latestTourney = tourneys[0]
+      ? await fetchTourney({ data: { id: tourneys[0].id } })
+      : null;
+    const geoJson = {
+      ...ukRegionsRaw,
+      features: (ukRegionsRaw as any).features.map(rewindFeature),
+    };
+    const latestRegions = regionsOverTime.at(-1)?.regions ?? [];
 
-    const teamImageMap = new Map(teams.map((t) => [t.id, t.image_key]))
+    const teamImageMap = new Map(teams.map((t) => [t.id, t.image_key]));
     const teamRankingsWithImages = (teamRankings as any[]).map((tr: any) => ({
       ...tr,
       image_key: teamImageMap.get(tr.team_id) ?? null,
-    }))
+    }));
 
     return {
       rankings,
@@ -79,14 +111,29 @@ export const Route = createFileRoute('/')({
       latestRegions,
       geoJson,
       latestTourney,
-    }
+    };
   },
+  head: () =>
+    seo({
+      title: SITE_NAME,
+      description:
+        "The UK Malifaux Community. Events, Results, Rankings, Best Painted Models for the Malifaux miniatures game from Wyrd.",
+      path: "/",
+    }),
   component: HomePage,
-})
+});
 
 function HomePage() {
-  const { rankings, teamRankings, factionRankings, painting, communityStats, latestRegions, geoJson, latestTourney } =
-    Route.useLoaderData()
+  const {
+    rankings,
+    teamRankings,
+    factionRankings,
+    painting,
+    communityStats,
+    latestRegions,
+    geoJson,
+    latestTourney,
+  } = Route.useLoaderData();
 
   const recentEvent = latestTourney
     ? {
@@ -102,7 +149,7 @@ function HomePage() {
           factionName: p.factionName,
         })),
       }
-    : null
+    : null;
 
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -114,5 +161,5 @@ function HomePage() {
       <CommunityStatsCard data={communityStats} />
       <FactionCard data={factionRankings as any} />
     </div>
-  )
+  );
 }

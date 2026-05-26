@@ -2,6 +2,13 @@ import { fetchTeam } from '#/queries'
 import { createFileRoute, notFound } from '@tanstack/react-router'
 import { Link } from '#/components/link'
 import z from 'zod'
+import { SITE_NAME, SITE_URL, absoluteUrl, jsonLd, seo } from '#/helpers/seo'
+import type { SportsTeam, WithContext } from 'schema-dts'
+
+function teamLogoUrl(imageKey: string | null | undefined): string | undefined {
+  if (!imageKey) return undefined
+  return `${import.meta.env.VITE_ASSETS_URL}/${imageKey}-w800.png`
+}
 
 export const Route = createFileRoute('/team/$id')({
   params: z.object({ id: z.string() }),
@@ -11,13 +18,48 @@ export const Route = createFileRoute('/team/$id')({
     if (!team) throw notFound()
     return team
   },
-  head: ({ loaderData }) => loaderData ? ({
-    meta: [
-      { title: `${loaderData.name} — b(UK)et bot` },
-      { property: 'og:title', content: loaderData.name },
-      { property: 'og:description', content: `Team page for ${loaderData.name}` },
-    ],
-  }) : {},
+  head: ({ loaderData, params }) => {
+    if (!loaderData) return {}
+    const team = loaderData
+    const members = (team.members as any[]) ?? []
+    const logo = teamLogoUrl(team.image_key as string | null | undefined)
+    const topMember = members[0]
+    const captain = members.find((m) => m.is_captain)
+    const description = [
+      `${members.length} player${members.length === 1 ? '' : 's'}.`,
+      captain ? `Captain: ${captain.player_name}.` : undefined,
+      topMember?.rolling_year_rank
+        ? `Top ranked member: ${topMember.player_name} (#${topMember.rolling_year_rank} rolling-year).`
+        : undefined,
+    ]
+      .filter(Boolean)
+      .join(' ')
+
+    const schema: WithContext<SportsTeam> = {
+      '@context': 'https://schema.org',
+      '@type': 'SportsTeam',
+      name: team.name,
+      url: absoluteUrl(`/team/${params.id}`),
+      sport: 'Malifaux',
+      ...(logo ? { logo } : {}),
+      member: members.map((m) => ({
+        '@type': 'Person',
+        name: m.player_name,
+        url: `${SITE_URL}/player/${m.player_id}`,
+      })),
+    }
+
+    return {
+      ...seo({
+        title: `${team.name} — ${SITE_NAME}`,
+        description,
+        path: `/team/${params.id}`,
+        image: logo,
+        type: 'profile',
+      }),
+      scripts: [jsonLd(schema)],
+    }
+  },
   component: RouteComponent,
 })
 

@@ -1,20 +1,32 @@
-import { fetchTourneys, fetchTiers } from '#/queries'
-import { Link } from '#/components/link'
-import { createFileRoute } from '@tanstack/react-router'
-import { format } from 'date-fns'
+import { fetchTourneys, fetchTiers } from "#/queries";
+import { Link } from "#/components/link";
+import { createFileRoute } from "@tanstack/react-router";
+import { format } from "date-fns";
+import { SITE_NAME, seo } from "#/helpers/seo";
 
-export const Route = createFileRoute('/events')({
-  staticData: { title: 'Events' },
+export const Route = createFileRoute("/events")({
+  staticData: { title: "Events" },
   loader: async () => {
-    const [tourneys, tiers] = await Promise.all([fetchTourneys(), fetchTiers()])
-    return { tourneys, tiers }
+    const [tourneys, tiers] = await Promise.all([
+      fetchTourneys(),
+      fetchTiers(),
+    ]);
+    return { tourneys, tiers };
   },
+  head: () =>
+    seo({
+      title: `Events — ${SITE_NAME}`,
+      description: "UK Malifaux tournament events.",
+      path: "/events",
+    }),
   component: RouteComponent,
-})
+});
 
 function RouteComponent() {
-  const { tourneys, tiers } = Route.useLoaderData()
-  const tierNameByCode = new Map((tiers as any[]).map((t: any) => [t.code, t.name]))
+  const { tourneys, tiers } = Route.useLoaderData();
+  const tierNameByCode = new Map(
+    (tiers as any[]).map((t: any) => [t.code, t.name]),
+  );
   return (
     <table className="min-w-full text-sm">
       <thead>
@@ -29,15 +41,21 @@ function RouteComponent() {
         {tourneys.map(({ id, name, date, players, tier_code }) => (
           <tr key={id} className="border-b border-gray-100">
             <td className="px-2 py-1.5">
-              <Link to="/event/$id" params={{ id }} search={{ tab: undefined, painting: undefined }}>
+              <Link
+                to="/event/$id"
+                params={{ id }}
+                search={{ tab: undefined, painting: undefined }}
+              >
                 {name}
               </Link>
             </td>
-            <td className="px-2 py-1.5">{date ? format(new Date(date), 'dd MMM yyyy') : ''}</td>
+            <td className="px-2 py-1.5">
+              {date ? format(new Date(date), "dd MMM yyyy") : ""}
+            </td>
             <td className="px-2 py-1.5">{players}</td>
             <td className="px-2 py-1.5">
-              {tier_code && tier_code !== 'EVENT' ? (
-                tierNameByCode.get(tier_code) ?? tier_code
+              {tier_code && tier_code !== "EVENT" ? (
+                (tierNameByCode.get(tier_code) ?? tier_code)
               ) : (
                 <span className="text-gray-500">—</span>
               )}
@@ -46,5 +64,5 @@ function RouteComponent() {
         ))}
       </tbody>
     </table>
-  )
+  );
 }
