@@ -71,4 +71,4 @@ jobs:
           eval "$(ssh-agent -s)"
           echo "$SSH_PRIVATE_KEY" | ssh-add -
           ssh -o "StrictHostKeyChecking=no" $BACKEND_USER@$BACKEND_IP \
-            "docker pull ghcr.io/${{ github.repository }}/site:latest && sudo systemctl restart bucket-bot-site"
+            "docker pull ghcr.io/${{ github.repository }}/site:latest && sudo systemctl restart bucket-bot-site && docker image prune -af"

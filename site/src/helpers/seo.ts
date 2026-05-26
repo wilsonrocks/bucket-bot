@@ -37,6 +37,7 @@ export function seo({
 }: SeoInput): SeoOutput {
   const url = `${SITE_URL}${path}`;
   const ogImage = image ?? DEFAULT_OG_IMAGE;
+  const ogImageType = ogImage.endsWith(".png") ? "image/png" : "image/jpeg";
 
   return {
     meta: [
@@ -48,6 +49,8 @@ export function seo({
       { property: "og:type", content: type },
       { property: "og:url", content: url },
       { property: "og:image", content: ogImage },
+      { property: "og:image:secure_url", content: ogImage },
+      { property: "og:image:type", content: ogImageType },
       ...(image
         ? [
             { property: "og:image:width", content: "1200" },

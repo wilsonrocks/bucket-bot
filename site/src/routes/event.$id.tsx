@@ -40,7 +40,7 @@ export const Route = createFileRoute("/event/$id")({
       .flatMap((c: any) => c.winners ?? [])
       .find((w: any) => w.imageKey)?.imageKey;
     const ogImage = firstPaintedImage
-      ? `${import.meta.env.VITE_ASSETS_URL}/${firstPaintedImage}-ogp.png`
+      ? `${import.meta.env.VITE_ASSETS_URL}/${firstPaintedImage}-ogp.jpg`
       : undefined;
 
     const schema: WithContext<SportsEvent> = {
