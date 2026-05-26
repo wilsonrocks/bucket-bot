@@ -119,7 +119,7 @@ function SiteLayout() {
         <aside
           className={`${
             navOpen ? "block" : "hidden"
-          } fixed inset-y-0 top-[60px] z-20 w-[200px] border-r border-gray-200 bg-white p-4 sm:static sm:block sm:w-[250px] sm:top-0 lg:w-[300px]`}
+          } fixed left-0 inset-y-0 top-[60px] z-20 w-[200px] border-r border-gray-200 bg-white p-4 sm:static sm:left-auto sm:block sm:w-[250px] sm:top-0 lg:w-[300px]`}
         >
           <SiteNavbar />
         </aside>
