@@ -56,7 +56,7 @@ resource "aws_cloudfront_distribution" "frontend" {
   default_root_object = "index.html"
 
 
-  aliases = ["admin.malifaux.uk"]
+  aliases = ["admin.malifaux.uk", "assets.malifaux.uk"]
 
   depends_on = [aws_acm_certificate_validation.frontend]
   origin {
@@ -194,6 +194,17 @@ resource "aws_route53_record" "admin" {
   }
 }
 
+resource "aws_route53_record" "assets" {
+  zone_id = aws_route53_zone.primary.zone_id
+  name    = "assets.malifaux.uk"
+  type    = "A"
+  alias {
+    name                   = aws_cloudfront_distribution.frontend.domain_name
+    zone_id                = aws_cloudfront_distribution.frontend.hosted_zone_id
+    evaluate_target_health = false
+  }
+}
+
 resource "aws_route53_record" "api" {
   zone_id = aws_route53_zone.primary.zone_id
   name    = "api.malifaux.uk"
@@ -203,9 +214,10 @@ resource "aws_route53_record" "api" {
 }
 
 resource "aws_acm_certificate" "frontend" {
-  provider          = aws.us_east_1
-  domain_name       = "admin.malifaux.uk"
-  validation_method = "DNS"
+  provider                  = aws.us_east_1
+  domain_name               = "admin.malifaux.uk"
+  subject_alternative_names = ["assets.malifaux.uk"]
+  validation_method         = "DNS"
 
   lifecycle {
     create_before_destroy = true

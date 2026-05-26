@@ -18,7 +18,7 @@ export function buildPaintingEmbeds(
       description: string | null;
       imageKey: string | null;
     }[];
-  }[]
+  }[],
 ): EmbedBuilder[] {
   const embeds: EmbedBuilder[] = [];
 
