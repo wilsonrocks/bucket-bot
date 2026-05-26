@@ -63,6 +63,16 @@ jobs:
       - name: Generate OpenAPI schema
         run: npm run generate-schema
         working-directory: backend
+        env:
+          JWT_SECRET: placeholder
+          DISCORD_REDIRECT_URL: placeholder
+          DISCORD_CLIENT_ID: placeholder
+          DISCORD_CLIENT_SECRET: placeholder
+          DISCORD_FACTION_CHANNEL_ID: placeholder
+          DISCORD_TEST_CHANNEL_ID: placeholder
+          ASSETS_ACCESS_KEY_ID: placeholder
+          ASSETS_SECRET_ACCESS_KEY: placeholder
+          ASSETS_BUCKET_NAME: placeholder
 
       - name: Generate admin API client (orval)
         run: npx orval
