@@ -8,6 +8,7 @@ import { Link } from '#/components/link'
 import { Tabs } from '#/components/routed-tabs'
 import { PlayersBarRace } from '#/components/animated-players'
 import z from 'zod'
+import { SITE_NAME, seo } from '#/helpers/seo'
 
 function RankChange({ change, newPlayer }: { change: number | null | undefined; newPlayer?: boolean }) {
   if (newPlayer) return <span className="text-sm text-green-600">NEW</span>
@@ -34,6 +35,13 @@ export const Route = createFileRoute('/rankings')({
     ])
     return { rankingTypes, rankings, playersOverTime, typeCode }
   },
+  head: () =>
+    seo({
+      title: `Rankings — ${SITE_NAME}`,
+      description:
+        'UK Malifaux player rankings — rolling-year leaderboard of competitive results.',
+      path: '/rankings',
+    }),
   component: RouteComponent,
 })
 

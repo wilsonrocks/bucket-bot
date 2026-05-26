@@ -13,6 +13,8 @@ import { Tabs } from '#/components/routed-tabs'
 import { PaintingLightbox, positionLabel } from '#/components/painting-lightbox'
 import { formatDate } from 'date-fns'
 import { PlayerRankingOverTime } from '#/components/charts'
+import { SITE_NAME, SITE_URL, absoluteUrl, jsonLd, seo } from '#/helpers/seo'
+import type { Person, WithContext } from 'schema-dts'
 
 export const Route = createFileRoute('/player/$id')({
   params: z.object({ id: z.coerce.number() }),
@@ -35,13 +37,60 @@ export const Route = createFileRoute('/player/$id')({
     if (!player) throw notFound()
     return { player, rankingTypes, rankingsData, tourneys, teams, paintingWins, typeCode }
   },
-  head: ({ loaderData }) => loaderData ? ({
-    meta: [
-      { title: `${loaderData.player.name} — b(UK)et bot` },
-      { property: 'og:title', content: loaderData.player.name },
-      { property: 'og:description', content: `Player profile for ${loaderData.player.name}` },
-    ],
-  }) : {},
+  head: ({ loaderData, params }) => {
+    if (!loaderData) return {}
+    const { player, teams, tourneys, rankingsData, typeCode } = loaderData
+
+    const latestRollingYearRank =
+      typeCode === 'ROLLING_YEAR'
+        ? [...(rankingsData.rankings ?? [])]
+            .sort(
+              (a: any, b: any) =>
+                new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+            )[0]?.rank
+        : undefined
+
+    const currentTeam = teams.find((t: any) => !t.left_date)?.team_name
+    const descParts = [
+      latestRollingYearRank
+        ? `Currently ranked #${latestRollingYearRank} in the UK rolling-year Malifaux rankings.`
+        : `UK Malifaux player.`,
+      currentTeam ? `Plays for ${currentTeam}.` : undefined,
+      tourneys.length ? `${tourneys.length} tournament results tracked.` : undefined,
+    ].filter(Boolean)
+
+    const avatar = (player as any).discord_avatar_url as string | null | undefined
+
+    const schema: WithContext<Person> = {
+      '@context': 'https://schema.org',
+      '@type': 'Person',
+      name: player.name,
+      url: absoluteUrl(`/player/${params.id}`),
+      ...(avatar ? { image: avatar } : {}),
+      ...(currentTeam
+        ? {
+            memberOf: teams
+              .filter((t: any) => !t.left_date)
+              .map((t: any) => ({
+                '@type': 'SportsTeam' as const,
+                name: t.team_name,
+                url: `${SITE_URL}/team/${t.team_id}`,
+              })),
+          }
+        : {}),
+    }
+
+    return {
+      ...seo({
+        title: `${player.name} — ${SITE_NAME}`,
+        description: descParts.join(' '),
+        path: `/player/${params.id}`,
+        image: avatar ?? undefined,
+        type: 'profile',
+      }),
+      scripts: [jsonLd(schema)],
+    }
+  },
   component: RouteComponent,
 })
 

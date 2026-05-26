@@ -1,7 +1,15 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { SITE_NAME, seo } from '#/helpers/seo'
 
 export const Route = createFileRoute('/how-it-works')({
   staticData: { title: 'How It Works' },
+  head: () =>
+    seo({
+      title: `How It Works — ${SITE_NAME}`,
+      description:
+        'How the UK Malifaux ranking system works — event eligibility, points, and the rolling-year window.',
+      path: '/how-it-works',
+    }),
   component: RouteComponent,
 })
 

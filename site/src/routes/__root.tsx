@@ -19,19 +19,43 @@ declare module "@tanstack/react-router" {
 
 import appCss from "../styles.css?url";
 import logoUrl from "#/assets/bucket-bot-logo.png?inline";
+import { DEFAULT_OG_IMAGE, SITE_NAME, SITE_URL, jsonLd, seo } from "#/helpers/seo";
+
+const rootWebsiteJsonLd = jsonLd({
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: SITE_NAME,
+  url: SITE_URL,
+});
+
+const rootOrgJsonLd = jsonLd({
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: SITE_NAME,
+  url: SITE_URL,
+  logo: DEFAULT_OG_IMAGE,
+});
 
 export const Route = createRootRoute({
-  head: () => ({
-    meta: [
-      { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "b(UK)et bot" },
-    ],
-    links: [
-      { rel: "stylesheet", href: appCss },
-      { rel: "icon", type: "image/png", href: logoUrl },
-    ],
-  }),
+  head: () => {
+    const base = seo({
+      title: SITE_NAME,
+      path: "/",
+    });
+    return {
+      meta: [
+        { charSet: "utf-8" },
+        { name: "viewport", content: "width=device-width, initial-scale=1" },
+        ...base.meta,
+      ],
+      links: [
+        { rel: "stylesheet", href: appCss },
+        { rel: "icon", type: "image/png", href: logoUrl },
+        ...base.links,
+      ],
+      scripts: [rootOrgJsonLd, rootWebsiteJsonLd],
+    };
+  },
   shellComponent: RootDocument,
   component: SiteLayout,
 });

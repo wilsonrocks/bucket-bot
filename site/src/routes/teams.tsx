@@ -1,10 +1,17 @@
 import { fetchTeams } from '#/queries'
 import { Link } from '#/components/link'
 import { createFileRoute } from '@tanstack/react-router'
+import { SITE_NAME, seo } from '#/helpers/seo'
 
 export const Route = createFileRoute('/teams')({
   staticData: { title: 'Teams' },
   loader: () => fetchTeams(),
+  head: () =>
+    seo({
+      title: `Teams — ${SITE_NAME}`,
+      description: 'Directory of UK Malifaux clubs and teams.',
+      path: '/teams',
+    }),
   component: RouteComponent,
 })
 
