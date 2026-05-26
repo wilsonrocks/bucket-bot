@@ -5,7 +5,7 @@ import {
   PutObjectCommand,
   HeadObjectCommand,
 } from "@aws-sdk/client-s3";
-import { makeOgpPng } from "../logic/images";
+import { makeOgpJpeg } from "../logic/images";
 
 const ASSETS_ACCESS_KEY_ID = process.env.ASSETS_ACCESS_KEY_ID;
 const ASSETS_SECRET_ACCESS_KEY = process.env.ASSETS_SECRET_ACCESS_KEY;
@@ -73,7 +73,7 @@ async function main() {
     console.log(`[${prefix}] found ${originals.length} originals`);
     for (const originalKey of originals) {
       const baseKey = originalKey.slice(0, -"-original.png".length);
-      const ogpKey = `${baseKey}-ogp.png`;
+      const ogpKey = `${baseKey}-ogp.jpg`;
 
       if (await exists(ogpKey)) {
         skipped++;
@@ -84,14 +84,14 @@ async function main() {
         new GetObjectCommand({ Bucket: ASSETS_BUCKET_NAME, Key: originalKey })
       );
       const buffer = await streamToBuffer(obj.Body as NodeJS.ReadableStream);
-      const ogp = await makeOgpPng(buffer);
+      const ogp = await makeOgpJpeg(buffer);
 
       await s3.send(
         new PutObjectCommand({
           Bucket: ASSETS_BUCKET_NAME,
           Key: ogpKey,
           Body: ogp,
-          ContentType: "image/png",
+          ContentType: "image/jpeg",
         })
       );
 

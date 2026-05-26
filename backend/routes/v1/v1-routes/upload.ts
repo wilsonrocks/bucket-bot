@@ -3,7 +3,7 @@ import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import sharp from "sharp";
 import crypto from "crypto";
 import type { AppEnv } from "../../../hono-env.js";
-import { makeOgpPng } from "../../../logic/images";
+import { makeOgpJpeg } from "../../../logic/images";
 
 // ── S3 singleton ───────────────────────────────────────────────────────────
 
@@ -82,10 +82,10 @@ export const uploadHandler: RouteHandler<typeof uploadRoute, AppEnv> = async (c)
   const hash = crypto.createHash("sha256").update(buffer).digest("hex").slice(0, 16);
   const baseKey = `${type}/${hash}`;
 
-  const [originalPng, resizedPngs, ogpPng] = await Promise.all([
+  const [originalPng, resizedPngs, ogpJpeg] = await Promise.all([
     sharp(buffer).png().toBuffer(),
     Promise.all(IMAGE_WIDTHS.map((w) => sharp(buffer).resize({ width: w }).png().toBuffer())),
-    makeOgpPng(buffer),
+    makeOgpJpeg(buffer),
   ]);
 
   // CloudFront forwards the full path to S3, so /media/team/x.png → S3 key media/team/x.png
@@ -104,9 +104,9 @@ export const uploadHandler: RouteHandler<typeof uploadRoute, AppEnv> = async (c)
     }))),
     s3.send(new PutObjectCommand({
       Bucket: ASSETS_BUCKET_NAME,
-      Key: `media/${baseKey}-ogp.png`,
-      Body: ogpPng,
-      ContentType: "image/png",
+      Key: `media/${baseKey}-ogp.jpg`,
+      Body: ogpJpeg,
+      ContentType: "image/jpeg",
     })),
   ]);
 
