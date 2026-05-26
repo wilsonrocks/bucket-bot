@@ -1,78 +1,101 @@
-import { fetchTourney } from '#/queries'
-import { createFileRoute, notFound } from '@tanstack/react-router'
-import z from 'zod'
-import { Link } from '#/components/link'
-import { Tabs } from '#/components/routed-tabs'
-import { PaintingLightbox, positionLabel } from '#/components/painting-lightbox'
-import { SITE_NAME, SITE_URL, absoluteUrl, jsonLd, seo } from '#/helpers/seo'
-import type { SportsEvent, WithContext } from 'schema-dts'
+import { fetchTourney } from "#/queries";
+import { createFileRoute, notFound } from "@tanstack/react-router";
+import z from "zod";
+import { Link } from "#/components/link";
+import { Tabs } from "#/components/routed-tabs";
+import {
+  PaintingLightbox,
+  positionLabel,
+} from "#/components/painting-lightbox";
+import { SITE_NAME, SITE_URL, absoluteUrl, jsonLd, seo } from "#/helpers/seo";
+import type { SportsEvent, WithContext } from "schema-dts";
 
-export const Route = createFileRoute('/event/$id')({
+export const Route = createFileRoute("/event/$id")({
   params: z.object({ id: z.coerce.number() }),
   validateSearch: z.object({
-    tab: z.enum(['results', 'best-painted']).optional(),
+    tab: z.enum(["results", "best-painted"]).optional(),
     painting: z.coerce.number().optional(),
   }),
   loader: async ({ params }) => {
     try {
-      return await fetchTourney({ data: { id: params.id } })
+      return await fetchTourney({ data: { id: params.id } });
     } catch {
-      throw notFound()
+      throw notFound();
     }
   },
   head: ({ loaderData, params }) => {
-    if (!loaderData) return {}
-    const t = loaderData.tourney as any
-    const players = loaderData.players as any[]
-    const winnerName = players[0]?.playerName
-    const description = winnerName
-      ? `${t.name} — ${players.length} players. Won by ${winnerName}.`
-      : `${t.name} — Malifaux tournament results on ${SITE_NAME}.`
+    if (!loaderData) return {};
+    const t = loaderData.tourney as any;
+    const players = loaderData.players as any[];
+    const winnerName = players[0]?.playerName;
+
+    const description =
+      t.name + t.venue
+        ? ` at ${t.venue},`
+        : "" +
+          ` a ${t.rounds} round Malifaux tournament attended by ${players.length} players.` +
+          (winnerName ? ` Won by ${winnerName}.` : "");
+
+    const firstPaintedImage = (loaderData.paintingCategories as any[])
+      .flatMap((c: any) => c.winners ?? [])
+      .find((w: any) => w.imageKey)?.imageKey;
+    const ogImage = firstPaintedImage
+      ? `${import.meta.env.VITE_ASSETS_URL}/${firstPaintedImage}-w800.png`
+      : undefined;
 
     const schema: WithContext<SportsEvent> = {
-      '@context': 'https://schema.org',
-      '@type': 'SportsEvent',
+      "@context": "https://schema.org",
+      "@type": "SportsEvent",
       name: t.name,
       startDate: t.date,
       url: absoluteUrl(`/event/${params.id}`),
-      sport: 'Malifaux',
+      sport: "Malifaux",
       ...(t.venue
-        ? { location: { '@type': 'Place', name: t.venue } }
-        : { location: { '@type': 'Place', name: 'United Kingdom' } }),
+        ? { location: { "@type": "Place", name: t.venue } }
+        : { location: { "@type": "Place", name: "United Kingdom" } }),
       competitor: players.slice(0, 5).map((p) => ({
-        '@type': 'Person',
+        "@type": "Person",
         name: p.playerName,
         ...(p.playerId ? { url: `${SITE_URL}/player/${p.playerId}` } : {}),
       })),
-    }
+    };
 
     return {
       ...seo({
         title: `${t.name} — ${SITE_NAME}`,
         description,
         path: `/event/${params.id}`,
-        type: 'article',
+        type: "article",
+        image: ogImage,
       }),
       scripts: [jsonLd(schema)],
-    }
+    };
   },
   component: RouteComponent,
-})
+});
 
 function RouteComponent() {
-  const { players, tourney, paintingCategories } = Route.useLoaderData()
-  const { painting: activePaintingId } = Route.useSearch()
-  const navigate = Route.useNavigate()
-  const t = tourney as any
-  const cats = (paintingCategories as any[])
+  const { players, tourney, paintingCategories } = Route.useLoaderData();
+  const { painting: activePaintingId } = Route.useSearch();
+  const navigate = Route.useNavigate();
+  const t = tourney as any;
+  const cats = paintingCategories as any[];
 
-  const hasAnyImages = cats.some((cat: any) => (cat.winners ?? []).some((w: any) => w.imageKey))
+  const hasAnyImages = cats.some((cat: any) =>
+    (cat.winners ?? []).some((w: any) => w.imageKey),
+  );
 
   const activeWinner = activePaintingId
-    ? cats.flatMap((cat: any) =>
-        (cat.winners ?? []).map((w: any) => ({ ...w, categoryName: cat.name, totalWinners: cat.winners.length })),
-      ).find((w: any) => w.id === activePaintingId) ?? null
-    : null
+    ? (cats
+        .flatMap((cat: any) =>
+          (cat.winners ?? []).map((w: any) => ({
+            ...w,
+            categoryName: cat.name,
+            totalWinners: cat.winners.length,
+          })),
+        )
+        .find((w: any) => w.id === activePaintingId) ?? null)
+    : null;
 
   return (
     <div>
@@ -80,7 +103,9 @@ function RouteComponent() {
       <Tabs defaultValue="results">
         <Tabs.List mb="md">
           <Tabs.Tab value="results">Results</Tabs.Tab>
-          {hasAnyImages && <Tabs.Tab value="best-painted">Best Painted</Tabs.Tab>}
+          {hasAnyImages && (
+            <Tabs.Tab value="best-painted">Best Painted</Tabs.Tab>
+          )}
         </Tabs.List>
 
         <Tabs.Panel value="results">
@@ -95,14 +120,21 @@ function RouteComponent() {
             </thead>
             <tbody>
               {(players as any[]).map((row: any) => (
-                <tr key={`${row.place}-${row.playerName}`} className="border-b border-gray-100">
+                <tr
+                  key={`${row.place}-${row.playerName}`}
+                  className="border-b border-gray-100"
+                >
                   <td className="px-2 py-1.5">{row.place}</td>
                   <td className="px-2 py-1.5">
                     {row.playerId != null ? (
                       <Link
                         to="/player/$id"
                         params={{ id: row.playerId }}
-                        search={{ tab: undefined, typeCode: undefined, painting: undefined }}
+                        search={{
+                          tab: undefined,
+                          typeCode: undefined,
+                          painting: undefined,
+                        }}
                       >
                         {row.playerName}
                       </Link>
@@ -120,8 +152,10 @@ function RouteComponent() {
 
         <Tabs.Panel value="best-painted">
           {cats.map((cat: any) => {
-            const winnersWithImages = (cat.winners ?? []).filter((w: any) => w.imageKey)
-            if (winnersWithImages.length === 0) return null
+            const winnersWithImages = (cat.winners ?? []).filter(
+              (w: any) => w.imageKey,
+            );
+            if (winnersWithImages.length === 0) return null;
             return (
               <div key={cat.id} className="mb-6">
                 <h3 className="mb-2 text-lg font-semibold">{cat.name}</h3>
@@ -130,7 +164,11 @@ function RouteComponent() {
                     <div
                       key={winner.id}
                       className="w-[150px] cursor-pointer"
-                      onClick={() => navigate({ search: (prev) => ({ ...prev, painting: winner.id }) })}
+                      onClick={() =>
+                        navigate({
+                          search: (prev) => ({ ...prev, painting: winner.id }),
+                        })
+                      }
                     >
                       <img
                         src={`${import.meta.env.VITE_ASSETS_URL}/${winner.imageKey}-w150.png`}
@@ -138,13 +176,17 @@ function RouteComponent() {
                         className="w-[150px] rounded-sm"
                       />
                       <p className="mt-1 text-center text-xs text-gray-500">
-                        {positionLabel(winner.position, cat.winners.length)} —{' '}
+                        {positionLabel(winner.position, cat.winners.length)} —{" "}
                         {winner.playerId != null ? (
                           <span onClick={(e) => e.stopPropagation()}>
                             <Link
                               to="/player/$id"
                               params={{ id: winner.playerId }}
-                              search={{ tab: 'painting', typeCode: undefined, painting: undefined }}
+                              search={{
+                                tab: "painting",
+                                typeCode: undefined,
+                                painting: undefined,
+                              }}
                             >
                               {winner.playerName}
                             </Link>
@@ -157,16 +199,18 @@ function RouteComponent() {
                   ))}
                 </div>
               </div>
-            )
+            );
           })}
         </Tabs.Panel>
       </Tabs>
 
       <PaintingLightbox
         winner={activeWinner}
-        onClose={() => navigate({ search: (prev) => ({ ...prev, painting: undefined }) })}
+        onClose={() =>
+          navigate({ search: (prev) => ({ ...prev, painting: undefined }) })
+        }
         linkPlayerName
       />
     </div>
-  )
+  );
 }
