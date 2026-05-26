@@ -1,7 +1,7 @@
 import type { Thing, WithContext } from "schema-dts";
 
 export const SITE_URL = "https://malifaux.uk";
-export const SITE_NAME = "b(UK)et bot";
+export const SITE_NAME = "UK Malifaux Community";
 export const DEFAULT_OG_IMAGE = `${SITE_URL}/bucket-bot-logo-original.png`;
 const DEFAULT_DESCRIPTION =
   "Rankings, results and best-painted winners from the UK Malifaux tournament scene.";
