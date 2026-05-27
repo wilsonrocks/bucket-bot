@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TeamsRouteImport } from './routes/teams'
 import { Route as TeamRankingsRouteImport } from './routes/team-rankings'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as RegionsRouteImport } from './routes/regions'
 import { Route as RankingsRouteImport } from './routes/rankings'
 import { Route as PlayersRouteImport } from './routes/players'
@@ -31,6 +32,11 @@ const TeamsRoute = TeamsRouteImport.update({
 const TeamRankingsRoute = TeamRankingsRouteImport.update({
   id: '/team-rankings',
   path: '/team-rankings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RegionsRoute = RegionsRouteImport.update({
@@ -98,6 +104,7 @@ export interface FileRoutesByFullPath {
   '/players': typeof PlayersRoute
   '/rankings': typeof RankingsRoute
   '/regions': typeof RegionsRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/team-rankings': typeof TeamRankingsRoute
   '/teams': typeof TeamsRoute
   '/event/$id': typeof EventIdRoute
@@ -113,6 +120,7 @@ export interface FileRoutesByTo {
   '/players': typeof PlayersRoute
   '/rankings': typeof RankingsRoute
   '/regions': typeof RegionsRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/team-rankings': typeof TeamRankingsRoute
   '/teams': typeof TeamsRoute
   '/event/$id': typeof EventIdRoute
@@ -129,6 +137,7 @@ export interface FileRoutesById {
   '/players': typeof PlayersRoute
   '/rankings': typeof RankingsRoute
   '/regions': typeof RegionsRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/team-rankings': typeof TeamRankingsRoute
   '/teams': typeof TeamsRoute
   '/event/$id': typeof EventIdRoute
@@ -146,6 +155,7 @@ export interface FileRouteTypes {
     | '/players'
     | '/rankings'
     | '/regions'
+    | '/sitemap.xml'
     | '/team-rankings'
     | '/teams'
     | '/event/$id'
@@ -161,6 +171,7 @@ export interface FileRouteTypes {
     | '/players'
     | '/rankings'
     | '/regions'
+    | '/sitemap.xml'
     | '/team-rankings'
     | '/teams'
     | '/event/$id'
@@ -176,6 +187,7 @@ export interface FileRouteTypes {
     | '/players'
     | '/rankings'
     | '/regions'
+    | '/sitemap.xml'
     | '/team-rankings'
     | '/teams'
     | '/event/$id'
@@ -192,6 +204,7 @@ export interface RootRouteChildren {
   PlayersRoute: typeof PlayersRoute
   RankingsRoute: typeof RankingsRoute
   RegionsRoute: typeof RegionsRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TeamRankingsRoute: typeof TeamRankingsRoute
   TeamsRoute: typeof TeamsRoute
   EventIdRoute: typeof EventIdRoute
@@ -213,6 +226,13 @@ declare module '@tanstack/react-router' {
       path: '/team-rankings'
       fullPath: '/team-rankings'
       preLoaderRoute: typeof TeamRankingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/regions': {
@@ -304,6 +324,7 @@ const rootRouteChildren: RootRouteChildren = {
   PlayersRoute: PlayersRoute,
   RankingsRoute: RankingsRoute,
   RegionsRoute: RegionsRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   TeamRankingsRoute: TeamRankingsRoute,
   TeamsRoute: TeamsRoute,
   EventIdRoute: EventIdRoute,
