@@ -213,6 +213,14 @@ resource "aws_route53_record" "api" {
   records = ["212.227.84.191"]
 }
 
+resource "aws_route53_record" "google_site_verification" {
+  zone_id = aws_route53_zone.primary.zone_id
+  name    = "malifaux.uk"
+  type    = "TXT"
+  ttl     = 300
+  records = ["google-site-verification=cL4h80B4oDIDXiINFiKyusqhH1fh4EYQV1IWi5rpewE"]
+}
+
 resource "aws_acm_certificate" "frontend" {
   provider                  = aws.us_east_1
   domain_name               = "admin.malifaux.uk"
