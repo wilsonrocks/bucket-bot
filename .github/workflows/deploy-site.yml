@@ -35,6 +35,7 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           NODE_EXTRA_CA_CERTS: ca.pem
           VITE_ASSETS_URL: ${{ vars.VITE_ASSETS_URL }}
+          VITE_UMAMI_WEBSITE_ID: ${{ vars.VITE_UMAMI_WEBSITE_ID }}
         working-directory: site
         run: |
           npm ci

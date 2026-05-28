@@ -9,11 +9,17 @@ import {
   useMatches,
   useRouterState,
 } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 declare module "@tanstack/react-router" {
   interface StaticDataRouteOption {
     title?: string;
+  }
+}
+
+declare global {
+  interface Window {
+    umami?: { track: () => void };
   }
 }
 
@@ -65,6 +71,13 @@ function RootDocument({ children }: { children: React.ReactNode }) {
     <html lang="en">
       <head>
         <HeadContent />
+        {import.meta.env.VITE_UMAMI_WEBSITE_ID && (
+          <script
+            defer
+            src="https://cloud.umami.is/script.js"
+            data-website-id={import.meta.env.VITE_UMAMI_WEBSITE_ID}
+          />
+        )}
       </head>
       <body>
         {children}
@@ -76,10 +89,16 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 
 function SiteLayout() {
   const [navOpen, setNavOpen] = useState(false);
+  const isInitialMount = useRef(true);
 
   const location = useRouterState({ select: (s) => s.location });
   useEffect(() => {
     setNavOpen(false);
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+    window.umami?.track();
   }, [location.pathname]);
 
   const matches = useMatches();
