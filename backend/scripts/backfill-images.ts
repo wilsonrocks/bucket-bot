@@ -89,27 +89,29 @@ async function main() {
     const meta = await sharp(buffer).metadata();
 
     if (meta.width && meta.height) {
+      // Existing originals were all stored as PNG by the previous upload handler.
       await dbClient
         .insertInto("image")
-        .values({ key, width: meta.width, height: meta.height })
+        .values({ key, width: meta.width, height: meta.height, original_ext: "png" })
         .onConflict((oc) =>
-          oc.column("key").doUpdateSet({ width: meta.width!, height: meta.height! })
+          oc.column("key").doUpdateSet({ width: meta.width!, height: meta.height!, original_ext: "png" })
         )
         .execute();
       dims++;
     }
 
-    // Generate any width variants that don't exist yet (e.g. the new 400/1200).
+    // Generate any WebP width variants that don't exist yet. Old -w*.png files
+    // are left in place.
     for (const w of IMAGE_WIDTHS) {
-      const variantKey = `media/${key}-w${w}.png`;
+      const variantKey = `media/${key}-w${w}.webp`;
       if (await exists(variantKey)) continue;
-      const png = await sharp(buffer).resize({ width: w }).png().toBuffer();
+      const webp = await sharp(buffer).resize({ width: w }).webp({ quality: 80 }).toBuffer();
       await s3.send(
         new PutObjectCommand({
           Bucket: ASSETS_BUCKET_NAME,
           Key: variantKey,
-          Body: png,
-          ContentType: "image/png",
+          Body: webp,
+          ContentType: "image/webp",
         })
       );
       variants++;

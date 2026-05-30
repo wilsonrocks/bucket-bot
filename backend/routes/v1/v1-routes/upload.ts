@@ -74,8 +74,13 @@ export const uploadHandler: RouteHandler<typeof uploadRoute, AppEnv> = async (c)
     return c.json({ error: "Missing or invalid 'file' field" }, 400);
   }
 
-  const allowed = ["image/png", "image/jpeg", "image/webp"];
-  if (!allowed.includes(file.type)) {
+  const EXT_BY_TYPE: Record<string, string> = {
+    "image/png": "png",
+    "image/jpeg": "jpg",
+    "image/webp": "webp",
+  };
+  const ext = EXT_BY_TYPE[file.type];
+  if (!ext) {
     return c.json({ error: "Only PNG, JPEG, and WebP are accepted" }, 400);
   }
 
@@ -83,26 +88,28 @@ export const uploadHandler: RouteHandler<typeof uploadRoute, AppEnv> = async (c)
   const hash = crypto.createHash("sha256").update(buffer).digest("hex").slice(0, 16);
   const baseKey = `${type}/${hash}`;
 
-  const [originalPng, resizedPngs, ogpJpeg, meta] = await Promise.all([
-    sharp(buffer).png().toBuffer(),
-    Promise.all(IMAGE_WIDTHS.map((w) => sharp(buffer).resize({ width: w }).png().toBuffer())),
+  // Variants are served as WebP (smaller for the same quality); the OGP card stays
+  // JPEG for social/crawler compatibility; the original is kept untouched in its
+  // uploaded format as the regeneration source-of-truth.
+  const [resizedWebps, ogpJpeg, meta] = await Promise.all([
+    Promise.all(IMAGE_WIDTHS.map((w) => sharp(buffer).resize({ width: w }).webp({ quality: 80 }).toBuffer())),
     makeOgpJpeg(buffer),
     sharp(buffer).metadata(),
   ]);
 
-  // CloudFront forwards the full path to S3, so /media/team/x.png → S3 key media/team/x.png
+  // CloudFront forwards the full path to S3, so /media/team/x.webp → S3 key media/team/x.webp
   await Promise.all([
     s3.send(new PutObjectCommand({
       Bucket: ASSETS_BUCKET_NAME,
-      Key: `media/${baseKey}-original.png`,
-      Body: originalPng,
-      ContentType: "image/png",
+      Key: `media/${baseKey}-original.${ext}`,
+      Body: buffer,
+      ContentType: file.type,
     })),
-    ...resizedPngs.map((png, i) => s3.send(new PutObjectCommand({
+    ...resizedWebps.map((webp, i) => s3.send(new PutObjectCommand({
       Bucket: ASSETS_BUCKET_NAME,
-      Key: `media/${baseKey}-w${IMAGE_WIDTHS[i]}.png`,
-      Body: png,
-      ContentType: "image/png",
+      Key: `media/${baseKey}-w${IMAGE_WIDTHS[i]}.webp`,
+      Body: webp,
+      ContentType: "image/webp",
     }))),
     s3.send(new PutObjectCommand({
       Bucket: ASSETS_BUCKET_NAME,
@@ -118,8 +125,10 @@ export const uploadHandler: RouteHandler<typeof uploadRoute, AppEnv> = async (c)
   if (meta.width && meta.height) {
     await c.get("db")
       .insertInto("image")
-      .values({ key: baseKey, width: meta.width, height: meta.height })
-      .onConflict((oc) => oc.column("key").doUpdateSet({ width: meta.width!, height: meta.height! }))
+      .values({ key: baseKey, width: meta.width, height: meta.height, original_ext: ext })
+      .onConflict((oc) =>
+        oc.column("key").doUpdateSet({ width: meta.width!, height: meta.height!, original_ext: ext })
+      )
       .execute();
   }
 

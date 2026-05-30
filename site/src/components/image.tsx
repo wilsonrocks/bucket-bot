@@ -14,7 +14,7 @@ const ASSET_WIDTHS = [150, 400, 800, 1200] as const
 
 /** Build a `srcset` value listing every pre-resized width variant for a key. */
 export function buildSrcSet(imageKey: string): string {
-  return ASSET_WIDTHS.map((w) => `${ASSETS_URL}/${imageKey}-w${w}.png ${w}w`).join(', ')
+  return ASSET_WIDTHS.map((w) => `${ASSETS_URL}/${imageKey}-w${w}.webp ${w}w`).join(', ')
 }
 
 type ImageProps = {
@@ -44,7 +44,7 @@ export function Image({
 }: ImageProps) {
   return (
     <img
-      src={`${ASSETS_URL}/${imageKey}-w${fallbackWidth}.png`}
+      src={`${ASSETS_URL}/${imageKey}-w${fallbackWidth}.webp`}
       srcSet={buildSrcSet(imageKey)}
       sizes={sizes}
       width={width ?? undefined}

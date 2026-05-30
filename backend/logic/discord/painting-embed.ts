@@ -34,7 +34,7 @@ export function buildPaintingEmbeds(
         .setDescription(lines.join("\n"));
 
       if (winner.imageKey && ASSETS_URL) {
-        embed.setImage(`${ASSETS_URL}/${winner.imageKey}-w800.png`);
+        embed.setImage(`${ASSETS_URL}/${winner.imageKey}-w800.webp`);
       }
 
       embeds.push(embed);

@@ -1,5 +1,5 @@
 
-\restrict kmxZGqOa5bRaKJZlUHlCzFVc6AW41kndX0HFhdQt0IULPCVzXztgB0ePt9rAcF0
+\restrict hWRwUeuOjIUaoMyUV4DJnH4NUT9KrJSlBfkjlFwCmTFh4ehuecgH9RAg8SJL78a
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -106,7 +106,8 @@ CREATE TABLE public.image (
     key text NOT NULL,
     width integer NOT NULL,
     height integer NOT NULL,
-    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    original_ext text
 );
 
 CREATE TABLE public.membership (
@@ -579,5 +580,5 @@ ALTER TABLE ONLY public.tourney
 ALTER TABLE ONLY public.venue
     ADD CONSTRAINT venue_region_id_fkey FOREIGN KEY (region_id) REFERENCES public.region(id);
 
-\unrestrict kmxZGqOa5bRaKJZlUHlCzFVc6AW41kndX0HFhdQt0IULPCVzXztgB0ePt9rAcF0
+\unrestrict hWRwUeuOjIUaoMyUV4DJnH4NUT9KrJSlBfkjlFwCmTFh4ehuecgH9RAg8SJL78a
 

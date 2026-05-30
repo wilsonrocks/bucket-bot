@@ -13,7 +13,7 @@
     "generate-db-types": "kysely-codegen",
     "generate-schema": "tsx generate-schema.ts",
     "backfill-ogp": "tsx scripts/backfill-ogp.ts",
-    "backfill-image-dimensions": "tsx scripts/backfill-image-dimensions.ts"
+    "backfill-images": "tsx scripts/backfill-images.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1019.0",

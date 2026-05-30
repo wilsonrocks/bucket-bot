@@ -96,6 +96,7 @@ export interface Image {
   created_at: Generated<Timestamp>;
   height: number;
   key: string;
+  original_ext: string | null;
   width: number;
 }
 

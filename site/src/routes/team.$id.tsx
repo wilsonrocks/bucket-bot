@@ -8,7 +8,7 @@ import type { SportsTeam, WithContext } from 'schema-dts'
 
 function teamLogoUrl(imageKey: string | null | undefined): string | undefined {
   if (!imageKey) return undefined
-  return `${import.meta.env.VITE_ASSETS_URL}/${imageKey}-w800.png`
+  return `${import.meta.env.VITE_ASSETS_URL}/${imageKey}-w800.webp`
 }
 
 export const Route = createFileRoute('/team/$id')({

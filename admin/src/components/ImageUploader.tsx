@@ -12,7 +12,7 @@ interface ImageUploaderProps {
 
 export function ImageUploader({ value, onChange, preview, label }: ImageUploaderProps) {
   const { hovered, ref } = useHover<HTMLDivElement>()
-  const effectivePreview = preview ?? (value ? `${import.meta.env.VITE_ASSETS_URL}/${value}-w150.png` : null)
+  const effectivePreview = preview ?? (value ? `${import.meta.env.VITE_ASSETS_URL}/${value}-w150.webp` : null)
 
   const handleFile = (file: File) => {
     if (file.type.startsWith('image/')) onChange(file)
