@@ -1,6 +1,5 @@
-import { TeamAvatar } from '#/components/team-avatar'
+import { PlayerTeamIcon } from '#/components/player-team-icon'
 import { Link } from '#/components/link'
-import { Tooltip } from '#/components/ui/tooltip'
 
 type RankingEntry = {
   player_id: number | null
@@ -37,21 +36,11 @@ export function TopPlayersCard({ data }: { data: RankingEntry[] }) {
                     ) : (
                       <span className="text-sm">{player.name}</span>
                     )}
-                    {player.current_team_id != null && (
-                      <Tooltip label={player.current_team_name}>
-                        <Link
-                          to="/team/$id"
-                          params={{ id: String(player.current_team_id) }}
-                          search={{ tab: undefined }}
-                        >
-                          <TeamAvatar
-                            image_key={player.team_image_key}
-                            name={player.current_team_name ?? '?'}
-                            size={20}
-                          />
-                        </Link>
-                      </Tooltip>
-                    )}
+                    <PlayerTeamIcon
+                      team_id={player.current_team_id}
+                      team_name={player.current_team_name}
+                      image_key={player.team_image_key}
+                    />
                   </div>
                 </td>
                 <td className="py-1.5 text-right text-muted-foreground">

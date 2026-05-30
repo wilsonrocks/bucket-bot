@@ -51,6 +51,21 @@ resource "aws_cloudfront_origin_access_control" "frontend" {
   signing_protocol                  = "sigv4"
 }
 
+# Forces a long-lived Cache-Control header onto every /media/* response, including
+# objects already cached in CloudFront / uploaded before the backend started setting
+# CacheControl. Media keys are content-hashed, so immutable is safe.
+resource "aws_cloudfront_response_headers_policy" "assets_immutable" {
+  name = "bucket-bot-assets-immutable"
+
+  custom_headers_config {
+    items {
+      header   = "Cache-Control"
+      value    = "public, max-age=31536000, immutable"
+      override = true
+    }
+  }
+}
+
 resource "aws_cloudfront_distribution" "frontend" {
   enabled             = true
   default_root_object = "index.html"
@@ -72,11 +87,12 @@ resource "aws_cloudfront_distribution" "frontend" {
   }
 
   ordered_cache_behavior {
-    path_pattern           = "/media/*"
-    target_origin_id       = "assets"
-    viewer_protocol_policy = "redirect-to-https"
-    allowed_methods        = ["GET", "HEAD"]
-    cached_methods         = ["GET", "HEAD"]
+    path_pattern               = "/media/*"
+    target_origin_id           = "assets"
+    viewer_protocol_policy     = "redirect-to-https"
+    allowed_methods            = ["GET", "HEAD"]
+    cached_methods             = ["GET", "HEAD"]
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.assets_immutable.id
     forwarded_values {
       query_string = false
       cookies {

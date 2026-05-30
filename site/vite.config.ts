@@ -24,7 +24,21 @@ const config = defineConfig({
   plugins: [
     injectedHeadScriptsShim,
     devtools(),
-    nitro({ rollupConfig: { external: [/^@sentry\//] } }),
+    nitro({
+      rollupConfig: { external: [/^@sentry\//] },
+      // Nitro already caches the content-hashed /assets/** bundles immutably. These
+      // public/ files are not hashed, so use a shorter (mutable) TTL — long enough to
+      // satisfy PageSpeed's cache-policy audit, short enough that swapping a logo or
+      // favicon is picked up. To force an instant swap, rename the file.
+      routeRules: {
+        '/favicon.ico': { headers: { 'cache-control': 'public, max-age=2592000' } },
+        '/logo192.png': { headers: { 'cache-control': 'public, max-age=2592000' } },
+        '/logo512.png': { headers: { 'cache-control': 'public, max-age=2592000' } },
+        '/bucket-bot-logo-original.png': { headers: { 'cache-control': 'public, max-age=2592000' } },
+        '/manifest.json': { headers: { 'cache-control': 'public, max-age=2592000' } },
+        '/robots.txt': { headers: { 'cache-control': 'public, max-age=2592000' } },
+      },
+    }),
     tanstackStart(),
     viteReact(),
     tailwindcss(),

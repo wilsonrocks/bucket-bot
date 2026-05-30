@@ -1,7 +1,6 @@
 import { fetchRankingTypes, fetchRankings, fetchPlayersOverTime } from '#/queries'
 import { playerShortName } from '#/helpers/player-short-name'
-import { TeamAvatar } from '#/components/team-avatar'
-import { Tooltip } from '#/components/ui/tooltip'
+import { PlayerTeamIcon } from '#/components/player-team-icon'
 import { useMediaQuery } from '#/helpers/use-media-query'
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { Link } from '#/components/link'
@@ -97,21 +96,11 @@ function RouteComponent() {
                       >
                         {isMobile ? playerShortName(player) : player.name}
                       </Link>
-                      {player.current_team_id != null && (
-                        <Tooltip label={player.current_team_name}>
-                          <Link
-                            to="/team/$id"
-                            params={{ id: String(player.current_team_id) }}
-                            search={{ tab: undefined }}
-                          >
-                            <TeamAvatar
-                              image_key={player.team_image_key}
-                              name={player.current_team_name ?? '?'}
-                              size={22}
-                            />
-                          </Link>
-                        </Tooltip>
-                      )}
+                      <PlayerTeamIcon
+                        team_id={player.current_team_id}
+                        team_name={player.current_team_name}
+                        image_key={player.team_image_key}
+                      />
                     </div>
                   </td>
                   <td className="px-2 py-1.5">{(player.total_points ?? 0).toFixed(2)}</td>
