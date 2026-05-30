@@ -30,6 +30,8 @@ type ImageProps = {
   /** Width variant used for the `src` fallback (non-srcset browsers). */
   fallbackWidth?: (typeof ASSET_WIDTHS)[number]
   loading?: 'lazy' | 'eager'
+  /** Prioritise the fetch — set 'high' for an above-the-fold LCP image. */
+  fetchPriority?: 'high' | 'low' | 'auto'
 }
 
 export function Image({
@@ -41,6 +43,7 @@ export function Image({
   className,
   fallbackWidth = 800,
   loading = 'lazy',
+  fetchPriority,
 }: ImageProps) {
   return (
     <img
@@ -51,6 +54,7 @@ export function Image({
       height={height ?? undefined}
       alt={alt}
       loading={loading}
+      fetchPriority={fetchPriority}
       decoding="async"
       className={className}
     />

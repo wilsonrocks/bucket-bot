@@ -28,6 +28,8 @@ export function PaintingHighlightCard({ data }: { data: RecentPainting }) {
                   height={data.imageHeight}
                   alt={data.playerName}
                   sizes="(min-width: 768px) 33vw, 100vw"
+                  loading="eager"
+                  fetchPriority="high"
                   className="h-full w-full object-contain"
                 />
               </div>
