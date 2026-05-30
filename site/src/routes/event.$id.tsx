@@ -7,6 +7,7 @@ import {
   PaintingLightbox,
   positionLabel,
 } from "#/components/painting-lightbox";
+import { Image } from "#/components/image";
 import { SITE_NAME, SITE_URL, absoluteUrl, jsonLd, seo } from "#/helpers/seo";
 import type { SportsEvent, WithContext } from "schema-dts";
 
@@ -170,10 +171,14 @@ function RouteComponent() {
                         })
                       }
                     >
-                      <img
-                        src={`${import.meta.env.VITE_ASSETS_URL}/${winner.imageKey}-w150.png`}
+                      <Image
+                        imageKey={winner.imageKey}
+                        width={winner.imageWidth}
+                        height={winner.imageHeight}
                         alt={`${winner.playerName} — ${cat.name}`}
-                        className="w-[150px] rounded-sm"
+                        fallbackWidth={400}
+                        sizes="150px"
+                        className="h-auto w-[150px] rounded-sm"
                       />
                       <p className="mt-1 text-center text-xs text-muted-foreground">
                         {positionLabel(winner.position, cat.winners.length)} —{" "}

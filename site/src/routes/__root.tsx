@@ -29,7 +29,7 @@ import { DEFAULT_OG_IMAGE, SITE_NAME, SITE_URL, jsonLd, seo } from "#/helpers/se
 import { ThemeProvider } from "#/theme/theme-provider";
 import { ThemeToggle } from "#/components/theme-toggle";
 import { NO_FLASH_SCRIPT } from "#/theme/theme";
-import { getThemeCookie } from "#/theme/theme.server";
+import { getThemeCookie } from "#/theme/theme-cookie";
 
 const rootWebsiteJsonLd = jsonLd({
   "@context": "https://schema.org",

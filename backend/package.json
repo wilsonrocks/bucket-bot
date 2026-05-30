@@ -12,7 +12,8 @@
     "dev": "node --inspect --enable-source-maps --import tsx --watch index.ts",
     "generate-db-types": "kysely-codegen",
     "generate-schema": "tsx generate-schema.ts",
-    "backfill-ogp": "tsx scripts/backfill-ogp.ts"
+    "backfill-ogp": "tsx scripts/backfill-ogp.ts",
+    "backfill-images": "tsx scripts/backfill-images.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1019.0",

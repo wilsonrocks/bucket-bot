@@ -92,6 +92,14 @@ export interface IdentityProvider {
   name: string;
 }
 
+export interface Image {
+  created_at: Generated<Timestamp>;
+  height: number;
+  key: string;
+  original_ext: string | null;
+  width: number;
+}
+
 export interface Membership {
   created_at: Generated<Timestamp | null>;
   id: Generated<number>;
@@ -278,6 +286,7 @@ export interface DB {
   geography_columns: GeographyColumns;
   geometry_columns: GeometryColumns;
   identity_provider: IdentityProvider;
+  image: Image;
   membership: Membership;
   painting_category: PaintingCategory;
   painting_winner: PaintingWinner;

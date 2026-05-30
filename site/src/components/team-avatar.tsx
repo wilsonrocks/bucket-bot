@@ -6,7 +6,7 @@ interface TeamAvatarProps {
 
 export function TeamAvatar({ image_key, name, size = 35 }: TeamAvatarProps) {
   const src = image_key
-    ? `${import.meta.env.VITE_ASSETS_URL}/${image_key}-w150.png`
+    ? `${import.meta.env.VITE_ASSETS_URL}/${image_key}-w150.webp`
     : null
 
   if (src) {
