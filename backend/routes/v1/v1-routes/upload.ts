@@ -28,6 +28,9 @@ const s3 = new S3Client({
 const MAX_BYTES = 10 * 1024 * 1024;
 // Responsive width ladder. Keep in sync with ASSET_WIDTHS in site/src/components/image.tsx.
 const IMAGE_WIDTHS = [150, 400, 800, 1200] as const;
+// Keys are content-hashed (sha256 of the upload), so a changed image always gets a
+// new URL — the variants are safe to cache immutably for the browser/CloudFront.
+const IMMUTABLE_CACHE_CONTROL = "public, max-age=31536000, immutable";
 
 const ErrorSchema = z.object({ error: z.string() });
 
@@ -104,18 +107,21 @@ export const uploadHandler: RouteHandler<typeof uploadRoute, AppEnv> = async (c)
       Key: `media/${baseKey}-original.${ext}`,
       Body: buffer,
       ContentType: file.type,
+      CacheControl: IMMUTABLE_CACHE_CONTROL,
     })),
     ...resizedWebps.map((webp, i) => s3.send(new PutObjectCommand({
       Bucket: ASSETS_BUCKET_NAME,
       Key: `media/${baseKey}-w${IMAGE_WIDTHS[i]}.webp`,
       Body: webp,
       ContentType: "image/webp",
+      CacheControl: IMMUTABLE_CACHE_CONTROL,
     }))),
     s3.send(new PutObjectCommand({
       Bucket: ASSETS_BUCKET_NAME,
       Key: `media/${baseKey}-ogp.jpg`,
       Body: ogpJpeg,
       ContentType: "image/jpeg",
+      CacheControl: IMMUTABLE_CACHE_CONTROL,
     })),
   ]);
 
