@@ -28,22 +28,20 @@ function WinnerCard({ winner, onClick }: { winner: PaintingItem; onClick: () => 
   const clickable = !!winner.imageKey
   return (
     <div
-      className={`grid grid-rows-subgrid row-span-2 rounded-sm bg-surface ${clickable ? 'cursor-pointer' : ''}`}
+      className={`mb-4 break-inside-avoid rounded-sm bg-surface ${clickable ? 'cursor-pointer' : ''}`}
       onClick={clickable ? onClick : undefined}
     >
-      <div className="flex items-end">
-        {winner.imageKey && (
-          <Image
-            imageKey={winner.imageKey}
-            width={winner.imageWidth}
-            height={winner.imageHeight}
-            alt={winner.playerName}
-            fallbackWidth={400}
-            sizes="(min-width: 1024px) 20vw, (min-width: 768px) 25vw, (min-width: 640px) 33vw, 50vw"
-            className="h-auto w-full rounded-t-sm"
-          />
-        )}
-      </div>
+      {winner.imageKey && (
+        <Image
+          imageKey={winner.imageKey}
+          width={winner.imageWidth}
+          height={winner.imageHeight}
+          alt={winner.playerName}
+          fallbackWidth={400}
+          sizes="(min-width: 1024px) 20vw, (min-width: 768px) 25vw, (min-width: 640px) 33vw, 50vw"
+          className="h-auto w-full rounded-t-sm"
+        />
+      )}
       <div className="flex flex-col gap-0.5 px-3 pb-3 pt-2">
         <p className="line-clamp-1 text-sm font-semibold">
           {winner.playerId != null ? (
@@ -118,7 +116,7 @@ function RouteComponent() {
 
   return (
     <div>
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+      <div className="columns-2 gap-4 sm:columns-3 md:columns-4 lg:columns-5">
         {data.map((winner) => (
           <WinnerCard
             key={winner.id}
