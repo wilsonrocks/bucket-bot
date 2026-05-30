@@ -1,5 +1,5 @@
 
-\restrict bb3o4JAvW8UF6wAPlcx1msNHUVo3rdYpmbEcAdWIFoVhXmVcRzAVrZYkvt85h4X
+\restrict kmxZGqOa5bRaKJZlUHlCzFVc6AW41kndX0HFhdQt0IULPCVzXztgB0ePt9rAcF0
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -102,6 +102,13 @@ CREATE TABLE public.identity_provider (
     name text NOT NULL
 );
 
+CREATE TABLE public.image (
+    key text NOT NULL,
+    width integer NOT NULL,
+    height integer NOT NULL,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
 CREATE TABLE public.membership (
     id integer NOT NULL,
     player_id integer,
@@ -128,10 +135,12 @@ CREATE TABLE public.painting_category (
 
 CREATE TABLE public.painting_winner (
     id integer NOT NULL,
-    player_id integer NOT NULL,
     "position" integer NOT NULL,
-    model text NOT NULL,
+    model text,
     category_id integer,
+    player_identity_id integer NOT NULL,
+    image_key text,
+    description text,
     CONSTRAINT painting_winner_position_check CHECK (("position" > 0))
 );
 
@@ -158,7 +167,8 @@ CREATE TABLE public.player_identity (
     external_id text NOT NULL,
     identity_provider_id text NOT NULL,
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
-    provider_name text NOT NULL
+    provider_name text NOT NULL,
+    is_ignored boolean DEFAULT false NOT NULL
 );
 
     AS integer
@@ -355,6 +365,9 @@ ALTER TABLE ONLY public.flyway_schema_history
 ALTER TABLE ONLY public.identity_provider
     ADD CONSTRAINT identity_provider_pkey PRIMARY KEY (id);
 
+ALTER TABLE ONLY public.image
+    ADD CONSTRAINT image_pkey PRIMARY KEY (key);
+
 ALTER TABLE ONLY public.membership
     ADD CONSTRAINT membership_no_overlapping_membership EXCLUDE USING gist (player_id WITH =, daterange(join_date, left_date) WITH &&);
 
@@ -369,9 +382,6 @@ ALTER TABLE ONLY public.painting_winner
 
 ALTER TABLE ONLY public.player_identity
     ADD CONSTRAINT player_identity_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY public.player_identity
-    ADD CONSTRAINT player_identity_player_id_external_id_key UNIQUE (player_id, external_id);
 
 ALTER TABLE ONLY public.player
     ADD CONSTRAINT player_pkey PRIMARY KEY (id);
@@ -458,7 +468,7 @@ CREATE INDEX idx_painting_category_tourney_id ON public.painting_category USING 
 
 CREATE INDEX idx_painting_winner_category_id ON public.painting_winner USING btree (category_id);
 
-CREATE INDEX idx_painting_winner_player_id ON public.painting_winner USING btree (player_id);
+CREATE INDEX idx_painting_winner_player_identity_id ON public.painting_winner USING btree (player_identity_id);
 
 CREATE INDEX idx_player_identity_provider_external ON public.player_identity USING btree (identity_provider_id, external_id);
 
@@ -483,6 +493,8 @@ CREATE INDEX idx_tourney_bot_id ON public.tourney USING btree (bot_id);
 CREATE INDEX idx_tourney_venue_id ON public.tourney USING btree (venue_id);
 
 CREATE INDEX idx_venue_region_id ON public.venue USING btree (region_id);
+
+CREATE UNIQUE INDEX player_identity_provider_external_id_key ON public.player_identity USING btree (identity_provider_id, external_id);
 
 CREATE UNIQUE INDEX unique_display_order_true ON public.ranking_snapshot_type USING btree (display_order) WHERE (display = true);
 
@@ -514,7 +526,7 @@ ALTER TABLE ONLY public.painting_winner
     ADD CONSTRAINT painting_winner_category_id_fkey FOREIGN KEY (category_id) REFERENCES public.painting_category(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY public.painting_winner
-    ADD CONSTRAINT painting_winner_player_id_fkey FOREIGN KEY (player_id) REFERENCES public.player(id) ON DELETE CASCADE;
+    ADD CONSTRAINT painting_winner_player_identity_id_fkey FOREIGN KEY (player_identity_id) REFERENCES public.player_identity(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY public.player_identity
     ADD CONSTRAINT player_identity_identity_provider_id_fkey FOREIGN KEY (identity_provider_id) REFERENCES public.identity_provider(id);
@@ -567,5 +579,5 @@ ALTER TABLE ONLY public.tourney
 ALTER TABLE ONLY public.venue
     ADD CONSTRAINT venue_region_id_fkey FOREIGN KEY (region_id) REFERENCES public.region(id);
 
-\unrestrict bb3o4JAvW8UF6wAPlcx1msNHUVo3rdYpmbEcAdWIFoVhXmVcRzAVrZYkvt85h4X
+\unrestrict kmxZGqOa5bRaKJZlUHlCzFVc6AW41kndX0HFhdQt0IULPCVzXztgB0ePt9rAcF0
 

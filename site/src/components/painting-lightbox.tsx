@@ -1,10 +1,13 @@
 import * as Dialog from '@radix-ui/react-dialog'
 import { X } from 'lucide-react'
 import { Link } from '#/components/link'
+import { Image } from '#/components/image'
 
 export type PaintingLightboxWinner = {
   id: number
   imageKey: string | null
+  imageWidth: number | null
+  imageHeight: number | null
   playerName: string
   playerId: number | null
   model: string | null
@@ -51,9 +54,13 @@ export function PaintingLightbox({
           {winner && (
             <div>
               {winner.imageKey && (
-                <img
-                  src={`${import.meta.env.VITE_ASSETS_URL}/${winner.imageKey}-w800.png`}
+                <Image
+                  imageKey={winner.imageKey}
+                  width={winner.imageWidth}
+                  height={winner.imageHeight}
                   alt={winner.playerName}
+                  sizes="(max-width: 768px) 95vw, 768px"
+                  loading="eager"
                   className="mb-4 max-h-[500px] w-full rounded-sm object-contain"
                 />
               )}

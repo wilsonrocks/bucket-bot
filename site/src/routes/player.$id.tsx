@@ -11,6 +11,7 @@ import z from 'zod'
 import { Link } from '#/components/link'
 import { Tabs } from '#/components/routed-tabs'
 import { PaintingLightbox, positionLabel } from '#/components/painting-lightbox'
+import { Image } from '#/components/image'
 import { formatDate } from 'date-fns'
 import { PlayerRankingOverTime } from '#/components/charts'
 import { SITE_NAME, SITE_URL, absoluteUrl, jsonLd, seo } from '#/helpers/seo'
@@ -104,6 +105,8 @@ function RouteComponent() {
   const activeWinnerForLightbox = activeWinner ? {
     id: activeWinner.id,
     imageKey: activeWinner.imageKey,
+    imageWidth: activeWinner.imageWidth,
+    imageHeight: activeWinner.imageHeight,
     playerName: player.name,
     playerId: player.id,
     model: activeWinner.model,
@@ -225,12 +228,20 @@ function RouteComponent() {
                 <tr key={w.id} className="border-b border-border">
                   <td className="px-2 py-1.5">
                     {w.imageKey ? (
-                      <img
-                        src={`${import.meta.env.VITE_ASSETS_URL}/${w.imageKey}-w150.png`}
-                        alt={w.categoryName}
-                        className="w-20 cursor-pointer rounded-sm"
+                      <span
+                        className="inline-block cursor-pointer"
                         onClick={() => navigate({ search: (prev) => ({ ...prev, painting: w.id }) })}
-                      />
+                      >
+                        <Image
+                          imageKey={w.imageKey}
+                          width={w.imageWidth}
+                          height={w.imageHeight}
+                          alt={w.categoryName}
+                          fallbackWidth={150}
+                          sizes="80px"
+                          className="h-auto w-20 rounded-sm"
+                        />
+                      </span>
                     ) : null}
                   </td>
                   <td className="px-2 py-1.5">

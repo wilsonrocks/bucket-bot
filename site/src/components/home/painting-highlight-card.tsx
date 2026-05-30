@@ -1,4 +1,5 @@
 import { Link } from '#/components/link'
+import { Image } from '#/components/image'
 
 type RecentPainting = {
   playerId: number | null
@@ -7,6 +8,8 @@ type RecentPainting = {
   tourneyName: string
   categoryName: string
   imageKey: string | null
+  imageWidth: number | null
+  imageHeight: number | null
   model: string | null
 } | null
 
@@ -19,9 +22,12 @@ export function PaintingHighlightCard({ data }: { data: RecentPainting }) {
           <>
             {data.imageKey && (
               <div className="mb-2 aspect-[4/3] w-full overflow-hidden rounded-sm">
-                <img
-                  src={`${import.meta.env.VITE_ASSETS_URL}/${data.imageKey}-w800.png`}
+                <Image
+                  imageKey={data.imageKey}
+                  width={data.imageWidth}
+                  height={data.imageHeight}
                   alt={data.playerName}
+                  sizes="(min-width: 768px) 33vw, 100vw"
                   className="h-full w-full object-contain"
                 />
               </div>

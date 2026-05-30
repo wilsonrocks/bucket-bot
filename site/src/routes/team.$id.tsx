@@ -1,6 +1,7 @@
 import { fetchTeam } from '#/queries'
 import { createFileRoute, notFound } from '@tanstack/react-router'
 import { Link } from '#/components/link'
+import { Image } from '#/components/image'
 import z from 'zod'
 import { SITE_NAME, SITE_URL, absoluteUrl, jsonLd, seo } from '#/helpers/seo'
 import type { SportsTeam, WithContext } from 'schema-dts'
@@ -73,10 +74,13 @@ function RouteComponent() {
       <h2 className="mb-1 text-xl font-semibold">{team.name}</h2>
       {team.description && <p>{team.description}</p>}
       {team.image_key && (
-        <img
-          src={`${import.meta.env.VITE_ASSETS_URL}/${team.image_key}-w800.png`}
+        <Image
+          imageKey={team.image_key}
+          width={team.imageWidth}
+          height={team.imageHeight}
           alt={`${team.name} logo`}
-          className="mb-4 max-w-[400px] rounded-sm object-contain"
+          sizes="(max-width: 400px) 100vw, 400px"
+          className="mb-4 h-auto max-w-[400px] rounded-sm object-contain"
         />
       )}
       <table className="mt-4 min-w-full text-sm tabular-nums">

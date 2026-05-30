@@ -253,6 +253,7 @@ export const fetchPlayerPaintingWins = createServerFn()
       .innerJoin('painting_category', 'painting_winner.category_id' as any, 'painting_category.id')
       .innerJoin('tourney', 'painting_category.tourney_id', 'tourney.id')
       .innerJoin('player_identity', 'painting_winner.player_identity_id' as any, 'player_identity.id')
+      .leftJoin('image', 'image.key' as any, 'painting_winner.image_key' as any)
       .where('player_identity.player_id', '=', playerId)
       .select([
         'painting_winner.id as id',
@@ -264,6 +265,8 @@ export const fetchPlayerPaintingWins = createServerFn()
         'painting_winner.position',
         'painting_winner.model',
         'painting_winner.image_key as imageKey' as any,
+        'image.width as imageWidth' as any,
+        'image.height as imageHeight' as any,
         'painting_winner.description' as any,
       ])
       .orderBy('tourney.date', 'desc')
@@ -339,6 +342,7 @@ export const fetchTourney = createServerFn()
         .leftJoin('painting_winner', 'painting_category.id', 'painting_winner.category_id')
         .leftJoin('player_identity', 'painting_winner.player_identity_id' as any, 'player_identity.id')
         .leftJoin('player', 'player_identity.player_id', 'player.id')
+        .leftJoin('image', 'image.key' as any, 'painting_winner.image_key' as any)
         .where('painting_category.tourney_id', '=', id)
         .select([
           'painting_category.id as categoryId',
@@ -350,6 +354,8 @@ export const fetchTourney = createServerFn()
           'painting_winner.position',
           'painting_winner.model',
           'painting_winner.image_key as imageKey' as any,
+          'image.width as imageWidth' as any,
+          'image.height as imageHeight' as any,
           'painting_winner.description as winnerDescription' as any,
         ])
         .orderBy('painting_category.id')
@@ -372,6 +378,8 @@ export const fetchTourney = createServerFn()
           position: row.position,
           model: row.model,
           imageKey: row.imageKey,
+          imageWidth: row.imageWidth ?? null,
+          imageHeight: row.imageHeight ?? null,
           description: row.winnerDescription,
         })
       }
@@ -390,7 +398,13 @@ export const fetchTeams = createServerFn().handler(async () => {
 export const fetchTeam = createServerFn()
   .inputValidator((d: { id: number }) => d)
   .handler(async ({ data: { id } }) => {
-    const team = await db.selectFrom('team').selectAll().where('id', '=', id).executeTakeFirst()
+    const team = await db
+      .selectFrom('team')
+      .leftJoin('image', 'image.key', 'team.image_key')
+      .selectAll('team')
+      .select(['image.width as imageWidth', 'image.height as imageHeight'])
+      .where('team.id', '=', id)
+      .executeTakeFirst()
     if (!team) return null
 
     const latestBatch = await db
@@ -622,6 +636,7 @@ export const fetchAllPainting = createServerFn().handler(async () => {
     .innerJoin('tourney', 'painting_category.tourney_id', 'tourney.id')
     .innerJoin('player_identity', 'painting_winner.player_identity_id' as any, 'player_identity.id')
     .leftJoin('player', 'player_identity.player_id', 'player.id')
+    .leftJoin('image', 'image.key' as any, 'painting_winner.image_key' as any)
     .select([
       'painting_winner.id as id',
       'player.id as playerId',
@@ -632,6 +647,8 @@ export const fetchAllPainting = createServerFn().handler(async () => {
       'painting_category.id as categoryId',
       'painting_category.name as categoryName',
       'painting_winner.image_key as imageKey' as any,
+      'image.width as imageWidth' as any,
+      'image.height as imageHeight' as any,
       'painting_winner.model as model',
       'painting_winner.description' as any,
       'painting_winner.position',
@@ -652,6 +669,8 @@ export const fetchAllPainting = createServerFn().handler(async () => {
     categoryId: r.categoryId,
     categoryName: r.categoryName,
     imageKey: r.imageKey ?? null,
+    imageWidth: r.imageWidth ?? null,
+    imageHeight: r.imageHeight ?? null,
     model: r.model ?? null,
     description: r.description ?? null,
     position: r.position,
@@ -666,6 +685,7 @@ export const fetchRecentPainting = createServerFn().handler(async () => {
     .innerJoin('tourney', 'painting_category.tourney_id', 'tourney.id')
     .innerJoin('player_identity', 'painting_winner.player_identity_id' as any, 'player_identity.id')
     .leftJoin('player', 'player_identity.player_id', 'player.id')
+    .leftJoin('image', 'image.key' as any, 'painting_winner.image_key' as any)
     .where('painting_winner.position', '=', 1)
     .orderBy('tourney.date', 'desc')
     .orderBy('painting_category.id', 'asc')
@@ -676,6 +696,8 @@ export const fetchRecentPainting = createServerFn().handler(async () => {
       'tourney.name as tourneyName',
       'painting_category.name as categoryName',
       'painting_winner.image_key as imageKey' as any,
+      'image.width as imageWidth' as any,
+      'image.height as imageHeight' as any,
       'painting_winner.model as model',
     ])
     .limit(1)
@@ -689,6 +711,8 @@ export const fetchRecentPainting = createServerFn().handler(async () => {
     tourneyName: row.tourneyName,
     categoryName: row.categoryName,
     imageKey: row.imageKey ?? null,
+    imageWidth: row.imageWidth ?? null,
+    imageHeight: row.imageHeight ?? null,
     model: row.model ?? null,
   }
 })

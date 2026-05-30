@@ -3,6 +3,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import z from 'zod'
 import { Link } from '#/components/link'
 import { PaintingLightbox, positionLabel } from '#/components/painting-lightbox'
+import { Image } from '#/components/image'
 import { SITE_NAME, seo } from '#/helpers/seo'
 
 type PaintingItem = {
@@ -15,6 +16,8 @@ type PaintingItem = {
   categoryId: number
   categoryName: string
   imageKey: string | null
+  imageWidth: number | null
+  imageHeight: number | null
   model: string | null
   description: string | null
   position: number
@@ -30,10 +33,14 @@ function WinnerCard({ winner, onClick }: { winner: PaintingItem; onClick: () => 
     >
       <div className="flex items-end">
         {winner.imageKey && (
-          <img
-            src={`${import.meta.env.VITE_ASSETS_URL}/${winner.imageKey}-w150.png`}
+          <Image
+            imageKey={winner.imageKey}
+            width={winner.imageWidth}
+            height={winner.imageHeight}
             alt={winner.playerName}
-            className="rounded-t-sm"
+            fallbackWidth={400}
+            sizes="(min-width: 1024px) 20vw, (min-width: 768px) 25vw, (min-width: 640px) 33vw, 50vw"
+            className="h-auto w-full rounded-t-sm"
           />
         )}
       </div>
@@ -98,6 +105,8 @@ function RouteComponent() {
   const lightboxWinner = activeWinner ? {
     id: activeWinner.id,
     imageKey: activeWinner.imageKey,
+    imageWidth: activeWinner.imageWidth,
+    imageHeight: activeWinner.imageHeight,
     playerName: activeWinner.playerName,
     playerId: activeWinner.playerId,
     model: activeWinner.model,

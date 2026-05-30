@@ -26,7 +26,8 @@ const s3 = new S3Client({
 // ── Route ──────────────────────────────────────────────────────────────────
 
 const MAX_BYTES = 10 * 1024 * 1024;
-const IMAGE_WIDTHS = [150, 800] as const;
+// Responsive width ladder. Keep in sync with ASSET_WIDTHS in site/src/components/image.tsx.
+const IMAGE_WIDTHS = [150, 400, 800, 1200] as const;
 
 const ErrorSchema = z.object({ error: z.string() });
 
@@ -82,10 +83,11 @@ export const uploadHandler: RouteHandler<typeof uploadRoute, AppEnv> = async (c)
   const hash = crypto.createHash("sha256").update(buffer).digest("hex").slice(0, 16);
   const baseKey = `${type}/${hash}`;
 
-  const [originalPng, resizedPngs, ogpJpeg] = await Promise.all([
+  const [originalPng, resizedPngs, ogpJpeg, meta] = await Promise.all([
     sharp(buffer).png().toBuffer(),
     Promise.all(IMAGE_WIDTHS.map((w) => sharp(buffer).resize({ width: w }).png().toBuffer())),
     makeOgpJpeg(buffer),
+    sharp(buffer).metadata(),
   ]);
 
   // CloudFront forwards the full path to S3, so /media/team/x.png → S3 key media/team/x.png
@@ -109,6 +111,17 @@ export const uploadHandler: RouteHandler<typeof uploadRoute, AppEnv> = async (c)
       ContentType: "image/jpeg",
     })),
   ]);
+
+  // Record the original's intrinsic dimensions so the site can reserve layout
+  // space and build a responsive srcset. Upsert: re-uploading the same file
+  // (same hash → same key) refreshes the dimensions.
+  if (meta.width && meta.height) {
+    await c.get("db")
+      .insertInto("image")
+      .values({ key: baseKey, width: meta.width, height: meta.height })
+      .onConflict((oc) => oc.column("key").doUpdateSet({ width: meta.width!, height: meta.height! }))
+      .execute();
+  }
 
   return c.json({ key: baseKey }, 200);
 };
