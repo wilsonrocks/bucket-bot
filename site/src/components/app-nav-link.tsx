@@ -19,8 +19,8 @@ export function AppNavLink({ to, label, icon, fuzzy = true, children }: AppNavLi
         to={to}
         className={`flex items-center gap-2 rounded px-3 py-2 text-sm no-underline ${
           active
-            ? 'bg-blue-50 text-blue-700 font-medium'
-            : 'text-gray-700 hover:bg-gray-100'
+            ? 'bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300 font-medium'
+            : 'text-foreground hover:bg-muted'
         }`}
       >
         {icon && <span className="inline-flex h-5 w-5 items-center justify-center">{icon}</span>}

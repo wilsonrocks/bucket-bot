@@ -6,10 +6,10 @@ import { useState } from 'react'
 import { SITE_NAME, seo } from '#/helpers/seo'
 
 function RankChange({ change }: { change: number | null | undefined }) {
-  if (change == null) return <span className="text-sm text-green-600">NEW</span>
-  if (change === 0) return <span className="text-sm text-gray-500">-</span>
-  if (change > 0) return <span className="text-sm text-green-600">↑{change}</span>
-  return <span className="text-sm text-red-600">↓{Math.abs(change)}</span>
+  if (change == null) return <span className="text-sm text-green-600 dark:text-green-400">NEW</span>
+  if (change === 0) return <span className="text-sm text-muted-foreground">-</span>
+  if (change > 0) return <span className="text-sm text-green-600 dark:text-green-400">↑{change}</span>
+  return <span className="text-sm text-red-600 dark:text-red-400">↓{Math.abs(change)}</span>
 }
 
 export const Route = createFileRoute('/faction-rankings')({
@@ -44,7 +44,7 @@ function RouteComponent() {
         <Tabs.Panel value="table">
           <table className="min-w-full text-sm tabular-nums">
             <thead>
-              <tr className="border-b border-gray-200 text-left">
+              <tr className="border-b border-border text-left">
                 <th className="whitespace-nowrap px-2 py-2 font-semibold">Rank</th>
                 <th className="whitespace-nowrap px-2 py-2 font-semibold">Change</th>
                 <th className="px-2 py-2 font-semibold">Faction</th>
@@ -56,7 +56,7 @@ function RouteComponent() {
             </thead>
             <tbody>
               {(factionRankings as any[]).map((faction: any) => (
-                <tr key={faction.faction_code} className="border-b border-gray-100">
+                <tr key={faction.faction_code} className="border-b border-border">
                   <td className="whitespace-nowrap px-2 py-1.5">
                     <div style={{ borderLeft: `3px solid ${faction.hex_code}`, paddingLeft: '0.5rem' }}>
                       {(faction.rank ?? 0).toString()}
@@ -80,9 +80,9 @@ function RouteComponent() {
           </table>
         </Tabs.Panel>
         <Tabs.Panel value="animation">
-          <p className="mt-1 text-sm text-gray-500">Showing top 16 factions</p>
+          <p className="mt-1 text-sm text-muted-foreground">Showing top 16 factions</p>
           <select
-            className="mt-2 w-[220px] rounded border border-gray-300 px-2 py-1 text-sm"
+            className="mt-2 w-[220px] rounded border border-border px-2 py-1 text-sm"
             value={metric}
             onChange={(e) => setMetric(e.target.value as typeof metric)}
           >

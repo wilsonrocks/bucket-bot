@@ -12,7 +12,7 @@ export const SiteNavbar = () => {
       <AppNavLink to="/regions" label="Regions" />
       <AppNavLink to="/best-painted" label="Best Painted" />
       <AppNavLink to="/how-it-works" label="How It Works" />
-      <hr className="my-2 border-gray-200" />
+      <hr className="my-2 border-border" />
     </div>
   );
 };

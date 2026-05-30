@@ -33,7 +33,7 @@ export function PaintingLightbox({
     <Dialog.Root open={!!winner} onOpenChange={(open) => !open && onClose()}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-40 bg-black/50" />
-        <Dialog.Content className="fixed left-1/2 top-1/2 z-50 max-h-[90vh] w-[95vw] max-w-3xl -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-lg bg-white p-6 shadow-xl">
+        <Dialog.Content className="fixed left-1/2 top-1/2 z-50 max-h-[90vh] w-[95vw] max-w-3xl -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-lg bg-surface p-6 shadow-xl">
           <div className="mb-4 flex items-start justify-between gap-4">
             <Dialog.Title className="text-lg font-semibold">
               {winner ? `${winner.categoryName} — ${positionLabel(winner.position, winner.totalWinners)}` : ''}
@@ -41,7 +41,7 @@ export function PaintingLightbox({
             <Dialog.Close asChild>
               <button
                 type="button"
-                className="inline-flex h-8 w-8 items-center justify-center rounded hover:bg-gray-100"
+                className="inline-flex h-8 w-8 items-center justify-center rounded hover:bg-muted"
                 aria-label="Close"
               >
                 <X size={18} />
@@ -69,7 +69,7 @@ export function PaintingLightbox({
               ) : (
                 <p className="font-semibold">{winner.playerName}</p>
               )}
-              {winner.model && <p className="text-sm text-gray-500">{winner.model}</p>}
+              {winner.model && <p className="text-sm text-muted-foreground">{winner.model}</p>}
               {winner.description && <p className="mt-1 text-sm">{winner.description}</p>}
             </div>
           )}

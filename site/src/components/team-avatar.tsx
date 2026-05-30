@@ -23,7 +23,7 @@ export function TeamAvatar({ image_key, name, size = 35 }: TeamAvatarProps) {
   return (
     <div
       style={{ width: size, height: size, fontSize: size * 0.45 }}
-      className="inline-flex items-center justify-center rounded-sm bg-gray-200 font-medium text-gray-700"
+      className="inline-flex items-center justify-center rounded-sm bg-muted font-medium text-foreground"
       aria-label={name}
     >
       {name[0]}

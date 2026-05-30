@@ -20,7 +20,7 @@ function RouteComponent() {
   return (
     <table className="min-w-full text-sm">
       <thead>
-        <tr className="border-b border-gray-200 text-left">
+        <tr className="border-b border-border text-left">
           <th className="px-2 py-2 font-semibold">Name</th>
           <th className="px-2 py-2 font-semibold">Current Team</th>
           <th className="px-2 py-2 font-semibold">Events</th>
@@ -28,7 +28,7 @@ function RouteComponent() {
       </thead>
       <tbody>
         {players.map((p) => (
-          <tr key={p.id ?? p.name} className="border-b border-gray-100">
+          <tr key={p.id ?? p.name} className="border-b border-border">
             <td className="px-2 py-1.5">
               {p.id != null ? (
                 <Link

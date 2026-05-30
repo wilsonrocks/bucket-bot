@@ -111,7 +111,7 @@ function RouteComponent() {
         <Tabs.Panel value="results">
           <table className="min-w-full text-sm tabular-nums">
             <thead>
-              <tr className="border-b border-gray-200 text-left">
+              <tr className="border-b border-border text-left">
                 <th className="px-2 py-2 font-semibold">Place</th>
                 <th className="px-2 py-2 font-semibold">Name</th>
                 <th className="px-2 py-2 font-semibold">Points</th>
@@ -122,7 +122,7 @@ function RouteComponent() {
               {(players as any[]).map((row: any) => (
                 <tr
                   key={`${row.place}-${row.playerName}`}
-                  className="border-b border-gray-100"
+                  className="border-b border-border"
                 >
                   <td className="px-2 py-1.5">{row.place}</td>
                   <td className="px-2 py-1.5">
@@ -175,7 +175,7 @@ function RouteComponent() {
                         alt={`${winner.playerName} — ${cat.name}`}
                         className="w-[150px] rounded-sm"
                       />
-                      <p className="mt-1 text-center text-xs text-gray-500">
+                      <p className="mt-1 text-center text-xs text-muted-foreground">
                         {positionLabel(winner.position, cat.winners.length)} —{" "}
                         {winner.playerId != null ? (
                           <span onClick={(e) => e.stopPropagation()}>

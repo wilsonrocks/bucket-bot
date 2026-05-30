@@ -25,7 +25,7 @@ function WinnerCard({ winner, onClick }: { winner: PaintingItem; onClick: () => 
   const clickable = !!winner.imageKey
   return (
     <div
-      className={`grid grid-rows-subgrid row-span-2 rounded-sm bg-white ${clickable ? 'cursor-pointer' : ''}`}
+      className={`grid grid-rows-subgrid row-span-2 rounded-sm bg-surface ${clickable ? 'cursor-pointer' : ''}`}
       onClick={clickable ? onClick : undefined}
     >
       <div className="flex items-end">
@@ -54,9 +54,9 @@ function WinnerCard({ winner, onClick }: { winner: PaintingItem; onClick: () => 
           )}
         </p>
         {(winner.model || winner.description) && (
-          <p className="line-clamp-1 text-xs text-gray-500">{winner.model ?? winner.description}</p>
+          <p className="line-clamp-1 text-xs text-muted-foreground">{winner.model ?? winner.description}</p>
         )}
-        <p className="line-clamp-1 text-xs text-gray-500">
+        <p className="line-clamp-1 text-xs text-muted-foreground">
           <span onClick={(e) => e.stopPropagation()}>
             <Link
               to="/event/$id"
@@ -67,7 +67,7 @@ function WinnerCard({ winner, onClick }: { winner: PaintingItem; onClick: () => 
             </Link>
           </span>
         </p>
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-muted-foreground">
           {winner.categoryName} — {positionLabel(winner.position, winner.totalWinners)}
         </p>
       </div>

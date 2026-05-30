@@ -5,7 +5,7 @@ A Discord bot + web dashboard for tracking Warhammer tournament rankings.
 ## Architecture
 
 - **Backend**: Node.js + TypeScript, Hono framework, OpenAPI/Zod, runs on a VPS
-- **Site** (`site/`): React 19 + TanStack Start (SSR), Mantine, direct DB access via Kysely — public-facing at `malifaux.uk`
+- **Site** (`site/`): React 19 + TanStack Start (SSR), Tailwind CSS v4, direct DB access via Kysely — public-facing at `malifaux.uk`
 - **Admin** (`admin/`): React 19 + Vite, TanStack Router/Query, Mantine — admin-only at `admin.malifaux.uk`
 - **Database**: PostgreSQL with PostGIS (Aiven in production, Docker locally)
 - **Bot**: discord.js, posts ranking updates to Discord channels

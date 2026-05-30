@@ -11,11 +11,11 @@ import z from 'zod'
 import { SITE_NAME, seo } from '#/helpers/seo'
 
 function RankChange({ change, newPlayer }: { change: number | null | undefined; newPlayer?: boolean }) {
-  if (newPlayer) return <span className="text-sm text-green-600">NEW</span>
-  if (change == null) return <span className="text-sm text-blue-600">RE</span>
-  if (change === 0) return <span className="text-sm text-gray-500">-</span>
-  if (change > 0) return <span className="text-sm text-green-600">↑{change}</span>
-  return <span className="text-sm text-red-600">↓{Math.abs(change)}</span>
+  if (newPlayer) return <span className="text-sm text-green-600 dark:text-green-400">NEW</span>
+  if (change == null) return <span className="text-sm text-blue-600 dark:text-blue-400">RE</span>
+  if (change === 0) return <span className="text-sm text-muted-foreground">-</span>
+  if (change > 0) return <span className="text-sm text-green-600 dark:text-green-400">↑{change}</span>
+  return <span className="text-sm text-red-600 dark:text-red-400">↓{Math.abs(change)}</span>
 }
 
 export const Route = createFileRoute('/rankings')({
@@ -56,7 +56,7 @@ function RouteComponent() {
     <div>
       <div className="mb-2 flex flex-wrap items-center gap-3">
         <select
-          className="w-[200px] rounded border border-gray-300 px-2 py-1 text-sm"
+          className="w-[200px] rounded border border-border px-2 py-1 text-sm"
           value={typeCode}
           onChange={(e) => navigate({ search: (prev) => ({ ...prev, typeCode: e.target.value || undefined }) })}
         >
@@ -73,8 +73,8 @@ function RouteComponent() {
         </Tabs.List>
         <Tabs.Panel value="table">
           <table className="min-w-full text-sm tabular-nums">
-            <thead className="sticky top-0 bg-white">
-              <tr className="border-b border-gray-200 text-left">
+            <thead className="sticky top-0 bg-surface">
+              <tr className="border-b border-border text-left">
                 <th className="whitespace-nowrap px-2 py-2 font-semibold">Rank</th>
                 <th className="whitespace-nowrap px-2 py-2 font-semibold">Change</th>
                 <th className="px-2 py-2 font-semibold">Player</th>
@@ -83,7 +83,7 @@ function RouteComponent() {
             </thead>
             <tbody>
               {rankings.map((player) => (
-                <tr key={player.id} className="border-b border-gray-100">
+                <tr key={player.id} className="border-b border-border">
                   <td className="whitespace-nowrap px-2 py-1.5">{player.rank}</td>
                   <td className="whitespace-nowrap px-2 py-1.5">
                     <RankChange change={player.rank_change} newPlayer={player.new_player} />
@@ -121,7 +121,7 @@ function RouteComponent() {
           </table>
         </Tabs.Panel>
         <Tabs.Panel value="animation">
-          <p className="mt-1 text-sm text-gray-500">Showing top 16 players</p>
+          <p className="mt-1 text-sm text-muted-foreground">Showing top 16 players</p>
           <PlayersBarRace data={playersOverTime as any} />
         </Tabs.Panel>
       </Tabs>

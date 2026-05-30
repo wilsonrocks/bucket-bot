@@ -16,14 +16,14 @@ export function TopPlayersCard({ data }: { data: RankingEntry[] }) {
   const top5 = data.slice(0, 5)
 
   return (
-    <div className="flex h-full min-h-[280px] flex-col rounded-lg border border-gray-200 bg-white p-4">
+    <div className="flex h-full min-h-[280px] flex-col rounded-lg border border-border bg-surface p-4">
       <h3 className="mb-2 text-lg font-semibold">Top Players</h3>
       <div className="flex-1">
         <table className="min-w-full text-sm">
           <tbody>
             {top5.map((player, i) => (
-              <tr key={player.player_id} className="border-b border-gray-100 last:border-0">
-                <td className="w-8 py-1.5 text-gray-500">#{i + 1}</td>
+              <tr key={player.player_id} className="border-b border-border last:border-0">
+                <td className="w-8 py-1.5 text-muted-foreground">#{i + 1}</td>
                 <td className="py-1.5">
                   <div className="flex items-center gap-2 whitespace-nowrap">
                     {player.player_id != null ? (
@@ -54,7 +54,7 @@ export function TopPlayersCard({ data }: { data: RankingEntry[] }) {
                     )}
                   </div>
                 </td>
-                <td className="py-1.5 text-right text-gray-500">
+                <td className="py-1.5 text-right text-muted-foreground">
                   {(player.total_points ?? 0).toFixed(0)} pts
                 </td>
               </tr>

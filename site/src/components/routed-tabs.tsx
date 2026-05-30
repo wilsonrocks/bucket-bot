@@ -40,7 +40,7 @@ type ListProps = {
 function List({ children, className = '', mb }: ListProps) {
   const mbClass = mb === 'md' ? 'mb-4' : mb === 'sm' ? 'mb-2' : mb === 'lg' ? 'mb-6' : ''
   return (
-    <RadixTabs.List className={`flex border-b border-gray-200 ${mbClass} ${className}`}>
+    <RadixTabs.List className={`flex border-b border-border ${mbClass} ${className}`}>
       {children}
     </RadixTabs.List>
   )
@@ -56,7 +56,7 @@ function Tab({ value, children, className = '' }: TabProps) {
   return (
     <RadixTabs.Trigger
       value={value}
-      className={`-mb-px border-b-2 border-transparent px-4 py-2 text-sm text-gray-600 hover:text-gray-900 data-[state=active]:border-blue-600 data-[state=active]:text-blue-700 data-[state=active]:font-medium ${className}`}
+      className={`-mb-px border-b-2 border-transparent px-4 py-2 text-sm text-muted-foreground hover:text-foreground data-[state=active]:border-blue-600 data-[state=active]:text-blue-700 dark:data-[state=active]:border-blue-400 dark:data-[state=active]:text-blue-300 data-[state=active]:font-medium ${className}`}
     >
       {children}
     </RadixTabs.Trigger>

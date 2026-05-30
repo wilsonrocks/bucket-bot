@@ -12,7 +12,7 @@ type RecentPainting = {
 
 export function PaintingHighlightCard({ data }: { data: RecentPainting }) {
   return (
-    <div className="flex h-full min-h-[320px] flex-col rounded-lg border border-gray-200 bg-white p-4">
+    <div className="flex h-full min-h-[320px] flex-col rounded-lg border border-border bg-surface p-4">
       <h3 className="mb-2 text-lg font-semibold">Latest Best Painted</h3>
       <div className="flex-1">
         {data ? (
@@ -39,8 +39,8 @@ export function PaintingHighlightCard({ data }: { data: RecentPainting }) {
                 data.playerName
               )}
             </p>
-            {data.model && <p className="text-sm text-gray-500">{data.model}</p>}
-            <p className="mt-1 text-sm text-gray-500">
+            {data.model && <p className="text-sm text-muted-foreground">{data.model}</p>}
+            <p className="mt-1 text-sm text-muted-foreground">
               <Link
                 to="/event/$id"
                 params={{ id: data.tourneyId }}

@@ -38,7 +38,7 @@ export function FactionCard({ data }: { data: FactionRanking[] }) {
     .padding(0.15)
 
   return (
-    <div className="flex h-full min-h-[280px] flex-col rounded-lg border border-gray-200 bg-white p-4">
+    <div className="flex h-full min-h-[280px] flex-col rounded-lg border border-border bg-surface p-4">
       <h3 className="mb-2 text-lg font-semibold">Faction Rankings</h3>
       <div className="flex-1" ref={containerRef}>
         <svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`}>
