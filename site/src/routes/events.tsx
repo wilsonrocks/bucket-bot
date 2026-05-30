@@ -30,7 +30,7 @@ function RouteComponent() {
   return (
     <table className="min-w-full text-sm">
       <thead>
-        <tr className="border-b border-gray-200 text-left">
+        <tr className="border-b border-border text-left">
           <th className="px-2 py-2 font-semibold">Name</th>
           <th className="px-2 py-2 font-semibold">Date</th>
           <th className="px-2 py-2 font-semibold">Players</th>
@@ -39,7 +39,7 @@ function RouteComponent() {
       </thead>
       <tbody>
         {tourneys.map(({ id, name, date, players, tier_code }) => (
-          <tr key={id} className="border-b border-gray-100">
+          <tr key={id} className="border-b border-border">
             <td className="px-2 py-1.5">
               <Link
                 to="/event/$id"
@@ -57,7 +57,7 @@ function RouteComponent() {
               {tier_code && tier_code !== "EVENT" ? (
                 (tierNameByCode.get(tier_code) ?? tier_code)
               ) : (
-                <span className="text-gray-500">—</span>
+                <span className="text-muted-foreground">—</span>
               )}
             </td>
           </tr>

@@ -8,7 +8,7 @@ const StyledAnchor = React.forwardRef<HTMLAnchorElement, AnchorProps>(
   ({ className = '', ...props }, ref) => (
     <a
       ref={ref}
-      className={`text-blue-600 hover:underline ${className}`}
+      className={`text-blue-600 dark:text-blue-400 hover:underline ${className}`}
       {...props}
     />
   ),

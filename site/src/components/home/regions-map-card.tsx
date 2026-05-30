@@ -54,7 +54,7 @@ export function RegionsMapCard({ regions, geoJson }: { regions: RegionData[]; ge
   const countMap = new Map<string, number>(regions.map((r) => [r.geojson_name, r.event_count]))
 
   return (
-    <div className="flex h-full min-h-[280px] flex-col rounded-lg border border-gray-200 bg-white p-4">
+    <div className="flex h-full min-h-[280px] flex-col rounded-lg border border-border bg-surface p-4">
       <h3 className="mb-2 text-lg font-semibold">Regions</h3>
       <div className="flex-1">
         <Link to="/regions" search={{}}>

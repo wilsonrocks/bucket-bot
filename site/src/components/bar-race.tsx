@@ -314,7 +314,7 @@ function BarRaceInner<T extends BarDatum>({
       .attr('x', -6)
       .attr('y', yScale.bandwidth() / 2)
       .attr('text-anchor', 'end')
-      .attr('fill', 'black')
+      .attr('fill', 'currentColor')
       .text((d) => d.rank)
 
     merged
@@ -346,14 +346,14 @@ function BarRaceInner<T extends BarDatum>({
         <button
           type="button"
           onClick={handleReset}
-          className="inline-flex h-8 w-8 items-center justify-center rounded hover:bg-gray-100"
+          className="inline-flex h-8 w-8 items-center justify-center rounded hover:bg-muted"
         >
           <SkipBack size={16} />
         </button>
         <button
           type="button"
           onClick={handlePlayPause}
-          className="inline-flex h-8 w-8 items-center justify-center rounded hover:bg-gray-100"
+          className="inline-flex h-8 w-8 items-center justify-center rounded hover:bg-muted"
         >
           {isPlaying ? <Pause size={16} /> : <Play size={16} />}
         </button>

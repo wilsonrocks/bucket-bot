@@ -127,7 +127,7 @@ function RouteComponent() {
         <Tabs.Panel value="events">
           <table className="min-w-full text-sm tabular-nums">
             <thead>
-              <tr className="border-b border-gray-200 text-left">
+              <tr className="border-b border-border text-left">
                 <th className="px-2 py-2 font-semibold">Event</th>
                 <th className="px-2 py-2 font-semibold">Points</th>
                 <th className="px-2 py-2 font-semibold">Place</th>
@@ -137,7 +137,7 @@ function RouteComponent() {
             </thead>
             <tbody>
               {(tourneys as any[]).map((t: any) => (
-                <tr key={t.tourneyId} className="border-b border-gray-100">
+                <tr key={t.tourneyId} className="border-b border-border">
                   <td className="px-2 py-1.5">
                     <Link to="/event/$id" params={{ id: t.tourneyId }} search={{ tab: undefined, painting: undefined }}>
                       {t.tourneyName}
@@ -157,7 +157,7 @@ function RouteComponent() {
 
         <Tabs.Panel value="rankings">
           <select
-            className="w-[200px] rounded border border-gray-300 px-2 py-1 text-sm"
+            className="w-[200px] rounded border border-border px-2 py-1 text-sm"
             value={typeCode}
             onChange={(e) => navigate({ search: (prev) => ({ ...prev, typeCode: e.target.value || undefined }) })}
           >
@@ -178,7 +178,7 @@ function RouteComponent() {
           ) : (
             <table className="min-w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-200 text-left">
+                <tr className="border-b border-border text-left">
                   <th className="px-2 py-2 font-semibold">Team</th>
                   <th className="px-2 py-2 font-semibold">Joined</th>
                   <th className="px-2 py-2 font-semibold">Left</th>
@@ -187,7 +187,7 @@ function RouteComponent() {
               </thead>
               <tbody>
                 {(teams as any[]).map((m: any) => (
-                  <tr key={m.membership_id ?? m.team_id} className="border-b border-gray-100">
+                  <tr key={m.membership_id ?? m.team_id} className="border-b border-border">
                     <td className="px-2 py-1.5">
                       <Link to="/team/$id" params={{ id: String(m.team_id) }} search={{ tab: undefined }}>
                         {m.team_name}
@@ -197,7 +197,7 @@ function RouteComponent() {
                     <td className="px-2 py-1.5">{m.left_date ? formatDate(new Date(m.left_date), 'd MMMM yyyy') : 'Current'}</td>
                     <td className="px-2 py-1.5">
                       {m.is_captain && (
-                        <span className="inline-flex rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium">
+                        <span className="inline-flex rounded-full bg-muted px-2 py-0.5 text-xs font-medium">
                           Captain
                         </span>
                       )}
@@ -212,7 +212,7 @@ function RouteComponent() {
         <Tabs.Panel value="painting">
           <table className="min-w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-200 text-left">
+              <tr className="border-b border-border text-left">
                 <th className="px-2 py-2 font-semibold" />
                 <th className="px-2 py-2 font-semibold">Event</th>
                 <th className="px-2 py-2 font-semibold">Category</th>
@@ -222,7 +222,7 @@ function RouteComponent() {
             </thead>
             <tbody>
               {wins.map((w: any) => (
-                <tr key={w.id} className="border-b border-gray-100">
+                <tr key={w.id} className="border-b border-border">
                   <td className="px-2 py-1.5">
                     {w.imageKey ? (
                       <img

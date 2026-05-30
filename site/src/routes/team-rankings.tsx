@@ -10,11 +10,11 @@ import z from 'zod'
 import { SITE_NAME, seo } from '#/helpers/seo'
 
 function RankChange({ change, isNew }: { change: number | null | undefined; isNew?: boolean }) {
-  if (isNew) return <span className="text-sm text-green-600">NEW</span>
-  if (change == null) return <span className="text-sm text-blue-600">RE</span>
-  if (change === 0) return <span className="text-sm text-gray-500">-</span>
-  if (change > 0) return <span className="text-sm text-green-600">↑{change}</span>
-  return <span className="text-sm text-red-600">↓{Math.abs(change)}</span>
+  if (isNew) return <span className="text-sm text-green-600 dark:text-green-400">NEW</span>
+  if (change == null) return <span className="text-sm text-blue-600 dark:text-blue-400">RE</span>
+  if (change === 0) return <span className="text-sm text-muted-foreground">-</span>
+  if (change > 0) return <span className="text-sm text-green-600 dark:text-green-400">↑{change}</span>
+  return <span className="text-sm text-red-600 dark:text-red-400">↓{Math.abs(change)}</span>
 }
 
 export const Route = createFileRoute('/team-rankings')({
@@ -53,7 +53,7 @@ function RouteComponent() {
     <div>
       <div className="mb-2 flex flex-wrap items-center gap-3">
         <select
-          className="w-[200px] rounded border border-gray-300 px-2 py-1 text-sm"
+          className="w-[200px] rounded border border-border px-2 py-1 text-sm"
           value={typeCode}
           onChange={(e) => navigate({ search: (prev) => ({ ...prev, typeCode: e.target.value || undefined }) })}
         >
@@ -69,7 +69,7 @@ function RouteComponent() {
           <Tabs.Tab value="animation">Animation</Tabs.Tab>
         </Tabs.List>
         <Tabs.Panel value="table">
-          <p className="mb-2 text-sm text-gray-500">
+          <p className="mb-2 text-sm text-muted-foreground">
             Team ranking points are calculated as the sum of the ranking points of the top five players in the team.
           </p>
           <div
@@ -84,8 +84,8 @@ function RouteComponent() {
             }
           >
             <table className="min-w-full text-sm tabular-nums">
-              <thead className="sticky top-0 bg-white">
-                <tr className="border-b border-gray-200 text-left">
+              <thead className="sticky top-0 bg-surface">
+                <tr className="border-b border-border text-left">
                   <th className="whitespace-nowrap px-2 py-2 font-semibold">Rank</th>
                   <th className="whitespace-nowrap px-2 py-2 font-semibold">Change</th>
                   <th className="px-2 py-2 font-semibold">Logo</th>
@@ -97,7 +97,7 @@ function RouteComponent() {
               </thead>
               <tbody>
                 {(rankings as any[]).map((team: any) => (
-                  <tr key={team.team_id} className="border-b border-gray-100">
+                  <tr key={team.team_id} className="border-b border-border">
                     <td className="whitespace-nowrap px-2 py-1.5">{team.rank}</td>
                     <td className="whitespace-nowrap px-2 py-1.5">
                       <RankChange change={team.rank_change} isNew={team.new_team} />

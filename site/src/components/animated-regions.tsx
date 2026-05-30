@@ -259,7 +259,7 @@ export function AnimatedRegions({
           type="button"
           onClick={handleReset}
           disabled={!canAnimate}
-          className="inline-flex h-8 w-8 items-center justify-center rounded hover:bg-gray-100 disabled:opacity-40"
+          className="inline-flex h-8 w-8 items-center justify-center rounded hover:bg-muted disabled:opacity-40"
         >
           <SkipBack size={16} />
         </button>
@@ -267,7 +267,7 @@ export function AnimatedRegions({
           type="button"
           onClick={handlePlayPause}
           disabled={!canAnimate}
-          className="inline-flex h-8 w-8 items-center justify-center rounded hover:bg-gray-100 disabled:opacity-40"
+          className="inline-flex h-8 w-8 items-center justify-center rounded hover:bg-muted disabled:opacity-40"
         >
           {isPlaying ? <Pause size={16} /> : <Play size={16} />}
         </button>

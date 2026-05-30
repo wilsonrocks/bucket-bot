@@ -20,7 +20,7 @@ type RecentEvent = {
 function PlayerRow({ player }: { player: Player }) {
   return (
     <p className="text-sm">
-      <span className="text-gray-500">#{player.place} </span>
+      <span className="text-muted-foreground">#{player.place} </span>
       {player.playerId != null ? (
         <Link
           to="/player/$id"
@@ -32,7 +32,7 @@ function PlayerRow({ player }: { player: Player }) {
       ) : (
         player.playerName
       )}
-      <span className="text-gray-500"> · {player.factionName}</span>
+      <span className="text-muted-foreground"> · {player.factionName}</span>
     </p>
   )
 }
@@ -44,7 +44,7 @@ export function RecentEventCard({ data }: { data: RecentEvent }) {
   const spoon = data.players.length > 3 ? data.players[data.players.length - 1] : null
 
   return (
-    <div className="flex h-full min-h-[280px] flex-col rounded-lg border border-gray-200 bg-white p-4">
+    <div className="flex h-full min-h-[280px] flex-col rounded-lg border border-border bg-surface p-4">
       <h3 className="mb-2 text-lg font-semibold">Latest Event</h3>
       <div className="flex-1">
         <Link
@@ -56,7 +56,7 @@ export function RecentEventCard({ data }: { data: RecentEvent }) {
           {data.name}
         </Link>
         {data.date && (
-          <p className="mb-2 text-sm text-gray-500">
+          <p className="mb-2 text-sm text-muted-foreground">
             {formatDate(new Date(data.date), 'd MMM yyyy')}
             {data.venue ? ` · ${data.venue}` : ''}
           </p>
@@ -67,8 +67,8 @@ export function RecentEventCard({ data }: { data: RecentEvent }) {
           ))}
           {spoon && (
             <>
-              <hr className="my-1 border-gray-200" />
-              <p className="text-xs text-gray-500">Wooden spoon</p>
+              <hr className="my-1 border-border" />
+              <p className="text-xs text-muted-foreground">Wooden spoon</p>
               <PlayerRow player={spoon} />
             </>
           )}

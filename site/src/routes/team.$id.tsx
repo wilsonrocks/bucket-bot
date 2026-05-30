@@ -81,7 +81,7 @@ function RouteComponent() {
       )}
       <table className="mt-4 min-w-full text-sm tabular-nums">
         <thead>
-          <tr className="border-b border-gray-200 text-left">
+          <tr className="border-b border-border text-left">
             <th className="px-2 py-2 font-semibold">Player</th>
             <th className="px-2 py-2 font-semibold">Rolling Year Points</th>
             <th className="px-2 py-2 font-semibold" />
@@ -89,7 +89,7 @@ function RouteComponent() {
         </thead>
         <tbody>
           {(team.members as any[]).map((member: any) => (
-            <tr key={member.membership_id} className="border-b border-gray-100">
+            <tr key={member.membership_id} className="border-b border-border">
               <td className="px-2 py-1.5">
                 <Link
                   to="/player/$id"
@@ -104,7 +104,7 @@ function RouteComponent() {
               </td>
               <td className="px-2 py-1.5">
                 {member.is_captain && (
-                  <span className="inline-flex rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-800">
+                  <span className="inline-flex rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300">
                     Captain
                   </span>
                 )}

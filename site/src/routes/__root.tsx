@@ -26,6 +26,10 @@ declare global {
 import appCss from "../styles.css?url";
 import logoUrl from "#/assets/bucket-bot-logo.png?inline";
 import { DEFAULT_OG_IMAGE, SITE_NAME, SITE_URL, jsonLd, seo } from "#/helpers/seo";
+import { ThemeProvider } from "#/theme/theme-provider";
+import { ThemeToggle } from "#/components/theme-toggle";
+import { NO_FLASH_SCRIPT } from "#/theme/theme";
+import { getThemeCookie } from "#/theme/theme.server";
 
 const rootWebsiteJsonLd = jsonLd({
   "@context": "https://schema.org",
@@ -43,6 +47,7 @@ const rootOrgJsonLd = jsonLd({
 });
 
 export const Route = createRootRoute({
+  loader: () => getThemeCookie(),
   head: () => {
     const base = seo({
       title: SITE_NAME,
@@ -67,9 +72,11 @@ export const Route = createRootRoute({
 });
 
 function RootDocument({ children }: { children: React.ReactNode }) {
+  const theme = Route.useLoaderData();
   return (
-    <html lang="en">
+    <html lang="en" className={theme === "dark" ? "dark" : undefined} suppressHydrationWarning>
       <head>
+        <script dangerouslySetInnerHTML={{ __html: NO_FLASH_SCRIPT }} />
         <HeadContent />
         {import.meta.env.VITE_UMAMI_WEBSITE_ID && (
           <script
@@ -88,6 +95,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 }
 
 function SiteLayout() {
+  const theme = Route.useLoaderData();
   const [navOpen, setNavOpen] = useState(false);
   const isInitialMount = useRef(true);
 
@@ -105,12 +113,13 @@ function SiteLayout() {
   const title = matches.at(-1)?.staticData.title;
 
   return (
+    <ThemeProvider initialTheme={theme}>
     <div className="flex min-h-screen flex-col">
-      <header className="sticky top-0 z-30 flex h-[60px] items-center gap-3 border-b border-gray-200 bg-white px-4 md:h-[70px] lg:h-[80px]">
+      <header className="sticky top-0 z-30 flex h-[60px] items-center gap-3 border-b border-border bg-surface px-4 md:h-[70px] lg:h-[80px]">
         <button
           type="button"
           onClick={() => setNavOpen((o) => !o)}
-          className="inline-flex h-9 w-9 items-center justify-center rounded hover:bg-gray-100 sm:hidden"
+          className="inline-flex h-9 w-9 items-center justify-center rounded hover:bg-muted sm:hidden"
           aria-label="Toggle navigation"
         >
           {navOpen ? <X size={20} /> : <Menu size={20} />}
@@ -125,20 +134,23 @@ function SiteLayout() {
           />
         </Link>
         {title && <span className="truncate font-semibold">{title}</span>}
-        <Link
-          to="/"
-          search={{}}
-          className="ml-auto hidden font-bold text-inherit no-underline sm:inline"
-        >
-          UK Malifaux Community
-        </Link>
+        <div className="ml-auto flex items-center gap-3">
+          <Link
+            to="/"
+            search={{}}
+            className="hidden font-bold text-inherit no-underline sm:inline"
+          >
+            UK Malifaux Community
+          </Link>
+          <ThemeToggle />
+        </div>
       </header>
 
       <div className="flex flex-1">
         <aside
           className={`${
             navOpen ? "block" : "hidden"
-          } fixed left-0 inset-y-0 top-[60px] z-20 w-[200px] border-r border-gray-200 bg-white p-4 sm:static sm:left-auto sm:block sm:w-[250px] sm:top-0 lg:w-[300px]`}
+          } fixed left-0 inset-y-0 top-[60px] z-20 w-[200px] border-r border-border bg-surface p-4 sm:static sm:left-auto sm:block sm:w-[250px] sm:top-0 lg:w-[300px]`}
         >
           <SiteNavbar />
         </aside>
@@ -155,5 +167,6 @@ function SiteLayout() {
         </main>
       </div>
     </div>
+    </ThemeProvider>
   );
 }
