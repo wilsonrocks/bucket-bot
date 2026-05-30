@@ -27,7 +27,7 @@ const s3 = new S3Client({
 
 const MAX_BYTES = 10 * 1024 * 1024;
 // Responsive width ladder. Keep in sync with ASSET_WIDTHS in site/src/components/image.tsx.
-const IMAGE_WIDTHS = [150, 400, 800, 1200] as const;
+const IMAGE_WIDTHS = [35, 150, 400, 800, 1200] as const;
 // Keys are content-hashed (sha256 of the upload), so a changed image always gets a
 // new URL — the variants are safe to cache immutably for the browser/CloudFront.
 const IMMUTABLE_CACHE_CONTROL = "public, max-age=31536000, immutable";

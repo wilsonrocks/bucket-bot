@@ -10,7 +10,7 @@
 const ASSETS_URL = import.meta.env.VITE_ASSETS_URL
 
 // Keep in sync with IMAGE_WIDTHS in backend/routes/v1/v1-routes/upload.ts.
-const ASSET_WIDTHS = [150, 400, 800, 1200] as const
+const ASSET_WIDTHS = [35, 150, 400, 800, 1200] as const
 
 /** Build a `srcset` value listing every pre-resized width variant for a key. */
 export function buildSrcSet(imageKey: string): string {

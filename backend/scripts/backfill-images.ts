@@ -24,7 +24,7 @@ const s3 = new S3Client({
 });
 
 // Keep in sync with IMAGE_WIDTHS in routes/v1/v1-routes/upload.ts.
-const IMAGE_WIDTHS = [150, 400, 800, 1200] as const;
+const IMAGE_WIDTHS = [35, 150, 400, 800, 1200] as const;
 
 async function exists(key: string): Promise<boolean> {
   try {
