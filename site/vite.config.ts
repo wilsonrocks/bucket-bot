@@ -21,6 +21,21 @@ const injectedHeadScriptsShim: Plugin = {
 
 const config = defineConfig({
   resolve: { tsconfigPaths: true },
+  build: {
+    rollupOptions: {
+      output: {
+        // Keep the ~98KB UK region geometry in its own chunk so the homepage (which
+        // only reaches it via a dynamic import in RegionsMapCard) never loads it
+        // eagerly. Without this, the static import in the /regions route hoists it into
+        // the shared vendor chunk that every page downloads up front.
+        manualChunks(id) {
+          if (id.includes('/data/ukRegions') || id.includes('/data/uk-regions-geo')) {
+            return 'uk-regions-geo'
+          }
+        },
+      },
+    },
+  },
   plugins: [
     injectedHeadScriptsShim,
     devtools(),

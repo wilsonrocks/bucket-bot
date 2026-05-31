@@ -2,20 +2,10 @@ import { Pause, Play, SkipBack } from 'lucide-react'
 import * as d3 from 'd3'
 import { timeFormat } from 'd3-time-format'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import type { UkRegionFeature } from '#/data/uk-regions-geo'
 type RegionSnapshot = {
   date: string
   regions: Array<{ region_id: number; geojson_name: string; event_count: number }>
-}
-
-type GeoJsonFeature = {
-  type: string
-  geometry: object
-  properties: { rgn19nm: string; [key: string]: unknown }
-}
-
-type GeoJsonCollection = {
-  type: string
-  features: GeoJsonFeature[]
 }
 
 function catmullRom(p0: number, p1: number, p2: number, p3: number, t: number) {
@@ -52,16 +42,26 @@ const formatDate = timeFormat('%d %b %Y')
 
 type AnimatedRegionsProps = {
   snapshots: RegionSnapshot[]
-  geoJson: GeoJsonCollection
   duration?: number
 }
 
 export function AnimatedRegions({
   snapshots,
-  geoJson,
   duration = 750,
 }: AnimatedRegionsProps) {
   const svgRef = useRef<SVGSVGElement | null>(null)
+  // The ~98KB region geometry is loaded on the client only, keeping it out of the
+  // /regions SSR payload and the eagerly-loaded JS bundle.
+  const [features, setFeatures] = useState<UkRegionFeature[] | null>(null)
+  useEffect(() => {
+    let cancelled = false
+    void import('#/data/uk-regions-geo').then((m) => {
+      if (!cancelled) setFeatures(m.ukRegionFeatures)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [])
   const hoveredNameRef = useRef<((name: string | null) => void) | null>(null)
   const [hoveredRegion, setHoveredRegion] = useState<string | null>(null)
   const [mousePos, setMousePos] = useState<{ x: number; y: number } | null>(
@@ -202,9 +202,9 @@ export function AnimatedRegions({
     return formatDate(new Date(interpTime))
   }, [frame, t, snapshots])
 
-  // Set up SVG paths (runs once when geoJson loads)
+  // Set up SVG paths (runs once the geometry has loaded)
   useEffect(() => {
-    if (!geoJson || !svgRef.current) return
+    if (!features || !svgRef.current) return
 
     const ukBbox = {
       type: 'Feature' as const,
@@ -222,8 +222,8 @@ export function AnimatedRegions({
 
     const svg = d3.select(svgRef.current)
     svg
-      .selectAll<SVGPathElement, GeoJsonFeature>('path')
-      .data(geoJson.features)
+      .selectAll<SVGPathElement, UkRegionFeature>('path')
+      .data(features)
       .join('path')
       .attr('d', (d) => pathGen(d as d3.GeoPermissibleObjects) ?? '')
       .attr('stroke', '#fff')
@@ -234,13 +234,13 @@ export function AnimatedRegions({
       .on('mouseleave', () => {
         hoveredNameRef.current?.(null)
       })
-  }, [geoJson, width, height])
+  }, [features, width, height])
 
   // Update fills on each animation tick
   useEffect(() => {
     if (!svgRef.current) return
     d3.select(svgRef.current)
-      .selectAll<SVGPathElement, GeoJsonFeature>('path')
+      .selectAll<SVGPathElement, UkRegionFeature>('path')
       .attr('fill', (d) => getColor(countMap.get(d.properties.rgn19nm) ?? 0))
   }, [countMap])
 

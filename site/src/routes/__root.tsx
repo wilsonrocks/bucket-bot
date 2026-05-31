@@ -46,6 +46,16 @@ const rootOrgJsonLd = jsonLd({
   logo: DEFAULT_OG_IMAGE,
 });
 
+// Origin of the CloudFront asset host, for connection-warming hints. Guarded so a
+// missing/invalid VITE_ASSETS_URL degrades to no hint rather than crashing SSR.
+function assetOrigin(): string | null {
+  try {
+    return new URL(import.meta.env.VITE_ASSETS_URL).origin;
+  } catch {
+    return null;
+  }
+}
+
 export const Route = createRootRoute({
   loader: () => getThemeCookie(),
   head: () => {
@@ -53,6 +63,7 @@ export const Route = createRootRoute({
       title: SITE_NAME,
       path: "/",
     });
+    const origin = assetOrigin();
     return {
       meta: [
         { charSet: "utf-8" },
@@ -62,6 +73,14 @@ export const Route = createRootRoute({
       links: [
         { rel: "stylesheet", href: appCss },
         { rel: "icon", type: "image/png", href: logoUrl },
+        // Warm the connection to the CloudFront asset origin so the LCP image
+        // (best-painted photo on the homepage) skips DNS+TLS+TCP on its critical path.
+        ...(origin
+          ? [
+              { rel: "preconnect", href: origin, crossOrigin: "anonymous" as const },
+              { rel: "dns-prefetch", href: origin },
+            ]
+          : []),
         ...base.links,
       ],
       scripts: [rootOrgJsonLd, rootWebsiteJsonLd],

@@ -25,6 +25,8 @@
     "@tanstack/react-start": "latest",
     "@tanstack/router-plugin": "^1.132.0",
     "d3": "^7.9.0",
+    "d3-geo": "^3.1.1",
+    "d3-selection": "^3.0.0",
     "date-fns": "^4.1.0",
     "kysely": "^0.28.8",
     "lucide-react": "^0.545.0",
