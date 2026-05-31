@@ -24,7 +24,7 @@ declare global {
 }
 
 import appCss from "../styles.css?url";
-import logoUrl from "#/assets/bucket-bot-logo.png";
+import logoUrl from "#/assets/bucket-bot-logo.webp";
 import { DEFAULT_OG_IMAGE, SITE_NAME, SITE_URL, jsonLd, seo } from "#/helpers/seo";
 import { ThemeProvider } from "#/theme/theme-provider";
 import { ThemeToggle } from "#/components/theme-toggle";
@@ -72,7 +72,7 @@ export const Route = createRootRoute({
       ],
       links: [
         { rel: "stylesheet", href: appCss },
-        { rel: "icon", type: "image/png", href: logoUrl },
+        { rel: "icon", type: "image/webp", href: logoUrl },
         // Warm the connection to the CloudFront asset origin so the LCP image
         // (best-painted photo on the homepage) skips DNS+TLS+TCP on its critical path.
         ...(origin
