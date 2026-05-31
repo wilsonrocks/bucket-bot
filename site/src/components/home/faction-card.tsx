@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef, useState } from 'react'
-import { scaleBand, scaleLinear } from 'd3'
+import { scaleBand, scaleLinear } from 'd3-scale'
 import { Link } from '#/components/link'
 
 type FactionRanking = {

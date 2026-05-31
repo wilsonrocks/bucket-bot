@@ -6,7 +6,7 @@ import { createFileRoute, redirect } from '@tanstack/react-router'
 import { Link } from '#/components/link'
 import { Tabs } from '#/components/routed-tabs'
 import { PlayersBarRace } from '#/components/animated-players'
-import z from 'zod'
+import { optionalString } from '#/helpers/search-params'
 import { SITE_NAME, seo } from '#/helpers/seo'
 
 function RankChange({ change, newPlayer }: { change: number | null | undefined; newPlayer?: boolean }) {
@@ -18,7 +18,9 @@ function RankChange({ change, newPlayer }: { change: number | null | undefined; 
 }
 
 export const Route = createFileRoute('/rankings')({
-  validateSearch: z.object({ typeCode: z.string().optional().catch('') }),
+  validateSearch: (search: Record<string, unknown>) => ({
+    typeCode: optionalString(search.typeCode),
+  }),
   staticData: { title: 'Rankings' },
   beforeLoad: (context) => {
     if (!context.search.typeCode)

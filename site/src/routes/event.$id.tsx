@@ -1,6 +1,6 @@
 import { fetchTourney } from "#/queries";
 import { createFileRoute, notFound } from "@tanstack/react-router";
-import z from "zod";
+import { enumParam, optionalNumber } from "#/helpers/search-params";
 import { Link } from "#/components/link";
 import { Tabs } from "#/components/routed-tabs";
 import {
@@ -12,10 +12,13 @@ import { SITE_NAME, SITE_URL, absoluteUrl, jsonLd, seo } from "#/helpers/seo";
 import type { SportsEvent, WithContext } from "schema-dts";
 
 export const Route = createFileRoute("/event/$id")({
-  params: z.object({ id: z.coerce.number() }),
-  validateSearch: z.object({
-    tab: z.enum(["results", "best-painted"]).optional(),
-    painting: z.coerce.number().optional(),
+  params: {
+    parse: (raw: Record<string, string>) => ({ id: Number(raw.id) }),
+    stringify: (params: { id: number }) => ({ id: String(params.id) }),
+  },
+  validateSearch: (search: Record<string, unknown>) => ({
+    tab: enumParam(search.tab, ["results", "best-painted"] as const),
+    painting: optionalNumber(search.painting),
   }),
   loader: async ({ params }) => {
     try {

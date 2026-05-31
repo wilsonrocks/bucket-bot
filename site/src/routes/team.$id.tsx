@@ -2,7 +2,6 @@ import { fetchTeam } from '#/queries'
 import { createFileRoute, notFound } from '@tanstack/react-router'
 import { Link } from '#/components/link'
 import { Image } from '#/components/image'
-import z from 'zod'
 import { SITE_NAME, SITE_URL, absoluteUrl, jsonLd, seo } from '#/helpers/seo'
 import type { SportsTeam, WithContext } from 'schema-dts'
 
@@ -12,7 +11,6 @@ function teamLogoUrl(imageKey: string | null | undefined): string | undefined {
 }
 
 export const Route = createFileRoute('/team/$id')({
-  params: z.object({ id: z.string() }),
   staticData: { title: 'Team' },
   loader: async ({ params }) => {
     const team = await fetchTeam({ data: { id: Number(params.id) } })

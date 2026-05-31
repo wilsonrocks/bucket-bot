@@ -22,6 +22,9 @@ const injectedHeadScriptsShim: Plugin = {
 const config = defineConfig({
   resolve: { tsconfigPaths: true },
   build: {
+    // Emit referenced source maps so Lighthouse's "Missing source maps for large
+    // first-party JavaScript" diagnostic clears and bundle bytes can be attributed.
+    sourcemap: true,
     rollupOptions: {
       output: {
         // Keep the ~98KB UK region geometry in its own chunk so the homepage (which

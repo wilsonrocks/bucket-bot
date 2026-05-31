@@ -1,6 +1,8 @@
 import { useMediaQuery } from '#/helpers/use-media-query'
 import { Pause, Play, SkipBack } from 'lucide-react'
-import { max, scaleBand, scaleLinear, select } from 'd3'
+import { max } from 'd3-array'
+import { scaleBand, scaleLinear } from 'd3-scale'
+import { select } from 'd3-selection'
 import { timeFormat } from 'd3-time-format'
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 

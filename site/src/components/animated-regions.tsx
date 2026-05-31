@@ -1,5 +1,7 @@
 import { Pause, Play, SkipBack } from 'lucide-react'
-import * as d3 from 'd3'
+import { interpolateRgb } from 'd3-interpolate'
+import { geoMercator, geoPath, type GeoPermissibleObjects } from 'd3-geo'
+import { select } from 'd3-selection'
 import { timeFormat } from 'd3-time-format'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { UkRegionFeature } from '#/data/uk-regions-geo'
@@ -35,7 +37,7 @@ function getColor(count: number): string {
   const upper = Math.min(lower + 1, 5)
   const frac = count % 1
   if (lower === upper || frac === 0) return COLORS[lower]
-  return d3.interpolateRgb(COLORS[lower], COLORS[upper])(frac)
+  return interpolateRgb(COLORS[lower], COLORS[upper])(frac)
 }
 
 const formatDate = timeFormat('%d %b %Y')
@@ -217,15 +219,15 @@ export function AnimatedRegions({
       },
       properties: {},
     }
-    const projection = d3.geoMercator().fitSize([width, height], ukBbox)
-    const pathGen = d3.geoPath().projection(projection)
+    const projection = geoMercator().fitSize([width, height], ukBbox)
+    const pathGen = geoPath().projection(projection)
 
-    const svg = d3.select(svgRef.current)
+    const svg = select(svgRef.current)
     svg
       .selectAll<SVGPathElement, UkRegionFeature>('path')
       .data(features)
       .join('path')
-      .attr('d', (d) => pathGen(d as d3.GeoPermissibleObjects) ?? '')
+      .attr('d', (d) => pathGen(d as GeoPermissibleObjects) ?? '')
       .attr('stroke', '#fff')
       .attr('stroke-width', 0.5)
       .on('mouseenter', (_event, d) => {
@@ -239,7 +241,7 @@ export function AnimatedRegions({
   // Update fills on each animation tick
   useEffect(() => {
     if (!svgRef.current) return
-    d3.select(svgRef.current)
+    select(svgRef.current)
       .selectAll<SVGPathElement, UkRegionFeature>('path')
       .attr('fill', (d) => getColor(countMap.get(d.properties.rgn19nm) ?? 0))
   }, [countMap])

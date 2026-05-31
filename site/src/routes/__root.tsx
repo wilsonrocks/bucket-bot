@@ -24,7 +24,7 @@ declare global {
 }
 
 import appCss from "../styles.css?url";
-import logoUrl from "#/assets/bucket-bot-logo.png?inline";
+import logoUrl from "#/assets/bucket-bot-logo.png";
 import { DEFAULT_OG_IMAGE, SITE_NAME, SITE_URL, jsonLd, seo } from "#/helpers/seo";
 import { ThemeProvider } from "#/theme/theme-provider";
 import { ThemeToggle } from "#/components/theme-toggle";

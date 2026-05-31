@@ -1,6 +1,6 @@
 import { fetchAllPainting } from '#/queries'
 import { createFileRoute } from '@tanstack/react-router'
-import z from 'zod'
+import { optionalNumber } from '#/helpers/search-params'
 import { Link } from '#/components/link'
 import { PaintingLightbox, positionLabel } from '#/components/painting-lightbox'
 import { Image } from '#/components/image'
@@ -81,7 +81,9 @@ function WinnerCard({ winner, onClick }: { winner: PaintingItem; onClick: () => 
 }
 
 export const Route = createFileRoute('/best-painted')({
-  validateSearch: z.object({ painting: z.coerce.number().optional() }),
+  validateSearch: (search: Record<string, unknown>) => ({
+    painting: optionalNumber(search.painting),
+  }),
   staticData: { title: 'Best Painted' },
   loader: () => fetchAllPainting(),
   head: () =>

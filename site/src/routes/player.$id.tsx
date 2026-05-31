@@ -7,7 +7,7 @@ import {
   fetchRankingTypes,
 } from '#/queries'
 import { createFileRoute, notFound } from '@tanstack/react-router'
-import z from 'zod'
+import { optionalNumber, optionalString } from '#/helpers/search-params'
 import { Link } from '#/components/link'
 import { Tabs } from '#/components/routed-tabs'
 import { PaintingLightbox, positionLabel } from '#/components/painting-lightbox'
@@ -18,11 +18,14 @@ import { SITE_NAME, SITE_URL, absoluteUrl, jsonLd, seo } from '#/helpers/seo'
 import type { Person, WithContext } from 'schema-dts'
 
 export const Route = createFileRoute('/player/$id')({
-  params: z.object({ id: z.coerce.number() }),
-  validateSearch: z.object({
-    typeCode: z.string().default('ROLLING_YEAR'),
-    tab: z.string().default('events'),
-    painting: z.coerce.number().optional(),
+  params: {
+    parse: (raw: Record<string, string>) => ({ id: Number(raw.id) }),
+    stringify: (params: { id: number }) => ({ id: String(params.id) }),
+  },
+  validateSearch: (search: Record<string, unknown>) => ({
+    typeCode: optionalString(search.typeCode),
+    tab: optionalString(search.tab),
+    painting: optionalNumber(search.painting),
   }),
   loader: async ({ params, location }) => {
     const searchParams = new URLSearchParams(location.search)
