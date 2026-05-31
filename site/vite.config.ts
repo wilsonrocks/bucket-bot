@@ -44,6 +44,11 @@ const config = defineConfig({
     devtools(),
     nitro({
       rollupConfig: { external: [/^@sentry\//] },
+      // Precompress hashed /assets/** at build so they're served gzip/brotli. Prod
+      // nginx gzips text/html but not the proxied CSS/JS assets, leaving the
+      // render-blocking stylesheet (~19KB) and JS bundles uncompressed. Nitro serves
+      // the precompressed variant via Accept-Encoding negotiation.
+      compressPublicAssets: { gzip: true, brotli: true },
       // Nitro already caches the content-hashed /assets/** bundles immutably. These
       // public/ files are not hashed, so use a shorter (mutable) TTL — long enough to
       // satisfy PageSpeed's cache-policy audit, short enough that swapping a logo or
