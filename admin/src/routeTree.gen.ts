@@ -23,6 +23,7 @@ import { Route as AppPlayersIndexRouteImport } from './routes/_app/players/index
 import { Route as AppImportIndexRouteImport } from './routes/_app/import/index'
 import { Route as AppEventsIndexRouteImport } from './routes/_app/events/index'
 import { Route as AppTeamsIdRouteImport } from './routes/_app/teams/$id'
+import { Route as AppRankingsRunsRouteImport } from './routes/_app/rankings/runs'
 import { Route as AppPlayersIdRouteImport } from './routes/_app/players/$id'
 import { Route as AppImportImportLongshanksRouteImport } from './routes/_app/import/import-longshanks'
 import { Route as AppImportImportBotRouteImport } from './routes/_app/import/import-bot'
@@ -97,6 +98,11 @@ const AppTeamsIdRoute = AppTeamsIdRouteImport.update({
   path: '/teams/$id',
   getParentRoute: () => AppRouteRoute,
 } as any)
+const AppRankingsRunsRoute = AppRankingsRunsRouteImport.update({
+  id: '/rankings/runs',
+  path: '/rankings/runs',
+  getParentRoute: () => AppRouteRoute,
+} as any)
 const AppPlayersIdRoute = AppPlayersIdRouteImport.update({
   id: '/players/$id',
   path: '/players/$id',
@@ -130,6 +136,7 @@ export interface FileRoutesByFullPath {
   '/import/import-bot': typeof AppImportImportBotRoute
   '/import/import-longshanks': typeof AppImportImportLongshanksRoute
   '/players/$id': typeof AppPlayersIdRoute
+  '/rankings/runs': typeof AppRankingsRunsRoute
   '/teams/$id': typeof AppTeamsIdRoute
   '/events': typeof AppEventsIndexRoute
   '/import': typeof AppImportIndexRoute
@@ -149,6 +156,7 @@ export interface FileRoutesByTo {
   '/import/import-bot': typeof AppImportImportBotRoute
   '/import/import-longshanks': typeof AppImportImportLongshanksRoute
   '/players/$id': typeof AppPlayersIdRoute
+  '/rankings/runs': typeof AppRankingsRunsRoute
   '/teams/$id': typeof AppTeamsIdRoute
   '/events': typeof AppEventsIndexRoute
   '/import': typeof AppImportIndexRoute
@@ -170,6 +178,7 @@ export interface FileRoutesById {
   '/_app/import/import-bot': typeof AppImportImportBotRoute
   '/_app/import/import-longshanks': typeof AppImportImportLongshanksRoute
   '/_app/players/$id': typeof AppPlayersIdRoute
+  '/_app/rankings/runs': typeof AppRankingsRunsRoute
   '/_app/teams/$id': typeof AppTeamsIdRoute
   '/_app/events/': typeof AppEventsIndexRoute
   '/_app/import/': typeof AppImportIndexRoute
@@ -191,6 +200,7 @@ export interface FileRouteTypes {
     | '/import/import-bot'
     | '/import/import-longshanks'
     | '/players/$id'
+    | '/rankings/runs'
     | '/teams/$id'
     | '/events'
     | '/import'
@@ -210,6 +220,7 @@ export interface FileRouteTypes {
     | '/import/import-bot'
     | '/import/import-longshanks'
     | '/players/$id'
+    | '/rankings/runs'
     | '/teams/$id'
     | '/events'
     | '/import'
@@ -230,6 +241,7 @@ export interface FileRouteTypes {
     | '/_app/import/import-bot'
     | '/_app/import/import-longshanks'
     | '/_app/players/$id'
+    | '/_app/rankings/runs'
     | '/_app/teams/$id'
     | '/_app/events/'
     | '/_app/import/'
@@ -346,6 +358,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppTeamsIdRouteImport
       parentRoute: typeof AppRouteRoute
     }
+    '/_app/rankings/runs': {
+      id: '/_app/rankings/runs'
+      path: '/rankings/runs'
+      fullPath: '/rankings/runs'
+      preLoaderRoute: typeof AppRankingsRunsRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
     '/_app/players/$id': {
       id: '/_app/players/$id'
       path: '/players/$id'
@@ -385,6 +404,7 @@ interface AppRouteRouteChildren {
   AppImportImportBotRoute: typeof AppImportImportBotRoute
   AppImportImportLongshanksRoute: typeof AppImportImportLongshanksRoute
   AppPlayersIdRoute: typeof AppPlayersIdRoute
+  AppRankingsRunsRoute: typeof AppRankingsRunsRoute
   AppTeamsIdRoute: typeof AppTeamsIdRoute
   AppEventsIndexRoute: typeof AppEventsIndexRoute
   AppImportIndexRoute: typeof AppImportIndexRoute
@@ -402,6 +422,7 @@ const AppRouteRouteChildren: AppRouteRouteChildren = {
   AppImportImportBotRoute: AppImportImportBotRoute,
   AppImportImportLongshanksRoute: AppImportImportLongshanksRoute,
   AppPlayersIdRoute: AppPlayersIdRoute,
+  AppRankingsRunsRoute: AppRankingsRunsRoute,
   AppTeamsIdRoute: AppTeamsIdRoute,
   AppEventsIndexRoute: AppEventsIndexRoute,
   AppImportIndexRoute: AppImportIndexRoute,

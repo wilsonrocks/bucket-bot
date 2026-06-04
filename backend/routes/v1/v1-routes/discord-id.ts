@@ -1,7 +1,8 @@
 import { createRoute, z, type RouteHandler } from "@hono/zod-openapi";
 import { sql } from "kysely";
 import type { AppEnv } from "../../../hono-env.js";
-import { UK_MALIFAUX_SERVER_ID, getDiscordClient } from "../../../logic/discord-client.js";
+import { syncDiscordUsers } from "../../../logic/discord/sync-discord-users.js";
+import { runManualStep } from "../../../logic/pipeline/run-step.js";
 import { mergePlaceholderIntoPlayer } from "../../../logic/identities/merge-player.js";
 
 const ErrorSchema = z.object({ error: z.string() });
@@ -26,33 +27,8 @@ export const fetchDiscordUserIdsRoute = createRoute({
 });
 
 export const fetchAndStoreDiscordUserIds: RouteHandler<typeof fetchDiscordUserIdsRoute, AppEnv> = async (c) => {
-  const discordClient = await getDiscordClient();
-  const guild = await discordClient.guilds.fetch(UK_MALIFAUX_SERVER_ID);
-  const members = await guild.members.fetch();
-
-  const mappedMembers = members.map((m) => ({
-    discord_user_id: m.user.id,
-    discord_username: m.user.username,
-    discord_display_name: m.displayName,
-    discord_nickname: m.nickname,
-    discord_avatar_url: m.displayAvatarURL(),
-  }));
-
-  const upserted = await c.get("db")
-    .insertInto("discord_user")
-    .values(mappedMembers)
-    .onConflict((oc) =>
-      oc.column("discord_user_id").doUpdateSet((eb) => ({
-        discord_username: eb.ref("excluded.discord_username"),
-        discord_display_name: eb.ref("excluded.discord_display_name"),
-        discord_avatar_url: eb.ref("excluded.discord_avatar_url"),
-        discord_nickname: eb.ref("excluded.discord_nickname"),
-      })),
-    )
-    .returningAll()
-    .execute();
-
-  return c.json({ updated: upserted.length }, 200);
+  const updated = await runManualStep(c.get("db"), "fetch-discord", (db) => syncDiscordUsers(db));
+  return c.json({ updated }, 200);
 };
 
 export const getAllDiscordUsersRoute = createRoute({

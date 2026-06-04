@@ -1,5 +1,5 @@
 
-\restrict hWRwUeuOjIUaoMyUV4DJnH4NUT9KrJSlBfkjlFwCmTFh4ehuecgH9RAg8SJL78a
+\restrict bUzD4pPCoiRwvlQ3HekpiA4Clh3VBR3mQ8VAlpTkuxV0go01iXer4M7USNQoAsg
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -143,6 +143,22 @@ CREATE TABLE public.painting_winner (
     image_key text,
     description text,
     CONSTRAINT painting_winner_position_check CHECK (("position" > 0))
+);
+
+    AS integer
+    NO MINVALUE
+    NO MAXVALUE
+
+CREATE TABLE public.pipeline_job_step (
+    id integer NOT NULL,
+    run_id text NOT NULL,
+    step_key text NOT NULL,
+    trigger text NOT NULL,
+    status text NOT NULL,
+    attempts integer DEFAULT 0 NOT NULL,
+    error text,
+    started_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    finished_at timestamp without time zone
 );
 
     AS integer
@@ -381,6 +397,9 @@ ALTER TABLE ONLY public.painting_category
 ALTER TABLE ONLY public.painting_winner
     ADD CONSTRAINT painting_winner_pkey PRIMARY KEY (id);
 
+ALTER TABLE ONLY public.pipeline_job_step
+    ADD CONSTRAINT pipeline_job_step_pkey PRIMARY KEY (id);
+
 ALTER TABLE ONLY public.player_identity
     ADD CONSTRAINT player_identity_pkey PRIMARY KEY (id);
 
@@ -495,6 +514,10 @@ CREATE INDEX idx_tourney_venue_id ON public.tourney USING btree (venue_id);
 
 CREATE INDEX idx_venue_region_id ON public.venue USING btree (region_id);
 
+CREATE INDEX pipeline_job_step_run_id_idx ON public.pipeline_job_step USING btree (run_id);
+
+CREATE INDEX pipeline_job_step_started_at_idx ON public.pipeline_job_step USING btree (started_at DESC);
+
 CREATE UNIQUE INDEX player_identity_provider_external_id_key ON public.player_identity USING btree (identity_provider_id, external_id);
 
 CREATE UNIQUE INDEX unique_display_order_true ON public.ranking_snapshot_type USING btree (display_order) WHERE (display = true);
@@ -580,5 +603,5 @@ ALTER TABLE ONLY public.tourney
 ALTER TABLE ONLY public.venue
     ADD CONSTRAINT venue_region_id_fkey FOREIGN KEY (region_id) REFERENCES public.region(id);
 
-\unrestrict hWRwUeuOjIUaoMyUV4DJnH4NUT9KrJSlBfkjlFwCmTFh4ehuecgH9RAg8SJL78a
+\unrestrict bUzD4pPCoiRwvlQ3HekpiA4Clh3VBR3mQ8VAlpTkuxV0go01iXer4M7USNQoAsg
 

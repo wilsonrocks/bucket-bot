@@ -14,9 +14,9 @@ function formatRankChange(change: number | null, isNew: boolean): string {
 }
 
 export const postTeamRankingsToDiscord = async (db: Kysely<DB>) => {
-  const channelId = process.env.DISCORD_TEAM_RANKINGS_CHANNEL_ID;
+  const channelId = process.env.DISCORD_TEAM_CHANNEL_ID;
   if (!channelId) {
-    console.error("DISCORD_TEAM_RANKINGS_CHANNEL_ID is not defined");
+    console.error("DISCORD_TEAM_CHANNEL_ID is not defined");
     return;
   }
 
@@ -29,7 +29,9 @@ export const postTeamRankingsToDiscord = async (db: Kysely<DB>) => {
     .executeTakeFirst();
 
   if (!batch) {
-    console.warn("No team ranking snapshot found for ROLLING_YEAR, skipping Discord post.");
+    console.warn(
+      "No team ranking snapshot found for ROLLING_YEAR, skipping Discord post.",
+    );
     return;
   }
 
@@ -52,11 +54,13 @@ export const postTeamRankingsToDiscord = async (db: Kysely<DB>) => {
   const channel = await discordClient.channels.fetch(channelId);
 
   if (!(channel instanceof TextChannel)) {
-    throw new Error(`DISCORD_TEAM_RANKINGS_CHANNEL_ID is not a TextChannel`);
+    throw new Error(`DISCORD_TEAM_CHANNEL_ID is not a TextChannel`);
   }
 
   if (!channel.isSendable()) {
-    console.warn("Team rankings channel is not sendable, skipping Discord post.");
+    console.warn(
+      "Team rankings channel is not sendable, skipping Discord post.",
+    );
     return;
   }
 
@@ -67,9 +71,13 @@ export const postTeamRankingsToDiscord = async (db: Kysely<DB>) => {
     .join("\n");
 
   const embed = new EmbedBuilder()
-    .setTitle(`Team Rankings as of ${formatDate(new Date(), "EEEE d MMM yyyy")}`)
+    .setTitle(
+      `Team Rankings as of ${formatDate(new Date(), "EEEE d MMM yyyy")}`,
+    )
     .setColor("#5865F2")
-    .setDescription("Rolling year rankings — team score is the sum of the top 5 players' contributions.")
+    .setDescription(
+      "Rolling year rankings — team score is the sum of the top 5 players' contributions.",
+    )
     .addFields({ name: "Teams", value: teamsText });
 
   await channel.send({

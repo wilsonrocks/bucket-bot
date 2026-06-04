@@ -41,6 +41,8 @@ import type {
   GetPaintingAll200Item,
   GetPaintingRecent200,
   GetPaintingRecent404,
+  GetPipelineJobSteps200Item,
+  GetPipelineJobStepsParams,
   GetPlayerId200,
   GetPlayerId400,
   GetPlayerId404,
@@ -130,6 +132,10 @@ import type {
   PostPostFactionRankings500,
   PostPostFactionRankingsParams,
   PostPostTeamRankings200,
+  PostRetryPipelineSteps200,
+  PostRetryPipelineStepsBody,
+  PostRunRankingsPipeline200,
+  PostRunRankingsPipeline409,
   PostTeamsTeamIdMembers201,
   PostTeamsTeamIdMembers403,
   PostTeamsTeamIdMembers404,
@@ -6071,5 +6077,274 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getPatchFeatureFlagsFlagMutationOptions(options), queryClient);
+    }
+    export type getPipelineJobStepsResponse200 = {
+  data: GetPipelineJobSteps200Item[]
+  status: 200
+}
+
+export type getPipelineJobStepsResponseSuccess = (getPipelineJobStepsResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getPipelineJobStepsResponse = (getPipelineJobStepsResponseSuccess)
+
+export const getGetPipelineJobStepsUrl = (params?: GetPipelineJobStepsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/v1/pipeline-job-steps?${stringifiedParams}` : `/v1/pipeline-job-steps`
+}
+
+export const getPipelineJobSteps = async (params?: GetPipelineJobStepsParams, options?: RequestInit): Promise<getPipelineJobStepsResponse> => {
+  
+  return customFetch<getPipelineJobStepsResponse>(getGetPipelineJobStepsUrl(params),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
+
+export const getGetPipelineJobStepsQueryKey = (params?: GetPipelineJobStepsParams,) => {
+    return [
+    `/v1/pipeline-job-steps`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+    
+export const getGetPipelineJobStepsQueryOptions = <TData = Awaited<ReturnType<typeof getPipelineJobSteps>>, TError = unknown>(params?: GetPipelineJobStepsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPipelineJobSteps>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPipelineJobStepsQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPipelineJobSteps>>> = ({ signal }) => getPipelineJobSteps(params, { signal, ...requestOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPipelineJobSteps>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetPipelineJobStepsQueryResult = NonNullable<Awaited<ReturnType<typeof getPipelineJobSteps>>>
+export type GetPipelineJobStepsQueryError = unknown
+
+
+export function useGetPipelineJobSteps<TData = Awaited<ReturnType<typeof getPipelineJobSteps>>, TError = unknown>(
+ params: undefined |  GetPipelineJobStepsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPipelineJobSteps>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPipelineJobSteps>>,
+          TError,
+          Awaited<ReturnType<typeof getPipelineJobSteps>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPipelineJobSteps<TData = Awaited<ReturnType<typeof getPipelineJobSteps>>, TError = unknown>(
+ params?: GetPipelineJobStepsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPipelineJobSteps>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPipelineJobSteps>>,
+          TError,
+          Awaited<ReturnType<typeof getPipelineJobSteps>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPipelineJobSteps<TData = Awaited<ReturnType<typeof getPipelineJobSteps>>, TError = unknown>(
+ params?: GetPipelineJobStepsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPipelineJobSteps>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetPipelineJobSteps<TData = Awaited<ReturnType<typeof getPipelineJobSteps>>, TError = unknown>(
+ params?: GetPipelineJobStepsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPipelineJobSteps>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetPipelineJobStepsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+export type postRunRankingsPipelineResponse200 = {
+  data: PostRunRankingsPipeline200
+  status: 200
+}
+
+export type postRunRankingsPipelineResponse409 = {
+  data: PostRunRankingsPipeline409
+  status: 409
+}
+
+export type postRunRankingsPipelineResponseSuccess = (postRunRankingsPipelineResponse200) & {
+  headers: Headers;
+};
+export type postRunRankingsPipelineResponseError = (postRunRankingsPipelineResponse409) & {
+  headers: Headers;
+};
+
+export type postRunRankingsPipelineResponse = (postRunRankingsPipelineResponseSuccess | postRunRankingsPipelineResponseError)
+
+export const getPostRunRankingsPipelineUrl = () => {
+
+
+  
+
+  return `/v1/run-rankings-pipeline`
+}
+
+export const postRunRankingsPipeline = async ( options?: RequestInit): Promise<postRunRankingsPipelineResponse> => {
+  
+  return customFetch<postRunRankingsPipelineResponse>(getPostRunRankingsPipelineUrl(),
+  {      
+    ...options,
+    method: 'POST'
+    
+    
+  }
+);}
+  
+
+
+
+export const getPostRunRankingsPipelineMutationOptions = <TError = PostRunRankingsPipeline409,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postRunRankingsPipeline>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postRunRankingsPipeline>>, TError,void, TContext> => {
+
+const mutationKey = ['postRunRankingsPipeline'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postRunRankingsPipeline>>, void> = () => {
+          
+
+          return  postRunRankingsPipeline(requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostRunRankingsPipelineMutationResult = NonNullable<Awaited<ReturnType<typeof postRunRankingsPipeline>>>
+    
+    export type PostRunRankingsPipelineMutationError = PostRunRankingsPipeline409
+
+    export const usePostRunRankingsPipeline = <TError = PostRunRankingsPipeline409,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postRunRankingsPipeline>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postRunRankingsPipeline>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getPostRunRankingsPipelineMutationOptions(options), queryClient);
+    }
+    export type postRetryPipelineStepsResponse200 = {
+  data: PostRetryPipelineSteps200
+  status: 200
+}
+
+export type postRetryPipelineStepsResponseSuccess = (postRetryPipelineStepsResponse200) & {
+  headers: Headers;
+};
+;
+
+export type postRetryPipelineStepsResponse = (postRetryPipelineStepsResponseSuccess)
+
+export const getPostRetryPipelineStepsUrl = () => {
+
+
+  
+
+  return `/v1/retry-pipeline-steps`
+}
+
+export const postRetryPipelineSteps = async (postRetryPipelineStepsBody: PostRetryPipelineStepsBody, options?: RequestInit): Promise<postRetryPipelineStepsResponse> => {
+  
+  return customFetch<postRetryPipelineStepsResponse>(getPostRetryPipelineStepsUrl(),
+  {      
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      postRetryPipelineStepsBody,)
+  }
+);}
+  
+
+
+
+export const getPostRetryPipelineStepsMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postRetryPipelineSteps>>, TError,{data: PostRetryPipelineStepsBody}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postRetryPipelineSteps>>, TError,{data: PostRetryPipelineStepsBody}, TContext> => {
+
+const mutationKey = ['postRetryPipelineSteps'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postRetryPipelineSteps>>, {data: PostRetryPipelineStepsBody}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postRetryPipelineSteps(data,requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostRetryPipelineStepsMutationResult = NonNullable<Awaited<ReturnType<typeof postRetryPipelineSteps>>>
+    export type PostRetryPipelineStepsMutationBody = PostRetryPipelineStepsBody
+    export type PostRetryPipelineStepsMutationError = unknown
+
+    export const usePostRetryPipelineSteps = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postRetryPipelineSteps>>, TError,{data: PostRetryPipelineStepsBody}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postRetryPipelineSteps>>,
+        TError,
+        {data: PostRetryPipelineStepsBody},
+        TContext
+      > => {
+      return useMutation(getPostRetryPipelineStepsMutationOptions(options), queryClient);
     }
     
