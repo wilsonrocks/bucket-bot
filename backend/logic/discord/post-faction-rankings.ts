@@ -3,14 +3,6 @@ import type { Kysely } from "kysely";
 import type { DB } from "kysely-codegen";
 import { getDiscordClient } from "../discord-client.js";
 
-const { DISCORD_FACTION_CHANNEL_ID, DISCORD_TEST_CHANNEL_ID } = process.env;
-if (!DISCORD_FACTION_CHANNEL_ID) {
-  throw new Error("DISCORD_FACTION_CHANNEL_ID env var is not set");
-}
-if (!DISCORD_TEST_CHANNEL_ID) {
-  throw new Error("DISCORD_TEST_CHANNEL_ID env var is not set");
-}
-
 function formatRankChange(change: number | null): string {
   if (change === null) return "`NEW`";
   if (change === 0) return "-";
@@ -26,7 +18,14 @@ export async function postFactionRankings(
   db: Kysely<DB>,
   { live }: { live: boolean },
 ): Promise<void> {
-  const channelId = live ? DISCORD_FACTION_CHANNEL_ID! : DISCORD_TEST_CHANNEL_ID!;
+  const channelId = live
+    ? process.env.DISCORD_FACTION_CHANNEL_ID
+    : process.env.DISCORD_TEST_CHANNEL_ID;
+  if (!channelId) {
+    throw new Error(
+      `${live ? "DISCORD_FACTION_CHANNEL_ID" : "DISCORD_TEST_CHANNEL_ID"} env var is not set`,
+    );
+  }
 
   const mostRecentSnapshotBatch = await db
     .selectFrom("faction_snapshot_batch")

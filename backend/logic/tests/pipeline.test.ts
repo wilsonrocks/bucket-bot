@@ -1,13 +1,17 @@
-import { beforeEach, describe, expect, test } from "vitest";
+import { beforeEach, describe, expect, test, vi } from "vitest";
 import { dbClient } from "../../db-client";
 import { runStep, type StepDef } from "../pipeline/run-step";
 import { runPipeline, retryPipelineSteps } from "../pipeline/rankings-pipeline";
+
+// This is an integration test of the orchestrator (real DB via testcontainers,
+// fake step fns). The end-of-run Discord summary is not under test, so stub it
+// out — keeps the test off Discord and independent of ambient DISCORD_* env.
+vi.mock("../pipeline/notify-ops", () => ({ postPipelineSummary: vi.fn() }));
 
 // Fast retries, no real timers, no Discord.
 const FAST = { backoffMs: [0], sleep: async () => {} };
 
 beforeEach(async () => {
-  delete process.env.DISCORD_OPS_CHANNEL_ID; // keep notify-ops from touching Discord
   await dbClient.deleteFrom("pipeline_job_step").execute();
 });
 
