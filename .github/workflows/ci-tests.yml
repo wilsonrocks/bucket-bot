@@ -112,7 +112,7 @@ jobs:
           node-version: "24.11.1"
       - run: npm ci
         working-directory: backend
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: backend-db-types
           path: backend/node_modules/kysely-codegen/dist
@@ -130,7 +130,7 @@ jobs:
       - uses: ./.github/actions/install-flyway
       - run: npm ci
         working-directory: backend
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: backend-db-types
           path: backend/node_modules/kysely-codegen/dist
@@ -147,7 +147,7 @@ jobs:
           node-version: "24.11.1"
       - run: npm ci
         working-directory: site
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: site-db-types
           path: site/src
@@ -164,7 +164,7 @@ jobs:
           node-version: "24.11.1"
       - run: npm ci
         working-directory: site
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: site-db-types
           path: site/src
@@ -181,7 +181,7 @@ jobs:
           node-version: "24.11.1"
       - run: npm ci
         working-directory: admin
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: admin-generated
           path: admin/src/api/generated
@@ -198,7 +198,7 @@ jobs:
           node-version: "24.11.1"
       - run: npm ci
         working-directory: admin
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: admin-generated
           path: admin/src/api/generated
