@@ -79,25 +79,25 @@ jobs:
         working-directory: admin
 
       - name: Upload backend DB types
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: backend-db-types
           path: backend/node_modules/kysely-codegen/dist/db.d.ts
 
       - name: Upload site DB types
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: site-db-types
           path: site/src/db.d.ts
 
       - name: Upload OpenAPI schema
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: openapi
           path: openapi.json
 
       - name: Upload admin generated client
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: admin-generated
           path: admin/src/api/generated
@@ -134,7 +134,7 @@ jobs:
         with:
           name: backend-db-types
           path: backend/node_modules/kysely-codegen/dist
-      - run: npx vitest run --reporter=github-actions
+      - run: npx vitest run --reporter=default --reporter=github-actions
         working-directory: backend
 
   site-typecheck:
@@ -168,7 +168,7 @@ jobs:
         with:
           name: site-db-types
           path: site/src
-      - run: npx vitest run --reporter=github-actions
+      - run: npx vitest run --reporter=default --reporter=github-actions
         working-directory: site
 
   admin-typecheck:
@@ -202,5 +202,5 @@ jobs:
         with:
           name: admin-generated
           path: admin/src/api/generated
-      - run: npx vitest run --reporter=github-actions
+      - run: npx vitest run --reporter=default --reporter=github-actions
         working-directory: admin
