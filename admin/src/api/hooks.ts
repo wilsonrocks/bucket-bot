@@ -31,6 +31,7 @@ import {
   useGetTeamRankingsTypeCode as useGetTeamRankingsTypeCodeGenerated,
   useGetFeatureFlags as useGetFeatureFlagsGenerated,
   useGetRankingTypes as useGetRankingTypesGenerated,
+  useGetPipelineJobSteps as useGetPipelineJobStepsGenerated,
   useGetSearchDiscordUsers as useGetSearchDiscordUsersGenerated,
   useGetSearchPlayers as useGetSearchPlayersGenerated,
   usePostPlayerIdentityIdMergeIntoPlayer as usePostPlayerIdentityIdMergeIntoPlayerGenerated,
@@ -80,6 +81,8 @@ export {
   usePostPostDiscordRankings,
   usePostPostFactionRankings,
   usePostPostTeamRankings,
+  usePostRunRankingsPipeline,
+  usePostRetryPipelineSteps,
   usePostToken,
 } from './generated/default/default'
 
@@ -108,6 +111,15 @@ export const useGetTourney = (
   options?: Parameters<typeof useGetTourneyGenerated>[0],
 ) =>
   useGetTourneyGenerated({
+    ...options,
+    query: { ...options?.query, select: (res) => res.data },
+  })
+
+export const useGetPipelineJobSteps = (
+  params?: Parameters<typeof useGetPipelineJobStepsGenerated>[0],
+  options?: Parameters<typeof useGetPipelineJobStepsGenerated>[1],
+) =>
+  useGetPipelineJobStepsGenerated(params, {
     ...options,
     query: { ...options?.query, select: (res) => res.data },
   })

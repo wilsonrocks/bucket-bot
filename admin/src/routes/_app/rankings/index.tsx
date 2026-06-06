@@ -13,11 +13,12 @@ import {
   usePostGenerateRegionSnapshot,
 } from '@/api/hooks'
 
-import { Button, Card, Grid, List, Text, Title } from '@mantine/core'
+import { Button, Card, Grid, Group, List, Text, Title } from '@mantine/core'
 
 import { modals } from '@mantine/modals'
 
 import { Route as IdentitiesRoute } from '../identities'
+import { Route as RunsRoute } from './runs'
 import { Link } from '@/components/link'
 
 export const Route = createFileRoute('/_app/rankings/')({
@@ -65,10 +66,16 @@ function RouteComponent() {
           </List.Item>
         </List>
         <Text>
-          Eventually, this process will be automated. For now it's done by
-          clicking buttons. Rankings must be generated _before_ they can be
-          posted.
+          The full pipeline now runs automatically every <strong>Monday at 9am
+          UK time</strong> — it generates and posts all rankings, recording each
+          step. The buttons below are for ad-hoc re-runs; rankings must be
+          generated <em>before</em> they can be posted.
         </Text>
+        <Group mt="sm">
+          <Button component={Link} to={RunsRoute.to} variant="light">
+            View pipeline runs
+          </Button>
+        </Group>
       </Card>
 
       <Grid>

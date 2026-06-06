@@ -967,3 +967,43 @@ export type PatchFeatureFlagsFlag404 = {
   error: string;
 };
 
+export type GetPipelineJobStepsParams = {
+/**
+ * @maximum 1000
+ * @exclusiveMinimum 0
+ */
+limit?: number;
+};
+
+export type GetPipelineJobSteps200Item = {
+  id: number;
+  run_id: string;
+  step_key: string;
+  trigger: string;
+  status: string;
+  attempts: number;
+  /** @nullable */
+  error: string | null;
+  started_at: string;
+  /** @nullable */
+  finished_at: string | null;
+};
+
+export type PostRunRankingsPipeline200 = {
+  runId: string;
+};
+
+export type PostRunRankingsPipeline409 = {
+  error: string;
+};
+
+export type PostRetryPipelineStepsBody = {
+  runId: string;
+  /** @minItems 1 */
+  stepKeys: string[];
+};
+
+export type PostRetryPipelineSteps200 = {
+  runId: string;
+};
+

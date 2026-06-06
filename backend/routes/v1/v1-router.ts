@@ -167,6 +167,14 @@ import {
   communityStatsHandler,
   communityStatsRoute,
 } from "./v1-routes/stats.js";
+import {
+  pipelineJobStepsHandler,
+  pipelineJobStepsRoute,
+  retryPipelineStepsHandler,
+  retryPipelineStepsRoute,
+  runPipelineHandler,
+  runPipelineRoute,
+} from "./v1-routes/pipeline.js";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) throw new Error("JWT_SECRET is not defined");
@@ -341,3 +349,6 @@ v1Router.openapi(playerNameExistsRoute, playerNameExistsHandler);
 v1Router.openapi(postTeamRankingsRoute, postTeamRankingsHandler);
 v1Router.openapi(generateTeamRankingsRoute, generateTeamRankingsHandler);
 v1Router.openapi(updateFeatureFlagRoute, updateFeatureFlag);
+v1Router.openapi(pipelineJobStepsRoute, pipelineJobStepsHandler);
+v1Router.openapi(runPipelineRoute, runPipelineHandler);
+v1Router.openapi(retryPipelineStepsRoute, retryPipelineStepsHandler);

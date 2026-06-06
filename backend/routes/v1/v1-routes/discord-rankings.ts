@@ -1,6 +1,7 @@
 import { createRoute, z, type RouteHandler } from "@hono/zod-openapi";
 import type { AppEnv } from "../../../hono-env.js";
 import { postDiscordRankings } from "../../../logic/discord/post-rankings.js";
+import { runManualStep } from "../../../logic/pipeline/run-step.js";
 
 export const postDiscordRankingsRoute = createRoute({
   method: "post",
@@ -14,6 +15,6 @@ export const postDiscordRankingsRoute = createRoute({
 });
 
 export const postDiscordRankingsHandler: RouteHandler<typeof postDiscordRankingsRoute, AppEnv> = async (c) => {
-  await postDiscordRankings(c.get("db"));
+  await runManualStep(c.get("db"), "post-player", (db) => postDiscordRankings(db));
   return c.json({ message: "Discord rankings posted successfully" }, 200);
 };
