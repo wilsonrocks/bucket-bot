@@ -27,6 +27,7 @@ import { Route as AppRankingsRunsRouteImport } from './routes/_app/rankings/runs
 import { Route as AppPlayersIdRouteImport } from './routes/_app/players/$id'
 import { Route as AppImportImportLongshanksRouteImport } from './routes/_app/import/import-longshanks'
 import { Route as AppImportImportBotRouteImport } from './routes/_app/import/import-bot'
+import { Route as AppEventsUpcomingRouteImport } from './routes/_app/events/upcoming'
 import { Route as AppEventsIdEditRouteImport } from './routes/_app/events.$id.edit'
 
 const LoginRoute = LoginRouteImport.update({
@@ -119,6 +120,11 @@ const AppImportImportBotRoute = AppImportImportBotRouteImport.update({
   path: '/import/import-bot',
   getParentRoute: () => AppRouteRoute,
 } as any)
+const AppEventsUpcomingRoute = AppEventsUpcomingRouteImport.update({
+  id: '/events/upcoming',
+  path: '/events/upcoming',
+  getParentRoute: () => AppRouteRoute,
+} as any)
 const AppEventsIdEditRoute = AppEventsIdEditRouteImport.update({
   id: '/events/$id/edit',
   path: '/events/$id/edit',
@@ -133,6 +139,7 @@ export interface FileRoutesByFullPath {
   '/feature-flags': typeof AppFeatureFlagsRoute
   '/identities': typeof AppIdentitiesRoute
   '/venues': typeof AppVenuesRoute
+  '/events/upcoming': typeof AppEventsUpcomingRoute
   '/import/import-bot': typeof AppImportImportBotRoute
   '/import/import-longshanks': typeof AppImportImportLongshanksRoute
   '/players/$id': typeof AppPlayersIdRoute
@@ -153,6 +160,7 @@ export interface FileRoutesByTo {
   '/feature-flags': typeof AppFeatureFlagsRoute
   '/identities': typeof AppIdentitiesRoute
   '/venues': typeof AppVenuesRoute
+  '/events/upcoming': typeof AppEventsUpcomingRoute
   '/import/import-bot': typeof AppImportImportBotRoute
   '/import/import-longshanks': typeof AppImportImportLongshanksRoute
   '/players/$id': typeof AppPlayersIdRoute
@@ -175,6 +183,7 @@ export interface FileRoutesById {
   '/_app/feature-flags': typeof AppFeatureFlagsRoute
   '/_app/identities': typeof AppIdentitiesRoute
   '/_app/venues': typeof AppVenuesRoute
+  '/_app/events/upcoming': typeof AppEventsUpcomingRoute
   '/_app/import/import-bot': typeof AppImportImportBotRoute
   '/_app/import/import-longshanks': typeof AppImportImportLongshanksRoute
   '/_app/players/$id': typeof AppPlayersIdRoute
@@ -197,6 +206,7 @@ export interface FileRouteTypes {
     | '/feature-flags'
     | '/identities'
     | '/venues'
+    | '/events/upcoming'
     | '/import/import-bot'
     | '/import/import-longshanks'
     | '/players/$id'
@@ -217,6 +227,7 @@ export interface FileRouteTypes {
     | '/feature-flags'
     | '/identities'
     | '/venues'
+    | '/events/upcoming'
     | '/import/import-bot'
     | '/import/import-longshanks'
     | '/players/$id'
@@ -238,6 +249,7 @@ export interface FileRouteTypes {
     | '/_app/feature-flags'
     | '/_app/identities'
     | '/_app/venues'
+    | '/_app/events/upcoming'
     | '/_app/import/import-bot'
     | '/_app/import/import-longshanks'
     | '/_app/players/$id'
@@ -386,6 +398,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppImportImportBotRouteImport
       parentRoute: typeof AppRouteRoute
     }
+    '/_app/events/upcoming': {
+      id: '/_app/events/upcoming'
+      path: '/events/upcoming'
+      fullPath: '/events/upcoming'
+      preLoaderRoute: typeof AppEventsUpcomingRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
     '/_app/events/$id/edit': {
       id: '/_app/events/$id/edit'
       path: '/events/$id/edit'
@@ -401,6 +420,7 @@ interface AppRouteRouteChildren {
   AppFeatureFlagsRoute: typeof AppFeatureFlagsRoute
   AppIdentitiesRoute: typeof AppIdentitiesRoute
   AppVenuesRoute: typeof AppVenuesRoute
+  AppEventsUpcomingRoute: typeof AppEventsUpcomingRoute
   AppImportImportBotRoute: typeof AppImportImportBotRoute
   AppImportImportLongshanksRoute: typeof AppImportImportLongshanksRoute
   AppPlayersIdRoute: typeof AppPlayersIdRoute
@@ -419,6 +439,7 @@ const AppRouteRouteChildren: AppRouteRouteChildren = {
   AppFeatureFlagsRoute: AppFeatureFlagsRoute,
   AppIdentitiesRoute: AppIdentitiesRoute,
   AppVenuesRoute: AppVenuesRoute,
+  AppEventsUpcomingRoute: AppEventsUpcomingRoute,
   AppImportImportBotRoute: AppImportImportBotRoute,
   AppImportImportLongshanksRoute: AppImportImportLongshanksRoute,
   AppPlayersIdRoute: AppPlayersIdRoute,

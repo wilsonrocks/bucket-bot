@@ -175,6 +175,16 @@ import {
   runPipelineHandler,
   runPipelineRoute,
 } from "./v1-routes/pipeline.js";
+import {
+  getUpcomingEventsHandler,
+  getUpcomingEventsRoute,
+  setUpcomingEventOrganiserHandler,
+  setUpcomingEventOrganiserRoute,
+  setUpcomingEventVenueHandler,
+  setUpcomingEventVenueRoute,
+  syncUpcomingEventsHandler,
+  syncUpcomingEventsRoute,
+} from "./v1-routes/upcoming-events.js";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) throw new Error("JWT_SECRET is not defined");
@@ -311,6 +321,7 @@ v1Router.openapi(getAllFeatureFlagsRoute, getAllFeatureFlags);
 v1Router.openapi(recentPaintingWinnerRoute, recentPaintingWinnerHandler);
 v1Router.openapi(allPaintingWinnersRoute, allPaintingWinnersHandler);
 v1Router.openapi(communityStatsRoute, communityStatsHandler);
+v1Router.openapi(getUpcomingEventsRoute, getUpcomingEventsHandler);
 
 // ── JWT middleware (all routes below require authentication) ───────────────
 
@@ -352,3 +363,6 @@ v1Router.openapi(updateFeatureFlagRoute, updateFeatureFlag);
 v1Router.openapi(pipelineJobStepsRoute, pipelineJobStepsHandler);
 v1Router.openapi(runPipelineRoute, runPipelineHandler);
 v1Router.openapi(retryPipelineStepsRoute, retryPipelineStepsHandler);
+v1Router.openapi(setUpcomingEventVenueRoute, setUpcomingEventVenueHandler);
+v1Router.openapi(setUpcomingEventOrganiserRoute, setUpcomingEventOrganiserHandler);
+v1Router.openapi(syncUpcomingEventsRoute, syncUpcomingEventsHandler);

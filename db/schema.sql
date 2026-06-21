@@ -1,5 +1,5 @@
 
-\restrict bUzD4pPCoiRwvlQ3HekpiA4Clh3VBR3mQ8VAlpTkuxV0go01iXer4M7USNQoAsg
+\restrict yRdCiTIaMrM2izk7tlkVKiNBwL9LIInP8TT3P6WJwVrSuONVP6ZPpBVAnfcQfpl
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -339,6 +339,22 @@ CREATE TABLE public.tourney (
     NO MINVALUE
     NO MAXVALUE
 
+CREATE TABLE public.upcoming_event (
+    id integer NOT NULL,
+    google_event_id text NOT NULL,
+    name text NOT NULL,
+    starts_at timestamp with time zone NOT NULL,
+    venue_id integer,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    organiser_discord_id text,
+    description text,
+    location text
+);
+
+    AS integer
+    NO MINVALUE
+    NO MAXVALUE
+
 CREATE TABLE public.venue (
     id integer NOT NULL,
     name text,
@@ -468,6 +484,12 @@ ALTER TABLE ONLY public.player
 
 ALTER TABLE ONLY public.venue
     ADD CONSTRAINT unique_venue_post_code UNIQUE (post_code);
+
+ALTER TABLE ONLY public.upcoming_event
+    ADD CONSTRAINT upcoming_event_google_event_id_key UNIQUE (google_event_id);
+
+ALTER TABLE ONLY public.upcoming_event
+    ADD CONSTRAINT upcoming_event_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY public.venue
     ADD CONSTRAINT venue_pkey PRIMARY KEY (id);
@@ -600,8 +622,11 @@ ALTER TABLE ONLY public.tourney
 ALTER TABLE ONLY public.tourney
     ADD CONSTRAINT tourney_venue_id_fkey FOREIGN KEY (venue_id) REFERENCES public.venue(id);
 
+ALTER TABLE ONLY public.upcoming_event
+    ADD CONSTRAINT upcoming_event_venue_id_fkey FOREIGN KEY (venue_id) REFERENCES public.venue(id);
+
 ALTER TABLE ONLY public.venue
     ADD CONSTRAINT venue_region_id_fkey FOREIGN KEY (region_id) REFERENCES public.region(id);
 
-\unrestrict bUzD4pPCoiRwvlQ3HekpiA4Clh3VBR3mQ8VAlpTkuxV0go01iXer4M7USNQoAsg
+\unrestrict yRdCiTIaMrM2izk7tlkVKiNBwL9LIInP8TT3P6WJwVrSuONVP6ZPpBVAnfcQfpl
 

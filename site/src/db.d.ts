@@ -126,6 +126,18 @@ export interface PaintingWinner {
   position: number;
 }
 
+export interface PipelineJobStep {
+  attempts: Generated<number>;
+  error: string | null;
+  finished_at: Timestamp | null;
+  id: Generated<number>;
+  run_id: string;
+  started_at: Generated<Timestamp>;
+  status: string;
+  step_key: string;
+  trigger: string;
+}
+
 export interface Player {
   created_at: Generated<Timestamp | null>;
   discord_id: string | null;
@@ -267,6 +279,18 @@ export interface Tourney {
   venue_id: number | null;
 }
 
+export interface UpcomingEvent {
+  created_at: Generated<Timestamp>;
+  description: string | null;
+  google_event_id: string;
+  id: Generated<number>;
+  location: string | null;
+  name: string;
+  organiser_discord_id: string | null;
+  starts_at: Timestamp;
+  venue_id: number | null;
+}
+
 export interface Venue {
   geom: string | null;
   id: Generated<number>;
@@ -290,6 +314,7 @@ export interface DB {
   membership: Membership;
   painting_category: PaintingCategory;
   painting_winner: PaintingWinner;
+  pipeline_job_step: PipelineJobStep;
   player: Player;
   player_identity: PlayerIdentity;
   ranking_snapshot: RankingSnapshot;
@@ -306,5 +331,6 @@ export interface DB {
   team_ranking_snapshot_batch: TeamRankingSnapshotBatch;
   tier: Tier;
   tourney: Tourney;
+  upcoming_event: UpcomingEvent;
   venue: Venue;
 }

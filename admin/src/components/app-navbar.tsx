@@ -3,6 +3,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { usePermissions } from '@/hooks/usePermissions'
 import { Route as BotChat } from '@/routes/_app/bot-chat'
 import { Route as EventsAppRoute } from '@/routes/_app/events'
+import { Route as UpcomingEventsRoute } from '@/routes/_app/events/upcoming'
 import { Route as IdentitiesRoute } from '@/routes/_app/identities'
 import { Route as ImportRoute } from '@/routes/_app/import'
 import { Route as RankingsRoute } from '@/routes/_app/rankings'
@@ -15,7 +16,7 @@ import { Anchor, Badge, Divider, Group, ScrollArea, Stack, Text } from '@mantine
 import { AppNavLink } from './app-nav-link'
 export const AppNavbar = () => {
   const unmappedIdentities = useGetUnmappedIdentities()
-  const { rankingReporter } = usePermissions()
+  const { rankingReporter, organiserOfEventIds } = usePermissions()
   const auth = useAuth()
 
   return (
@@ -45,6 +46,9 @@ export const AppNavbar = () => {
               }
             />
           </>
+        )}
+        {(rankingReporter || organiserOfEventIds.length > 0) && (
+          <AppNavLink to={UpcomingEventsRoute.to} label="Upcoming Events" />
         )}
         <AppNavLink to={TeamsRoute.to} label="Teams" />
         {rankingReporter && (

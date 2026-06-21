@@ -80,6 +80,7 @@ import type {
   GetTourneysPlayerPlayerId200Item,
   GetTourneysPlayerPlayerId400,
   GetUnmappedIdentities200Item,
+  GetUpcomingEvents200Item,
   GetVenues200Item,
   PatchFeatureFlagsFlag200,
   PatchFeatureFlagsFlag403,
@@ -136,6 +137,8 @@ import type {
   PostRetryPipelineStepsBody,
   PostRunRankingsPipeline200,
   PostRunRankingsPipeline409,
+  PostSyncUpcomingEvents200,
+  PostSyncUpcomingEvents403,
   PostTeamsTeamIdMembers201,
   PostTeamsTeamIdMembers403,
   PostTeamsTeamIdMembers404,
@@ -162,7 +165,15 @@ import type {
   PutTeamsId200,
   PutTeamsId403,
   PutTeamsId404,
-  PutTeamsIdBody
+  PutTeamsIdBody,
+  PutUpcomingEventsIdOrganiser200,
+  PutUpcomingEventsIdOrganiser403,
+  PutUpcomingEventsIdOrganiser404,
+  PutUpcomingEventsIdOrganiserBody,
+  PutUpcomingEventsIdVenue200,
+  PutUpcomingEventsIdVenue403,
+  PutUpcomingEventsIdVenue404,
+  PutUpcomingEventsIdVenueBody
 } from '../bucketBotAPI.schemas';
 
 import { customFetch } from '../../custom-instance';
@@ -3565,6 +3576,110 @@ export function useGetStatsCommunity<TData = Awaited<ReturnType<typeof getStatsC
 
 
 
+export type getUpcomingEventsResponse200 = {
+  data: GetUpcomingEvents200Item[]
+  status: 200
+}
+
+export type getUpcomingEventsResponseSuccess = (getUpcomingEventsResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getUpcomingEventsResponse = (getUpcomingEventsResponseSuccess)
+
+export const getGetUpcomingEventsUrl = () => {
+
+
+  
+
+  return `/v1/upcoming-events`
+}
+
+export const getUpcomingEvents = async ( options?: RequestInit): Promise<getUpcomingEventsResponse> => {
+  
+  return customFetch<getUpcomingEventsResponse>(getGetUpcomingEventsUrl(),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
+
+export const getGetUpcomingEventsQueryKey = () => {
+    return [
+    `/v1/upcoming-events`
+    ] as const;
+    }
+
+    
+export const getGetUpcomingEventsQueryOptions = <TData = Awaited<ReturnType<typeof getUpcomingEvents>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUpcomingEvents>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetUpcomingEventsQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getUpcomingEvents>>> = ({ signal }) => getUpcomingEvents({ signal, ...requestOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getUpcomingEvents>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetUpcomingEventsQueryResult = NonNullable<Awaited<ReturnType<typeof getUpcomingEvents>>>
+export type GetUpcomingEventsQueryError = unknown
+
+
+export function useGetUpcomingEvents<TData = Awaited<ReturnType<typeof getUpcomingEvents>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUpcomingEvents>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getUpcomingEvents>>,
+          TError,
+          Awaited<ReturnType<typeof getUpcomingEvents>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetUpcomingEvents<TData = Awaited<ReturnType<typeof getUpcomingEvents>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUpcomingEvents>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getUpcomingEvents>>,
+          TError,
+          Awaited<ReturnType<typeof getUpcomingEvents>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetUpcomingEvents<TData = Awaited<ReturnType<typeof getUpcomingEvents>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUpcomingEvents>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetUpcomingEvents<TData = Awaited<ReturnType<typeof getUpcomingEvents>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUpcomingEvents>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetUpcomingEventsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
 export type postLongshanksEventIdResponse200 = {
   data: PostLongshanksEventId200
   status: 200
@@ -6346,5 +6461,265 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getPostRetryPipelineStepsMutationOptions(options), queryClient);
+    }
+    export type putUpcomingEventsIdVenueResponse200 = {
+  data: PutUpcomingEventsIdVenue200
+  status: 200
+}
+
+export type putUpcomingEventsIdVenueResponse403 = {
+  data: PutUpcomingEventsIdVenue403
+  status: 403
+}
+
+export type putUpcomingEventsIdVenueResponse404 = {
+  data: PutUpcomingEventsIdVenue404
+  status: 404
+}
+
+export type putUpcomingEventsIdVenueResponseSuccess = (putUpcomingEventsIdVenueResponse200) & {
+  headers: Headers;
+};
+export type putUpcomingEventsIdVenueResponseError = (putUpcomingEventsIdVenueResponse403 | putUpcomingEventsIdVenueResponse404) & {
+  headers: Headers;
+};
+
+export type putUpcomingEventsIdVenueResponse = (putUpcomingEventsIdVenueResponseSuccess | putUpcomingEventsIdVenueResponseError)
+
+export const getPutUpcomingEventsIdVenueUrl = (id: string,) => {
+
+
+  
+
+  return `/v1/upcoming-events/${id}/venue`
+}
+
+export const putUpcomingEventsIdVenue = async (id: string,
+    putUpcomingEventsIdVenueBody: PutUpcomingEventsIdVenueBody, options?: RequestInit): Promise<putUpcomingEventsIdVenueResponse> => {
+  
+  return customFetch<putUpcomingEventsIdVenueResponse>(getPutUpcomingEventsIdVenueUrl(id),
+  {      
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      putUpcomingEventsIdVenueBody,)
+  }
+);}
+  
+
+
+
+export const getPutUpcomingEventsIdVenueMutationOptions = <TError = PutUpcomingEventsIdVenue403 | PutUpcomingEventsIdVenue404,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putUpcomingEventsIdVenue>>, TError,{id: string;data: PutUpcomingEventsIdVenueBody}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof putUpcomingEventsIdVenue>>, TError,{id: string;data: PutUpcomingEventsIdVenueBody}, TContext> => {
+
+const mutationKey = ['putUpcomingEventsIdVenue'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putUpcomingEventsIdVenue>>, {id: string;data: PutUpcomingEventsIdVenueBody}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  putUpcomingEventsIdVenue(id,data,requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PutUpcomingEventsIdVenueMutationResult = NonNullable<Awaited<ReturnType<typeof putUpcomingEventsIdVenue>>>
+    export type PutUpcomingEventsIdVenueMutationBody = PutUpcomingEventsIdVenueBody
+    export type PutUpcomingEventsIdVenueMutationError = PutUpcomingEventsIdVenue403 | PutUpcomingEventsIdVenue404
+
+    export const usePutUpcomingEventsIdVenue = <TError = PutUpcomingEventsIdVenue403 | PutUpcomingEventsIdVenue404,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putUpcomingEventsIdVenue>>, TError,{id: string;data: PutUpcomingEventsIdVenueBody}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof putUpcomingEventsIdVenue>>,
+        TError,
+        {id: string;data: PutUpcomingEventsIdVenueBody},
+        TContext
+      > => {
+      return useMutation(getPutUpcomingEventsIdVenueMutationOptions(options), queryClient);
+    }
+    export type putUpcomingEventsIdOrganiserResponse200 = {
+  data: PutUpcomingEventsIdOrganiser200
+  status: 200
+}
+
+export type putUpcomingEventsIdOrganiserResponse403 = {
+  data: PutUpcomingEventsIdOrganiser403
+  status: 403
+}
+
+export type putUpcomingEventsIdOrganiserResponse404 = {
+  data: PutUpcomingEventsIdOrganiser404
+  status: 404
+}
+
+export type putUpcomingEventsIdOrganiserResponseSuccess = (putUpcomingEventsIdOrganiserResponse200) & {
+  headers: Headers;
+};
+export type putUpcomingEventsIdOrganiserResponseError = (putUpcomingEventsIdOrganiserResponse403 | putUpcomingEventsIdOrganiserResponse404) & {
+  headers: Headers;
+};
+
+export type putUpcomingEventsIdOrganiserResponse = (putUpcomingEventsIdOrganiserResponseSuccess | putUpcomingEventsIdOrganiserResponseError)
+
+export const getPutUpcomingEventsIdOrganiserUrl = (id: string,) => {
+
+
+  
+
+  return `/v1/upcoming-events/${id}/organiser`
+}
+
+export const putUpcomingEventsIdOrganiser = async (id: string,
+    putUpcomingEventsIdOrganiserBody: PutUpcomingEventsIdOrganiserBody, options?: RequestInit): Promise<putUpcomingEventsIdOrganiserResponse> => {
+  
+  return customFetch<putUpcomingEventsIdOrganiserResponse>(getPutUpcomingEventsIdOrganiserUrl(id),
+  {      
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      putUpcomingEventsIdOrganiserBody,)
+  }
+);}
+  
+
+
+
+export const getPutUpcomingEventsIdOrganiserMutationOptions = <TError = PutUpcomingEventsIdOrganiser403 | PutUpcomingEventsIdOrganiser404,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putUpcomingEventsIdOrganiser>>, TError,{id: string;data: PutUpcomingEventsIdOrganiserBody}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof putUpcomingEventsIdOrganiser>>, TError,{id: string;data: PutUpcomingEventsIdOrganiserBody}, TContext> => {
+
+const mutationKey = ['putUpcomingEventsIdOrganiser'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putUpcomingEventsIdOrganiser>>, {id: string;data: PutUpcomingEventsIdOrganiserBody}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  putUpcomingEventsIdOrganiser(id,data,requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PutUpcomingEventsIdOrganiserMutationResult = NonNullable<Awaited<ReturnType<typeof putUpcomingEventsIdOrganiser>>>
+    export type PutUpcomingEventsIdOrganiserMutationBody = PutUpcomingEventsIdOrganiserBody
+    export type PutUpcomingEventsIdOrganiserMutationError = PutUpcomingEventsIdOrganiser403 | PutUpcomingEventsIdOrganiser404
+
+    export const usePutUpcomingEventsIdOrganiser = <TError = PutUpcomingEventsIdOrganiser403 | PutUpcomingEventsIdOrganiser404,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putUpcomingEventsIdOrganiser>>, TError,{id: string;data: PutUpcomingEventsIdOrganiserBody}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof putUpcomingEventsIdOrganiser>>,
+        TError,
+        {id: string;data: PutUpcomingEventsIdOrganiserBody},
+        TContext
+      > => {
+      return useMutation(getPutUpcomingEventsIdOrganiserMutationOptions(options), queryClient);
+    }
+    export type postSyncUpcomingEventsResponse200 = {
+  data: PostSyncUpcomingEvents200
+  status: 200
+}
+
+export type postSyncUpcomingEventsResponse403 = {
+  data: PostSyncUpcomingEvents403
+  status: 403
+}
+
+export type postSyncUpcomingEventsResponseSuccess = (postSyncUpcomingEventsResponse200) & {
+  headers: Headers;
+};
+export type postSyncUpcomingEventsResponseError = (postSyncUpcomingEventsResponse403) & {
+  headers: Headers;
+};
+
+export type postSyncUpcomingEventsResponse = (postSyncUpcomingEventsResponseSuccess | postSyncUpcomingEventsResponseError)
+
+export const getPostSyncUpcomingEventsUrl = () => {
+
+
+  
+
+  return `/v1/sync-upcoming-events`
+}
+
+export const postSyncUpcomingEvents = async ( options?: RequestInit): Promise<postSyncUpcomingEventsResponse> => {
+  
+  return customFetch<postSyncUpcomingEventsResponse>(getPostSyncUpcomingEventsUrl(),
+  {      
+    ...options,
+    method: 'POST'
+    
+    
+  }
+);}
+  
+
+
+
+export const getPostSyncUpcomingEventsMutationOptions = <TError = PostSyncUpcomingEvents403,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postSyncUpcomingEvents>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postSyncUpcomingEvents>>, TError,void, TContext> => {
+
+const mutationKey = ['postSyncUpcomingEvents'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postSyncUpcomingEvents>>, void> = () => {
+          
+
+          return  postSyncUpcomingEvents(requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostSyncUpcomingEventsMutationResult = NonNullable<Awaited<ReturnType<typeof postSyncUpcomingEvents>>>
+    
+    export type PostSyncUpcomingEventsMutationError = PostSyncUpcomingEvents403
+
+    export const usePostSyncUpcomingEvents = <TError = PostSyncUpcomingEvents403,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postSyncUpcomingEvents>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postSyncUpcomingEvents>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getPostSyncUpcomingEventsMutationOptions(options), queryClient);
     }
     

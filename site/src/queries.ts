@@ -736,3 +736,32 @@ export const fetchCommunityStats = createServerFn().handler(async () => {
     totalEvents: Number(row.total_events),
   }
 })
+
+// ── Upcoming events ──────────────────────────────────────────────────────────
+
+export const fetchUpcomingEvents = createServerFn().handler(async () => {
+  const rows = await db
+    .selectFrom('upcoming_event')
+    .leftJoin('venue', 'upcoming_event.venue_id', 'venue.id')
+    .select([
+      'upcoming_event.id as id',
+      'upcoming_event.name as name',
+      'upcoming_event.starts_at as startsAt',
+      'upcoming_event.description as description',
+      'upcoming_event.location as location',
+      'venue.name as venueName',
+    ])
+    .where('upcoming_event.starts_at', '>=', new Date())
+    .orderBy('upcoming_event.starts_at')
+    .limit(5)
+    .execute()
+
+  return rows.map((row) => ({
+    id: row.id,
+    name: row.name,
+    startsAt: formatISO(row.startsAt),
+    description: row.description ?? null,
+    location: row.location ?? null,
+    venueName: row.venueName ?? null,
+  }))
+})

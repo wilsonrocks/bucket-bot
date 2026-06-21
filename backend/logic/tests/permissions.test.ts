@@ -9,7 +9,13 @@ vi.mock("../../logic/discord-client.js", () => ({
 }));
 
 import { getDiscordClient } from "../../logic/discord-client.js";
-import { canAccessTeam, getCaptainTeamIds, isRankingReporter } from "../../routes/v1/permissions.js";
+import {
+  canAccessTeam,
+  canManageEvent,
+  getCaptainTeamIds,
+  getOrganiserEventIds,
+  isRankingReporter,
+} from "../../routes/v1/permissions.js";
 
 // ── constants & helpers ────────────────────────────────────────────────────
 
@@ -198,5 +204,65 @@ describe("canAccessTeam", () => {
   test("returns false for a user with no role and no captaincy", async () => {
     makeMockDiscordClient(false);
     expect(await canAccessTeam("discord-nobody-xyz", teamId, dbClient)).toBe(false);
+  });
+});
+
+// ── event organiser access ──────────────────────────────────────────────────
+
+const TEST_ORGANISER_DISCORD = "test-permissions-discord-organiser";
+
+describe("getOrganiserEventIds / canManageEvent", () => {
+  let eventId: number;
+
+  beforeEach(async () => {
+    await dbClient
+      .deleteFrom("upcoming_event")
+      .where("google_event_id", "like", "test-permissions-%")
+      .execute();
+
+    eventId = (
+      await dbClient
+        .insertInto("upcoming_event")
+        .values({
+          google_event_id: "test-permissions-event-1",
+          name: "Test Event",
+          starts_at: new Date(),
+          organiser_discord_id: TEST_ORGANISER_DISCORD,
+        })
+        .returning("id")
+        .executeTakeFirstOrThrow()
+    ).id;
+  });
+
+  afterEach(async () => {
+    await dbClient
+      .deleteFrom("upcoming_event")
+      .where("google_event_id", "like", "test-permissions-%")
+      .execute();
+  });
+
+  test("getOrganiserEventIds returns events the user organises", async () => {
+    expect(await getOrganiserEventIds(TEST_ORGANISER_DISCORD, dbClient)).toEqual([
+      eventId,
+    ]);
+  });
+
+  test("getOrganiserEventIds returns empty for an unrelated user", async () => {
+    expect(await getOrganiserEventIds("discord-nobody-xyz", dbClient)).toEqual([]);
+  });
+
+  test("canManageEvent returns true for a ranking reporter on any event", async () => {
+    makeMockDiscordClient(true);
+    expect(await canManageEvent("discord-nobody-xyz", eventId, dbClient)).toBe(true);
+  });
+
+  test("canManageEvent returns true for the event's organiser", async () => {
+    makeMockDiscordClient(false);
+    expect(await canManageEvent(TEST_ORGANISER_DISCORD, eventId, dbClient)).toBe(true);
+  });
+
+  test("canManageEvent returns false for a non-reporter, non-organiser", async () => {
+    makeMockDiscordClient(false);
+    expect(await canManageEvent("discord-nobody-xyz", eventId, dbClient)).toBe(false);
   });
 });
