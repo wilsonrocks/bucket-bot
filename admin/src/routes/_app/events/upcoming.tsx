@@ -6,7 +6,7 @@ import {
   usePutUpcomingEventOrganiser,
   usePutUpcomingEventVenue,
 } from '@/api/hooks'
-import { RequireEventAccess } from '@/components/RequireEventAccess'
+import { RequireRankingReporter } from '@/components/RequireRankingReporter'
 import { usePermissions } from '@/hooks/usePermissions'
 import { Button, Group, Select, Table } from '@mantine/core'
 import { createFileRoute } from '@tanstack/react-router'
@@ -14,15 +14,15 @@ import { format, parseISO } from 'date-fns'
 
 export const Route = createFileRoute('/_app/events/upcoming')({
   component: () => (
-    <RequireEventAccess>
+    <RequireRankingReporter>
       <RouteComponent />
-    </RequireEventAccess>
+    </RequireRankingReporter>
   ),
   staticData: { title: 'Upcoming Events' },
 })
 
 function RouteComponent() {
-  const { rankingReporter, isEventOrganiser } = usePermissions()
+  const { rankingReporter } = usePermissions()
   const { data: events } = useGetUpcomingEvents()
   const { data: venues } = useGetVenues()
   const { data: discordUsers } = useGetAllDiscordUsers()
@@ -69,7 +69,6 @@ function RouteComponent() {
         </Table.Thead>
         <Table.Tbody>
           {events.map((event) => {
-            const canEditVenue = rankingReporter || isEventOrganiser(event.id)
             return (
               <Table.Tr key={event.id}>
                 <Table.Td>{event.name}</Table.Td>
@@ -99,7 +98,7 @@ function RouteComponent() {
                     data={venueOptions}
                     searchable
                     clearable
-                    disabled={!canEditVenue}
+                    disabled={!rankingReporter}
                     value={
                       event.venue_id != null ? String(event.venue_id) : null
                     }

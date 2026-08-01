@@ -13,28 +13,6 @@ export async function isRankingReporter(userId: string): Promise<boolean> {
   return member.roles.cache.has(RANKING_REPORTER_ROLE_ID);
 }
 
-export async function getOrganiserEventIds(
-  userId: string,
-  db: Kysely<DB>,
-): Promise<number[]> {
-  const rows = await db
-    .selectFrom("upcoming_event")
-    .select("id")
-    .where("organiser_discord_id", "=", userId)
-    .execute();
-
-  return rows.map((r) => r.id);
-}
-
-export async function canManageEvent(
-  userId: string,
-  eventId: number,
-  db: Kysely<DB>,
-): Promise<boolean> {
-  if (await isRankingReporter(userId)) return true;
-  return (await getOrganiserEventIds(userId, db)).includes(eventId);
-}
-
 export async function getCaptainTeamIds(userId: string, db: Kysely<DB>): Promise<number[]> {
   const rows = await db
     .selectFrom("membership")

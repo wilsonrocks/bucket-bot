@@ -16,7 +16,7 @@ import { Anchor, Badge, Divider, Group, ScrollArea, Stack, Text } from '@mantine
 import { AppNavLink } from './app-nav-link'
 export const AppNavbar = () => {
   const unmappedIdentities = useGetUnmappedIdentities()
-  const { rankingReporter, organiserOfEventIds } = usePermissions()
+  const { rankingReporter } = usePermissions()
   const auth = useAuth()
 
   return (
@@ -47,7 +47,7 @@ export const AppNavbar = () => {
             />
           </>
         )}
-        {(rankingReporter || organiserOfEventIds.length > 0) && (
+        {rankingReporter && (
           <AppNavLink to={UpcomingEventsRoute.to} label="Upcoming Events" />
         )}
         <AppNavLink to={TeamsRoute.to} label="Teams" />

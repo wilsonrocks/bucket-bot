@@ -1,6 +1,6 @@
 import { createRoute, z, type RouteHandler } from "@hono/zod-openapi";
 import type { AppEnv } from "../../../hono-env.js";
-import { canManageEvent, isRankingReporter } from "../permissions.js";
+import { isRankingReporter } from "../permissions.js";
 import { syncUpcomingEvents } from "../../../logic/calendar/sync-upcoming-events.js";
 
 const UpcomingEventSchema = z
@@ -90,8 +90,8 @@ export const setUpcomingEventVenueHandler: RouteHandler<
   const { id: userId } = c.get("jwtPayload") as { id: string };
   const id = Number(c.req.valid("param").id);
 
-  // The event's organiser (TO) or any ranking reporter can set the venue.
-  if (!(await canManageEvent(userId, id, c.get("db")))) {
+  // Only ranking reporters can edit upcoming events.
+  if (!(await isRankingReporter(userId))) {
     return c.json({ error: "Forbidden" }, 403);
   }
 

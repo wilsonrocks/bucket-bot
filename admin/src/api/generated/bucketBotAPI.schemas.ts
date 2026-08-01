@@ -637,7 +637,6 @@ export type PostBotEventId502 = {
 export type GetHasRole200 = {
   rankingReporter: boolean;
   captainOfTeamIds: number[];
-  organiserOfEventIds: number[];
 };
 
 export type GetHasRole400 = {

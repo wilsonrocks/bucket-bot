@@ -1,10 +1,6 @@
 import { createRoute, z, type RouteHandler } from "@hono/zod-openapi";
 import type { AppEnv } from "../../../hono-env.js";
-import {
-  getCaptainTeamIds,
-  getOrganiserEventIds,
-  isRankingReporter,
-} from "../permissions.js";
+import { getCaptainTeamIds, isRankingReporter } from "../permissions.js";
 
 const ErrorSchema = z.object({ error: z.string() });
 
@@ -18,7 +14,6 @@ export const hasRankingReporterRoleRoute = createRoute({
           schema: z.object({
             rankingReporter: z.boolean(),
             captainOfTeamIds: z.array(z.number()),
-            organiserOfEventIds: z.array(z.number()),
           }),
         },
       },
@@ -51,13 +46,7 @@ export const hasRankingReporterRole: RouteHandler<typeof hasRankingReporterRoleR
     return c.json({ error: "Failed to fetch Discord role" }, 500);
   }
 
-  const [captainOfTeamIds, organiserOfEventIds] = await Promise.all([
-    getCaptainTeamIds(userId, c.get("db")),
-    getOrganiserEventIds(userId, c.get("db")),
-  ]);
+  const captainOfTeamIds = await getCaptainTeamIds(userId, c.get("db"));
 
-  return c.json(
-    { rankingReporter, captainOfTeamIds, organiserOfEventIds },
-    200,
-  );
+  return c.json({ rankingReporter, captainOfTeamIds }, 200);
 };
