@@ -4,6 +4,7 @@ export const SiteNavbar = () => {
   return (
     <div className="flex h-full flex-col gap-1 overflow-y-auto">
       <AppNavLink to="/events" label="Events" />
+      <AppNavLink to="/upcoming-events" label="Upcoming Events" />
       <AppNavLink to="/players" label="Players" />
       <AppNavLink to="/rankings" label="Rankings" />
       <AppNavLink to="/faction-rankings" label="Factions" />

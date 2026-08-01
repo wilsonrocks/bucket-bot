@@ -1,4 +1,5 @@
 import { formatDate } from 'date-fns'
+import { Link } from '#/components/link'
 
 type UpcomingEvent = {
   id: number
@@ -24,7 +25,13 @@ export function UpcomingEventsCard({ data }: { data: UpcomingEvent[] }) {
               const place = event.venueName ?? event.location
               return (
                 <div key={event.id}>
-                  <p className="font-semibold">{event.name}</p>
+                  <Link
+                    to="/upcoming-event/$id"
+                    params={{ id: event.id }}
+                    className="font-semibold"
+                  >
+                    {event.name}
+                  </Link>
                   <p className="text-sm text-muted-foreground">
                     {formatDate(new Date(event.startsAt), 'd MMM yyyy')}
                     {place ? ` · ${place}` : ''}
@@ -40,6 +47,9 @@ export function UpcomingEventsCard({ data }: { data: UpcomingEvent[] }) {
           </div>
         )}
       </div>
+      <Link to="/upcoming-events" className="mt-2 text-sm">
+        All upcoming events →
+      </Link>
     </div>
   )
 }

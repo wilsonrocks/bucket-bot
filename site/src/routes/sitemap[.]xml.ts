@@ -20,6 +20,7 @@ const STATIC_ENTRIES: Entry[] = [
   { url: "/regions", priority: 0.8, changefreq: "weekly" },
   { url: "/how-it-works", priority: 0.5, changefreq: "yearly" },
   { url: "/events", priority: 0.3, changefreq: "weekly" },
+  { url: "/upcoming-events", priority: 0.4, changefreq: "weekly" },
   { url: "/teams", priority: 0.3, changefreq: "weekly" },
   { url: "/players", priority: 0.3, changefreq: "weekly" },
 ];
@@ -33,10 +34,15 @@ export const Route = createFileRoute("/sitemap.xml")({
   server: {
     handlers: {
       GET: async () => {
-        const [players, teams, tourneys] = await Promise.all([
+        const [players, teams, tourneys, upcomingEvents] = await Promise.all([
           db.selectFrom("player").select(["id", "created_at"]).execute(),
           db.selectFrom("team").select(["id", "created_at"]).execute(),
           db.selectFrom("tourney").select(["id", "date"]).execute(),
+          db
+            .selectFrom("upcoming_event")
+            .select(["id", "starts_at"])
+            .where("starts_at", ">=", new Date())
+            .execute(),
         ]);
 
         const dynamicEntries: Entry[] = [
@@ -57,6 +63,12 @@ export const Route = createFileRoute("/sitemap.xml")({
             priority: 0.6,
             changefreq: "monthly",
             lastmod: toIso(e.date),
+          })),
+          ...upcomingEvents.map((e): Entry => ({
+            url: `/upcoming-event/${e.id}`,
+            priority: 0.5,
+            changefreq: "weekly",
+            lastmod: toIso(e.starts_at),
           })),
         ];
 

@@ -765,3 +765,78 @@ export const fetchUpcomingEvents = createServerFn().handler(async () => {
     venueName: row.venueName ?? null,
   }))
 })
+
+export const fetchAllUpcomingEvents = createServerFn().handler(async () => {
+  const rows = await db
+    .selectFrom('upcoming_event')
+    .leftJoin('venue', 'upcoming_event.venue_id', 'venue.id')
+    .select([
+      'upcoming_event.id as id',
+      'upcoming_event.name as name',
+      'upcoming_event.starts_at as startsAt',
+      'upcoming_event.description as description',
+      'upcoming_event.location as location',
+      'venue.name as venueName',
+    ])
+    .where('upcoming_event.starts_at', '>=', new Date())
+    .orderBy('upcoming_event.starts_at')
+    .execute()
+
+  return rows.map((row) => ({
+    id: row.id,
+    name: row.name,
+    startsAt: formatISO(row.startsAt),
+    description: row.description ?? null,
+    location: row.location ?? null,
+    venueName: row.venueName ?? null,
+  }))
+})
+
+export const fetchUpcomingEvent = createServerFn()
+  .inputValidator((d: { id: number }) => d)
+  .handler(async ({ data: { id } }) => {
+    const row = await db
+      .selectFrom('upcoming_event')
+      .leftJoin('venue', 'upcoming_event.venue_id', 'venue.id')
+      .leftJoin(
+        'discord_user',
+        'discord_user.discord_user_id',
+        'upcoming_event.organiser_discord_id',
+      )
+      .leftJoin(
+        'player',
+        'player.discord_id',
+        'upcoming_event.organiser_discord_id',
+      )
+      .select([
+        'upcoming_event.id as id',
+        'upcoming_event.name as name',
+        'upcoming_event.starts_at as startsAt',
+        'upcoming_event.description as description',
+        'upcoming_event.location as location',
+        'venue.name as venueName',
+        'venue.town as venueTown',
+        'player.id as organiserPlayerId',
+        'player.name as organiserPlayerName',
+        'discord_user.discord_display_name as organiserDisplayName',
+        'discord_user.discord_username as organiserUsername',
+      ])
+      .where('upcoming_event.id', '=', id)
+      .executeTakeFirstOrThrow()
+
+    return {
+      id: row.id,
+      name: row.name,
+      startsAt: formatISO(row.startsAt),
+      description: row.description ?? null,
+      location: row.location ?? null,
+      venueName: row.venueName ?? null,
+      venueTown: row.venueTown ?? null,
+      organiserPlayerId: row.organiserPlayerId ?? null,
+      organiserName:
+        row.organiserPlayerName ??
+        row.organiserDisplayName ??
+        row.organiserUsername ??
+        null,
+    }
+  })
