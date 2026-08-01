@@ -3576,110 +3576,6 @@ export function useGetStatsCommunity<TData = Awaited<ReturnType<typeof getStatsC
 
 
 
-export type getUpcomingEventsResponse200 = {
-  data: GetUpcomingEvents200Item[]
-  status: 200
-}
-
-export type getUpcomingEventsResponseSuccess = (getUpcomingEventsResponse200) & {
-  headers: Headers;
-};
-;
-
-export type getUpcomingEventsResponse = (getUpcomingEventsResponseSuccess)
-
-export const getGetUpcomingEventsUrl = () => {
-
-
-  
-
-  return `/v1/upcoming-events`
-}
-
-export const getUpcomingEvents = async ( options?: RequestInit): Promise<getUpcomingEventsResponse> => {
-  
-  return customFetch<getUpcomingEventsResponse>(getGetUpcomingEventsUrl(),
-  {      
-    ...options,
-    method: 'GET'
-    
-    
-  }
-);}
-  
-
-
-
-
-export const getGetUpcomingEventsQueryKey = () => {
-    return [
-    `/v1/upcoming-events`
-    ] as const;
-    }
-
-    
-export const getGetUpcomingEventsQueryOptions = <TData = Awaited<ReturnType<typeof getUpcomingEvents>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUpcomingEvents>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetUpcomingEventsQueryKey();
-
-  
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getUpcomingEvents>>> = ({ signal }) => getUpcomingEvents({ signal, ...requestOptions });
-
-      
-
-      
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getUpcomingEvents>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type GetUpcomingEventsQueryResult = NonNullable<Awaited<ReturnType<typeof getUpcomingEvents>>>
-export type GetUpcomingEventsQueryError = unknown
-
-
-export function useGetUpcomingEvents<TData = Awaited<ReturnType<typeof getUpcomingEvents>>, TError = unknown>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUpcomingEvents>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getUpcomingEvents>>,
-          TError,
-          Awaited<ReturnType<typeof getUpcomingEvents>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customFetch>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetUpcomingEvents<TData = Awaited<ReturnType<typeof getUpcomingEvents>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUpcomingEvents>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getUpcomingEvents>>,
-          TError,
-          Awaited<ReturnType<typeof getUpcomingEvents>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customFetch>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetUpcomingEvents<TData = Awaited<ReturnType<typeof getUpcomingEvents>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUpcomingEvents>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-
-export function useGetUpcomingEvents<TData = Awaited<ReturnType<typeof getUpcomingEvents>>, TError = unknown>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUpcomingEvents>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
- , queryClient?: QueryClient 
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getGetUpcomingEventsQueryOptions(options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return { ...query, queryKey: queryOptions.queryKey };
-}
-
-
-
-
 export type postLongshanksEventIdResponse200 = {
   data: PostLongshanksEventId200
   status: 200
@@ -6462,7 +6358,111 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getPostRetryPipelineStepsMutationOptions(options), queryClient);
     }
-    export type putUpcomingEventsIdVenueResponse200 = {
+    export type getUpcomingEventsResponse200 = {
+  data: GetUpcomingEvents200Item[]
+  status: 200
+}
+
+export type getUpcomingEventsResponseSuccess = (getUpcomingEventsResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getUpcomingEventsResponse = (getUpcomingEventsResponseSuccess)
+
+export const getGetUpcomingEventsUrl = () => {
+
+
+  
+
+  return `/v1/upcoming-events`
+}
+
+export const getUpcomingEvents = async ( options?: RequestInit): Promise<getUpcomingEventsResponse> => {
+  
+  return customFetch<getUpcomingEventsResponse>(getGetUpcomingEventsUrl(),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
+
+export const getGetUpcomingEventsQueryKey = () => {
+    return [
+    `/v1/upcoming-events`
+    ] as const;
+    }
+
+    
+export const getGetUpcomingEventsQueryOptions = <TData = Awaited<ReturnType<typeof getUpcomingEvents>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUpcomingEvents>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetUpcomingEventsQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getUpcomingEvents>>> = ({ signal }) => getUpcomingEvents({ signal, ...requestOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getUpcomingEvents>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetUpcomingEventsQueryResult = NonNullable<Awaited<ReturnType<typeof getUpcomingEvents>>>
+export type GetUpcomingEventsQueryError = unknown
+
+
+export function useGetUpcomingEvents<TData = Awaited<ReturnType<typeof getUpcomingEvents>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUpcomingEvents>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getUpcomingEvents>>,
+          TError,
+          Awaited<ReturnType<typeof getUpcomingEvents>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetUpcomingEvents<TData = Awaited<ReturnType<typeof getUpcomingEvents>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUpcomingEvents>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getUpcomingEvents>>,
+          TError,
+          Awaited<ReturnType<typeof getUpcomingEvents>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetUpcomingEvents<TData = Awaited<ReturnType<typeof getUpcomingEvents>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUpcomingEvents>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetUpcomingEvents<TData = Awaited<ReturnType<typeof getUpcomingEvents>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUpcomingEvents>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetUpcomingEventsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+export type putUpcomingEventsIdVenueResponse200 = {
   data: PutUpcomingEventsIdVenue200
   status: 200
 }

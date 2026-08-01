@@ -11,7 +11,6 @@ const UpcomingEventSchema = z
     venue_id: z.number().nullable(),
     venue_name: z.string().nullable(),
     organiser_discord_id: z.string().nullable(),
-    description: z.string().nullable(),
     location: z.string().nullable(),
   })
   .passthrough();
@@ -46,7 +45,6 @@ export const getUpcomingEventsHandler: RouteHandler<
       "upcoming_event.venue_id",
       "venue.name as venue_name",
       "upcoming_event.organiser_discord_id",
-      "upcoming_event.description",
       "upcoming_event.location",
     ])
     .where("upcoming_event.starts_at", ">=", new Date())

@@ -281,12 +281,13 @@ export interface Tourney {
 
 export interface UpcomingEvent {
   created_at: Generated<Timestamp>;
-  description: string | null;
+  geom: string | null;
   google_event_id: string;
   id: Generated<number>;
   location: string | null;
   name: string;
   organiser_discord_id: string | null;
+  region_id: number | null;
   starts_at: Timestamp;
   venue_id: number | null;
 }

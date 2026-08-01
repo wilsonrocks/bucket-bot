@@ -81,9 +81,6 @@ function RouteComponent() {
           )}
         </p>
       )}
-      {event.description && (
-        <p className="mb-6 whitespace-pre-line">{event.description}</p>
-      )}
       <Link to="/upcoming-events">← All upcoming events</Link>
     </div>
   );

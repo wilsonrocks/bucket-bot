@@ -6,24 +6,41 @@ import { syncUpcomingEvents } from "../calendar/sync-upcoming-events";
 // A venue seeded by the test fixtures (Test Venue North West).
 const TEST_VENUE_ID = 5001;
 
+// postcodes.io stub: any postcode resolves to a London point (region id 7).
+const POSTCODES_IO_RESULT = {
+  status: 200,
+  result: {
+    latitude: 51.5,
+    longitude: -0.1,
+    region: "London",
+    country: "England",
+    postcode: "EC1A 1BB",
+  },
+};
+
 function mockCalendar(
   items: {
     id: string;
     summary: string;
     start: { dateTime?: string; date?: string };
     status?: string;
-    description?: string;
     location?: string;
   }[],
 ) {
+  // URL-aware: postcodes.io lookups get a geocode result, everything else gets
+  // the Google Calendar items payload.
   vi.stubGlobal(
     "fetch",
-    vi.fn(async () =>
-      new Response(JSON.stringify({ items }), {
+    vi.fn(async (input: unknown) => {
+      const url = String(input);
+      const body = url.includes("api.postcodes.io")
+        ? POSTCODES_IO_RESULT
+        : { items };
+      return new Response(JSON.stringify(body), {
         status: 200,
         headers: { "content-type": "application/json" },
-      }),
-    ),
+      });
+    }),
   );
 }
 
@@ -62,13 +79,12 @@ describe("syncUpcomingEvents", () => {
     expect(rows[0]!.name).toBe("Spring GT");
   });
 
-  test("stores and refreshes description and location", async () => {
+  test("stores and refreshes location", async () => {
     mockCalendar([
       {
         id: "g1",
         summary: "Spring GT",
         start: { dateTime: future(7) },
-        description: "A grand tournament",
         location: "The Hall, London",
       },
     ]);
@@ -79,7 +95,6 @@ describe("syncUpcomingEvents", () => {
       .selectAll()
       .where("google_event_id", "=", "g1")
       .executeTakeFirstOrThrow();
-    expect(row.description).toBe("A grand tournament");
     expect(row.location).toBe("The Hall, London");
 
     mockCalendar([
@@ -87,7 +102,6 @@ describe("syncUpcomingEvents", () => {
         id: "g1",
         summary: "Spring GT",
         start: { dateTime: future(7) },
-        description: "Updated blurb",
         location: "New Venue, Leeds",
       },
     ]);
@@ -98,8 +112,45 @@ describe("syncUpcomingEvents", () => {
       .selectAll()
       .where("google_event_id", "=", "g1")
       .executeTakeFirstOrThrow();
-    expect(row.description).toBe("Updated blurb");
     expect(row.location).toBe("New Venue, Leeds");
+  });
+
+  test("geocodes a location containing a UK postcode", async () => {
+    mockCalendar([
+      {
+        id: "g1",
+        summary: "Postcoded Event",
+        start: { dateTime: future(7) },
+        location: "The Hall, 1 High St, London EC1A 1BB",
+      },
+      {
+        id: "g2",
+        summary: "No Postcode Event",
+        start: { dateTime: future(9) },
+        location: "Somewhere vague",
+      },
+    ]);
+    await syncUpcomingEvents(dbClient);
+
+    const rows = await dbClient
+      .selectFrom("upcoming_event")
+      .select((eb) => [
+        "google_event_id",
+        "region_id",
+        eb.fn<number | null>("ST_X", ["geom"]).as("lng"),
+        eb.fn<number | null>("ST_Y", ["geom"]).as("lat"),
+      ])
+      .orderBy("google_event_id")
+      .execute();
+
+    const g1 = rows.find((r) => r.google_event_id === "g1")!;
+    expect(g1.region_id).toBe(7); // London
+    expect(g1.lng).toBeCloseTo(-0.1);
+    expect(g1.lat).toBeCloseTo(51.5);
+
+    const g2 = rows.find((r) => r.google_event_id === "g2")!;
+    expect(g2.region_id).toBeNull();
+    expect(g2.lng).toBeNull();
   });
 
   test("re-sync updates name/date but preserves admin-set venue_id", async () => {

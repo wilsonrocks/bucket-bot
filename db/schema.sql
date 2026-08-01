@@ -1,5 +1,5 @@
 
-\restrict yRdCiTIaMrM2izk7tlkVKiNBwL9LIInP8TT3P6WJwVrSuONVP6ZPpBVAnfcQfpl
+\restrict 0BeXHBUf79i9xVqnCPBhc7SsV1vvu4xHnpMqLuef87ZE8x5j1MvS1ZivMlgcEqN
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -347,8 +347,9 @@ CREATE TABLE public.upcoming_event (
     venue_id integer,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     organiser_discord_id text,
-    description text,
-    location text
+    location text,
+    geom public.geometry(Point,4326),
+    region_id integer
 );
 
     AS integer
@@ -623,10 +624,13 @@ ALTER TABLE ONLY public.tourney
     ADD CONSTRAINT tourney_venue_id_fkey FOREIGN KEY (venue_id) REFERENCES public.venue(id);
 
 ALTER TABLE ONLY public.upcoming_event
+    ADD CONSTRAINT upcoming_event_region_id_fkey FOREIGN KEY (region_id) REFERENCES public.region(id);
+
+ALTER TABLE ONLY public.upcoming_event
     ADD CONSTRAINT upcoming_event_venue_id_fkey FOREIGN KEY (venue_id) REFERENCES public.venue(id);
 
 ALTER TABLE ONLY public.venue
     ADD CONSTRAINT venue_region_id_fkey FOREIGN KEY (region_id) REFERENCES public.region(id);
 
-\unrestrict yRdCiTIaMrM2izk7tlkVKiNBwL9LIInP8TT3P6WJwVrSuONVP6ZPpBVAnfcQfpl
+\unrestrict 0BeXHBUf79i9xVqnCPBhc7SsV1vvu4xHnpMqLuef87ZE8x5j1MvS1ZivMlgcEqN
 

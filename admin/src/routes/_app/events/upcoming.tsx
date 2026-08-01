@@ -63,7 +63,6 @@ function RouteComponent() {
             <Table.Th>Event</Table.Th>
             <Table.Th>Date</Table.Th>
             <Table.Th>Location</Table.Th>
-            <Table.Th>Description</Table.Th>
             <Table.Th>Organiser</Table.Th>
             <Table.Th>Venue</Table.Th>
           </Table.Tr>
@@ -78,7 +77,6 @@ function RouteComponent() {
                   {format(parseISO(event.starts_at), 'dd MMM yyyy')}
                 </Table.Td>
                 <Table.Td>{event.location ?? '—'}</Table.Td>
-                <Table.Td>{event.description ?? '—'}</Table.Td>
                 <Table.Td>
                   <Select
                     placeholder="No organiser"

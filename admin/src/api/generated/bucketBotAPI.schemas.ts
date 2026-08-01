@@ -604,23 +604,6 @@ export type GetStatsCommunity200 = {
   totalEvents: number;
 };
 
-export type GetUpcomingEvents200Item = {
-  id: number;
-  name: string;
-  starts_at: string;
-  /** @nullable */
-  venue_id: number | null;
-  /** @nullable */
-  venue_name: string | null;
-  /** @nullable */
-  organiser_discord_id: string | null;
-  /** @nullable */
-  description: string | null;
-  /** @nullable */
-  location: string | null;
-  [key: string]: unknown | null;
-};
-
 export type PostLongshanksEventIdBody = {
   tierCode?: string;
 };
@@ -1023,6 +1006,21 @@ export type PostRetryPipelineStepsBody = {
 
 export type PostRetryPipelineSteps200 = {
   runId: string;
+};
+
+export type GetUpcomingEvents200Item = {
+  id: number;
+  name: string;
+  starts_at: string;
+  /** @nullable */
+  venue_id: number | null;
+  /** @nullable */
+  venue_name: string | null;
+  /** @nullable */
+  organiser_discord_id: string | null;
+  /** @nullable */
+  location: string | null;
+  [key: string]: unknown | null;
 };
 
 export type PutUpcomingEventsIdVenueBody = {

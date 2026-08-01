@@ -1,10 +1,11 @@
-import type { Kysely } from "kysely";
+import { sql, type Kysely } from "kysely";
 import type { DB } from "kysely-codegen";
+import { geocodePostcode } from "../postcodes/geocode-postcode.js";
+import { extractUkPostcode } from "../postcodes/extract-postcode.js";
 
 type GoogleCalendarEvent = {
   id: string;
   summary?: string;
-  description?: string;
   location?: string;
   status?: string;
   start?: { date?: string; dateTime?: string };
@@ -60,7 +61,6 @@ export async function syncUpcomingEvents(
         google_event_id: item.id,
         name: item.summary,
         starts_at: new Date(startsAt),
-        description: item.description ?? null,
         location: item.location ?? null,
       };
     })
@@ -75,15 +75,24 @@ export async function syncUpcomingEvents(
   }
 
   for (const event of events) {
+    const geo = await geocodeLocation(db, event.location);
+    // Always provide a geom expression (NULL when ungeocoded) so a re-sync
+    // clears stale coordinates if a location loses its postcode.
+    const geom = geo
+      ? sql<string>`ST_SetSRID(ST_MakePoint(${geo.longitude}, ${geo.latitude}), 4326)`
+      : sql<string>`NULL`;
+    const region_id = geo?.regionId ?? null;
+
     await db
       .insertInto("upcoming_event")
-      .values(event)
+      .values({ ...event, geom, region_id })
       .onConflict((oc) =>
         oc.column("google_event_id").doUpdateSet({
           name: event.name,
           starts_at: event.starts_at,
-          description: event.description,
           location: event.location,
+          geom,
+          region_id,
         }),
       )
       .execute();
@@ -103,4 +112,34 @@ export async function syncUpcomingEvents(
     upserted: events.length,
     deleted: Number(deleted.numDeletedRows ?? 0),
   };
+}
+
+/**
+ * Geocodes a free-text calendar location by extracting a UK postcode and
+ * running it through postcodes.io (the same path venues use). Returns null when
+ * no postcode can be found or the lookup fails — geocoding is best-effort.
+ */
+async function geocodeLocation(
+  db: Kysely<DB>,
+  location: string | null,
+): Promise<{ longitude: number; latitude: number; regionId: number | null } | null> {
+  const postcode = extractUkPostcode(location);
+  if (!postcode) return null;
+
+  const result = await geocodePostcode(postcode);
+  if ("error" in result) {
+    console.warn(
+      `syncUpcomingEvents: geocode failed for postcode "${postcode}": ${result.error}`,
+    );
+    return null;
+  }
+
+  const { latitude, longitude, region, country } = result;
+  const regionRow = await db
+    .selectFrom("region")
+    .select("id")
+    .where("postcodes_api_name", "=", region ?? country)
+    .executeTakeFirst();
+
+  return { longitude, latitude, regionId: regionRow?.id ?? null };
 }

@@ -747,7 +747,6 @@ export const fetchUpcomingEvents = createServerFn().handler(async () => {
       'upcoming_event.id as id',
       'upcoming_event.name as name',
       'upcoming_event.starts_at as startsAt',
-      'upcoming_event.description as description',
       'upcoming_event.location as location',
       'venue.name as venueName',
     ])
@@ -760,7 +759,6 @@ export const fetchUpcomingEvents = createServerFn().handler(async () => {
     id: row.id,
     name: row.name,
     startsAt: formatISO(row.startsAt),
-    description: row.description ?? null,
     location: row.location ?? null,
     venueName: row.venueName ?? null,
   }))
@@ -774,7 +772,6 @@ export const fetchAllUpcomingEvents = createServerFn().handler(async () => {
       'upcoming_event.id as id',
       'upcoming_event.name as name',
       'upcoming_event.starts_at as startsAt',
-      'upcoming_event.description as description',
       'upcoming_event.location as location',
       'venue.name as venueName',
     ])
@@ -786,7 +783,6 @@ export const fetchAllUpcomingEvents = createServerFn().handler(async () => {
     id: row.id,
     name: row.name,
     startsAt: formatISO(row.startsAt),
-    description: row.description ?? null,
     location: row.location ?? null,
     venueName: row.venueName ?? null,
   }))
@@ -812,7 +808,6 @@ export const fetchUpcomingEvent = createServerFn()
         'upcoming_event.id as id',
         'upcoming_event.name as name',
         'upcoming_event.starts_at as startsAt',
-        'upcoming_event.description as description',
         'upcoming_event.location as location',
         'venue.name as venueName',
         'venue.town as venueTown',
@@ -828,7 +823,6 @@ export const fetchUpcomingEvent = createServerFn()
       id: row.id,
       name: row.name,
       startsAt: formatISO(row.startsAt),
-      description: row.description ?? null,
       location: row.location ?? null,
       venueName: row.venueName ?? null,
       venueTown: row.venueTown ?? null,

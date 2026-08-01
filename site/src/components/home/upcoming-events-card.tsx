@@ -5,7 +5,6 @@ type UpcomingEvent = {
   id: number
   name: string
   startsAt: string
-  description: string | null
   location: string | null
   venueName: string | null
 }
@@ -36,11 +35,6 @@ export function UpcomingEventsCard({ data }: { data: UpcomingEvent[] }) {
                     {formatDate(new Date(event.startsAt), 'd MMM yyyy')}
                     {place ? ` · ${place}` : ''}
                   </p>
-                  {event.description && (
-                    <p className="line-clamp-2 text-sm text-muted-foreground">
-                      {event.description}
-                    </p>
-                  )}
                 </div>
               )
             })}
