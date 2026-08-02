@@ -5,7 +5,7 @@ import { format } from "date-fns";
 import { SITE_NAME, seo } from "#/helpers/seo";
 
 export const Route = createFileRoute("/events")({
-  staticData: { title: "Events" },
+  staticData: { title: "Past Events" },
   loader: async () => {
     const [tourneys, tiers] = await Promise.all([
       fetchTourneys(),
@@ -15,7 +15,7 @@ export const Route = createFileRoute("/events")({
   },
   head: () =>
     seo({
-      title: `Events — ${SITE_NAME}`,
+      title: `Past Events — ${SITE_NAME}`,
       description: "UK Malifaux tournament events.",
       path: "/events",
     }),

@@ -175,6 +175,16 @@ import {
   runPipelineHandler,
   runPipelineRoute,
 } from "./v1-routes/pipeline.js";
+import {
+  getUpcomingEventsHandler,
+  getUpcomingEventsRoute,
+  setUpcomingEventOrganiserHandler,
+  setUpcomingEventOrganiserRoute,
+  setUpcomingEventVenueHandler,
+  setUpcomingEventVenueRoute,
+  syncUpcomingEventsHandler,
+  syncUpcomingEventsRoute,
+} from "./v1-routes/upcoming-events.js";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) throw new Error("JWT_SECRET is not defined");
@@ -352,3 +362,7 @@ v1Router.openapi(updateFeatureFlagRoute, updateFeatureFlag);
 v1Router.openapi(pipelineJobStepsRoute, pipelineJobStepsHandler);
 v1Router.openapi(runPipelineRoute, runPipelineHandler);
 v1Router.openapi(retryPipelineStepsRoute, retryPipelineStepsHandler);
+v1Router.openapi(getUpcomingEventsRoute, getUpcomingEventsHandler);
+v1Router.openapi(setUpcomingEventVenueRoute, setUpcomingEventVenueHandler);
+v1Router.openapi(setUpcomingEventOrganiserRoute, setUpcomingEventOrganiserHandler);
+v1Router.openapi(syncUpcomingEventsRoute, syncUpcomingEventsHandler);

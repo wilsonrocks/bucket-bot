@@ -1007,3 +1007,61 @@ export type PostRetryPipelineSteps200 = {
   runId: string;
 };
 
+export type GetUpcomingEvents200Item = {
+  id: number;
+  name: string;
+  starts_at: string;
+  /** @nullable */
+  venue_id: number | null;
+  /** @nullable */
+  venue_name: string | null;
+  /** @nullable */
+  organiser_discord_id: string | null;
+  /** @nullable */
+  location: string | null;
+  [key: string]: unknown | null;
+};
+
+export type PutUpcomingEventsIdVenueBody = {
+  /** @nullable */
+  venue_id: number | null;
+};
+
+export type PutUpcomingEventsIdVenue200 = {
+  success: boolean;
+};
+
+export type PutUpcomingEventsIdVenue403 = {
+  error: string;
+};
+
+export type PutUpcomingEventsIdVenue404 = {
+  error: string;
+};
+
+export type PutUpcomingEventsIdOrganiserBody = {
+  /** @nullable */
+  organiser_discord_id: string | null;
+};
+
+export type PutUpcomingEventsIdOrganiser200 = {
+  success: boolean;
+};
+
+export type PutUpcomingEventsIdOrganiser403 = {
+  error: string;
+};
+
+export type PutUpcomingEventsIdOrganiser404 = {
+  error: string;
+};
+
+export type PostSyncUpcomingEvents200 = {
+  upserted: number;
+  deleted: number;
+};
+
+export type PostSyncUpcomingEvents403 = {
+  error: string;
+};
+

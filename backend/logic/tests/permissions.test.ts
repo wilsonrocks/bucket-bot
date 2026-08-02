@@ -9,7 +9,11 @@ vi.mock("../../logic/discord-client.js", () => ({
 }));
 
 import { getDiscordClient } from "../../logic/discord-client.js";
-import { canAccessTeam, getCaptainTeamIds, isRankingReporter } from "../../routes/v1/permissions.js";
+import {
+  canAccessTeam,
+  getCaptainTeamIds,
+  isRankingReporter,
+} from "../../routes/v1/permissions.js";
 
 // ── constants & helpers ────────────────────────────────────────────────────
 

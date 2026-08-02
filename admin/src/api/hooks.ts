@@ -11,6 +11,7 @@ import {
   getGetTourneyIdQueryKey,
   getGetTourneyQueryKey,
   getGetUnmappedIdentitiesQueryKey,
+  getGetUpcomingEventsQueryKey,
   getGetVenuesQueryKey,
   useDeleteTeamsId as useDeleteTeamsIdGenerated,
   useDeleteTeamsTeamIdMembersMembershipId as useDeleteTeamsTeamIdMembersMembershipIdGenerated,
@@ -42,6 +43,10 @@ import {
   useGetTourneyId as useGetTourneyIdGenerated,
   useGetTourneysPlayerPlayerId as useGetTourneysPlayerPlayerIdGenerated,
   useGetUnmappedIdentities as useGetUnmappedIdentitiesGenerated,
+  useGetUpcomingEvents as useGetUpcomingEventsGenerated,
+  usePutUpcomingEventsIdVenue as usePutUpcomingEventsIdVenueGenerated,
+  usePutUpcomingEventsIdOrganiser as usePutUpcomingEventsIdOrganiserGenerated,
+  usePostSyncUpcomingEvents as usePostSyncUpcomingEventsGenerated,
   useGetVenues as useGetVenuesGenerated,
   usePatchTeamsTeamIdMembersMembershipId as usePatchTeamsTeamIdMembersMembershipIdGenerated,
   usePostBotEventId as usePostBotEventIdGenerated,
@@ -69,7 +74,11 @@ import type {
   GetStatsCommunity200,
 } from './generated/bucketBotAPI.schemas'
 
-export type { GetPaintingAll200Item, GetPaintingRecent200, GetStatsCommunity200 }
+export type {
+  GetPaintingAll200Item,
+  GetPaintingRecent200,
+  GetStatsCommunity200,
+}
 
 // ── Re-export simple mutations (no invalidation needed) ────────────────────
 export {
@@ -228,7 +237,8 @@ export const useGetHasRole = (
     query: {
       ...options?.query,
       select: (res) => {
-        if (res.status !== 200) throw new Error(`unexpected status ${res.status}`)
+        if (res.status !== 200)
+          throw new Error(`unexpected status ${res.status}`)
         return res.data
       },
     },
@@ -252,7 +262,8 @@ export const useGetPlayerId = (
     query: {
       ...options?.query,
       select: (res) => {
-        if (res.status !== 200) throw new Error(`unexpected status ${res.status}`)
+        if (res.status !== 200)
+          throw new Error(`unexpected status ${res.status}`)
         return res.data
       },
     },
@@ -267,7 +278,8 @@ export const useGetPlayerIdTeams = (
     query: {
       ...options?.query,
       select: (res) => {
-        if (res.status !== 200) throw new Error(`unexpected status ${res.status}`)
+        if (res.status !== 200)
+          throw new Error(`unexpected status ${res.status}`)
         return res.data
       },
     },
@@ -282,7 +294,8 @@ export const useGetPlayerIdPaintingWins = (
     query: {
       ...options?.query,
       select: (res) => {
-        if (res.status !== 200) throw new Error(`unexpected status ${res.status}`)
+        if (res.status !== 200)
+          throw new Error(`unexpected status ${res.status}`)
         return res.data
       },
     },
@@ -298,7 +311,8 @@ export const useGetPlayerNameExistsPlayerId = (
     query: {
       ...options?.query,
       select: (res) => {
-        if (res.status !== 200) throw new Error(`unexpected status ${res.status}`)
+        if (res.status !== 200)
+          throw new Error(`unexpected status ${res.status}`)
         return res.data
       },
     },
@@ -330,7 +344,8 @@ export const useGetTourneysPlayerPlayerId = (
     query: {
       ...options?.query,
       select: (res) => {
-        if (res.status !== 200) throw new Error(`unexpected status ${res.status}`)
+        if (res.status !== 200)
+          throw new Error(`unexpected status ${res.status}`)
         return res.data
       },
     },
@@ -355,7 +370,8 @@ export const useGetRankingsPlayerIdTypeCode = (
     query: {
       ...options?.query,
       select: (res) => {
-        if (res.status !== 200) throw new Error(`unexpected status ${res.status}`)
+        if (res.status !== 200)
+          throw new Error(`unexpected status ${res.status}`)
         return res.data
       },
     },
@@ -370,7 +386,8 @@ export const useGetSearchDiscordUsers = (
     query: {
       ...options?.query,
       select: (res) => {
-        if (res.status !== 200) throw new Error(`unexpected status ${res.status}`)
+        if (res.status !== 200)
+          throw new Error(`unexpected status ${res.status}`)
         return res.data
       },
     },
@@ -385,7 +402,8 @@ export const useGetSearchPlayers = (
     query: {
       ...options?.query,
       select: (res) => {
-        if (res.status !== 200) throw new Error(`unexpected status ${res.status}`)
+        if (res.status !== 200)
+          throw new Error(`unexpected status ${res.status}`)
         return res.data
       },
     },
@@ -427,6 +445,55 @@ export const usePostCreateVenue = () => {
     mutation: {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: getGetVenuesQueryKey() })
+      },
+    },
+  })
+}
+
+// ── Upcoming Events ────────────────────────────────────────────────────────
+
+export const useGetUpcomingEvents = (
+  options?: Parameters<typeof useGetUpcomingEventsGenerated>[0],
+) =>
+  useGetUpcomingEventsGenerated({
+    ...options,
+    query: { ...options?.query, select: (res) => res.data },
+  })
+
+export const usePutUpcomingEventVenue = () => {
+  const queryClient = useQueryClient()
+  return usePutUpcomingEventsIdVenueGenerated({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: getGetUpcomingEventsQueryKey(),
+        })
+      },
+    },
+  })
+}
+
+export const usePutUpcomingEventOrganiser = () => {
+  const queryClient = useQueryClient()
+  return usePutUpcomingEventsIdOrganiserGenerated({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: getGetUpcomingEventsQueryKey(),
+        })
+      },
+    },
+  })
+}
+
+export const usePostSyncUpcomingEvents = () => {
+  const queryClient = useQueryClient()
+  return usePostSyncUpcomingEventsGenerated({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: getGetUpcomingEventsQueryKey(),
+        })
       },
     },
   })
@@ -535,7 +602,8 @@ export const useGetTeamRankingsTypeCode = (
     query: {
       ...options?.query,
       select: (res) => {
-        if (res.status !== 200) throw new Error(`unexpected status ${res.status}`)
+        if (res.status !== 200)
+          throw new Error(`unexpected status ${res.status}`)
         return res.data
       },
     },
@@ -560,7 +628,8 @@ export const useGetTeamsId = (
     query: {
       ...options?.query,
       select: (res) => {
-        if (res.status !== 200) throw new Error(`unexpected status ${res.status}`)
+        if (res.status !== 200)
+          throw new Error(`unexpected status ${res.status}`)
         return res.data
       },
     },
@@ -696,9 +765,9 @@ export const useGetRegionsOverTime = () =>
   useQuery({
     queryKey: ['/v1/regions-over-time'],
     queryFn: () =>
-      customFetch<{ data: RegionSnapshot[] }>(
-        '/v1/regions-over-time',
-      ).then((res) => res.data),
+      customFetch<{ data: RegionSnapshot[] }>('/v1/regions-over-time').then(
+        (res) => res.data,
+      ),
   })
 
 export const usePostGenerateRegionSnapshot = () =>
@@ -727,7 +796,8 @@ export const useGetPaintingRecent = (
     query: {
       ...options?.query,
       select: (res) => {
-        if (res.status !== 200) throw new Error(`unexpected status ${res.status}`)
+        if (res.status !== 200)
+          throw new Error(`unexpected status ${res.status}`)
         return res.data
       },
     },

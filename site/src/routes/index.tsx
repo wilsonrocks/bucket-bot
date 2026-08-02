@@ -10,6 +10,7 @@ import {
   fetchTeams,
   fetchTourneys,
   fetchTourney,
+  fetchUpcomingEvents,
 } from "#/queries";
 import { buildSrcSet } from "#/components/image";
 import { CommunityStatsCard } from "#/components/home/community-stats-card";
@@ -19,6 +20,7 @@ import { RecentEventCard } from "#/components/home/recent-event-card";
 import { RegionsMapCard } from "#/components/home/regions-map-card";
 import { TeamStandingsCard } from "#/components/home/team-standings-card";
 import { TopPlayersCard } from "#/components/home/top-players-card";
+import { UpcomingEventsCard } from "#/components/home/upcoming-events-card";
 
 export const Route = createFileRoute("/")({
   loader: async () => {
@@ -31,6 +33,7 @@ export const Route = createFileRoute("/")({
       painting,
       communityStats,
       regionsOverTime,
+      upcomingEvents,
     ] = await Promise.all([
       fetchRankings({ data: { typeCode: "ROLLING_YEAR" } }),
       fetchTeamRankings({ data: { typeCode: "ROLLING_YEAR" } }),
@@ -40,6 +43,7 @@ export const Route = createFileRoute("/")({
       fetchRecentPainting(),
       fetchCommunityStats(),
       fetchRegionsOverTime(),
+      fetchUpcomingEvents(),
     ]);
 
     const latestTourney = tourneys[0]
@@ -61,6 +65,7 @@ export const Route = createFileRoute("/")({
       communityStats,
       latestRegions,
       latestTourney,
+      upcomingEvents,
     };
   },
   head: ({ loaderData }) => {
@@ -103,6 +108,7 @@ function HomePage() {
     communityStats,
     latestRegions,
     latestTourney,
+    upcomingEvents,
   } = Route.useLoaderData();
 
   const recentEvent = latestTourney
@@ -128,6 +134,7 @@ function HomePage() {
       <TeamStandingsCard data={teamRankings as any} />
       <RegionsMapCard regions={latestRegions} />
       <RecentEventCard data={recentEvent} />
+      <UpcomingEventsCard data={upcomingEvents} />
       <CommunityStatsCard data={communityStats} />
       <FactionCard data={factionRankings as any} />
     </div>

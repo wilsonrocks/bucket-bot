@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as UpcomingEventsRouteImport } from './routes/upcoming-events'
 import { Route as TeamsRouteImport } from './routes/teams'
 import { Route as TeamRankingsRouteImport } from './routes/team-rankings'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
@@ -20,10 +21,16 @@ import { Route as FactionRankingsRouteImport } from './routes/faction-rankings'
 import { Route as EventsRouteImport } from './routes/events'
 import { Route as BestPaintedRouteImport } from './routes/best-painted'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as UpcomingEventIdRouteImport } from './routes/upcoming-event.$id'
 import { Route as TeamIdRouteImport } from './routes/team.$id'
 import { Route as PlayerIdRouteImport } from './routes/player.$id'
 import { Route as EventIdRouteImport } from './routes/event.$id'
 
+const UpcomingEventsRoute = UpcomingEventsRouteImport.update({
+  id: '/upcoming-events',
+  path: '/upcoming-events',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TeamsRoute = TeamsRouteImport.update({
   id: '/teams',
   path: '/teams',
@@ -79,6 +86,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UpcomingEventIdRoute = UpcomingEventIdRouteImport.update({
+  id: '/upcoming-event/$id',
+  path: '/upcoming-event/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TeamIdRoute = TeamIdRouteImport.update({
   id: '/team/$id',
   path: '/team/$id',
@@ -107,9 +119,11 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/team-rankings': typeof TeamRankingsRoute
   '/teams': typeof TeamsRoute
+  '/upcoming-events': typeof UpcomingEventsRoute
   '/event/$id': typeof EventIdRoute
   '/player/$id': typeof PlayerIdRoute
   '/team/$id': typeof TeamIdRoute
+  '/upcoming-event/$id': typeof UpcomingEventIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -123,9 +137,11 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/team-rankings': typeof TeamRankingsRoute
   '/teams': typeof TeamsRoute
+  '/upcoming-events': typeof UpcomingEventsRoute
   '/event/$id': typeof EventIdRoute
   '/player/$id': typeof PlayerIdRoute
   '/team/$id': typeof TeamIdRoute
+  '/upcoming-event/$id': typeof UpcomingEventIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -140,9 +156,11 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/team-rankings': typeof TeamRankingsRoute
   '/teams': typeof TeamsRoute
+  '/upcoming-events': typeof UpcomingEventsRoute
   '/event/$id': typeof EventIdRoute
   '/player/$id': typeof PlayerIdRoute
   '/team/$id': typeof TeamIdRoute
+  '/upcoming-event/$id': typeof UpcomingEventIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -158,9 +176,11 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/team-rankings'
     | '/teams'
+    | '/upcoming-events'
     | '/event/$id'
     | '/player/$id'
     | '/team/$id'
+    | '/upcoming-event/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -174,9 +194,11 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/team-rankings'
     | '/teams'
+    | '/upcoming-events'
     | '/event/$id'
     | '/player/$id'
     | '/team/$id'
+    | '/upcoming-event/$id'
   id:
     | '__root__'
     | '/'
@@ -190,9 +212,11 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/team-rankings'
     | '/teams'
+    | '/upcoming-events'
     | '/event/$id'
     | '/player/$id'
     | '/team/$id'
+    | '/upcoming-event/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -207,13 +231,22 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TeamRankingsRoute: typeof TeamRankingsRoute
   TeamsRoute: typeof TeamsRoute
+  UpcomingEventsRoute: typeof UpcomingEventsRoute
   EventIdRoute: typeof EventIdRoute
   PlayerIdRoute: typeof PlayerIdRoute
   TeamIdRoute: typeof TeamIdRoute
+  UpcomingEventIdRoute: typeof UpcomingEventIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/upcoming-events': {
+      id: '/upcoming-events'
+      path: '/upcoming-events'
+      fullPath: '/upcoming-events'
+      preLoaderRoute: typeof UpcomingEventsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/teams': {
       id: '/teams'
       path: '/teams'
@@ -291,6 +324,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/upcoming-event/$id': {
+      id: '/upcoming-event/$id'
+      path: '/upcoming-event/$id'
+      fullPath: '/upcoming-event/$id'
+      preLoaderRoute: typeof UpcomingEventIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/team/$id': {
       id: '/team/$id'
       path: '/team/$id'
@@ -327,9 +367,11 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TeamRankingsRoute: TeamRankingsRoute,
   TeamsRoute: TeamsRoute,
+  UpcomingEventsRoute: UpcomingEventsRoute,
   EventIdRoute: EventIdRoute,
   PlayerIdRoute: PlayerIdRoute,
   TeamIdRoute: TeamIdRoute,
+  UpcomingEventIdRoute: UpcomingEventIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
