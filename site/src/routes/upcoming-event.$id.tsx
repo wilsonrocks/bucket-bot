@@ -19,10 +19,18 @@ export const Route = createFileRoute("/upcoming-event/$id")({
   },
   head: ({ loaderData, params }) => {
     if (!loaderData) return {};
-    const place = loaderData.venueName ?? loaderData.location;
-    const description = `${loaderData.name}, an upcoming Malifaux event${
-      place ? ` at ${place}` : ""
-    }.`;
+    const venueName = loaderData.venueName
+      ? loaderData.venueTown
+        ? `${loaderData.venueName}, ${loaderData.venueTown}`
+        : loaderData.venueName
+      : loaderData.location;
+
+    const formattedDate = format(new Date(loaderData.startsAt), "d MMMM yyyy");
+
+    const description =
+      `${loaderData.name}, an upcoming Malifaux tournament on ${formattedDate}` +
+      (venueName ? ` at ${venueName}` : "") +
+      ".";
 
     const schema: WithContext<SportsEvent> = {
       "@context": "https://schema.org",
@@ -33,7 +41,7 @@ export const Route = createFileRoute("/upcoming-event/$id")({
       sport: "Malifaux",
       location: {
         "@type": "Place",
-        name: place ?? "United Kingdom",
+        name: venueName ?? "United Kingdom",
       },
     };
 
@@ -72,7 +80,11 @@ function RouteComponent() {
             <Link
               to="/player/$id"
               params={{ id: event.organiserPlayerId }}
-              search={{ tab: undefined, typeCode: undefined, painting: undefined }}
+              search={{
+                tab: undefined,
+                typeCode: undefined,
+                painting: undefined,
+              }}
             >
               {event.organiserName}
             </Link>

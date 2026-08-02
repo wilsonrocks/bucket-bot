@@ -8,7 +8,7 @@ import {
 } from '@/api/hooks'
 import { RequireRankingReporter } from '@/components/RequireRankingReporter'
 import { usePermissions } from '@/hooks/usePermissions'
-import { Button, Group, Select, Table } from '@mantine/core'
+import { Button, Group, Select, Table, Text } from '@mantine/core'
 import { createFileRoute } from '@tanstack/react-router'
 import { format, parseISO } from 'date-fns'
 
@@ -49,11 +49,14 @@ function RouteComponent() {
     <>
       {rankingReporter && (
         <Group justify="flex-end" mb="md">
+          <Text>
+            This pulls from the calendar automatically each day at 8am
+          </Text>
           <Button
             onClick={() => syncEvents.mutate(undefined)}
             loading={syncEvents.isPending}
           >
-            Sync now
+            Pull now
           </Button>
         </Group>
       )}
