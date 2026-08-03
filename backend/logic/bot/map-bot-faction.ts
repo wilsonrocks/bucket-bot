@@ -10,11 +10,11 @@ export function mapBotFactionToFactionCode(botFaction: string): Faction {
       return Faction.BAYOU;
     case "arcanists":
       return Faction.ARCANISTS;
-    case "explorers society":
+    case "explorers-society":
       return Faction.EXPLORER;
     case "neverborn":
       return Faction.NEVERBORN;
-    case "ten thunders":
+    case "ten-thunders":
       return Faction.THUNDERS;
     case "resurrectionists":
       return Faction.RESSERS;

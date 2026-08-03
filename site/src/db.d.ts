@@ -148,7 +148,7 @@ export interface Player {
 }
 
 export interface PlayerIdentity {
-  created_at: Generated<Timestamp | null>;
+  created_at: Generated<Timestamp>;
   external_id: string;
   id: Generated<number>;
   identity_provider_id: string;

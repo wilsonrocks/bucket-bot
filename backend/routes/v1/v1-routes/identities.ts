@@ -52,6 +52,11 @@ export const getUnmappedIdentities: RouteHandler<typeof getUnmappedIdentitiesRou
       "tourney.name as tourney_name",
       "result.place as tourney_place",
     ])
+    // Newest identities first — these are the ones an admin has just imported
+    // and still needs to map. A whole import shares one created_at (it's the
+    // transaction timestamp), so id breaks the tie within an event.
+    .orderBy("player_identity.created_at", "desc")
+    .orderBy("player_identity.id", "desc")
     .execute();
 
   const grouped = new Map();
