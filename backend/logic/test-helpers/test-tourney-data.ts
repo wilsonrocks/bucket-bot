@@ -1,4 +1,4 @@
-import { Kysely, InsertObject, InsertType, Insertable } from "kysely";
+import { Kysely, InsertObject, InsertType, Insertable, sql } from "kysely";
 import { DB } from "kysely-codegen";
 import { dbClient } from "../../db-client";
 import { subMonths, format } from "date-fns";
@@ -97,10 +97,7 @@ export async function addTestTourneyData(db: Kysely<DB>) {
     }),
   );
 
-  const tourneys = await db
-    .insertInto("tourney")
-    .values(testTourneys)
-    .execute();
+  await db.insertInto("tourney").values(testTourneys).execute();
 
   const tourney1Results: TestResult[] = [
     [1, Alice, 15, Faction.RESSERS, 3],
@@ -135,6 +132,17 @@ export async function addTestTourneyData(db: Kysely<DB>) {
     insertResults(testTourneys[2]!, tourney3Results, db),
     insertResults(testTourneys[3]!, tourney4Results, db),
   ]);
+
+  // venue/player/tourney are seeded with explicit ids, which leaves their
+  // sequences behind. Without this, any code under test that inserts a row
+  // normally (e.g. the import routes) collides with a fixture id.
+  for (const table of ["venue", "player", "tourney"]) {
+    await sql`select setval(
+      pg_get_serial_sequence(${table}, 'id'),
+      coalesce((select max(id) from ${sql.ref(table)}), 0) + 1,
+      false
+    )`.execute(db);
+  }
 
   async function insertResults(
     tourney: TestTourney,

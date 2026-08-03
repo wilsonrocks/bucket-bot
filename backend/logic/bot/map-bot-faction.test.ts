@@ -8,9 +8,9 @@ describe("mapBotFactionToFactionCode", () => {
     ["guild", Faction.GUILD],
     ["bayou", Faction.BAYOU],
     ["arcanists", Faction.ARCANISTS],
-    ["explorers society", Faction.EXPLORER],
+    ["explorers-society", Faction.EXPLORER],
     ["neverborn", Faction.NEVERBORN],
-    ["ten thunders", Faction.THUNDERS],
+    ["ten-thunders", Faction.THUNDERS],
     ["resurrectionists", Faction.RESSERS],
   ])('maps "%s" to %s', (input, expected) => {
     expect(mapBotFactionToFactionCode(input)).toBe(expected);
@@ -23,5 +23,10 @@ describe("mapBotFactionToFactionCode", () => {
   test("throws on old BOT bookmarklet names", () => {
     expect(() => mapBotFactionToFactionCode("thunders")).toThrow();
     expect(() => mapBotFactionToFactionCode("explorers")).toThrow();
+  });
+
+  test("throws on pre-BOT4 space-separated names", () => {
+    expect(() => mapBotFactionToFactionCode("ten thunders")).toThrow();
+    expect(() => mapBotFactionToFactionCode("explorers society")).toThrow();
   });
 });

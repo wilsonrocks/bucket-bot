@@ -25,5 +25,6 @@ export enum RankingType {
 
 export enum IdentityProvider {
   LONGSHANKS = "LONGSHANKS",
-  BOT = "BOT",
+  BOT = "BOT", // legacy Bag o Tools, keyed by player name — no longer imported
+  BOT4 = "BOT4",
 }

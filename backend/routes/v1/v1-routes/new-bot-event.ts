@@ -8,6 +8,9 @@ import { createIdentityWithPlaceholderPlayer } from "../../../logic/identities/c
 const BotApiLeagueEntrySchema = z.object({
   position: z.number(),
   name: z.string(),
+  // Opaque stable player id introduced in BOT4. Mixed format (Firebase push ids
+  // and UUIDs), so never validate it as a UUID.
+  uid: z.string(),
   faction: z.string(),
   w: z.number(),
   d: z.number(),
@@ -100,15 +103,15 @@ export const newBotEventHandler: RouteHandler<typeof newBotEventRoute, AppEnv> =
       apiData.league.map(async (entry) => {
         let dbPlayerIdentity = await trx
           .selectFrom("player_identity")
-          .where("identity_provider_id", "=", IdentityProvider.BOT)
-          .where("external_id", "=", entry.name)
+          .where("identity_provider_id", "=", IdentityProvider.BOT4)
+          .where("external_id", "=", entry.uid)
           .select("id")
           .executeTakeFirst();
 
         if (!dbPlayerIdentity) {
           dbPlayerIdentity = await createIdentityWithPlaceholderPlayer(trx, {
-            providerId: IdentityProvider.BOT,
-            externalId: entry.name,
+            providerId: IdentityProvider.BOT4,
+            externalId: entry.uid,
             providerName: entry.name,
           });
         }

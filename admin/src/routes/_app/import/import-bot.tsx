@@ -7,13 +7,16 @@ import { Route as EventIdRoute } from '../events.$id.edit.tsx'
 
 export const Route = createFileRoute('/_app/import/import-bot')({
   component: () => <RequireRankingReporter><RouteComponent /></RequireRankingReporter>,
-  staticData: { title: 'Import BOT Event' },
+  staticData: { title: 'Import BOT4 Event' },
 })
 
 function extractBotId(input: string): string | null {
-  const urlMatch = input.match(/bag-o-tools\.web\.app\/event\/([A-Za-z0-9]+)/)
+  // Accepts the event page URL (/events/<id>) and the API URL (/api/event/<id>)
+  const urlMatch = input.match(
+    /bag-o-tools\.web\.app\/(?:api\/event|events?)\/([A-Za-z0-9_-]+)/,
+  )
   if (urlMatch) return urlMatch[1]
-  if (/^[A-Za-z0-9]+$/.test(input.trim())) return input.trim()
+  if (/^[A-Za-z0-9_-]+$/.test(input.trim())) return input.trim()
   return null
 }
 
@@ -24,7 +27,7 @@ function RouteComponent() {
     validate: {
       botIdOrUrl: (value) => {
         if (!extractBotId(value)) {
-          return 'Please enter a valid BOT event ID or URL'
+          return 'Please enter a valid BOT4 event ID or URL'
         }
         return null
       },
@@ -56,8 +59,8 @@ function RouteComponent() {
       >
         <TextInput
           mb="md"
-          label="BOT Event ID or URL"
-          placeholder="Enter BOT event ID or URL"
+          label="BOT4 Event ID or URL"
+          placeholder="Enter BOT4 event ID or URL"
           {...form.getInputProps('botIdOrUrl')}
         />
         <Select

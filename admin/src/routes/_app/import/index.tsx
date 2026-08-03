@@ -25,7 +25,7 @@ function RouteComponent() {
           Import Longshanks Event
         </Button>
         <Button component={Link} to={ImportBotRoute.to}>
-          Import Bot Event
+          Import BOT4 Event
         </Button>
       </Group>
     </div>
