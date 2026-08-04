@@ -2,6 +2,7 @@ import { createRoute, z, type RouteHandler } from "@hono/zod-openapi";
 import { sql, type Kysely } from "kysely";
 import type { DB } from "kysely-codegen";
 import type { AppEnv } from "../../../hono-env.js";
+import { mergePlaceholderIntoPlayer } from "../../../logic/identities/merge-player.js";
 import { isRankingReporter } from "../permissions.js";
 
 const PlayerSearchResultSchema = z.object({
@@ -356,6 +357,192 @@ export const getPlayerPaintingWins: RouteHandler<
   }));
 
   return c.json(result as any, 200);
+};
+
+const PlayerIdentitySchema = z.object({
+  id: z.number(),
+  external_id: z.string(),
+  provider_id: z.string(),
+  provider_name: z.string(),
+  display_name: z.string(),
+  is_ignored: z.boolean(),
+  created_at: z.string(),
+  result_count: z.number(),
+});
+
+export const getPlayerIdentitiesRoute = createRoute({
+  method: "get",
+  path: "/player/{id}/identities",
+  request: {
+    params: z.object({ id: z.string() }),
+  },
+  responses: {
+    200: {
+      content: {
+        "application/json": { schema: z.array(PlayerIdentitySchema) },
+      },
+      description: "Identities linked to a player",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Invalid player ID",
+    },
+  },
+});
+
+export const getPlayerIdentities: RouteHandler<
+  typeof getPlayerIdentitiesRoute,
+  AppEnv
+> = async (c) => {
+  const { id } = c.req.valid("param");
+  const playerId = Number(id);
+  if (isNaN(playerId)) {
+    return c.json({ error: "Invalid player ID" }, 400);
+  }
+
+  const identities = await c
+    .get("db")
+    .selectFrom("player_identity")
+    .innerJoin(
+      "identity_provider",
+      "identity_provider.id",
+      "player_identity.identity_provider_id",
+    )
+    .where("player_identity.player_id", "=", playerId)
+    .select([
+      "player_identity.id",
+      "player_identity.external_id",
+      "identity_provider.id as provider_id",
+      "identity_provider.name as provider_name",
+      "player_identity.provider_name as display_name",
+      "player_identity.is_ignored",
+      "player_identity.created_at",
+      // count(*) is a bigint, which would serialise as a string — cast so the
+      // response matches the declared number.
+      (eb) =>
+        eb
+          .selectFrom("result")
+          .whereRef("result.player_identity_id", "=", "player_identity.id")
+          .select(sql<number>`count(*)::int`.as("count"))
+          .as("result_count"),
+    ])
+    .orderBy("player_identity.created_at", "desc")
+    .orderBy("player_identity.id", "desc")
+    .execute();
+
+  return c.json(identities as any, 200);
+};
+
+const MergePlayerBodySchema = z.object({
+  targetPlayerId: z.number().int().positive(),
+});
+
+export const mergePlayerIntoPlayerRoute = createRoute({
+  method: "post",
+  path: "/player/{id}/merge-into-player",
+  request: {
+    params: z.object({ id: z.coerce.number().int().positive() }),
+    body: {
+      content: { "application/json": { schema: MergePlayerBodySchema } },
+    },
+  },
+  responses: {
+    200: {
+      content: {
+        "application/json": { schema: z.object({ message: z.string() }) },
+      },
+      description: "Player merged into target player",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Merge not allowed",
+    },
+    403: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Forbidden",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Player not found",
+    },
+    409: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Merge conflicts with existing data",
+    },
+  },
+});
+
+export const mergePlayerIntoPlayer: RouteHandler<
+  typeof mergePlayerIntoPlayerRoute,
+  AppEnv
+> = async (c) => {
+  const { id: userId } = c.get("jwtPayload") as { id: string };
+  if (!(await isRankingReporter(userId))) {
+    return c.json({ error: "Forbidden" }, 403);
+  }
+
+  const { id } = c.req.valid("param");
+  const { targetPlayerId } = c.req.valid("json");
+
+  if (id === targetPlayerId) {
+    return c.json({ error: "Cannot merge a player into itself" }, 400);
+  }
+
+  const db = c.get("db");
+
+  const players = await db
+    .selectFrom("player")
+    .where("id", "in", [id, targetPlayerId])
+    .select(["id", "discord_id"])
+    .execute();
+
+  const source = players.find((p) => p.id === id);
+  const target = players.find((p) => p.id === targetPlayerId);
+
+  if (!source || !target) {
+    return c.json({ error: "Player not found" }, 404);
+  }
+
+  if (source.discord_id && target.discord_id) {
+    return c.json(
+      {
+        error:
+          "Both players are linked to a Discord user. Unlink one before merging.",
+      },
+      400,
+    );
+  }
+
+  if (source.discord_id) {
+    return c.json(
+      {
+        error:
+          "This player is linked to a Discord user and the target is not — merge the other player into this one instead.",
+      },
+      400,
+    );
+  }
+
+  try {
+    await db.transaction().execute(async (trx) => {
+      await mergePlaceholderIntoPlayer(trx, id, targetPlayerId);
+    });
+  } catch (error) {
+    // Both players hold team memberships covering the same dates, which the
+    // membership_no_overlapping_membership exclusion constraint forbids.
+    if ((error as { code?: string }).code === "23P01") {
+      return c.json(
+        {
+          error:
+            "These players have overlapping team memberships. Fix the memberships before merging.",
+        },
+        409,
+      );
+    }
+    throw error;
+  }
+
+  return c.json({ message: "Merged successfully" }, 200);
 };
 
 const UpdatePlayerBodySchema = z.object({
