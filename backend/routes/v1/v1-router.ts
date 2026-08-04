@@ -9,6 +9,8 @@ import {
   fetchDiscordUserIdsRoute,
   getAllDiscordUsers,
   getAllDiscordUsersRoute,
+  matchPlayerIdToDiscordUser,
+  matchPlayerIdToDiscordUserRoute,
   matchPlayerToDiscordUser,
   matchPlayerToDiscordUserRoute,
   searchDiscordUsersByName,
@@ -49,12 +51,16 @@ import {
 import {
   getPlayerById,
   getPlayerByIdRoute,
+  getPlayerIdentities,
+  getPlayerIdentitiesRoute,
   getPlayerPaintingWins,
   getPlayerPaintingWinsRoute,
   getPlayerTeams,
   getPlayerTeamsRoute,
   getPlayers,
   getPlayersRoute,
+  mergePlayerIntoPlayer,
+  mergePlayerIntoPlayerRoute,
   playerNameExistsHandler,
   playerNameExistsRoute,
   searchPlayersHandler,
@@ -338,6 +344,9 @@ v1Router.openapi(fetchDiscordUserIdsRoute, fetchAndStoreDiscordUserIds);
 v1Router.openapi(searchDiscordUsersRoute, searchDiscordUsersByName);
 v1Router.openapi(getAllDiscordUsersRoute, getAllDiscordUsers);
 v1Router.openapi(matchPlayerToDiscordUserRoute, matchPlayerToDiscordUser);
+v1Router.openapi(matchPlayerIdToDiscordUserRoute, matchPlayerIdToDiscordUser);
+v1Router.openapi(getPlayerIdentitiesRoute, getPlayerIdentities);
+v1Router.openapi(mergePlayerIntoPlayerRoute, mergePlayerIntoPlayer);
 v1Router.openapi(setIdentityIgnoredRoute, setIdentityIgnored);
 v1Router.openapi(mergeIdentityIntoPlayerRoute, mergeIdentityIntoPlayer);
 v1Router.openapi(postDiscordRankingsRoute, postDiscordRankingsHandler);

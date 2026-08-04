@@ -3,7 +3,8 @@ import { sql } from "kysely";
 import type { AppEnv } from "../../../hono-env.js";
 import { syncDiscordUsers } from "../../../logic/discord/sync-discord-users.js";
 import { runManualStep } from "../../../logic/pipeline/run-step.js";
-import { mergePlaceholderIntoPlayer } from "../../../logic/identities/merge-player.js";
+import { attachDiscordUserToPlayer } from "../../../logic/identities/merge-player.js";
+import { isRankingReporter } from "../permissions.js";
 
 const ErrorSchema = z.object({ error: z.string() });
 
@@ -144,31 +145,90 @@ export const matchPlayerToDiscordUser: RouteHandler<typeof matchPlayerToDiscordU
       .select("player_id")
       .executeTakeFirstOrThrow();
 
-    const placeholderId = identity.player_id!;
-
-    const existingPlayer = await trx
-      .selectFrom("player")
-      .where("discord_id", "=", discordUserId)
-      .select("id")
-      .executeTakeFirst();
-
-    if (!existingPlayer || existingPlayer.id === placeholderId) {
-      await trx
-        .updateTable("player")
-        .set({
-          discord_id: discordUserId,
-          name:
-            discordUser.discord_display_name ||
-            discordUser.discord_username ||
-            discordUser.discord_nickname ||
-            "Unknown User",
-        })
-        .where("id", "=", placeholderId)
-        .execute();
-    } else {
-      await mergePlaceholderIntoPlayer(trx, placeholderId, existingPlayer.id);
-    }
+    await attachDiscordUserToPlayer(trx, identity.player_id!, discordUser);
   });
 
   return c.json({ message: "Player matched to Discord user successfully" }, 200);
+};
+
+const MatchPlayerToDiscordBodySchema = z.object({
+  discordUserId: z.string().min(1),
+});
+
+export const matchPlayerIdToDiscordUserRoute = createRoute({
+  method: "post",
+  path: "/player/{id}/match-discord-user",
+  request: {
+    params: z.object({ id: z.coerce.number().int().positive() }),
+    body: {
+      content: { "application/json": { schema: MatchPlayerToDiscordBodySchema } },
+    },
+  },
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: z.object({ message: z.string(), playerId: z.number() }),
+        },
+      },
+      description: "Player matched to Discord user",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Player already linked to a Discord user",
+    },
+    403: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Forbidden",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Player or Discord user not found",
+    },
+  },
+});
+
+export const matchPlayerIdToDiscordUser: RouteHandler<typeof matchPlayerIdToDiscordUserRoute, AppEnv> = async (c) => {
+  const { id: userId } = c.get("jwtPayload") as { id: string };
+  if (!(await isRankingReporter(userId))) {
+    return c.json({ error: "Forbidden" }, 403);
+  }
+
+  const { id } = c.req.valid("param");
+  const { discordUserId } = c.req.valid("json");
+
+  const db = c.get("db");
+
+  const player = await db
+    .selectFrom("player")
+    .where("id", "=", id)
+    .select(["id", "discord_id"])
+    .executeTakeFirst();
+
+  if (!player) {
+    return c.json({ error: "Player not found" }, 404);
+  }
+
+  if (player.discord_id) {
+    return c.json({ error: "Player is already linked to a Discord user" }, 400);
+  }
+
+  const discordUser = await db
+    .selectFrom("discord_user")
+    .where("discord_user.discord_user_id", "=", discordUserId)
+    .selectAll()
+    .executeTakeFirst();
+
+  if (!discordUser) {
+    return c.json({ error: "Discord user not found" }, 404);
+  }
+
+  const survivingPlayerId = await db
+    .transaction()
+    .execute((trx) => attachDiscordUserToPlayer(trx, id, discordUser));
+
+  return c.json(
+    { message: "Player matched to Discord user successfully", playerId: survivingPlayerId },
+    200,
+  );
 };

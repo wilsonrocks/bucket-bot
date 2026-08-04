@@ -730,6 +730,68 @@ export type PostMatchPlayerToDiscordUser404 = {
   error: string;
 };
 
+export type PostPlayerIdMatchDiscordUserBody = {
+  /** @minLength 1 */
+  discordUserId: string;
+};
+
+export type PostPlayerIdMatchDiscordUser200 = {
+  message: string;
+  playerId: number;
+};
+
+export type PostPlayerIdMatchDiscordUser400 = {
+  error: string;
+};
+
+export type PostPlayerIdMatchDiscordUser403 = {
+  error: string;
+};
+
+export type PostPlayerIdMatchDiscordUser404 = {
+  error: string;
+};
+
+export type GetPlayerIdIdentities200Item = {
+  id: number;
+  external_id: string;
+  provider_id: string;
+  provider_name: string;
+  display_name: string;
+  is_ignored: boolean;
+  created_at: string;
+  result_count: number;
+};
+
+export type GetPlayerIdIdentities400 = {
+  error: string;
+};
+
+export type PostPlayerIdMergeIntoPlayerBody = {
+  /** @exclusiveMinimum 0 */
+  targetPlayerId: number;
+};
+
+export type PostPlayerIdMergeIntoPlayer200 = {
+  message: string;
+};
+
+export type PostPlayerIdMergeIntoPlayer400 = {
+  error: string;
+};
+
+export type PostPlayerIdMergeIntoPlayer403 = {
+  error: string;
+};
+
+export type PostPlayerIdMergeIntoPlayer404 = {
+  error: string;
+};
+
+export type PostPlayerIdMergeIntoPlayer409 = {
+  error: string;
+};
+
 export type PostPlayerIdentityIdIgnoreBody = {
   ignored: boolean;
 };

@@ -21,6 +21,8 @@ import {
   useGetFactionsOverTime as useGetFactionsOverTimeGenerated,
   useGetHasRole as useGetHasRoleGenerated,
   useGetPlayerId as useGetPlayerIdGenerated,
+  getGetPlayerIdIdentitiesQueryKey,
+  useGetPlayerIdIdentities as useGetPlayerIdIdentitiesGenerated,
   useGetPlayerIdPaintingWins as useGetPlayerIdPaintingWinsGenerated,
   useGetPlayerIdTeams as useGetPlayerIdTeamsGenerated,
   useGetPlayerNameExistsPlayerId as useGetPlayerNameExistsPlayerIdGenerated,
@@ -56,6 +58,8 @@ import {
   usePostLongshanksEventId as usePostLongshanksEventIdGenerated,
   usePostMatchPlayerToDiscordUser as usePostMatchPlayerToDiscordUserGenerated,
   usePostPlayerIdentityIdIgnore as usePostPlayerIdentityIdIgnoreGenerated,
+  usePostPlayerIdMatchDiscordUser as usePostPlayerIdMatchDiscordUserGenerated,
+  usePostPlayerIdMergeIntoPlayer as usePostPlayerIdMergeIntoPlayerGenerated,
   usePostPostDiscordEventTourneyId as usePostPostDiscordEventTourneyIdGenerated,
   usePostTeamsTeamIdMembers as usePostTeamsTeamIdMembersGenerated,
   usePostTourney as usePostTourneyGenerated,
@@ -290,6 +294,22 @@ export const useGetPlayerIdPaintingWins = (
   options?: Parameters<typeof useGetPlayerIdPaintingWinsGenerated>[1],
 ) =>
   useGetPlayerIdPaintingWinsGenerated(id, {
+    ...options,
+    query: {
+      ...options?.query,
+      select: (res) => {
+        if (res.status !== 200)
+          throw new Error(`unexpected status ${res.status}`)
+        return res.data
+      },
+    },
+  })
+
+export const useGetPlayerIdIdentities = (
+  id: string,
+  options?: Parameters<typeof useGetPlayerIdIdentitiesGenerated>[1],
+) =>
+  useGetPlayerIdIdentitiesGenerated(id, {
     ...options,
     query: {
       ...options?.query,
@@ -539,11 +559,56 @@ export const usePostMatchPlayerToDiscordUser = () => {
   })
 }
 
-export const usePostPlayerIdentityIdIgnore = () => {
+export const usePostPlayerIdentityIdIgnore = (playerId?: number) => {
   const queryClient = useQueryClient()
   return usePostPlayerIdentityIdIgnoreGenerated({
     mutation: {
       onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: getGetUnmappedIdentitiesQueryKey(),
+        })
+        if (playerId !== undefined) {
+          queryClient.invalidateQueries({
+            queryKey: getGetPlayerIdIdentitiesQueryKey(String(playerId)),
+          })
+        }
+      },
+    },
+  })
+}
+
+export const usePostPlayerIdMatchDiscordUser = (playerId: number) => {
+  const queryClient = useQueryClient()
+  return usePostPlayerIdMatchDiscordUserGenerated({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: getGetPlayersQueryKey() })
+        queryClient.invalidateQueries({
+          queryKey: getGetPlayerIdQueryKey(String(playerId)),
+        })
+        queryClient.invalidateQueries({
+          queryKey: getGetPlayerIdIdentitiesQueryKey(String(playerId)),
+        })
+        queryClient.invalidateQueries({
+          queryKey: getGetUnmappedIdentitiesQueryKey(),
+        })
+      },
+    },
+  })
+}
+
+export const usePostPlayerIdMergeIntoPlayer = (playerId: number) => {
+  const queryClient = useQueryClient()
+  return usePostPlayerIdMergeIntoPlayerGenerated({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: getGetPlayersQueryKey() })
+        queryClient.invalidateQueries({
+          queryKey: getGetPlayerIdQueryKey(String(playerId)),
+        })
+        queryClient.invalidateQueries({
+          queryKey: getGetPlayerIdIdentitiesQueryKey(String(playerId)),
+        })
         queryClient.invalidateQueries({
           queryKey: getGetUnmappedIdentitiesQueryKey(),
         })
