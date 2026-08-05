@@ -1,4 +1,6 @@
 import {
+  useDeletePlayerIdDiscordUser,
+  useDeletePlayerIdentityIdPlayer,
   useGetPlayerId,
   useGetPlayerIdIdentities,
   useGetPlayerNameExistsPlayerId,
@@ -25,6 +27,7 @@ import {
 } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { useDebouncedValue } from '@mantine/hooks'
+import { modals } from '@mantine/modals'
 import { notifications } from '@mantine/notifications'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
@@ -57,6 +60,37 @@ function notifyFailure(
 function IdentitiesPanel({ playerId }: { playerId: number }) {
   const { data: identities } = useGetPlayerIdIdentities(String(playerId))
   const ignoreMutation = usePostPlayerIdentityIdIgnore(playerId)
+  const detachMutation = useDeletePlayerIdentityIdPlayer(playerId)
+
+  const confirmDetach = (identity: { id: number; display_name: string }) =>
+    modals.openConfirmModal({
+      title: 'Remove identity from this player',
+      centered: true,
+      labels: { confirm: 'Remove', cancel: 'Cancel' },
+      confirmProps: { color: 'red' },
+      children: (
+        <Text size="sm">
+          {`"${identity.display_name}" and its tournament results move off this player and back to the Identities page, where they can be reassigned. Until then those results don't score for anyone.`}
+        </Text>
+      ),
+      onConfirm: () =>
+        detachMutation.mutate(
+          { id: identity.id },
+          {
+            onSuccess: (res) => {
+              if (res.status !== 200) {
+                notifyFailure('Could not remove identity', res)
+                return
+              }
+              notifications.show({
+                title: 'Removed',
+                message: `${identity.display_name} is now unassigned`,
+                color: 'green',
+              })
+            },
+          },
+        ),
+    })
 
   return (
     <Paper withBorder p="md" mb="md">
@@ -94,20 +128,31 @@ function IdentitiesPanel({ playerId }: { playerId: number }) {
                 </Table.Td>
                 <Table.Td>{identity.result_count}</Table.Td>
                 <Table.Td>
-                  <Button
-                    variant="subtle"
-                    color="gray"
-                    size="compact-sm"
-                    loading={ignoreMutation.isPending}
-                    onClick={() =>
-                      ignoreMutation.mutate({
-                        id: identity.id,
-                        data: { ignored: !identity.is_ignored },
-                      })
-                    }
-                  >
-                    {identity.is_ignored ? 'Un-ignore' : 'Ignore'}
-                  </Button>
+                  <Group gap="xs" justify="flex-end" wrap="nowrap">
+                    <Button
+                      variant="subtle"
+                      color="gray"
+                      size="compact-sm"
+                      loading={ignoreMutation.isPending}
+                      onClick={() =>
+                        ignoreMutation.mutate({
+                          id: identity.id,
+                          data: { ignored: !identity.is_ignored },
+                        })
+                      }
+                    >
+                      {identity.is_ignored ? 'Un-ignore' : 'Ignore'}
+                    </Button>
+                    <Button
+                      variant="subtle"
+                      color="red"
+                      size="compact-sm"
+                      loading={detachMutation.isPending}
+                      onClick={() => confirmDetach(identity)}
+                    >
+                      Remove
+                    </Button>
+                  </Group>
                 </Table.Td>
               </Table.Tr>
             ))}
@@ -115,6 +160,61 @@ function IdentitiesPanel({ playerId }: { playerId: number }) {
         </Table>
       )}
     </Paper>
+  )
+}
+
+function UnlinkDiscordButton({
+  playerId,
+  discordName,
+}: {
+  playerId: number
+  discordName: string
+}) {
+  const unlinkMutation = useDeletePlayerIdDiscordUser(playerId)
+
+  const confirmUnlink = () =>
+    modals.openConfirmModal({
+      title: 'Unlink Discord account',
+      centered: true,
+      labels: { confirm: 'Unlink', cancel: 'Cancel' },
+      confirmProps: { color: 'red' },
+      children: (
+        <Text size="sm">
+          {`${discordName} will no longer be linked to this player, and loses any
+          admin access that came with it until the account is linked again. The
+          player keeps its name and identities — rename it below if it should
+          now be someone else.`}
+        </Text>
+      ),
+      onConfirm: () =>
+        unlinkMutation.mutate(
+          { id: playerId },
+          {
+            onSuccess: (res) => {
+              if (res.status !== 200) {
+                notifyFailure('Could not unlink', res)
+                return
+              }
+              notifications.show({
+                title: 'Unlinked',
+                message: `${discordName} unlinked from this player`,
+                color: 'green',
+              })
+            },
+          },
+        ),
+    })
+
+  return (
+    <Button
+      variant="subtle"
+      color="red"
+      size="compact-sm"
+      loading={unlinkMutation.isPending}
+      onClick={confirmUnlink}
+    >
+      Unlink
+    </Button>
   )
 }
 
@@ -296,16 +396,26 @@ function RouteComponent() {
           Discord Account
         </Title>
         {player.discord_id ? (
-          <Group>
-            <Avatar src={player.discord_avatar_url ?? undefined} size="md" />
-            <div>
-              <Text size="sm" fw={500}>
-                {player.discord_display_name ?? '—'}
-              </Text>
-              <Text size="sm" c="dimmed">
-                {player.discord_username ? `@${player.discord_username}` : '—'}
-              </Text>
-            </div>
+          <Group justify="space-between">
+            <Group>
+              <Avatar src={player.discord_avatar_url ?? undefined} size="md" />
+              <div>
+                <Text size="sm" fw={500}>
+                  {player.discord_display_name ?? '—'}
+                </Text>
+                <Text size="sm" c="dimmed">
+                  {player.discord_username ? `@${player.discord_username}` : '—'}
+                </Text>
+              </div>
+            </Group>
+            <UnlinkDiscordButton
+              playerId={player.id}
+              discordName={
+                player.discord_display_name ??
+                player.discord_username ??
+                'This Discord account'
+              }
+            />
           </Group>
         ) : (
           <>

@@ -1,6 +1,7 @@
 import { createRoute, z, type RouteHandler } from "@hono/zod-openapi";
 import type { AppEnv } from "../../../hono-env.js";
 import { mergePlaceholderIntoPlayer } from "../../../logic/identities/merge-player.js";
+import { isRankingReporter } from "../permissions.js";
 
 const ErrorSchema = z.object({ error: z.string() });
 
@@ -34,12 +35,19 @@ export const getUnmappedIdentitiesRoute = createRoute({
 export const getUnmappedIdentities: RouteHandler<typeof getUnmappedIdentitiesRoute, AppEnv> = async (c) => {
   const allUnmappedPlayers = await c.get("db")
     .selectFrom("player_identity")
-    .innerJoin("player", "player.id", "player_identity.player_id")
+    .leftJoin("player", "player.id", "player_identity.player_id")
     .innerJoin("identity_provider", "player_identity.identity_provider_id", "identity_provider.id")
-    .innerJoin("result", "result.player_identity_id", "player_identity.id")
-    .innerJoin("tourney", "result.tourney_id", "tourney.id")
-    .innerJoin("faction", "result.faction_code", "faction.name_code")
-    .where("player.discord_id", "is", null)
+    // Left-joined: an identity detached from its player may have no results yet,
+    // and it still needs to show up here so it can be reassigned.
+    .leftJoin("result", "result.player_identity_id", "player_identity.id")
+    .leftJoin("tourney", "result.tourney_id", "tourney.id")
+    .leftJoin("faction", "result.faction_code", "faction.name_code")
+    .where((eb) =>
+      eb.or([
+        eb("player_identity.player_id", "is", null),
+        eb("player.discord_id", "is", null),
+      ]),
+    )
     .where("player_identity.is_ignored", "=", false)
     .select([
       "player_identity.id as player_identity_id",
@@ -72,6 +80,11 @@ export const getUnmappedIdentities: RouteHandler<typeof getUnmappedIdentitiesRou
         results: [],
       });
     }
+    // A resultless identity still yields one row, with every result column null.
+    // Results whose tourney has gone are skipped as they were under the old
+    // inner joins — result.tourney_id is nullable.
+    if (row.tourney_name === null || row.faction_name === null) continue;
+
     grouped.get(row.player_identity_id).results.push({
       tourney_id: row.tourney_id,
       tourney_name: row.tourney_name,
@@ -122,6 +135,68 @@ export const setIdentityIgnored: RouteHandler<typeof setIdentityIgnoredRoute, Ap
   return c.json({ message: "Identity updated" }, 200);
 };
 
+export const detachIdentityFromPlayerRoute = createRoute({
+  method: "delete",
+  path: "/player-identity/{id}/player",
+  request: {
+    params: z.object({ id: z.coerce.number().int().positive() }),
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.object({ message: z.string() }) } },
+      description: "Identity detached from its player",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Identity is not attached to a player",
+    },
+    403: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Forbidden",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Identity not found",
+    },
+  },
+});
+
+export const detachIdentityFromPlayer: RouteHandler<typeof detachIdentityFromPlayerRoute, AppEnv> = async (c) => {
+  const { id: userId } = c.get("jwtPayload") as { id: string };
+  if (!(await isRankingReporter(userId))) {
+    return c.json({ error: "Forbidden" }, 403);
+  }
+
+  const { id } = c.req.valid("param");
+
+  const db = c.get("db");
+
+  const identity = await db
+    .selectFrom("player_identity")
+    .where("id", "=", id)
+    .select(["id", "player_id"])
+    .executeTakeFirst();
+
+  if (!identity) {
+    return c.json({ error: "Identity not found" }, 404);
+  }
+
+  if (!identity.player_id) {
+    return c.json({ error: "Identity is not attached to a player" }, 400);
+  }
+
+  // Results hang off player_identity_id, so they travel with the identity. The
+  // old player is left in place — it may still hold other identities, and if it
+  // doesn't an admin can merge or leave it.
+  await db
+    .updateTable("player_identity")
+    .set({ player_id: null })
+    .where("id", "=", id)
+    .execute();
+
+  return c.json({ message: "Identity detached successfully" }, 200);
+};
+
 const MergeIntoPlayerBodySchema = z.object({
   targetPlayerId: z.number().int().positive(),
 });
@@ -139,10 +214,6 @@ export const mergeIdentityIntoPlayerRoute = createRoute({
     200: {
       content: { "application/json": { schema: z.object({ message: z.string() }) } },
       description: "Identity merged into target player",
-    },
-    400: {
-      content: { "application/json": { schema: ErrorSchema } },
-      description: "Identity has no placeholder player",
     },
     404: {
       content: { "application/json": { schema: ErrorSchema } },
@@ -167,8 +238,16 @@ export const mergeIdentityIntoPlayer: RouteHandler<typeof mergeIdentityIntoPlaye
     return c.json({ error: "Identity not found" }, 404);
   }
 
+  // A detached identity has no placeholder player to merge away, so it just
+  // moves onto the target directly.
   if (!identity.player_id) {
-    return c.json({ error: "Identity has no placeholder player" }, 400);
+    await db
+      .updateTable("player_identity")
+      .set({ player_id: targetPlayerId })
+      .where("id", "=", id)
+      .execute();
+
+    return c.json({ message: "Merged successfully" }, 200);
   }
 
   if (identity.player_id !== targetPlayerId) {

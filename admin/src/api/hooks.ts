@@ -56,6 +56,8 @@ import {
   usePostCreateVenue as usePostCreateVenueGenerated,
   usePostFetchDiscordUserIds as usePostFetchDiscordUserIdsGenerated,
   usePostLongshanksEventId as usePostLongshanksEventIdGenerated,
+  useDeletePlayerIdDiscordUser as useDeletePlayerIdDiscordUserGenerated,
+  useDeletePlayerIdentityIdPlayer as useDeletePlayerIdentityIdPlayerGenerated,
   usePostMatchPlayerToDiscordUser as usePostMatchPlayerToDiscordUserGenerated,
   usePostPlayerIdentityIdIgnore as usePostPlayerIdentityIdIgnoreGenerated,
   usePostPlayerIdMatchDiscordUser as usePostPlayerIdMatchDiscordUserGenerated,
@@ -586,6 +588,40 @@ export const usePostPlayerIdMatchDiscordUser = (playerId: number) => {
         queryClient.invalidateQueries({
           queryKey: getGetPlayerIdQueryKey(String(playerId)),
         })
+        queryClient.invalidateQueries({
+          queryKey: getGetPlayerIdIdentitiesQueryKey(String(playerId)),
+        })
+        queryClient.invalidateQueries({
+          queryKey: getGetUnmappedIdentitiesQueryKey(),
+        })
+      },
+    },
+  })
+}
+
+export const useDeletePlayerIdDiscordUser = (playerId: number) => {
+  const queryClient = useQueryClient()
+  return useDeletePlayerIdDiscordUserGenerated({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: getGetPlayersQueryKey() })
+        queryClient.invalidateQueries({
+          queryKey: getGetPlayerIdQueryKey(String(playerId)),
+        })
+        // Unlinking changes whether this player's identities count as unmapped.
+        queryClient.invalidateQueries({
+          queryKey: getGetUnmappedIdentitiesQueryKey(),
+        })
+      },
+    },
+  })
+}
+
+export const useDeletePlayerIdentityIdPlayer = (playerId: number) => {
+  const queryClient = useQueryClient()
+  return useDeletePlayerIdentityIdPlayerGenerated({
+    mutation: {
+      onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: getGetPlayerIdIdentitiesQueryKey(String(playerId)),
         })

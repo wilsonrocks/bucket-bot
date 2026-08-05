@@ -15,6 +15,8 @@ import { getDiscordClient } from "../../../logic/discord-client.js";
 import {
   matchPlayerIdToDiscordUser,
   matchPlayerIdToDiscordUserRoute,
+  unlinkPlayerFromDiscordUser,
+  unlinkPlayerFromDiscordUserRoute,
 } from "./discord-id";
 import {
   getPlayerIdentities,
@@ -53,6 +55,7 @@ function makeApp() {
   app.openapi(getPlayerIdentitiesRoute, getPlayerIdentities);
   app.openapi(mergePlayerIntoPlayerRoute, mergePlayerIntoPlayer);
   app.openapi(matchPlayerIdToDiscordUserRoute, matchPlayerIdToDiscordUser);
+  app.openapi(unlinkPlayerFromDiscordUserRoute, unlinkPlayerFromDiscordUser);
   return app;
 }
 
@@ -73,6 +76,12 @@ function matchDiscord(playerId: number, discordUserId: string) {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ discordUserId }),
+  });
+}
+
+function unlinkDiscord(playerId: number) {
+  return makeApp().request(`/player/${playerId}/discord-user`, {
+    method: "DELETE",
   });
 }
 
@@ -503,5 +512,93 @@ describe("POST /player/{id}/match-discord-user", () => {
 
     const response = await matchDiscord(playerId, "does-not-exist");
     expect(response.status).toBe(404);
+  });
+});
+
+describe("DELETE /player/{id}/discord-user", () => {
+  async function addLinkedPlayer(name: string, externalId: string) {
+    await addDiscordUser(DISCORD_ALICE, "Alice");
+    const { playerId, identityId } = await addPlayerWithIdentity(
+      name,
+      IdentityProvider.BOT4,
+      externalId,
+    );
+    await dbClient
+      .updateTable("player")
+      .set({ discord_id: DISCORD_ALICE })
+      .where("id", "=", playerId)
+      .execute();
+    return { playerId, identityId };
+  }
+
+  test("clears the Discord link but keeps the name and identities", async () => {
+    const { playerId, identityId } = await addLinkedPlayer(
+      "Linked Player",
+      "uid-to-unlink",
+    );
+
+    const response = await unlinkDiscord(playerId);
+    expect(response.status).toBe(200);
+
+    const player = await dbClient
+      .selectFrom("player")
+      .where("id", "=", playerId)
+      .selectAll()
+      .executeTakeFirstOrThrow();
+    expect(player.discord_id).toBeNull();
+    expect(player.name).toBe("Linked Player");
+
+    const identity = await dbClient
+      .selectFrom("player_identity")
+      .where("id", "=", identityId)
+      .select("player_id")
+      .executeTakeFirstOrThrow();
+    expect(identity.player_id).toBe(playerId);
+  });
+
+  test("the player can be linked to a Discord user again afterwards", async () => {
+    const { playerId } = await addLinkedPlayer("Relink Me", "uid-to-relink");
+    await addDiscordUser(DISCORD_BOB, "Bob");
+
+    expect((await unlinkDiscord(playerId)).status).toBe(200);
+    expect((await matchDiscord(playerId, DISCORD_BOB)).status).toBe(200);
+
+    const player = await dbClient
+      .selectFrom("player")
+      .where("id", "=", playerId)
+      .select("discord_id")
+      .executeTakeFirstOrThrow();
+    expect(player.discord_id).toBe(DISCORD_BOB);
+  });
+
+  test("rejects a player that has no Discord link", async () => {
+    const { playerId } = await addPlayerWithIdentity(
+      "Never Linked",
+      IdentityProvider.BOT4,
+      "uid-never-linked",
+    );
+
+    const response = await unlinkDiscord(playerId);
+    expect(response.status).toBe(400);
+  });
+
+  test("returns 404 for an unknown player", async () => {
+    const response = await unlinkDiscord(999999);
+    expect(response.status).toBe(404);
+  });
+
+  test("returns 403 for a non-reporter", async () => {
+    const { playerId } = await addLinkedPlayer("Guarded", "uid-unlink-guarded");
+    mockRankingReporter(false);
+
+    const response = await unlinkDiscord(playerId);
+    expect(response.status).toBe(403);
+
+    const player = await dbClient
+      .selectFrom("player")
+      .where("id", "=", playerId)
+      .select("discord_id")
+      .executeTakeFirstOrThrow();
+    expect(player.discord_id).toBe(DISCORD_ALICE);
   });
 });
