@@ -83,19 +83,20 @@ export async function addTestTourneyData(db: Kysely<DB>) {
     .returningAll()
     .execute();
 
-  await Promise.all(
-    players.map(async (player, idx) => {
-      await db
-        .insertInto("player_identity")
-        .values({
-          identity_provider_id: "LONGSHANKS",
-          player_id: player.id,
-          external_id: `LS-${idx}`,
-          provider_name: player.name,
-        })
-        .execute();
-    }),
-  );
+  // One statement, so every fixture identity shares a created_at and ids are
+  // assigned in array order. Inserting these concurrently let created_at drift
+  // out of step with the serial ids, which broke ordering assertions.
+  await db
+    .insertInto("player_identity")
+    .values(
+      players.map((player, idx) => ({
+        identity_provider_id: "LONGSHANKS",
+        player_id: player.id,
+        external_id: `LS-${idx}`,
+        provider_name: player.name,
+      })),
+    )
+    .execute();
 
   await db.insertInto("tourney").values(testTourneys).execute();
 

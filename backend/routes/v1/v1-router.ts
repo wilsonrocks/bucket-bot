@@ -15,6 +15,8 @@ import {
   matchPlayerToDiscordUserRoute,
   searchDiscordUsersByName,
   searchDiscordUsersRoute,
+  unlinkPlayerFromDiscordUser,
+  unlinkPlayerFromDiscordUserRoute,
 } from "./v1-routes/discord-id.js";
 import {
   postDiscordRankingsHandler,
@@ -33,6 +35,8 @@ import {
   generateRankingsRoute,
 } from "./v1-routes/generate-rankings.js";
 import {
+  detachIdentityFromPlayer,
+  detachIdentityFromPlayerRoute,
   getUnmappedIdentities,
   getUnmappedIdentitiesRoute,
   mergeIdentityIntoPlayer,
@@ -345,9 +349,11 @@ v1Router.openapi(searchDiscordUsersRoute, searchDiscordUsersByName);
 v1Router.openapi(getAllDiscordUsersRoute, getAllDiscordUsers);
 v1Router.openapi(matchPlayerToDiscordUserRoute, matchPlayerToDiscordUser);
 v1Router.openapi(matchPlayerIdToDiscordUserRoute, matchPlayerIdToDiscordUser);
+v1Router.openapi(unlinkPlayerFromDiscordUserRoute, unlinkPlayerFromDiscordUser);
 v1Router.openapi(getPlayerIdentitiesRoute, getPlayerIdentities);
 v1Router.openapi(mergePlayerIntoPlayerRoute, mergePlayerIntoPlayer);
 v1Router.openapi(setIdentityIgnoredRoute, setIdentityIgnored);
+v1Router.openapi(detachIdentityFromPlayerRoute, detachIdentityFromPlayer);
 v1Router.openapi(mergeIdentityIntoPlayerRoute, mergeIdentityIntoPlayer);
 v1Router.openapi(postDiscordRankingsRoute, postDiscordRankingsHandler);
 v1Router.openapi(postEventSummaryToDiscordRoute, postEventSummaryToDiscord);

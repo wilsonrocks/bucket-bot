@@ -752,6 +752,22 @@ export type PostPlayerIdMatchDiscordUser404 = {
   error: string;
 };
 
+export type DeletePlayerIdDiscordUser200 = {
+  message: string;
+};
+
+export type DeletePlayerIdDiscordUser400 = {
+  error: string;
+};
+
+export type DeletePlayerIdDiscordUser403 = {
+  error: string;
+};
+
+export type DeletePlayerIdDiscordUser404 = {
+  error: string;
+};
+
 export type GetPlayerIdIdentities200Item = {
   id: number;
   external_id: string;
@@ -804,6 +820,22 @@ export type PostPlayerIdentityIdIgnore404 = {
   error: string;
 };
 
+export type DeletePlayerIdentityIdPlayer200 = {
+  message: string;
+};
+
+export type DeletePlayerIdentityIdPlayer400 = {
+  error: string;
+};
+
+export type DeletePlayerIdentityIdPlayer403 = {
+  error: string;
+};
+
+export type DeletePlayerIdentityIdPlayer404 = {
+  error: string;
+};
+
 export type PostPlayerIdentityIdMergeIntoPlayerBody = {
   /** @exclusiveMinimum 0 */
   targetPlayerId: number;
@@ -811,10 +843,6 @@ export type PostPlayerIdentityIdMergeIntoPlayerBody = {
 
 export type PostPlayerIdentityIdMergeIntoPlayer200 = {
   message: string;
-};
-
-export type PostPlayerIdentityIdMergeIntoPlayer400 = {
-  error: string;
 };
 
 export type PostPlayerIdentityIdMergeIntoPlayer404 = {

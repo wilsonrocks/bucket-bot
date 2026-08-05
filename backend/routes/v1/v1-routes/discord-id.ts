@@ -142,10 +142,30 @@ export const matchPlayerToDiscordUser: RouteHandler<typeof matchPlayerToDiscordU
     const identity = await trx
       .selectFrom("player_identity")
       .where("id", "=", playerIdentityId)
-      .select("player_id")
+      .select(["player_id", "provider_name"])
       .executeTakeFirstOrThrow();
 
-    await attachDiscordUserToPlayer(trx, identity.player_id!, discordUser);
+    let playerId = identity.player_id;
+
+    // A detached identity has no player to attach the Discord user to, so give
+    // it one first — the same shape createIdentityWithPlaceholderPlayer uses.
+    if (playerId === null) {
+      const player = await trx
+        .insertInto("player")
+        .values({ name: identity.provider_name })
+        .returning("id")
+        .executeTakeFirstOrThrow();
+
+      await trx
+        .updateTable("player_identity")
+        .set({ player_id: player.id })
+        .where("id", "=", playerIdentityId)
+        .execute();
+
+      playerId = player.id;
+    }
+
+    await attachDiscordUserToPlayer(trx, playerId, discordUser);
   });
 
   return c.json({ message: "Player matched to Discord user successfully" }, 200);
@@ -231,4 +251,65 @@ export const matchPlayerIdToDiscordUser: RouteHandler<typeof matchPlayerIdToDisc
     { message: "Player matched to Discord user successfully", playerId: survivingPlayerId },
     200,
   );
+};
+
+export const unlinkPlayerFromDiscordUserRoute = createRoute({
+  method: "delete",
+  path: "/player/{id}/discord-user",
+  request: {
+    params: z.object({ id: z.coerce.number().int().positive() }),
+  },
+  responses: {
+    200: {
+      content: { "application/json": { schema: z.object({ message: z.string() }) } },
+      description: "Discord user unlinked from player",
+    },
+    400: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Player is not linked to a Discord user",
+    },
+    403: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Forbidden",
+    },
+    404: {
+      content: { "application/json": { schema: ErrorSchema } },
+      description: "Player not found",
+    },
+  },
+});
+
+export const unlinkPlayerFromDiscordUser: RouteHandler<typeof unlinkPlayerFromDiscordUserRoute, AppEnv> = async (c) => {
+  const { id: userId } = c.get("jwtPayload") as { id: string };
+  if (!(await isRankingReporter(userId))) {
+    return c.json({ error: "Forbidden" }, 403);
+  }
+
+  const { id } = c.req.valid("param");
+
+  const db = c.get("db");
+
+  const player = await db
+    .selectFrom("player")
+    .where("id", "=", id)
+    .select(["id", "discord_id"])
+    .executeTakeFirst();
+
+  if (!player) {
+    return c.json({ error: "Player not found" }, 404);
+  }
+
+  if (!player.discord_id) {
+    return c.json({ error: "Player is not linked to a Discord user" }, 400);
+  }
+
+  // The player keeps its name — it was overwritten with the Discord display name
+  // when the link was made, and only an admin knows what it should become.
+  await db
+    .updateTable("player")
+    .set({ discord_id: null })
+    .where("id", "=", id)
+    .execute();
+
+  return c.json({ message: "Discord user unlinked successfully" }, 200);
 };
