@@ -1,6 +1,9 @@
 import { createRoute, z, type RouteHandler } from "@hono/zod-openapi";
 import type { AppEnv } from "../../../hono-env.js";
-import { addTeamMember } from "../../../logic/team-memberships.js";
+import {
+  addTeamMember,
+  removeTeamMember,
+} from "../../../logic/team-memberships.js";
 import { canAccessTeam } from "../permissions.js";
 import { MemberSchema } from "./teams.js";
 
@@ -152,6 +155,11 @@ export const removeTeamMemberRoute = createRoute({
   path: "/teams/{teamId}/members/{membershipId}",
   request: {
     params: z.object({ teamId: z.string(), membershipId: z.string() }),
+    query: z.object({
+      // "leave" keeps their past results with the team, "mistake" erases the
+      // membership so none of their results ever counted for it
+      mode: z.enum(["leave", "mistake"]).default("leave"),
+    }),
   },
   responses: {
     200: {
@@ -183,15 +191,16 @@ export const removeTeamMemberHandler: RouteHandler<
     return c.json({ error: "Forbidden" }, 403);
   }
 
-  const result = await c
-    .get("db")
-    .updateTable("membership")
-    .set({ left_date: new Date() })
-    .where("id", "=", membershipId)
-    .where("left_date", "is", null)
-    .executeTakeFirst();
+  const { mode } = c.req.valid("query");
 
-  if (!result.numUpdatedRows) {
+  const removed = await removeTeamMember(
+    c.get("db"),
+    teamId,
+    membershipId,
+    mode,
+  );
+
+  if (!removed) {
     return c.json({ error: "Membership not found" }, 404);
   }
 

@@ -8,6 +8,40 @@ type AddMemberResult =
 
 const FOUNDING_MEMBER_JOIN_DATE = "2025-12-01";
 
+export type RemoveMemberMode = "leave" | "mistake";
+
+/**
+ * "leave" — the player is leaving the team now, so their past results stay
+ * attributed to the team. "mistake" — they should never have been in the team,
+ * so the membership is erased and none of their results count for it.
+ */
+export async function removeTeamMember(
+  db: Kysely<DB>,
+  teamId: number,
+  membershipId: number,
+  mode: RemoveMemberMode,
+): Promise<boolean> {
+  if (mode === "mistake") {
+    const result = await db
+      .deleteFrom("membership")
+      .where("id", "=", membershipId)
+      .where("team_id", "=", teamId)
+      .executeTakeFirst();
+
+    return result.numDeletedRows > 0n;
+  }
+
+  const result = await db
+    .updateTable("membership")
+    .set({ left_date: new Date() })
+    .where("id", "=", membershipId)
+    .where("team_id", "=", teamId)
+    .where("left_date", "is", null)
+    .executeTakeFirst();
+
+  return result.numUpdatedRows > 0n;
+}
+
 export async function addTeamMember(
   db: Kysely<DB>,
   teamId: number,

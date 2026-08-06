@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test } from "vitest";
 import { dbClient } from "../../db-client";
-import { addTeamMember } from "../team-memberships";
+import { addTeamMember, removeTeamMember } from "../team-memberships";
 
 const DISCORD_ALICE = "test-memberships-discord-alice";
 const DISCORD_BOB = "test-memberships-discord-bob";
@@ -139,5 +139,61 @@ describe("addTeamMember", () => {
 
     const result = await addTeamMember(dbClient, teamId2, DISCORD_ALICE, false);
     expect(result.type).toBe("success");
+  });
+});
+
+describe("removeTeamMember", () => {
+  async function addAlice() {
+    const result = await addTeamMember(dbClient, teamId, DISCORD_ALICE, false);
+    if (result.type !== "success") throw new Error("failed to add member");
+    return result.membership.id;
+  }
+
+  test("leave sets left_date to today and keeps the membership", async () => {
+    const membershipId = await addAlice();
+
+    expect(await removeTeamMember(dbClient, teamId, membershipId, "leave")).toBe(true);
+
+    const membership = await dbClient
+      .selectFrom("membership").selectAll().where("id", "=", membershipId).executeTakeFirstOrThrow();
+    const d = membership.left_date as unknown as Date;
+    const now = new Date();
+    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+    expect(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`).toBe(today);
+  });
+
+  test("mistake deletes the membership row entirely", async () => {
+    const membershipId = await addAlice();
+
+    expect(await removeTeamMember(dbClient, teamId, membershipId, "mistake")).toBe(true);
+
+    const membership = await dbClient
+      .selectFrom("membership").selectAll().where("id", "=", membershipId).executeTakeFirst();
+    expect(membership).toBeUndefined();
+  });
+
+  test("mistake does not delete a membership belonging to another team", async () => {
+    const membershipId = await addAlice();
+    const teamId2 = (
+      await dbClient.insertInto("team").values({ name: TEAM_NAME_2 }).returning("id").executeTakeFirstOrThrow()
+    ).id;
+
+    expect(await removeTeamMember(dbClient, teamId2, membershipId, "mistake")).toBe(false);
+
+    const membership = await dbClient
+      .selectFrom("membership").selectAll().where("id", "=", membershipId).executeTakeFirst();
+    expect(membership).toBeDefined();
+  });
+
+  test("leave returns false for a membership that has already left", async () => {
+    const membershipId = await addAlice();
+    await removeTeamMember(dbClient, teamId, membershipId, "leave");
+
+    expect(await removeTeamMember(dbClient, teamId, membershipId, "leave")).toBe(false);
+  });
+
+  test("returns false for an unknown membership id", async () => {
+    expect(await removeTeamMember(dbClient, teamId, -1, "mistake")).toBe(false);
+    expect(await removeTeamMember(dbClient, teamId, -1, "leave")).toBe(false);
   });
 });

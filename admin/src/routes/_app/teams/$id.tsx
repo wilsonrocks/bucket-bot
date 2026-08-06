@@ -104,6 +104,14 @@ function RouteComponent() {
   >(null)
   const [joinModalOpened, { open: openJoinModal, close: closeJoinModal }] =
     useDisclosure(false)
+  const [
+    removeModalOpened,
+    { open: openRemoveModal, close: closeRemoveModal },
+  ] = useDisclosure(false)
+  const [removingMember, setRemovingMember] = useState<{
+    membership_id: number
+    player_name: string
+  } | null>(null)
   const { data: discordResults } = useGetSearchDiscordUsers(
     { text: discordSearch },
     { query: { enabled: discordSearch.trim().length > 0 } },
@@ -264,12 +272,13 @@ function RouteComponent() {
                       size="compact-xs"
                       variant="subtle"
                       color="red"
-                      onClick={() =>
-                        removeMember.mutate({
-                          teamId: String(id),
-                          membershipId: String(member.membership_id),
+                      onClick={() => {
+                        setRemovingMember({
+                          membership_id: member.membership_id,
+                          player_name: member.player_name,
                         })
-                      }
+                        openRemoveModal()
+                      }}
                     >
                       Remove
                     </Button>
@@ -377,6 +386,68 @@ function RouteComponent() {
               }}
             >
               Joining now
+            </Button>
+          </Group>
+        </Modal>
+
+        <Modal
+          opened={removeModalOpened}
+          onClose={closeRemoveModal}
+          title={
+            removingMember
+              ? `Remove ${removingMember.player_name} from the team?`
+              : 'Remove player from the team?'
+          }
+          centered
+        >
+          <Text size="sm" c="dimmed" mb="md">
+            Added by mistake removes them from the team's past results
+            entirely. Leaving now keeps the results they earned up to today.
+          </Text>
+          <Group>
+            <Button
+              color="red"
+              loading={removeMember.isPending}
+              onClick={() => {
+                if (!removingMember) return
+                removeMember.mutate(
+                  {
+                    teamId: String(id),
+                    membershipId: String(removingMember.membership_id),
+                    params: { mode: 'mistake' },
+                  },
+                  {
+                    onSuccess: () => {
+                      setRemovingMember(null)
+                      closeRemoveModal()
+                    },
+                  },
+                )
+              }}
+            >
+              Added by mistake
+            </Button>
+            <Button
+              variant="default"
+              loading={removeMember.isPending}
+              onClick={() => {
+                if (!removingMember) return
+                removeMember.mutate(
+                  {
+                    teamId: String(id),
+                    membershipId: String(removingMember.membership_id),
+                    params: { mode: 'leave' },
+                  },
+                  {
+                    onSuccess: () => {
+                      setRemovingMember(null)
+                      closeRemoveModal()
+                    },
+                  },
+                )
+              }}
+            >
+              Leaving now
             </Button>
           </Group>
         </Modal>

@@ -38,6 +38,7 @@ import type {
   DeleteTeamsTeamIdMembersMembershipId200,
   DeleteTeamsTeamIdMembersMembershipId403,
   DeleteTeamsTeamIdMembersMembershipId404,
+  DeleteTeamsTeamIdMembersMembershipIdParams,
   GetAllDiscordUsers200Item,
   GetBotChatChannels200Item,
   GetFactionRankings200Item,
@@ -6158,18 +6159,27 @@ export type deleteTeamsTeamIdMembersMembershipIdResponseError = (deleteTeamsTeam
 export type deleteTeamsTeamIdMembersMembershipIdResponse = (deleteTeamsTeamIdMembersMembershipIdResponseSuccess | deleteTeamsTeamIdMembersMembershipIdResponseError)
 
 export const getDeleteTeamsTeamIdMembersMembershipIdUrl = (teamId: string,
-    membershipId: string,) => {
+    membershipId: string,
+    params?: DeleteTeamsTeamIdMembersMembershipIdParams,) => {
+  const normalizedParams = new URLSearchParams();
 
+  Object.entries(params || {}).forEach(([key, value]) => {
+    
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
 
-  
+  const stringifiedParams = normalizedParams.toString();
 
-  return `/v1/teams/${teamId}/members/${membershipId}`
+  return stringifiedParams.length > 0 ? `/v1/teams/${teamId}/members/${membershipId}?${stringifiedParams}` : `/v1/teams/${teamId}/members/${membershipId}`
 }
 
 export const deleteTeamsTeamIdMembersMembershipId = async (teamId: string,
-    membershipId: string, options?: RequestInit): Promise<deleteTeamsTeamIdMembersMembershipIdResponse> => {
+    membershipId: string,
+    params?: DeleteTeamsTeamIdMembersMembershipIdParams, options?: RequestInit): Promise<deleteTeamsTeamIdMembersMembershipIdResponse> => {
   
-  return customFetch<deleteTeamsTeamIdMembersMembershipIdResponse>(getDeleteTeamsTeamIdMembersMembershipIdUrl(teamId,membershipId),
+  return customFetch<deleteTeamsTeamIdMembersMembershipIdResponse>(getDeleteTeamsTeamIdMembersMembershipIdUrl(teamId,membershipId,params),
   {      
     ...options,
     method: 'DELETE'
@@ -6182,8 +6192,8 @@ export const deleteTeamsTeamIdMembersMembershipId = async (teamId: string,
 
 
 export const getDeleteTeamsTeamIdMembersMembershipIdMutationOptions = <TError = DeleteTeamsTeamIdMembersMembershipId403 | DeleteTeamsTeamIdMembersMembershipId404,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteTeamsTeamIdMembersMembershipId>>, TError,{teamId: string;membershipId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof deleteTeamsTeamIdMembersMembershipId>>, TError,{teamId: string;membershipId: string}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteTeamsTeamIdMembersMembershipId>>, TError,{teamId: string;membershipId: string;params?: DeleteTeamsTeamIdMembersMembershipIdParams}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteTeamsTeamIdMembersMembershipId>>, TError,{teamId: string;membershipId: string;params?: DeleteTeamsTeamIdMembersMembershipIdParams}, TContext> => {
 
 const mutationKey = ['deleteTeamsTeamIdMembersMembershipId'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
@@ -6195,10 +6205,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteTeamsTeamIdMembersMembershipId>>, {teamId: string;membershipId: string}> = (props) => {
-          const {teamId,membershipId} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteTeamsTeamIdMembersMembershipId>>, {teamId: string;membershipId: string;params?: DeleteTeamsTeamIdMembersMembershipIdParams}> = (props) => {
+          const {teamId,membershipId,params} = props ?? {};
 
-          return  deleteTeamsTeamIdMembersMembershipId(teamId,membershipId,requestOptions)
+          return  deleteTeamsTeamIdMembersMembershipId(teamId,membershipId,params,requestOptions)
         }
 
 
@@ -6213,11 +6223,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type DeleteTeamsTeamIdMembersMembershipIdMutationError = DeleteTeamsTeamIdMembersMembershipId403 | DeleteTeamsTeamIdMembersMembershipId404
 
     export const useDeleteTeamsTeamIdMembersMembershipId = <TError = DeleteTeamsTeamIdMembersMembershipId403 | DeleteTeamsTeamIdMembersMembershipId404,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteTeamsTeamIdMembersMembershipId>>, TError,{teamId: string;membershipId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteTeamsTeamIdMembersMembershipId>>, TError,{teamId: string;membershipId: string;params?: DeleteTeamsTeamIdMembersMembershipIdParams}, TContext>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof deleteTeamsTeamIdMembersMembershipId>>,
         TError,
-        {teamId: string;membershipId: string},
+        {teamId: string;membershipId: string;params?: DeleteTeamsTeamIdMembersMembershipIdParams},
         TContext
       > => {
       return useMutation(getDeleteTeamsTeamIdMembersMembershipIdMutationOptions(options), queryClient);
