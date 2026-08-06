@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, test } from "vitest";
 import { dbClient } from "../../db-client";
 import { generateTeamRankings } from "../rankings/generate-team-rankings";
+import { removeTeamMember } from "../team-memberships";
 import { addTestDataToDb } from "../test-helpers/add-test-data-to-db";
 
 const TEAM_ALPHA = "test-team-Alpha";
@@ -178,5 +179,43 @@ describe("generateTeamRankings", () => {
 
     expect(beta.total_points).toBe(18);
     expect(beta.rank).toBe(2);
+  });
+
+  test("removing a player with mode 'leave' keeps the results they earned for the team", async () => {
+    const charlie = await dbClient
+      .selectFrom("membership")
+      .select("id")
+      .where("player_id", "=", CHARLIE_ID)
+      .where("team_id", "=", teamAlphaId)
+      .executeTakeFirstOrThrow();
+
+    await removeTeamMember(dbClient, teamAlphaId, charlie.id, "leave");
+
+    await generateTeamRankings(dbClient, "ROLLING_YEAR");
+
+    const { rankings } = await getLatestBatchRankings();
+    const alpha = rankings.find((r) => r.team_id === teamAlphaId)!;
+
+    // All test tourneys predate today's left_date, so Charlie(39) still counts
+    expect(alpha.total_points).toBe(108);
+  });
+
+  test("removing a player with mode 'mistake' drops the results they earned for the team", async () => {
+    const charlie = await dbClient
+      .selectFrom("membership")
+      .select("id")
+      .where("player_id", "=", CHARLIE_ID)
+      .where("team_id", "=", teamAlphaId)
+      .executeTakeFirstOrThrow();
+
+    await removeTeamMember(dbClient, teamAlphaId, charlie.id, "mistake");
+
+    await generateTeamRankings(dbClient, "ROLLING_YEAR");
+
+    const { rankings } = await getLatestBatchRankings();
+    const alpha = rankings.find((r) => r.team_id === teamAlphaId)!;
+
+    // Charlie never counted for Alpha — only Alice(30) + Bob(39) = 69
+    expect(alpha.total_points).toBe(69);
   });
 });

@@ -1003,6 +1003,18 @@ export type PatchTeamsTeamIdMembersMembershipId404 = {
   error: string;
 };
 
+export type DeleteTeamsTeamIdMembersMembershipIdParams = {
+mode?: DeleteTeamsTeamIdMembersMembershipIdMode;
+};
+
+export type DeleteTeamsTeamIdMembersMembershipIdMode = typeof DeleteTeamsTeamIdMembersMembershipIdMode[keyof typeof DeleteTeamsTeamIdMembersMembershipIdMode];
+
+
+export const DeleteTeamsTeamIdMembersMembershipIdMode = {
+  leave: 'leave',
+  mistake: 'mistake',
+} as const;
+
 export type DeleteTeamsTeamIdMembersMembershipId200 = {
   success: boolean;
 };
