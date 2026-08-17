@@ -143,14 +143,29 @@ export const generateRankings = async (
         AND prev.player_id = rs.player_id
     `.execute(trx);
 
+    // A player is "new" only if they have no result in a tourney dated before the
+    // previous rankings post for this type. This reflects "first ever event" rather
+    // than "first appearance in a snapshot" — the latter mis-flags veterans whose
+    // identities were only linked/merged to a player recently (player_identity.player_id
+    // is nullable, so their older results were invisible to earlier snapshots).
+    // On the first-ever batch the previous-batch subquery is NULL, so `t.date < NULL`
+    // is never true and every player is flagged new (preserving prior behaviour).
     await sql`
       UPDATE ranking_snapshot rs
       SET new_player = NOT EXISTS (
-        SELECT 1 FROM ranking_snapshot prior
-        INNER JOIN ranking_snapshot_batch prior_b ON prior.batch_id = prior_b.id
-        WHERE prior.player_id = rs.player_id
-          AND prior_b.type_code = ${rankingsType}
-          AND prior.batch_id < ${batch.id}
+        SELECT 1
+        FROM player_identity pi
+        INNER JOIN result r ON r.player_identity_id = pi.id
+        INNER JOIN tourney t ON t.id = r.tourney_id
+        WHERE pi.player_id = rs.player_id
+          AND t.date < (
+            SELECT b.created_at::date
+            FROM ranking_snapshot_batch b
+            WHERE b.type_code = ${rankingsType}
+              AND b.id < ${batch.id}
+            ORDER BY b.id DESC
+            LIMIT 1
+          )
       )
       WHERE rs.batch_id = ${batch.id}
     `.execute(trx);
