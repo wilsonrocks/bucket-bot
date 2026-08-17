@@ -1,7 +1,9 @@
 import { afterAll, beforeEach, describe, expect, test } from "vitest";
+import { format, subMonths } from "date-fns";
 import { dbClient } from "../../db-client";
 import { generateRankings } from "../rankings/generate-player-rankings";
 import { addTestDataToDb } from "../test-helpers/add-test-data-to-db";
+import { Faction } from "../fixtures";
 
 beforeEach(async () => {
   await addTestDataToDb(dbClient);
@@ -162,6 +164,150 @@ describe("generating player rankings", () => {
     expect(Alice!.rank).toBe(3);
     expect(David!.rank).toBe(4);
     expect(Eve!.rank).toBe(5);
+  });
+
+  test("new_player flag reflects first event, not first snapshot appearance", async () => {
+    // First batch — everyone is new (no prior batch to compare against).
+    await generateRankings(dbClient, "ROLLING_YEAR");
+
+    const firstBatch = await dbClient
+      .selectFrom("ranking_snapshot_batch")
+      .selectAll()
+      .executeTakeFirstOrThrow();
+
+    const firstRankings = await dbClient
+      .selectFrom("ranking_snapshot")
+      .where("batch_id", "=", firstBatch.id)
+      .selectAll()
+      .execute();
+    expect(firstRankings.every((r) => r.new_player)).toBe(true);
+
+    // A venue for the extra tourneys.
+    const [venue] = await dbClient
+      .insertInto("venue")
+      .values({ name: "New Test Venue", post_code: "TEST-NEW-1", region_id: 2 })
+      .returning("id")
+      .execute();
+
+    // A tourney dated AFTER the first batch (a fresh weekend event).
+    const [recentTourney] = await dbClient
+      .insertInto("tourney")
+      .values({
+        name: "Recent Tourney",
+        date: format(new Date(), "yyyy-MM-dd"),
+        number_of_players: 2,
+        venue_id: venue!.id,
+      })
+      .returning("id")
+      .execute();
+
+    // A tourney dated BEFORE the first batch (results existed all along, but the
+    // player/identity is only linked now — the case the old code mis-flagged).
+    const [oldTourney] = await dbClient
+      .insertInto("tourney")
+      .values({
+        name: "Old Tourney (predates first batch)",
+        date: format(subMonths(new Date(), 2), "yyyy-MM-dd"),
+        number_of_players: 1,
+        venue_id: venue!.id,
+      })
+      .returning("id")
+      .execute();
+
+    // Genuine debut: only result is in the recent tourney.
+    const [debut] = await dbClient
+      .insertInto("player")
+      .values({ name: "Debut" })
+      .returning("id")
+      .execute();
+    const [debutIdentity] = await dbClient
+      .insertInto("player_identity")
+      .values({
+        identity_provider_id: "LONGSHANKS",
+        player_id: debut!.id,
+        external_id: "LS-DEBUT",
+        provider_name: "Debut",
+      })
+      .returning("id")
+      .execute();
+    await dbClient
+      .insertInto("result")
+      .values({
+        tourney_id: recentTourney!.id,
+        player_identity_id: debutIdentity!.id,
+        points: 10,
+        place: 1,
+        faction_code: Faction.GUILD,
+        rounds_played: 4,
+      })
+      .execute();
+
+    // Late-linked veteran: linked to a player only now, but has a result in a
+    // tourney dated before the first batch — so NOT actually new.
+    const [veteran] = await dbClient
+      .insertInto("player")
+      .values({ name: "Veteran" })
+      .returning("id")
+      .execute();
+    const [veteranIdentity] = await dbClient
+      .insertInto("player_identity")
+      .values({
+        identity_provider_id: "LONGSHANKS",
+        player_id: veteran!.id,
+        external_id: "LS-VET",
+        provider_name: "Veteran",
+      })
+      .returning("id")
+      .execute();
+    await dbClient
+      .insertInto("result")
+      .values([
+        {
+          tourney_id: oldTourney!.id,
+          player_identity_id: veteranIdentity!.id,
+          points: 12,
+          place: 1,
+          faction_code: Faction.RESSERS,
+          rounds_played: 4,
+        },
+        {
+          tourney_id: recentTourney!.id,
+          player_identity_id: veteranIdentity!.id,
+          points: 8,
+          place: 2,
+          faction_code: Faction.RESSERS,
+          rounds_played: 4,
+        },
+      ])
+      .execute();
+
+    // Second batch.
+    await generateRankings(dbClient, "ROLLING_YEAR");
+
+    const batches = await dbClient
+      .selectFrom("ranking_snapshot_batch")
+      .selectAll()
+      .orderBy("id", "desc")
+      .execute();
+    const secondBatch = batches[0]!;
+    expect(secondBatch.id).not.toBe(firstBatch.id);
+
+    const secondRankings = await dbClient
+      .selectFrom("ranking_snapshot")
+      .innerJoin("player", "ranking_snapshot.player_id", "player.id")
+      .where("batch_id", "=", secondBatch.id)
+      .select(["player.name", "ranking_snapshot.new_player"])
+      .execute();
+
+    const debutRow = secondRankings.find((r) => r.name === "Debut");
+    const veteranRow = secondRankings.find((r) => r.name === "Veteran");
+
+    expect(debutRow?.new_player, "genuine debut is new").toBe(true);
+    expect(veteranRow?.new_player, "late-linked veteran is not new").toBe(false);
+
+    // Fixture players who appeared in batch 1 are not re-flagged as new.
+    const alice = secondRankings.find((r) => r.name === "Alice");
+    expect(alice?.new_player, "returning fixture player is not new").toBe(false);
   });
 
   test("saving events used for rankings", async () => {

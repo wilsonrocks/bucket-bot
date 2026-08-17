@@ -9,6 +9,8 @@ type TourneyFields = {
   days: number | null
   tier_code: string
   discord_post_id: string | null
+  longshanks_id: string | null
+  bot_id: string | null
 }
 
 import {
@@ -22,17 +24,21 @@ import {
 } from '@/api/hooks'
 import {
   ActionIcon,
+  Badge,
   Button,
   Grid,
+  Group,
   NumberInput,
   Paper,
   Select,
   Text,
   TextInput,
   Title,
+  Tooltip,
 } from '@mantine/core'
 import { useForm } from '@mantine/form'
 import { RequireRankingReporter } from '@/components/RequireRankingReporter'
+import { getImportSource } from '@/helpers/import-source'
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect } from 'react'
 import z from 'zod'
@@ -129,11 +135,35 @@ function RouteComponent() {
 
   // TODO can these tab panels be their own components?
 
+  const tourney = tourneyDetail.data.tourney as TourneyFields
+  const importSource = getImportSource(tourney)
+  const importBadge = importSource ? (
+    <Tooltip label={`${importSource.provider} event ${importSource.externalId}`}>
+      <Badge
+        variant="light"
+        color={importSource.color}
+        {...(importSource.url
+          ? {
+              component: 'a',
+              href: importSource.url,
+              target: '_blank',
+              rel: 'noopener noreferrer',
+              style: { cursor: 'pointer' },
+            }
+          : {})}
+      >
+        Imported from {importSource.provider}
+        {importSource.url ? ' ↗' : ''}
+      </Badge>
+    </Tooltip>
+  ) : null
+
   return (
     <div>
-      <Title order={1} mb="md">
-        {(tourneyDetail.data.tourney as TourneyFields).name}
-      </Title>
+      <Group gap="sm" mb="md" align="center">
+        <Title order={1}>{tourney.name}</Title>
+        {importBadge}
+      </Group>
 
       <Tabs defaultValue="details">
         <Tabs.List>
