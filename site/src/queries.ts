@@ -688,7 +688,8 @@ export const fetchRecentPainting = createServerFn().handler(async () => {
     .leftJoin('image', 'image.key' as any, 'painting_winner.image_key' as any)
     .where('painting_winner.position', '=', 1)
     .orderBy('tourney.date', 'desc')
-    .orderBy('painting_category.id', 'asc')
+    // pick at random among the winners of the most recent event(s)
+    .orderBy(sql`random()`)
     .select([
       'player.id as playerId',
       sql<string>`coalesce(${sql.ref('player.name')}, ${sql.ref('player_identity.provider_name')})`.as('playerName'),
