@@ -1,4 +1,4 @@
-import type { Selectable, Transaction } from "kysely";
+import { sql, type Selectable, type Transaction } from "kysely";
 import type { DB, DiscordUser } from "kysely-codegen";
 
 export async function mergePlaceholderIntoPlayer(
@@ -17,6 +17,8 @@ export async function mergePlaceholderIntoPlayer(
     .set({ player_id: intoPlayerId })
     .where("player_id", "=", fromPlayerId)
     .execute();
+
+  await mergePlayerAchievements(trx, fromPlayerId, intoPlayerId);
 
   await trx
     .deleteFrom("ranking_snapshot_event")
@@ -70,4 +72,52 @@ export async function attachDiscordUserToPlayer(
     .execute();
 
   return playerId;
+}
+
+/**
+ * Moves achievements from one player onto another ahead of a merge. Where both
+ * hold the same achievement the target keeps its row, but inherits the
+ * source's announcement so nothing already posted to Discord is re-posted.
+ * Which tourney the achievement is credited to is fixed up by the next sync.
+ */
+async function mergePlayerAchievements(
+  trx: Transaction<DB>,
+  fromPlayerId: number,
+  intoPlayerId: number,
+) {
+  await sql`
+    UPDATE player_achievement target
+    SET discord_message_id = source.discord_message_id
+    FROM player_achievement source
+    WHERE target.player_id = ${intoPlayerId}
+      AND source.player_id = ${fromPlayerId}
+      AND source.achievement_id = target.achievement_id
+      AND target.discord_message_id IS NULL
+      AND source.discord_message_id IS NOT NULL
+  `.execute(trx);
+
+  await trx
+    .updateTable("player_achievement")
+    .set({ player_id: intoPlayerId })
+    .where("player_id", "=", fromPlayerId)
+    .where(({ not, exists, selectFrom }) =>
+      not(
+        exists(
+          selectFrom("player_achievement as target")
+            .select(sql`1`.as("one"))
+            .where("target.player_id", "=", intoPlayerId)
+            .whereRef(
+              "target.achievement_id",
+              "=",
+              "player_achievement.achievement_id",
+            ),
+        ),
+      ),
+    )
+    .execute();
+
+  await trx
+    .deleteFrom("player_achievement")
+    .where("player_id", "=", fromPlayerId)
+    .execute();
 }

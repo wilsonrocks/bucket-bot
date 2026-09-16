@@ -1124,6 +1124,61 @@ export type GetUpcomingEvents200Item = {
   [key: string]: unknown | null;
 };
 
+export type GetAchievements200Item = {
+  id: string;
+  name: string;
+  flavour_text: string;
+  /** @nullable */
+  flavour_source: string | null;
+  /** @nullable */
+  image_key: string | null;
+  display_order: number;
+  award_count: number;
+  unannounced_count: number;
+};
+
+export type PostAchievementsSync200 = {
+  inserted: number;
+  updated: number;
+  deleted: number;
+};
+
+export type PostAchievementsSync403 = {
+  error: string;
+};
+
+export type PostAchievementsAnnounceNext200 = {
+  /** @nullable */
+  playerId: number | null;
+};
+
+export type PostAchievementsAnnounceNext403 = {
+  error: string;
+};
+
+export type PutAchievementsIdBody = {
+  /** @minLength 1 */
+  name: string;
+  /** @minLength 1 */
+  flavour_text: string;
+  /** @nullable */
+  flavour_source: string | null;
+  /** @nullable */
+  image_key: string | null;
+};
+
+export type PutAchievementsId200 = {
+  message: string;
+};
+
+export type PutAchievementsId403 = {
+  error: string;
+};
+
+export type PutAchievementsId404 = {
+  error: string;
+};
+
 export type PutUpcomingEventsIdVenueBody = {
   /** @nullable */
   venue_id: number | null;

@@ -4,6 +4,7 @@ import { dbClient } from "../../../db-client";
 import type { AppEnv } from "../../../hono-env";
 import { IdentityProvider } from "../../../logic/fixtures";
 import { addTestDataToDb } from "../../../logic/test-helpers/add-test-data-to-db";
+import { syncAchievements } from "../../../logic/achievements/sync-achievements";
 
 vi.mock("../../../logic/discord-client.js", () => ({
   getDiscordClient: vi.fn(),
@@ -375,5 +376,46 @@ describe("POST /player-identity/{id}/merge-into-player", () => {
       .select("id")
       .executeTakeFirst();
     expect(gone).toBeUndefined();
+  });
+});
+
+describe("identity changes and achievements", () => {
+  async function achievementsFor(playerId: number) {
+    const rows = await dbClient
+      .selectFrom("player_achievement")
+      .select("achievement_id")
+      .where("player_id", "=", playerId)
+      .orderBy("achievement_id")
+      .execute();
+    return rows.map((r) => r.achievement_id);
+  }
+
+  test("detaching an identity removes its achievements on the next sync", async () => {
+    mockRankingReporter(true);
+    const identityId = await addBot4Identity("uid-ach-detach", "Ach Detach");
+    const { player_id } = await dbClient
+      .selectFrom("player_identity")
+      .select("player_id")
+      .where("id", "=", identityId)
+      .executeTakeFirstOrThrow();
+    await syncAchievements(dbClient);
+    expect(await achievementsFor(player_id!)).toEqual(["first-event", "first-victory"]);
+
+    expect((await detach(identityId)).status).toBe(200);
+    await syncAchievements(dbClient);
+
+    expect(await achievementsFor(player_id!)).toEqual([]);
+  });
+
+  test("merging an identity into a player awards its achievements to that player", async () => {
+    const identityId = await addBot4Identity("uid-ach-merge", "Ach Merge");
+    const targetPlayerId = await addPlayer("Ach Merge Target");
+    await syncAchievements(dbClient);
+
+    expect((await mergeIdentity(identityId, targetPlayerId)).status).toBe(200);
+    expect(await achievementsFor(targetPlayerId)).toEqual(["first-event", "first-victory"]);
+
+    await syncAchievements(dbClient);
+    expect(await achievementsFor(targetPlayerId)).toEqual(["first-event", "first-victory"]);
   });
 });

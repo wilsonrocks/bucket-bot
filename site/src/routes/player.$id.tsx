@@ -4,6 +4,7 @@ import {
   fetchPlayerTeams,
   fetchPlayerTourneys,
   fetchPlayerPaintingWins,
+  fetchPlayerAchievements,
   fetchRankingTypes,
 } from '#/queries'
 import { createFileRoute, notFound } from '@tanstack/react-router'
@@ -12,10 +13,11 @@ import { Link } from '#/components/link'
 import { Tabs } from '#/components/routed-tabs'
 import { PaintingLightbox, positionLabel } from '#/components/painting-lightbox'
 import { Image } from '#/components/image'
-import { formatDate } from 'date-fns'
+import { formatDate, parseISO } from 'date-fns'
 import { PlayerRankingOverTime } from '#/components/charts'
 import { SITE_NAME, SITE_URL, absoluteUrl, jsonLd, seo } from '#/helpers/seo'
 import type { Person, WithContext } from 'schema-dts'
+import { achievementsTabLabel } from '#/helpers/achievements'
 
 export const Route = createFileRoute('/player/$id')({
   params: {
@@ -30,16 +32,17 @@ export const Route = createFileRoute('/player/$id')({
   loader: async ({ params, location }) => {
     const searchParams = new URLSearchParams(location.search)
     const typeCode = searchParams.get('typeCode') ?? 'ROLLING_YEAR'
-    const [player, rankingTypes, rankingsData, tourneys, teams, paintingWins] = await Promise.all([
+    const [player, rankingTypes, rankingsData, tourneys, teams, paintingWins, achievements] = await Promise.all([
       fetchPlayer({ data: { id: params.id } }),
       fetchRankingTypes(),
       fetchPlayerRankingHistory({ data: { playerId: params.id, typeCode } }),
       fetchPlayerTourneys({ data: { playerId: params.id } }),
       fetchPlayerTeams({ data: { playerId: params.id } }),
       fetchPlayerPaintingWins({ data: { playerId: params.id } }),
+      fetchPlayerAchievements({ data: { playerId: params.id } }),
     ])
     if (!player) throw notFound()
-    return { player, rankingTypes, rankingsData, tourneys, teams, paintingWins, typeCode }
+    return { player, rankingTypes, rankingsData, tourneys, teams, paintingWins, achievements, typeCode }
   },
   head: ({ loaderData, params }) => {
     if (!loaderData) return {}
@@ -99,7 +102,7 @@ export const Route = createFileRoute('/player/$id')({
 })
 
 function RouteComponent() {
-  const { player, rankingTypes, rankingsData, tourneys, teams, paintingWins, typeCode } = Route.useLoaderData()
+  const { player, rankingTypes, rankingsData, tourneys, teams, paintingWins, achievements, typeCode } = Route.useLoaderData()
   const { painting: activePaintingId } = Route.useSearch()
   const navigate = Route.useNavigate()
   const wins = paintingWins ?? []
@@ -128,6 +131,7 @@ function RouteComponent() {
           <Tabs.Tab value="rankings">Rankings</Tabs.Tab>
           <Tabs.Tab value="teams">Teams</Tabs.Tab>
           {wins.length > 0 && <Tabs.Tab value="painting">Painting</Tabs.Tab>}
+          <Tabs.Tab value="achievements">{achievementsTabLabel(achievements)}</Tabs.Tab>
         </Tabs.List>
 
         <Tabs.Panel value="events">
@@ -261,6 +265,64 @@ function RouteComponent() {
               ))}
             </tbody>
           </table>
+        </Tabs.Panel>
+
+        <Tabs.Panel value="achievements">
+          <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {achievements.map((a) => {
+              const earned = a.achievedOn !== null
+              return (
+                <li
+                  key={a.id}
+                  className={`flex gap-3 rounded-md border border-border bg-surface p-3 ${earned ? '' : 'text-muted-foreground'}`}
+                >
+                  <div className={`w-20 shrink-0 ${earned ? '' : 'opacity-50 grayscale'}`}>
+                    {a.imageKey ? (
+                      <Image
+                        imageKey={a.imageKey}
+                        width={a.imageWidth}
+                        height={a.imageHeight}
+                        alt={a.name}
+                        fallbackWidth={150}
+                        sizes="80px"
+                        className="h-auto w-20 rounded-sm"
+                      />
+                    ) : (
+                      <div className="flex aspect-square w-20 items-center justify-center rounded-sm bg-muted text-2xl" aria-hidden>
+                        🏅
+                      </div>
+                    )}
+                  </div>
+                  <div className="min-w-0 text-sm">
+                    <h3 className="font-semibold">
+                      {a.name}
+                      <span className="sr-only">{earned ? ' (earned)' : ' (not yet earned)'}</span>
+                    </h3>
+                    <blockquote className="mt-1 italic">
+                      “{a.flavourText}”
+                      {a.flavourSource && <footer className="not-italic">— {a.flavourSource}</footer>}
+                    </blockquote>
+                    {earned ? (
+                      <p className="mt-1 text-muted-foreground">
+                        Earned{' '}
+                        {a.tourneyId && a.tourneyName && (
+                          <>
+                            at{' '}
+                            <Link to="/event/$id" params={{ id: a.tourneyId }} search={{ tab: undefined, painting: undefined }}>
+                              {a.tourneyName}
+                            </Link>{' '}
+                          </>
+                        )}
+                        on {formatDate(parseISO(a.achievedOn!), 'd MMMM yyyy')}
+                      </p>
+                    ) : (
+                      <p className="mt-1">Not yet earned</p>
+                    )}
+                  </div>
+                </li>
+              )
+            })}
+          </ul>
         </Tabs.Panel>
       </Tabs>
 

@@ -2,6 +2,11 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { notifications } from '@mantine/notifications'
 import { customFetch } from './custom-instance'
 import {
+  getGetAchievementsQueryKey,
+  useGetAchievements as useGetAchievementsGenerated,
+  usePutAchievementsId as usePutAchievementsIdGenerated,
+  usePostAchievementsSync as usePostAchievementsSyncGenerated,
+  usePostAchievementsAnnounceNext as usePostAchievementsAnnounceNextGenerated,
   getGetFeatureFlagsQueryKey,
   getGetPlayerIdQueryKey,
   getGetPlayerNameExistsPlayerIdQueryKey,
@@ -913,3 +918,46 @@ export const useGetStatsCommunity = (
     ...options,
     query: { ...options?.query, select: (res) => res.data },
   })
+
+// ── Achievements ───────────────────────────────────────────────────────────
+
+export const useGetAchievements = (
+  options?: Parameters<typeof useGetAchievementsGenerated>[0],
+) =>
+  useGetAchievementsGenerated({
+    ...options,
+    query: { ...options?.query, select: (res) => res.data },
+  })
+
+export const usePutAchievementsId = () => {
+  const queryClient = useQueryClient()
+  return usePutAchievementsIdGenerated({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: getGetAchievementsQueryKey() })
+      },
+    },
+  })
+}
+
+export const usePostAchievementsSync = () => {
+  const queryClient = useQueryClient()
+  return usePostAchievementsSyncGenerated({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: getGetAchievementsQueryKey() })
+      },
+    },
+  })
+}
+
+export const usePostAchievementsAnnounceNext = () => {
+  const queryClient = useQueryClient()
+  return usePostAchievementsAnnounceNextGenerated({
+    mutation: {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: getGetAchievementsQueryKey() })
+      },
+    },
+  })
+}

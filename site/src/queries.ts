@@ -290,6 +290,35 @@ export const fetchPlayerPaintingWins = createServerFn()
     return wins.map((w) => ({ ...w, totalWinners: totalsByCat.get(w.categoryId) ?? 1 }))
   })
 
+export const fetchPlayerAchievements = createServerFn()
+  .inputValidator((d: { playerId: number }) => d)
+  .handler(async ({ data: { playerId } }) => {
+    // Every achievement is listed so unearned ones can be shown greyed out.
+    return db
+      .selectFrom('achievement')
+      .leftJoin('player_achievement', (join) =>
+        join
+          .onRef('player_achievement.achievement_id', '=', 'achievement.id')
+          .on('player_achievement.player_id', '=', playerId),
+      )
+      .leftJoin('tourney', 'tourney.id', 'player_achievement.tourney_id')
+      .leftJoin('image', 'image.key', 'achievement.image_key')
+      .select([
+        'achievement.id',
+        'achievement.name',
+        'achievement.flavour_text as flavourText',
+        'achievement.flavour_source as flavourSource',
+        'achievement.image_key as imageKey',
+        'image.width as imageWidth',
+        'image.height as imageHeight',
+        sql<string | null>`to_char(player_achievement.achieved_on, 'YYYY-MM-DD')`.as('achievedOn'),
+        'tourney.id as tourneyId',
+        'tourney.name as tourneyName',
+      ])
+      .orderBy('achievement.display_order')
+      .execute()
+  })
+
 // ── Events ─────────────────────────────────────────────────────────────────
 
 export const fetchTourneys = createServerFn().handler(async () => {
