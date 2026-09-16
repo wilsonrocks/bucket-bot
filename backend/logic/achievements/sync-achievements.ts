@@ -22,11 +22,12 @@ export async function syncAchievements(
   const achievements = await db.selectFrom("achievement").select("id").execute();
   const dbIds = new Set(achievements.map((a) => a.id));
   const ruleIds = new Set(Object.keys(rules));
-  const missingRules = [...dbIds].filter((id) => !ruleIds.has(id));
+  // A rule without a row can't be awarded (FK), so that's a deploy mistake.
+  // Rows without a rule are fine: they're achievements not implemented yet.
   const missingRows = [...ruleIds].filter((id) => !dbIds.has(id));
-  if (missingRules.length > 0 || missingRows.length > 0) {
+  if (missingRows.length > 0) {
     throw new Error(
-      `Achievement rules and table are out of sync (no rule: [${missingRules.join(", ")}], no row: [${missingRows.join(", ")}])`,
+      `Achievement rules have no matching achievement row: [${missingRows.join(", ")}]`,
     );
   }
 

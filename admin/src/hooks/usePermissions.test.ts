@@ -64,4 +64,20 @@ describe('usePermissions', () => {
 
     expect(result.current.isTeamCaptain(1)).toBe(false)
   })
+
+  test.each([
+    [{ rankingReporter: true, achievementAide: false }, true],
+    [{ rankingReporter: false, achievementAide: true }, true],
+    [{ rankingReporter: false, achievementAide: false }, false],
+  ])('%j → canEditAchievements %s', (roles, expected) => {
+    vi.mocked(useGetHasRole).mockReturnValue({
+      data: { ...roles, captainOfTeamIds: [] },
+      isLoading: false,
+    } as any)
+
+    const { result } = renderHook(() => usePermissions())
+
+    expect(result.current.achievementAide).toBe(roles.achievementAide)
+    expect(result.current.canEditAchievements).toBe(expected)
+  })
 })

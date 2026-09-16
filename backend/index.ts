@@ -14,5 +14,9 @@ serve({ fetch: app.fetch, port: 9999 }, () => {
 if (process.env.ENABLE_SCHEDULER === "true") {
   startScheduler(dbClient);
   startCalendarScheduler(dbClient);
-  startAchievementsScheduler(dbClient);
+  // Off until achievements have names — the job posts them to Discord. Manual
+  // sync/announce from the admin achievements page works either way.
+  if (process.env.ENABLE_ACHIEVEMENTS_SCHEDULER === "true") {
+    startAchievementsScheduler(dbClient);
+  }
 }

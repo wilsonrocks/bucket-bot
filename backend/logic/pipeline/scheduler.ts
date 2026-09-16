@@ -65,7 +65,8 @@ export function startCalendarScheduler(db: Kysely<DB>): void {
 /**
  * Arms the half-hourly achievements job: reconciles awards with current
  * results, then (during UK working hours only) announces one player's new
- * achievements so Discord isn't flooded. Gated on ENABLE_SCHEDULER.
+ * achievements so Discord isn't flooded. Gated on ENABLE_SCHEDULER and
+ * ENABLE_ACHIEVEMENTS_SCHEDULER.
  */
 export function startAchievementsScheduler(db: Kysely<DB>): void {
   cron.schedule(

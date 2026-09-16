@@ -3,11 +3,12 @@ import type { AppEnv } from "../../../hono-env";
 import { announceNextPlayer } from "../../../logic/achievements/announce";
 import { syncAchievements } from "../../../logic/achievements/sync-achievements";
 import { runManualStep } from "../../../logic/pipeline/run-step";
-import { isRankingReporter } from "../permissions";
+import { canEditAchievements, isRankingReporter } from "../permissions";
 
 const AchievementSchema = z.object({
   id: z.string(),
   name: z.string(),
+  group_name: z.string(),
   description: z.string(),
   flavour_text: z.string(),
   flavour_source: z.string().nullable(),
@@ -46,6 +47,7 @@ export const getAchievementsHandler: RouteHandler<
     .select((eb) => [
       "achievement.id",
       "achievement.name",
+      "achievement.group_name",
       "achievement.description",
       "achievement.flavour_text",
       "achievement.flavour_source",
@@ -70,11 +72,15 @@ export const getAchievementsHandler: RouteHandler<
   );
 };
 
+// Caps keep a single achievement's Discord embed well inside Discord's limits
+// (title 256, description 4096, 6000 per message), so one achievement can
+// never be too big to announce and block the queue.
 const UpdateAchievementBodySchema = z.object({
-  name: z.string().trim().min(1),
-  description: z.string().trim().min(1),
-  flavour_text: z.string().trim().min(1),
-  flavour_source: z.string().trim().nullable(),
+  name: z.string().trim().min(1).max(100),
+  group_name: z.string().trim().min(1).max(100),
+  description: z.string().trim().min(1).max(500),
+  flavour_text: z.string().trim().min(1).max(1500),
+  flavour_source: z.string().trim().max(200).nullable(),
   image_key: z.string().nullable(),
 });
 
@@ -108,18 +114,19 @@ export const updateAchievementHandler: RouteHandler<
   AppEnv
 > = async (c) => {
   const { id: userId } = c.get("jwtPayload") as { id: string };
-  if (!(await isRankingReporter(userId))) {
+  if (!(await canEditAchievements(userId))) {
     return c.json({ error: "Forbidden" }, 403);
   }
 
   const { id } = c.req.valid("param");
-  const { name, description, flavour_text, flavour_source, image_key } = c.req.valid("json");
+  const { name, group_name, description, flavour_text, flavour_source, image_key } = c.req.valid("json");
 
   const updated = await c
     .get("db")
     .updateTable("achievement")
     .set({
       name,
+      group_name,
       description,
       flavour_text,
       flavour_source: flavour_source || null,
@@ -185,7 +192,7 @@ export const announceAchievementsRoute = createRoute({
         },
       },
       description:
-        "Announced the longest-waiting player's achievements (playerId null if none were pending)",
+        "Announced a random pending player's achievements (playerId null if none were pending)",
     },
     403: {
       content: { "application/json": { schema: ErrorSchema } },

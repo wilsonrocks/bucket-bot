@@ -5,6 +5,9 @@ import type { AppEnv } from "../../../hono-env";
 import { IdentityProvider } from "../../../logic/fixtures";
 import { addTestDataToDb } from "../../../logic/test-helpers/add-test-data-to-db";
 import { syncAchievements } from "../../../logic/achievements/sync-achievements";
+import { pickRules } from "../../../logic/test-helpers/achievement-fixtures";
+
+const ACHIEVEMENT_RULES = pickRules("FIRST_EVENT", "WIN_EVENT");
 
 vi.mock("../../../logic/discord-client.js", () => ({
   getDiscordClient: vi.fn(),
@@ -398,11 +401,11 @@ describe("identity changes and achievements", () => {
       .select("player_id")
       .where("id", "=", identityId)
       .executeTakeFirstOrThrow();
-    await syncAchievements(dbClient);
-    expect(await achievementsFor(player_id!)).toEqual(["first-event", "first-victory"]);
+    await syncAchievements(dbClient, ACHIEVEMENT_RULES);
+    expect(await achievementsFor(player_id!)).toEqual(["FIRST_EVENT", "WIN_EVENT"]);
 
     expect((await detach(identityId)).status).toBe(200);
-    await syncAchievements(dbClient);
+    await syncAchievements(dbClient, ACHIEVEMENT_RULES);
 
     expect(await achievementsFor(player_id!)).toEqual([]);
   });
@@ -410,12 +413,12 @@ describe("identity changes and achievements", () => {
   test("merging an identity into a player awards its achievements to that player", async () => {
     const identityId = await addBot4Identity("uid-ach-merge", "Ach Merge");
     const targetPlayerId = await addPlayer("Ach Merge Target");
-    await syncAchievements(dbClient);
+    await syncAchievements(dbClient, ACHIEVEMENT_RULES);
 
     expect((await mergeIdentity(identityId, targetPlayerId)).status).toBe(200);
-    expect(await achievementsFor(targetPlayerId)).toEqual(["first-event", "first-victory"]);
+    expect(await achievementsFor(targetPlayerId)).toEqual(["FIRST_EVENT", "WIN_EVENT"]);
 
-    await syncAchievements(dbClient);
-    expect(await achievementsFor(targetPlayerId)).toEqual(["first-event", "first-victory"]);
+    await syncAchievements(dbClient, ACHIEVEMENT_RULES);
+    expect(await achievementsFor(targetPlayerId)).toEqual(["FIRST_EVENT", "WIN_EVENT"]);
   });
 });

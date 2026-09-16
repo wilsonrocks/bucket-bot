@@ -5,6 +5,9 @@ import type { AppEnv } from "../../../hono-env";
 import { IdentityProvider } from "../../../logic/fixtures";
 import { addTestDataToDb } from "../../../logic/test-helpers/add-test-data-to-db";
 import { syncAchievements } from "../../../logic/achievements/sync-achievements";
+import { pickRules } from "../../../logic/test-helpers/achievement-fixtures";
+
+const ACHIEVEMENT_RULES = pickRules("FIRST_EVENT", "WIN_EVENT");
 
 vi.mock("../../../logic/discord-client.js", () => ({
   getDiscordClient: vi.fn(),
@@ -608,7 +611,7 @@ describe("POST /player/{id}/merge-into-player achievements", () => {
   test("carries achievements to the target without re-announcing them", async () => {
     const source = await addPlayerWithIdentity("Ach Source", IdentityProvider.BOT4, "uid-ach-source");
     const target = await addPlayerWithIdentity("Ach Target", IdentityProvider.BOT4, "uid-ach-target", { withResult: false });
-    await syncAchievements(dbClient);
+    await syncAchievements(dbClient, ACHIEVEMENT_RULES);
     await dbClient
       .updateTable("player_achievement")
       .set({ discord_message_id: "already-posted" })
@@ -617,7 +620,7 @@ describe("POST /player/{id}/merge-into-player achievements", () => {
 
     const response = await merge(source.playerId, target.playerId);
     expect(response.status).toBe(200);
-    await syncAchievements(dbClient);
+    await syncAchievements(dbClient, ACHIEVEMENT_RULES);
 
     const awards = await dbClient
       .selectFrom("player_achievement")
@@ -626,8 +629,8 @@ describe("POST /player/{id}/merge-into-player achievements", () => {
       .orderBy("achievement_id")
       .execute();
     expect(awards).toEqual([
-      { player_id: target.playerId, achievement_id: "first-event", discord_message_id: "already-posted" },
-      { player_id: target.playerId, achievement_id: "first-victory", discord_message_id: "already-posted" },
+      { player_id: target.playerId, achievement_id: "FIRST_EVENT", discord_message_id: "already-posted" },
+      { player_id: target.playerId, achievement_id: "WIN_EVENT", discord_message_id: "already-posted" },
     ]);
   });
 });

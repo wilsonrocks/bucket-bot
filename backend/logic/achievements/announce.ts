@@ -1,5 +1,5 @@
 import { formatDate, parseISO } from "date-fns";
-import { EmbedBuilder, TextChannel } from "discord.js";
+import { EmbedBuilder, TextChannel, embedLength } from "discord.js";
 import { sql, type Kysely } from "kysely";
 import type { DB } from "kysely-codegen";
 import {
@@ -8,8 +8,10 @@ import {
   UK_MALIFAUX_SERVER_ID,
 } from "../discord-client";
 
-/** Discord allows at most 10 embeds per message. */
+/** Discord allows at most 10 embeds per message... */
 export const MAX_EMBEDS_PER_MESSAGE = 10;
+/** ...and at most 6000 characters across all of a message's embeds. */
+export const MAX_EMBED_CHARS_PER_MESSAGE = 6000;
 
 export interface AnnouncedAchievement {
   achievementId: string;
@@ -23,46 +25,77 @@ export interface AnnouncedAchievement {
   achievedOn: string;
 }
 
+export function buildAchievementEmbed(
+  a: AnnouncedAchievement,
+  assetsUrl: string | undefined = process.env.ASSETS_URL,
+): EmbedBuilder {
+  // Text is filled in from admin, so any of it may still be blank.
+  const sections: string[] = [];
+  if (a.description.trim()) sections.push(a.description);
+  if (a.flavourText.trim()) {
+    const quote = a.flavourText.split("\n").map((line) => `> *${line}*`);
+    if (a.flavourSource) quote.push(`> — ${a.flavourSource}`);
+    sections.push(quote.join("\n"));
+  }
+  const date = formatDate(parseISO(a.achievedOn), "d MMM yyyy");
+  sections.push(
+    a.tourneyName ? `Earned at **${a.tourneyName}** on ${date}` : `Earned on ${date}`,
+  );
+
+  const embed = new EmbedBuilder()
+    .setTitle(a.name)
+    .setDescription(sections.join("\n\n"));
+  if (a.imageKey && assetsUrl) {
+    embed.setThumbnail(`${assetsUrl}/${a.imageKey}-w400.webp`);
+  }
+  return embed;
+}
+
+/**
+ * Builds one Discord message from a player's pending achievements, adding
+ * them one at a time and stopping before the message would break Discord's
+ * limits (10 embeds, 6000 embed characters). `included` lists the achievements
+ * that made it in; the rest stay pending for a later post.
+ */
 export function buildAchievementMessage(
   mention: string,
   achievements: AnnouncedAchievement[],
   assetsUrl: string | undefined = process.env.ASSETS_URL,
-): { content: string; embeds: EmbedBuilder[] } {
+): {
+  content: string;
+  embeds: EmbedBuilder[];
+  included: AnnouncedAchievement[];
+} {
+  const embeds: EmbedBuilder[] = [];
+  const included: AnnouncedAchievement[] = [];
+  let chars = 0;
+
+  for (const achievement of achievements) {
+    if (embeds.length === MAX_EMBEDS_PER_MESSAGE) break;
+    const embed = buildAchievementEmbed(achievement, assetsUrl);
+    const length = embedLength(embed.data);
+    // A single embed always fits: EmbedBuilder caps title (256) and
+    // description (4096), and the admin form caps the text well below that.
+    if (chars + length > MAX_EMBED_CHARS_PER_MESSAGE) break;
+    embeds.push(embed);
+    included.push(achievement);
+    chars += length;
+  }
+
   const content =
-    achievements.length === 1
+    included.length === 1
       ? `🏅 ${mention} has earned a new achievement!`
-      : `🏅 ${mention} has earned ${achievements.length} new achievements!`;
+      : `🏅 ${mention} has earned ${included.length} new achievements!`;
 
-  const embeds = achievements.map((a) => {
-    const quote = a.flavourText
-      .split("\n")
-      .map((line) => `> *${line}*`)
-      .join("\n");
-    const lines = [a.description, "", quote];
-    if (a.flavourSource) lines.push(`> — ${a.flavourSource}`);
-    const date = formatDate(parseISO(a.achievedOn), "d MMM yyyy");
-    lines.push(
-      "",
-      a.tourneyName ? `Earned at **${a.tourneyName}** on ${date}` : `Earned on ${date}`,
-    );
-
-    const embed = new EmbedBuilder()
-      .setTitle(a.name)
-      .setDescription(lines.join("\n"));
-    if (a.imageKey && assetsUrl) {
-      embed.setThumbnail(`${assetsUrl}/${a.imageKey}-w400.webp`);
-    }
-    return embed;
-  });
-
-  return { content, embeds };
+  return { content, embeds, included };
 }
 
 let isRunning = false;
 
 /**
- * Announces the pending achievements of the single player who has waited
- * longest, in one message, then records the message id against those awards.
+ * Announces the pending achievements of one randomly chosen player, in one
+ * message, then records the message id against those awards. Each player with
+ * anything pending is equally likely, however many achievements they have.
  * Returns the player id announced, or null if the queue was empty.
  */
 export async function announceNextPlayer(db: Kysely<DB>): Promise<number | null> {
@@ -70,11 +103,16 @@ export async function announceNextPlayer(db: Kysely<DB>): Promise<number | null>
   isRunning = true;
   try {
     const next = await db
-      .selectFrom("player_achievement")
-      .where("discord_message_id", "is", null)
-      .select("player_id")
-      .orderBy("awarded_at")
-      .orderBy("player_id")
+      .selectFrom(
+        db
+          .selectFrom("player_achievement")
+          .where("discord_message_id", "is", null)
+          .select("player_id")
+          .distinct()
+          .as("pending"),
+      )
+      .select("pending.player_id")
+      .orderBy(sql`random()`)
       .limit(1)
       .executeTakeFirst();
     if (!next) return null;
@@ -107,7 +145,6 @@ export async function announceNextPlayer(db: Kysely<DB>): Promise<number | null>
         sql<string>`to_char(player_achievement.achieved_on, 'YYYY-MM-DD')`.as("achievedOn"),
       ])
       .orderBy("achievement.display_order")
-      .limit(MAX_EMBEDS_PER_MESSAGE)
       .execute();
 
     const channelId = process.env.DISCORD_ACHIEVEMENTS_CHANNEL_ID;
@@ -126,9 +163,11 @@ export async function announceNextPlayer(db: Kysely<DB>): Promise<number | null>
 
     const guild = await discordClient.guilds.fetch(UK_MALIFAUX_SERVER_ID);
     const mention = await mentionUserInGuild(guild, player);
-    const message = await channel.send(
-      buildAchievementMessage(mention, achievements),
+    const { content, embeds, included } = buildAchievementMessage(
+      mention,
+      achievements,
     );
+    const message = await channel.send({ content, embeds });
 
     await db
       .updateTable("player_achievement")
@@ -137,7 +176,7 @@ export async function announceNextPlayer(db: Kysely<DB>): Promise<number | null>
       .where(
         "achievement_id",
         "in",
-        achievements.map((a) => a.achievementId),
+        included.map((a) => a.achievementId),
       )
       .execute();
 

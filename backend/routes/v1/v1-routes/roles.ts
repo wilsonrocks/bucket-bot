@@ -1,6 +1,6 @@
 import { createRoute, z, type RouteHandler } from "@hono/zod-openapi";
 import type { AppEnv } from "../../../hono-env.js";
-import { getCaptainTeamIds, isRankingReporter } from "../permissions.js";
+import { getCaptainTeamIds, getStaffRoles, type StaffRoles } from "../permissions.js";
 
 const ErrorSchema = z.object({ error: z.string() });
 
@@ -13,6 +13,7 @@ export const hasRankingReporterRoleRoute = createRoute({
         "application/json": {
           schema: z.object({
             rankingReporter: z.boolean(),
+            achievementAide: z.boolean(),
             captainOfTeamIds: z.array(z.number()),
           }),
         },
@@ -38,9 +39,9 @@ export const hasRankingReporterRole: RouteHandler<typeof hasRankingReporterRoleR
     return c.json({ error: "Missing userId" }, 400);
   }
 
-  let rankingReporter: boolean;
+  let roles: StaffRoles;
   try {
-    rankingReporter = await isRankingReporter(userId);
+    roles = await getStaffRoles(userId);
   } catch (err) {
     console.error(err);
     return c.json({ error: "Failed to fetch Discord role" }, 500);
@@ -48,5 +49,5 @@ export const hasRankingReporterRole: RouteHandler<typeof hasRankingReporterRoleR
 
   const captainOfTeamIds = await getCaptainTeamIds(userId, c.get("db"));
 
-  return c.json({ rankingReporter, captainOfTeamIds }, 200);
+  return c.json({ ...roles, captainOfTeamIds }, 200);
 };

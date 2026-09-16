@@ -17,6 +17,7 @@ export interface Achievement {
   display_order: number;
   flavour_source: string | null;
   flavour_text: string;
+  group_name: string;
   id: string;
   image_key: string | null;
   name: string;

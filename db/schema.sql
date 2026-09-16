@@ -1,5 +1,5 @@
 
-\restrict 2OgPzSKq4twnDWcJMYKNfqHYCEvaPwObMlXIhn96hf4Zg7ty5Ps4R5LFX0qAYat
+\restrict HmIE448wI29w2KPaewYh3fExeQJT8ScmE3EUCUowut0ljPQhHf3TSYaX4CGv4NV
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -37,7 +37,8 @@ CREATE TABLE public.achievement (
     image_key text,
     display_order integer NOT NULL,
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    description text NOT NULL
+    description text NOT NULL,
+    group_name text NOT NULL
 );
 
 CREATE TABLE public.discord_user (
@@ -543,7 +544,7 @@ CREATE INDEX idx_player_achievement_achievement_id ON public.player_achievement 
 
 CREATE INDEX idx_player_achievement_tourney_id ON public.player_achievement USING btree (tourney_id);
 
-CREATE INDEX idx_player_achievement_unannounced ON public.player_achievement USING btree (awarded_at, player_id) WHERE (discord_message_id IS NULL);
+CREATE INDEX idx_player_achievement_unannounced ON public.player_achievement USING btree (player_id) WHERE (discord_message_id IS NULL);
 
 CREATE INDEX idx_player_identity_provider_external ON public.player_identity USING btree (identity_provider_id, external_id);
 
@@ -673,5 +674,5 @@ ALTER TABLE ONLY public.upcoming_event
 ALTER TABLE ONLY public.venue
     ADD CONSTRAINT venue_region_id_fkey FOREIGN KEY (region_id) REFERENCES public.region(id);
 
-\unrestrict 2OgPzSKq4twnDWcJMYKNfqHYCEvaPwObMlXIhn96hf4Zg7ty5Ps4R5LFX0qAYat
+\unrestrict HmIE448wI29w2KPaewYh3fExeQJT8ScmE3EUCUowut0ljPQhHf3TSYaX4CGv4NV
 

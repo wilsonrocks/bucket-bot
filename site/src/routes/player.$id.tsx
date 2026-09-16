@@ -17,7 +17,7 @@ import { formatDate, parseISO } from 'date-fns'
 import { PlayerRankingOverTime } from '#/components/charts'
 import { SITE_NAME, SITE_URL, absoluteUrl, jsonLd, seo } from '#/helpers/seo'
 import type { Person, WithContext } from 'schema-dts'
-import { achievementsTabLabel } from '#/helpers/achievements'
+import { achievementsTabLabel, earnedCount, groupAchievements } from '#/helpers/achievements'
 
 export const Route = createFileRoute('/player/$id')({
   params: {
@@ -268,62 +268,76 @@ function RouteComponent() {
         </Tabs.Panel>
 
         <Tabs.Panel value="achievements">
-          <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {achievements.map((a) => {
-              const earned = a.achievedOn !== null
-              return (
-                <li
-                  key={a.id}
-                  className={`flex gap-3 rounded-md border border-border bg-surface p-3 ${earned ? '' : 'text-muted-foreground'}`}
-                >
-                  <div className={`w-20 shrink-0 ${earned ? '' : 'opacity-50 grayscale'}`}>
-                    {a.imageKey ? (
-                      <Image
-                        imageKey={a.imageKey}
-                        width={a.imageWidth}
-                        height={a.imageHeight}
-                        alt={a.name}
-                        fallbackWidth={150}
-                        sizes="80px"
-                        className="h-auto w-20 rounded-sm"
-                      />
-                    ) : (
-                      <div className="flex aspect-square w-20 items-center justify-center rounded-sm bg-muted text-2xl" aria-hidden>
-                        🏅
-                      </div>
-                    )}
-                  </div>
-                  <div className="min-w-0 text-sm">
-                    <h3 className="font-semibold">
-                      {a.name}
-                      <span className="sr-only">{earned ? ' (earned)' : ' (not yet earned)'}</span>
-                    </h3>
-                    <p>{a.description}</p>
-                    <blockquote className="mt-1 italic">
-                      “{a.flavourText}”
-                      {a.flavourSource && <footer className="not-italic">— {a.flavourSource}</footer>}
-                    </blockquote>
-                    {earned ? (
-                      <p className="mt-1 text-muted-foreground">
-                        Earned{' '}
-                        {a.tourneyId && a.tourneyName && (
-                          <>
-                            at{' '}
-                            <Link to="/event/$id" params={{ id: a.tourneyId }} search={{ tab: undefined, painting: undefined }}>
-                              {a.tourneyName}
-                            </Link>{' '}
-                          </>
-                        )}
-                        on {formatDate(parseISO(a.achievedOn!), 'd MMMM yyyy')}
-                      </p>
-                    ) : (
-                      <p className="mt-1">Not yet earned</p>
-                    )}
-                  </div>
-                </li>
-              )
-            })}
-          </ul>
+          <div className="flex flex-col gap-6">
+            {groupAchievements(achievements).map((group) => (
+              <section key={group.name}>
+                <h3 className="mb-2 font-semibold">
+                  {group.name}{' '}
+                  <span className="font-normal text-muted-foreground">
+                    ({earnedCount(group.achievements)}/{group.achievements.length})
+                  </span>
+                </h3>
+                <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {group.achievements.map((a) => {
+                    const earned = a.achievedOn !== null
+                    return (
+                      <li
+                        key={a.id}
+                        className={`flex gap-3 rounded-md border border-border bg-surface p-3 ${earned ? '' : 'text-muted-foreground'}`}
+                      >
+                        <div className={`w-20 shrink-0 ${earned ? '' : 'opacity-50 grayscale'}`}>
+                          {a.imageKey ? (
+                            <Image
+                              imageKey={a.imageKey}
+                              width={a.imageWidth}
+                              height={a.imageHeight}
+                              alt={a.name}
+                              fallbackWidth={150}
+                              sizes="80px"
+                              className="h-auto w-20 rounded-sm"
+                            />
+                          ) : (
+                            <div className="flex aspect-square w-20 items-center justify-center rounded-sm bg-muted text-2xl" aria-hidden>
+                              🏅
+                            </div>
+                          )}
+                        </div>
+                        <div className="min-w-0 text-sm">
+                          <h4 className="font-semibold">
+                            {a.name}
+                            <span className="sr-only">{earned ? ' (earned)' : ' (not yet earned)'}</span>
+                          </h4>
+                          {a.description.trim() && <p>{a.description}</p>}
+                          {a.flavourText.trim() && (
+                            <blockquote className="mt-1 italic">
+                              “{a.flavourText}”
+                              {a.flavourSource && <footer className="not-italic">— {a.flavourSource}</footer>}
+                            </blockquote>
+                          )}
+                          {earned ? (
+                            <p className="mt-1 text-muted-foreground">
+                              Earned{' '}
+                              {a.tourneyId && a.tourneyName && (
+                                <>
+                                  at{' '}
+                                  <Link to="/event/$id" params={{ id: a.tourneyId }} search={{ tab: undefined, painting: undefined }}>
+                                    {a.tourneyName}
+                                  </Link>{' '}
+                                </>
+                              )}
+                              on {formatDate(parseISO(a.achievedOn!), 'd MMMM yyyy')}
+                            </p>
+                          ) : (
+                            <p className="mt-1">Not yet earned</p>
+                          )}
+                        </div>
+                      </li>
+                    )
+                  })}
+                </ul>
+              </section>
+            ))}
+          </div>
         </Tabs.Panel>
       </Tabs>
 

@@ -1,14 +1,16 @@
 import { TextChannel } from "discord.js";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { dbClient } from "../../db-client";
-import { IdentityProvider } from "../fixtures";
+import {
+  makeAchievementFixtures,
+  pickRules,
+} from "../test-helpers/achievement-fixtures";
 
 vi.mock("../discord-client.ts", async (importActual) => ({
   ...(await importActual<typeof import("../discord-client.ts")>()),
   getDiscordClient: vi.fn(),
 }));
 
-import { sql } from "kysely";
 import { announceNextPlayer } from "../achievements/announce";
 import { ACHIEVEMENT_RULES } from "../achievements/rules";
 import { syncAchievements } from "../achievements/sync-achievements";
@@ -16,73 +18,11 @@ import { getDiscordClient } from "../discord-client";
 import { mergePlaceholderIntoPlayer } from "../identities/merge-player";
 import { runAchievementsTick } from "../pipeline/scheduler";
 
-const PREFIX = "test-achievements-";
-
-async function cleanup() {
-  await dbClient.deleteFrom("tourney").where("name", "like", `${PREFIX}%`).execute();
-  await dbClient
-    .deleteFrom("player_identity")
-    .where("external_id", "like", `${PREFIX}%`)
-    .execute();
-  await dbClient.deleteFrom("player").where("name", "like", `${PREFIX}%`).execute();
-}
-
-async function addTourney(name: string, date: string) {
-  return (
-    await dbClient
-      .insertInto("tourney")
-      .values({ name: `${PREFIX}${name}`, date, number_of_players: 8 })
-      .returning("id")
-      .executeTakeFirstOrThrow()
-  ).id;
-}
-
-async function addPlayer(name: string) {
-  const player = await dbClient
-    .insertInto("player")
-    .values({ name: `${PREFIX}${name}` })
-    .returning("id")
-    .executeTakeFirstOrThrow();
-  const identity = await dbClient
-    .insertInto("player_identity")
-    .values({
-      player_id: player.id,
-      identity_provider_id: IdentityProvider.LONGSHANKS,
-      external_id: `${PREFIX}${name}`,
-      provider_name: name,
-    })
-    .returning("id")
-    .executeTakeFirstOrThrow();
-  return { playerId: player.id, identityId: identity.id };
-}
-
-async function addResult(identityId: number, tourneyId: number, place: number) {
-  await dbClient
-    .insertInto("result")
-    .values({
-      tourney_id: tourneyId,
-      player_identity_id: identityId,
-      place,
-      points: 10,
-      faction_code: "GUILD",
-      rounds_played: 3,
-    })
-    .execute();
-}
-
-async function awardsFor(playerId: number) {
-  return dbClient
-    .selectFrom("player_achievement")
-    .where("player_id", "=", playerId)
-    .select([
-      "achievement_id",
-      "tourney_id",
-      sql<string>`to_char(achieved_on, 'YYYY-MM-DD')`.as("achieved_on"),
-      "discord_message_id",
-    ])
-    .orderBy("achievement_id")
-    .execute();
-}
+// Sync/merge/announce mechanics are tested with just these two rules; the
+// rules themselves are covered in achievement-rules.test.ts.
+const RULES = pickRules("FIRST_EVENT", "WIN_EVENT");
+const { cleanup, addTourney, addPlayer, addResult, awardsFor } =
+  makeAchievementFixtures("test-achievements-");
 
 async function markAllAnnounced(playerId: number, messageId: string) {
   await dbClient
@@ -104,9 +44,16 @@ beforeEach(async () => {
 afterEach(cleanup);
 
 describe("achievement rules", () => {
-  test("every rule has an achievement row and vice versa", async () => {
+  test("every rule has an achievement row", async () => {
     const rows = await dbClient.selectFrom("achievement").select("id").execute();
-    expect(rows.map((r) => r.id).sort()).toEqual(Object.keys(ACHIEVEMENT_RULES).sort());
+    expect(rows.map((r) => r.id)).toEqual(
+      expect.arrayContaining(Object.keys(ACHIEVEMENT_RULES)),
+    );
+  });
+
+  test("achievement ids are SCREAMING_SNAKE_CASE", async () => {
+    const rows = await dbClient.selectFrom("achievement").select("id").execute();
+    for (const { id } of rows) expect(id).toMatch(/^[A-Z0-9]+(_[A-Z0-9]+)*$/);
   });
 });
 
@@ -120,11 +67,11 @@ describe("syncAchievements", () => {
     await addResult(alice.identityId, t2, 1);
     await addResult(alice.identityId, t1, 4);
 
-    await syncAchievements(dbClient);
+    await syncAchievements(dbClient, RULES);
 
     expect(await awardsFor(alice.playerId)).toEqual([
-      { achievement_id: "first-event", tourney_id: t1, achieved_on: "2024-01-10", discord_message_id: null },
-      { achievement_id: "first-victory", tourney_id: t2, achieved_on: "2024-02-10", discord_message_id: null },
+      { achievement_id: "FIRST_EVENT", tourney_id: t1, achieved_on: "2024-01-10", discord_message_id: null },
+      { achievement_id: "WIN_EVENT", tourney_id: t2, achieved_on: "2024-02-10", discord_message_id: null },
     ]);
   });
 
@@ -135,10 +82,10 @@ describe("syncAchievements", () => {
     await addResult(bob.identityId, tB, 2);
     await addResult(bob.identityId, tA, 2);
 
-    await syncAchievements(dbClient);
+    await syncAchievements(dbClient, RULES);
 
     expect(await awardsFor(bob.playerId)).toEqual([
-      expect.objectContaining({ achievement_id: "first-event", tourney_id: Math.min(tA, tB) }),
+      expect.objectContaining({ achievement_id: "FIRST_EVENT", tourney_id: Math.min(tA, tB) }),
     ]);
   });
 
@@ -147,8 +94,8 @@ describe("syncAchievements", () => {
     const alice = await addPlayer("alice");
     await addResult(alice.identityId, t1, 1);
 
-    await syncAchievements(dbClient);
-    const second = await syncAchievements(dbClient);
+    await syncAchievements(dbClient, RULES);
+    const second = await syncAchievements(dbClient, RULES);
 
     expect(second).toEqual({ inserted: 0, updated: 0, deleted: 0 });
   });
@@ -157,15 +104,15 @@ describe("syncAchievements", () => {
     const t1 = await addTourney("t1", "2024-01-10");
     const alice = await addPlayer("alice");
     await addResult(alice.identityId, t1, 3);
-    await syncAchievements(dbClient);
+    await syncAchievements(dbClient, RULES);
 
     const t2 = await addTourney("t2", "2024-02-10");
     await addResult(alice.identityId, t2, 1);
-    await syncAchievements(dbClient);
+    await syncAchievements(dbClient, RULES);
 
     expect((await awardsFor(alice.playerId)).map((a) => a.achievement_id)).toEqual([
-      "first-event",
-      "first-victory",
+      "FIRST_EVENT",
+      "WIN_EVENT",
     ]);
   });
 
@@ -173,14 +120,14 @@ describe("syncAchievements", () => {
     const t1 = await addTourney("t1", "2024-01-10");
     const alice = await addPlayer("alice");
     await addResult(alice.identityId, t1, 1);
-    await syncAchievements(dbClient);
+    await syncAchievements(dbClient, RULES);
 
     await dbClient
       .updateTable("player_identity")
       .set({ player_id: null })
       .where("id", "=", alice.identityId)
       .execute();
-    await syncAchievements(dbClient);
+    await syncAchievements(dbClient, RULES);
 
     expect(await awardsFor(alice.playerId)).toEqual([]);
   });
@@ -191,21 +138,21 @@ describe("syncAchievements", () => {
     const alice = await addPlayer("alice");
     await addResult(alice.identityId, t1, 2);
     await addResult(alice.identityId, t2, 2);
-    await syncAchievements(dbClient);
+    await syncAchievements(dbClient, RULES);
     await markAllAnnounced(alice.playerId, "msg-1");
 
     await dbClient.deleteFrom("tourney").where("id", "=", t1).execute();
-    await syncAchievements(dbClient);
+    await syncAchievements(dbClient, RULES);
 
     expect(await awardsFor(alice.playerId)).toEqual([
-      { achievement_id: "first-event", tourney_id: t2, achieved_on: "2024-02-10", discord_message_id: "msg-1" },
+      { achievement_id: "FIRST_EVENT", tourney_id: t2, achieved_on: "2024-02-10", discord_message_id: "msg-1" },
     ]);
   });
 
-  test("throws when rules and achievement rows disagree", async () => {
+  test("throws when a rule has no achievement row", async () => {
     await expect(
       syncAchievements(dbClient, { ...ACHIEVEMENT_RULES, "not-in-db": async () => [] }),
-    ).rejects.toThrow(/no row: \[not-in-db\]/);
+    ).rejects.toThrow(/no matching achievement row: \[not-in-db\]/);
   });
 });
 
@@ -217,17 +164,17 @@ describe("merging players", () => {
     const into = await addPlayer("into");
     await addResult(from.identityId, t1, 1);
     await addResult(into.identityId, t2, 3);
-    await syncAchievements(dbClient);
+    await syncAchievements(dbClient, RULES);
 
     await dbClient.transaction().execute((trx) =>
       mergePlaceholderIntoPlayer(trx, from.playerId, into.playerId),
     );
     expect(await awardsFor(from.playerId)).toEqual([]);
 
-    await syncAchievements(dbClient);
+    await syncAchievements(dbClient, RULES);
     expect(await awardsFor(into.playerId)).toEqual([
-      { achievement_id: "first-event", tourney_id: t1, achieved_on: "2024-01-10", discord_message_id: null },
-      { achievement_id: "first-victory", tourney_id: t1, achieved_on: "2024-01-10", discord_message_id: null },
+      { achievement_id: "FIRST_EVENT", tourney_id: t1, achieved_on: "2024-01-10", discord_message_id: null },
+      { achievement_id: "WIN_EVENT", tourney_id: t1, achieved_on: "2024-01-10", discord_message_id: null },
     ]);
   });
 
@@ -237,7 +184,7 @@ describe("merging players", () => {
     const into = await addPlayer("into");
     await addResult(from.identityId, t1, 2);
     await addResult(into.identityId, t1, 3);
-    await syncAchievements(dbClient);
+    await syncAchievements(dbClient, RULES);
     await markAllAnnounced(from.playerId, "msg-from");
 
     await dbClient.transaction().execute((trx) =>
@@ -245,7 +192,7 @@ describe("merging players", () => {
     );
 
     expect(await awardsFor(into.playerId)).toEqual([
-      expect.objectContaining({ achievement_id: "first-event", discord_message_id: "msg-from" }),
+      expect.objectContaining({ achievement_id: "FIRST_EVENT", discord_message_id: "msg-from" }),
     ]);
   });
 
@@ -255,7 +202,7 @@ describe("merging players", () => {
     const into = await addPlayer("into");
     await addResult(from.identityId, t1, 2);
     await addResult(into.identityId, t1, 3);
-    await syncAchievements(dbClient);
+    await syncAchievements(dbClient, RULES);
     await markAllAnnounced(from.playerId, "msg-from");
     await markAllAnnounced(into.playerId, "msg-into");
 
@@ -264,7 +211,7 @@ describe("merging players", () => {
     );
 
     expect(await awardsFor(into.playerId)).toEqual([
-      expect.objectContaining({ achievement_id: "first-event", discord_message_id: "msg-into" }),
+      expect.objectContaining({ achievement_id: "FIRST_EVENT", discord_message_id: "msg-into" }),
     ]);
   });
 });
@@ -291,28 +238,51 @@ describe("announcing", () => {
     expect(send).not.toHaveBeenCalled();
   });
 
-  test("announces all of the longest-waiting player's achievements in one message", async () => {
+  test("announces all of one pending player's achievements in one message", async () => {
+    const t1 = await addTourney("t1", "2024-01-10");
+    const alice = await addPlayer("alice"); // wins: 2 achievements
+    const bob = await addPlayer("bob"); // 2nd: 1 achievement
+    await addResult(alice.identityId, t1, 1);
+    await addResult(bob.identityId, t1, 2);
+    await syncAchievements(dbClient, RULES);
+    const pendingCount = { [alice.playerId]: 2, [bob.playerId]: 1 };
+
+    const first = await announceNextPlayer(dbClient);
+    expect([alice.playerId, bob.playerId]).toContain(first);
+    const other = first === alice.playerId ? bob.playerId : alice.playerId;
+
+    expect(send).toHaveBeenCalledTimes(1);
+    expect(send.mock.calls[0]![0].embeds).toHaveLength(pendingCount[first!]!);
+    expect(
+      new Set((await awardsFor(first!)).map((a) => a.discord_message_id)),
+    ).toEqual(new Set(["discord-msg-1"]));
+    expect((await awardsFor(other)).every((a) => a.discord_message_id === null)).toBe(true);
+
+    expect(await announceNextPlayer(dbClient)).toBe(other);
+    expect(await announceNextPlayer(dbClient)).toBeNull();
+  });
+
+  test("picks the player at random rather than by when they were awarded", async () => {
     const t1 = await addTourney("t1", "2024-01-10");
     const alice = await addPlayer("alice");
     const bob = await addPlayer("bob");
-    await addResult(alice.identityId, t1, 1);
-    await syncAchievements(dbClient);
-    await addResult(bob.identityId, t1, 2);
-    await syncAchievements(dbClient);
+    await addResult(alice.identityId, t1, 2);
+    await syncAchievements(dbClient, RULES);
+    await addResult(bob.identityId, t1, 3);
+    await syncAchievements(dbClient, RULES);
 
-    expect(await announceNextPlayer(dbClient)).toBe(alice.playerId);
-    expect(send).toHaveBeenCalledTimes(1);
-    const payload = send.mock.calls[0]![0];
-    expect(payload.content).toContain("2 new achievements");
-    expect(payload.embeds).toHaveLength(2);
-    expect((await awardsFor(alice.playerId)).map((a) => a.discord_message_id)).toEqual([
-      "discord-msg-1",
-      "discord-msg-1",
-    ]);
-    expect((await awardsFor(bob.playerId))[0]!.discord_message_id).toBeNull();
-
-    expect(await announceNextPlayer(dbClient)).toBe(bob.playerId);
-    expect(await announceNextPlayer(dbClient)).toBeNull();
+    // Alice was awarded first; if selection weren't random she'd always be
+    // picked. The chance of 20 random picks all agreeing is ~1 in 500,000.
+    const picks = new Set<number | null>();
+    for (let i = 0; i < 20; i++) {
+      picks.add(await announceNextPlayer(dbClient));
+      await dbClient
+        .updateTable("player_achievement")
+        .set({ discord_message_id: null })
+        .where("player_id", "in", [alice.playerId, bob.playerId])
+        .execute();
+    }
+    expect(picks).toEqual(new Set([alice.playerId, bob.playerId]));
   });
 
   test("scheduled tick syncs but only announces during UK working hours", async () => {
@@ -321,7 +291,9 @@ describe("announcing", () => {
     await addResult(alice.identityId, t1, 2);
 
     await runAchievementsTick(dbClient, new Date("2026-01-17T12:00:00Z")); // Saturday
-    expect(await awardsFor(alice.playerId)).toHaveLength(1);
+    expect((await awardsFor(alice.playerId)).map((a) => a.achievement_id)).toContain(
+      "FIRST_EVENT",
+    );
     expect(send).not.toHaveBeenCalled();
 
     await runAchievementsTick(dbClient, new Date("2026-01-14T12:00:00Z")); // Wednesday

@@ -21,18 +21,26 @@ import {
   updateAchievementRoute,
 } from "./achievements";
 
-function mockRankingReporter(hasRole: boolean) {
+const AIDE_ROLE_ID = "aide-role-id";
+
+/** Mocks the Discord member lookup so the user holds exactly `roleIds`. */
+function mockRoles(...roleIds: string[]) {
   vi.mocked(getDiscordClient).mockResolvedValue({
     guilds: {
       fetch: vi.fn().mockResolvedValue({
         members: {
           fetch: vi.fn().mockResolvedValue({
-            roles: { cache: { has: vi.fn().mockReturnValue(hasRole) } },
+            roles: { cache: { has: (id: string) => roleIds.includes(id) } },
           }),
         },
       }),
     },
   } as any);
+}
+
+function mockRankingReporter(hasRole: boolean) {
+  if (hasRole) mockRoles("reporter-role-id");
+  else mockRoles();
 }
 
 function makeApp() {
@@ -63,14 +71,15 @@ let originalFirstEvent: Record<string, unknown>;
 beforeEach(async () => {
   originalFirstEvent = await dbClient
     .selectFrom("achievement")
-    .select(["name", "description", "flavour_text", "flavour_source", "image_key"])
-    .where("id", "=", "first-event")
+    .select(["name", "group_name", "description", "flavour_text", "flavour_source", "image_key"])
+    .where("id", "=", "FIRST_EVENT")
     .executeTakeFirstOrThrow();
   mockRankingReporter(true);
+  process.env.ACHIEVEMENT_AIDE_ROLE_ID = AIDE_ROLE_ID;
 });
 
 afterEach(async () => {
-  await dbClient.updateTable("achievement").set(originalFirstEvent).where("id", "=", "first-event").execute();
+  await dbClient.updateTable("achievement").set(originalFirstEvent).where("id", "=", "FIRST_EVENT").execute();
   await dbClient.deleteFrom("player").where("name", "=", PLAYER_NAME).execute();
 });
 
@@ -84,25 +93,40 @@ describe("GET /achievements", () => {
       .executeTakeFirstOrThrow();
     await dbClient
       .insertInto("player_achievement")
-      .values({ player_id: player.id, achievement_id: "first-event", achieved_on: "2024-01-01" })
+      .values({ player_id: player.id, achievement_id: "FIRST_EVENT", achieved_on: "2024-01-01" })
       .execute();
 
     const response = await makeApp().request("/achievements");
     expect(response.status).toBe(200);
     const body = (await response.json()) as any[];
 
-    expect(body.map((a) => a.id)).toEqual(["first-event", "first-victory"]);
-    const firstEvent = body.find((a) => a.id === "first-event");
-    const firstEventBefore = before.find((a) => a.id === "first-event");
+    const orders = body.map((a) => a.display_order);
+    expect(orders).toEqual([...orders].sort((x, y) => x - y));
+    expect(body.map((a) => a.id)).toEqual(expect.arrayContaining(["FIRST_EVENT", "WIN_EVENT"]));
+    const firstEvent = body.find((a) => a.id === "FIRST_EVENT");
+    const firstEventBefore = before.find((a) => a.id === "FIRST_EVENT");
     expect(firstEvent.award_count).toBe(firstEventBefore.award_count + 1);
     expect(firstEvent.unannounced_count).toBe(firstEventBefore.unannounced_count + 1);
   });
 });
 
 describe("PUT /achievements/{id}", () => {
+  test("rejects text long enough to break a Discord embed", async () => {
+    const response = await update("FIRST_EVENT", {
+      name: "Name",
+      group_name: "General",
+      description: "d",
+      flavour_text: "x".repeat(1501),
+      flavour_source: null,
+      image_key: null,
+    });
+    expect(response.status).toBe(400);
+  });
+
   test("updates the text and image", async () => {
-    const response = await update("first-event", {
+    const response = await update("FIRST_EVENT", {
       name: "New Name",
+      group_name: "Special",
       description: "Win best in faction",
       flavour_text: "New quote",
       flavour_source: "  ",
@@ -113,10 +137,11 @@ describe("PUT /achievements/{id}", () => {
     const row = await dbClient
       .selectFrom("achievement")
       .selectAll()
-      .where("id", "=", "first-event")
+      .where("id", "=", "FIRST_EVENT")
       .executeTakeFirstOrThrow();
     expect(row).toMatchObject({
       name: "New Name",
+      group_name: "Special",
       description: "Win best in faction",
       flavour_text: "New quote",
       flavour_source: null,
@@ -127,6 +152,7 @@ describe("PUT /achievements/{id}", () => {
   test("returns 404 for an unknown achievement", async () => {
     const response = await update("nope", {
       name: "x",
+      group_name: "General",
       description: "x",
       flavour_text: "y",
       flavour_source: null,
@@ -137,8 +163,9 @@ describe("PUT /achievements/{id}", () => {
 
   test("returns 403 for a non-reporter", async () => {
     mockRankingReporter(false);
-    const response = await update("first-event", {
+    const response = await update("FIRST_EVENT", {
       name: "Hacked",
+      group_name: "General",
       description: "x",
       flavour_text: "y",
       flavour_source: null,
@@ -209,5 +236,33 @@ describe("POST /achievements/announce-next", () => {
   test("returns 403 for a non-reporter", async () => {
     mockRankingReporter(false);
     expect((await post("/achievements/announce-next")).status).toBe(403);
+  });
+});
+
+describe("achievement aides", () => {
+  const validUpdate = {
+    name: "Aide Name",
+    group_name: "General",
+    description: "d",
+    flavour_text: "f",
+    flavour_source: null,
+    image_key: null,
+  };
+
+  test("can edit achievement details", async () => {
+    mockRoles(AIDE_ROLE_ID);
+    expect((await update("FIRST_EVENT", validUpdate)).status).toBe(200);
+  });
+
+  test("cannot recalculate or post to Discord", async () => {
+    mockRoles(AIDE_ROLE_ID);
+    expect((await post("/achievements/sync")).status).toBe(403);
+    expect((await post("/achievements/announce-next")).status).toBe(403);
+  });
+
+  test("no one is an aide when the role id isn't configured", async () => {
+    delete process.env.ACHIEVEMENT_AIDE_ROLE_ID;
+    mockRoles(AIDE_ROLE_ID);
+    expect((await update("FIRST_EVENT", validUpdate)).status).toBe(403);
   });
 });
