@@ -6,6 +6,7 @@ const achievement = (
 ): AnnouncedAchievement => ({
   achievementId: "first-event",
   name: "Through the Breach",
+  description: "Attend 1 event",
   flavourText: "A quote",
   flavourSource: "Someone",
   imageKey: "achievement/abc",
@@ -26,7 +27,7 @@ describe("buildAchievementMessage", () => {
     const data = embeds[0]!.toJSON();
     expect(data.title).toBe("Through the Breach");
     expect(data.description).toBe(
-      "> *A quote*\n> — Someone\n\nEarned at **Big Event** on 8 Mar 2025",
+      "Attend 1 event\n\n> *A quote*\n> — Someone\n\nEarned at **Big Event** on 8 Mar 2025",
     );
     expect(data.thumbnail?.url).toBe(
       "https://assets.example/achievement/abc-w400.webp",
@@ -40,7 +41,7 @@ describe("buildAchievementMessage", () => {
       "https://assets.example",
     );
     const data = embeds[0]!.toJSON();
-    expect(data.description).toBe("> *A quote*\n\nEarned on 8 Mar 2025");
+    expect(data.description).toBe("Attend 1 event\n\n> *A quote*\n\nEarned on 8 Mar 2025");
     expect(data.thumbnail).toBeUndefined();
   });
 
@@ -50,7 +51,7 @@ describe("buildAchievementMessage", () => {
       [achievement({ flavourText: "one\ntwo", flavourSource: null })],
       "https://assets.example",
     );
-    expect(embeds[0]!.toJSON().description).toMatch(/^> \*one\*\n> \*two\*\n/);
+    expect(embeds[0]!.toJSON().description).toMatch(/^Attend 1 event\n\n> \*one\*\n> \*two\*\n/);
   });
 
   it("bundles several achievements into one message", () => {

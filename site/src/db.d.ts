@@ -13,6 +13,7 @@ export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
 export interface Achievement {
   created_at: Generated<Timestamp>;
+  description: string;
   display_order: number;
   flavour_source: string | null;
   flavour_text: string;

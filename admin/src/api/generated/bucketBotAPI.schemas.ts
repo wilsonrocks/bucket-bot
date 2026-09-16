@@ -1127,6 +1127,7 @@ export type GetUpcomingEvents200Item = {
 export type GetAchievements200Item = {
   id: string;
   name: string;
+  description: string;
   flavour_text: string;
   /** @nullable */
   flavour_source: string | null;
@@ -1159,6 +1160,8 @@ export type PostAchievementsAnnounceNext403 = {
 export type PutAchievementsIdBody = {
   /** @minLength 1 */
   name: string;
+  /** @minLength 1 */
+  description: string;
   /** @minLength 1 */
   flavour_text: string;
   /** @nullable */

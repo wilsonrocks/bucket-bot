@@ -8,6 +8,7 @@ import { isRankingReporter } from "../permissions";
 const AchievementSchema = z.object({
   id: z.string(),
   name: z.string(),
+  description: z.string(),
   flavour_text: z.string(),
   flavour_source: z.string().nullable(),
   image_key: z.string().nullable(),
@@ -45,6 +46,7 @@ export const getAchievementsHandler: RouteHandler<
     .select((eb) => [
       "achievement.id",
       "achievement.name",
+      "achievement.description",
       "achievement.flavour_text",
       "achievement.flavour_source",
       "achievement.image_key",
@@ -70,6 +72,7 @@ export const getAchievementsHandler: RouteHandler<
 
 const UpdateAchievementBodySchema = z.object({
   name: z.string().trim().min(1),
+  description: z.string().trim().min(1),
   flavour_text: z.string().trim().min(1),
   flavour_source: z.string().trim().nullable(),
   image_key: z.string().nullable(),
@@ -110,13 +113,14 @@ export const updateAchievementHandler: RouteHandler<
   }
 
   const { id } = c.req.valid("param");
-  const { name, flavour_text, flavour_source, image_key } = c.req.valid("json");
+  const { name, description, flavour_text, flavour_source, image_key } = c.req.valid("json");
 
   const updated = await c
     .get("db")
     .updateTable("achievement")
     .set({
       name,
+      description,
       flavour_text,
       flavour_source: flavour_source || null,
       image_key,

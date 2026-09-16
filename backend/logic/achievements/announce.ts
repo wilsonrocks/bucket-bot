@@ -14,6 +14,7 @@ export const MAX_EMBEDS_PER_MESSAGE = 10;
 export interface AnnouncedAchievement {
   achievementId: string;
   name: string;
+  description: string;
   flavourText: string;
   flavourSource: string | null;
   imageKey: string | null;
@@ -37,7 +38,7 @@ export function buildAchievementMessage(
       .split("\n")
       .map((line) => `> *${line}*`)
       .join("\n");
-    const lines = [quote];
+    const lines = [a.description, "", quote];
     if (a.flavourSource) lines.push(`> — ${a.flavourSource}`);
     const date = formatDate(parseISO(a.achievedOn), "d MMM yyyy");
     lines.push(
@@ -98,6 +99,7 @@ export async function announceNextPlayer(db: Kysely<DB>): Promise<number | null>
       .select([
         "achievement.id as achievementId",
         "achievement.name",
+        "achievement.description",
         "achievement.flavour_text as flavourText",
         "achievement.flavour_source as flavourSource",
         "achievement.image_key as imageKey",

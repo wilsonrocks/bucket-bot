@@ -298,6 +298,7 @@ function RouteComponent() {
                       {a.name}
                       <span className="sr-only">{earned ? ' (earned)' : ' (not yet earned)'}</span>
                     </h3>
+                    <p>{a.description}</p>
                     <blockquote className="mt-1 italic">
                       “{a.flavourText}”
                       {a.flavourSource && <footer className="not-italic">— {a.flavourSource}</footer>}

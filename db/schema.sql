@@ -1,5 +1,5 @@
 
-\restrict bbR8cYNpIWxbZ20gXQJ2qswT7e6TK7IM0oP6wXiwHiQMBes7se7RepJSh82ApfO
+\restrict 2OgPzSKq4twnDWcJMYKNfqHYCEvaPwObMlXIhn96hf4Zg7ty5Ps4R5LFX0qAYat
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -36,7 +36,8 @@ CREATE TABLE public.achievement (
     flavour_source text,
     image_key text,
     display_order integer NOT NULL,
-    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    description text NOT NULL
 );
 
 CREATE TABLE public.discord_user (
@@ -672,5 +673,5 @@ ALTER TABLE ONLY public.upcoming_event
 ALTER TABLE ONLY public.venue
     ADD CONSTRAINT venue_region_id_fkey FOREIGN KEY (region_id) REFERENCES public.region(id);
 
-\unrestrict bbR8cYNpIWxbZ20gXQJ2qswT7e6TK7IM0oP6wXiwHiQMBes7se7RepJSh82ApfO
+\unrestrict 2OgPzSKq4twnDWcJMYKNfqHYCEvaPwObMlXIhn96hf4Zg7ty5Ps4R5LFX0qAYat
 

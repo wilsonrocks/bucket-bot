@@ -63,7 +63,7 @@ let originalFirstEvent: Record<string, unknown>;
 beforeEach(async () => {
   originalFirstEvent = await dbClient
     .selectFrom("achievement")
-    .select(["name", "flavour_text", "flavour_source", "image_key"])
+    .select(["name", "description", "flavour_text", "flavour_source", "image_key"])
     .where("id", "=", "first-event")
     .executeTakeFirstOrThrow();
   mockRankingReporter(true);
@@ -103,6 +103,7 @@ describe("PUT /achievements/{id}", () => {
   test("updates the text and image", async () => {
     const response = await update("first-event", {
       name: "New Name",
+      description: "Win best in faction",
       flavour_text: "New quote",
       flavour_source: "  ",
       image_key: "achievement/abc",
@@ -116,6 +117,7 @@ describe("PUT /achievements/{id}", () => {
       .executeTakeFirstOrThrow();
     expect(row).toMatchObject({
       name: "New Name",
+      description: "Win best in faction",
       flavour_text: "New quote",
       flavour_source: null,
       image_key: "achievement/abc",
@@ -125,6 +127,7 @@ describe("PUT /achievements/{id}", () => {
   test("returns 404 for an unknown achievement", async () => {
     const response = await update("nope", {
       name: "x",
+      description: "x",
       flavour_text: "y",
       flavour_source: null,
       image_key: null,
@@ -136,6 +139,7 @@ describe("PUT /achievements/{id}", () => {
     mockRankingReporter(false);
     const response = await update("first-event", {
       name: "Hacked",
+      description: "x",
       flavour_text: "y",
       flavour_source: null,
       image_key: null,

@@ -306,6 +306,7 @@ export const fetchPlayerAchievements = createServerFn()
       .select([
         'achievement.id',
         'achievement.name',
+        'achievement.description',
         'achievement.flavour_text as flavourText',
         'achievement.flavour_source as flavourSource',
         'achievement.image_key as imageKey',

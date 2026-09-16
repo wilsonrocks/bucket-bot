@@ -125,6 +125,7 @@ function AchievementForm({
   const form = useForm({
     initialValues: {
       name: achievement.name,
+      description: achievement.description,
       flavour_text: achievement.flavour_text,
       flavour_source: achievement.flavour_source ?? '',
       image_key: achievement.image_key,
@@ -160,6 +161,7 @@ function AchievementForm({
             id: achievement.id,
             data: {
               name: values.name,
+              description: values.description,
               flavour_text: values.flavour_text,
               flavour_source: values.flavour_source.trim() || null,
               image_key,
@@ -171,6 +173,12 @@ function AchievementForm({
           <Grid.Col span={{ base: 12, xs: 8 }}>
             <Stack gap="xs">
               <TextInput label="Name" required {...form.getInputProps('name')} />
+              <TextInput
+                label="Description"
+                description="What earns it, e.g. 'Attend 1 event'"
+                required
+                {...form.getInputProps('description')}
+              />
               <Textarea
                 label="Flavour text"
                 required
