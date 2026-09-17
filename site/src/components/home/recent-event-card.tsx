@@ -25,7 +25,7 @@ function PlayerRow({ player }: { player: Player }) {
         <Link
           to="/player/$id"
           params={{ id: player.playerId }}
-          search={{ tab: undefined, typeCode: undefined, painting: undefined }}
+          search={{ tab: undefined, typeCode: undefined, painting: undefined, achievement: undefined }}
         >
           {player.playerName}
         </Link>

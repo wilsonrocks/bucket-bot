@@ -1,5 +1,5 @@
 
-\restrict 0BeXHBUf79i9xVqnCPBhc7SsV1vvu4xHnpMqLuef87ZE8x5j1MvS1ZivMlgcEqN
+\restrict HmIE448wI29w2KPaewYh3fExeQJT8ScmE3EUCUowut0ljPQhHf3TSYaX4CGv4NV
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -28,6 +28,18 @@ CREATE EXTENSION IF NOT EXISTS postgis WITH SCHEMA public;
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
+
+CREATE TABLE public.achievement (
+    id text NOT NULL,
+    name text NOT NULL,
+    flavour_text text NOT NULL,
+    flavour_source text,
+    image_key text,
+    display_order integer NOT NULL,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    description text NOT NULL,
+    group_name text NOT NULL
+);
 
 CREATE TABLE public.discord_user (
     discord_user_id text NOT NULL,
@@ -174,6 +186,15 @@ CREATE TABLE public.player (
     short_name text
 );
 
+CREATE TABLE public.player_achievement (
+    player_id integer NOT NULL,
+    achievement_id text NOT NULL,
+    tourney_id integer,
+    achieved_on date NOT NULL,
+    awarded_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    discord_message_id text
+);
+
     AS integer
     NO MINVALUE
     NO MAXVALUE
@@ -183,7 +204,7 @@ CREATE TABLE public.player_identity (
     player_id integer,
     external_id text NOT NULL,
     identity_provider_id text NOT NULL,
-    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     provider_name text NOT NULL,
     is_ignored boolean DEFAULT false NOT NULL
 );
@@ -369,6 +390,9 @@ CREATE TABLE public.venue (
     NO MINVALUE
     NO MAXVALUE
 
+ALTER TABLE ONLY public.achievement
+    ADD CONSTRAINT achievement_pkey PRIMARY KEY (id);
+
 ALTER TABLE ONLY public.discord_user
     ADD CONSTRAINT discord_user_pkey PRIMARY KEY (discord_user_id);
 
@@ -416,6 +440,9 @@ ALTER TABLE ONLY public.painting_winner
 
 ALTER TABLE ONLY public.pipeline_job_step
     ADD CONSTRAINT pipeline_job_step_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY public.player_achievement
+    ADD CONSTRAINT player_achievement_pkey PRIMARY KEY (player_id, achievement_id);
 
 ALTER TABLE ONLY public.player_identity
     ADD CONSTRAINT player_identity_pkey PRIMARY KEY (id);
@@ -513,6 +540,12 @@ CREATE INDEX idx_painting_winner_category_id ON public.painting_winner USING btr
 
 CREATE INDEX idx_painting_winner_player_identity_id ON public.painting_winner USING btree (player_identity_id);
 
+CREATE INDEX idx_player_achievement_achievement_id ON public.player_achievement USING btree (achievement_id);
+
+CREATE INDEX idx_player_achievement_tourney_id ON public.player_achievement USING btree (tourney_id);
+
+CREATE INDEX idx_player_achievement_unannounced ON public.player_achievement USING btree (player_id) WHERE (discord_message_id IS NULL);
+
 CREATE INDEX idx_player_identity_provider_external ON public.player_identity USING btree (identity_provider_id, external_id);
 
 CREATE INDEX idx_ranking_snapshot_batch_type_code ON public.ranking_snapshot_batch USING btree (type_code);
@@ -575,6 +608,15 @@ ALTER TABLE ONLY public.painting_winner
 ALTER TABLE ONLY public.painting_winner
     ADD CONSTRAINT painting_winner_player_identity_id_fkey FOREIGN KEY (player_identity_id) REFERENCES public.player_identity(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY public.player_achievement
+    ADD CONSTRAINT player_achievement_achievement_id_fkey FOREIGN KEY (achievement_id) REFERENCES public.achievement(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY public.player_achievement
+    ADD CONSTRAINT player_achievement_player_id_fkey FOREIGN KEY (player_id) REFERENCES public.player(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY public.player_achievement
+    ADD CONSTRAINT player_achievement_tourney_id_fkey FOREIGN KEY (tourney_id) REFERENCES public.tourney(id) ON DELETE SET NULL;
+
 ALTER TABLE ONLY public.player_identity
     ADD CONSTRAINT player_identity_identity_provider_id_fkey FOREIGN KEY (identity_provider_id) REFERENCES public.identity_provider(id);
 
@@ -632,5 +674,5 @@ ALTER TABLE ONLY public.upcoming_event
 ALTER TABLE ONLY public.venue
     ADD CONSTRAINT venue_region_id_fkey FOREIGN KEY (region_id) REFERENCES public.region(id);
 
-\unrestrict 0BeXHBUf79i9xVqnCPBhc7SsV1vvu4xHnpMqLuef87ZE8x5j1MvS1ZivMlgcEqN
+\unrestrict HmIE448wI29w2KPaewYh3fExeQJT8ScmE3EUCUowut0ljPQhHf3TSYaX4CGv4NV
 

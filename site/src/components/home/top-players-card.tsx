@@ -29,7 +29,7 @@ export function TopPlayersCard({ data }: { data: RankingEntry[] }) {
                       <Link
                         to="/player/$id"
                         params={{ id: player.player_id }}
-                        search={{ tab: undefined, typeCode: undefined, painting: undefined }}
+                        search={{ tab: undefined, typeCode: undefined, painting: undefined, achievement: undefined }}
                       >
                         {player.name}
                       </Link>

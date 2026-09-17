@@ -11,7 +11,9 @@ vi.mock("../../logic/discord-client.js", () => ({
 import { getDiscordClient } from "../../logic/discord-client.js";
 import {
   canAccessTeam,
+  canEditAchievements,
   getCaptainTeamIds,
+  getStaffRoles,
   isRankingReporter,
 } from "../../routes/v1/permissions.js";
 
@@ -202,5 +204,50 @@ describe("canAccessTeam", () => {
   test("returns false for a user with no role and no captaincy", async () => {
     makeMockDiscordClient(false);
     expect(await canAccessTeam("discord-nobody-xyz", teamId, dbClient)).toBe(false);
+  });
+});
+
+// ── getStaffRoles / canEditAchievements ────────────────────────────────────
+
+describe("staff roles", () => {
+  const AIDE_ROLE_ID = "aide-role-id";
+
+  function mockMemberRoles(...roleIds: string[]) {
+    vi.mocked(getDiscordClient).mockResolvedValue({
+      guilds: {
+        fetch: vi.fn().mockResolvedValue({
+          members: {
+            fetch: vi.fn().mockResolvedValue({
+              roles: { cache: { has: (id: string) => roleIds.includes(id) } },
+            }),
+          },
+        }),
+      },
+    } as any);
+  }
+
+  beforeEach(() => {
+    process.env.ACHIEVEMENT_AIDE_ROLE_ID = AIDE_ROLE_ID;
+  });
+
+  afterEach(() => {
+    delete process.env.ACHIEVEMENT_AIDE_ROLE_ID;
+  });
+
+  test.each([
+    [["reporter-role-id"], { rankingReporter: true, achievementAide: false }, true],
+    [[AIDE_ROLE_ID], { rankingReporter: false, achievementAide: true }, true],
+    [["reporter-role-id", AIDE_ROLE_ID], { rankingReporter: true, achievementAide: true }, true],
+    [[], { rankingReporter: false, achievementAide: false }, false],
+  ])("roles %j → %j, can edit achievements: %s", async (roleIds, expected, canEdit) => {
+    mockMemberRoles(...roleIds);
+    expect(await getStaffRoles("user")).toEqual(expected);
+    expect(await canEditAchievements("user")).toBe(canEdit);
+  });
+
+  test("nobody is an aide when ACHIEVEMENT_AIDE_ROLE_ID is unset", async () => {
+    delete process.env.ACHIEVEMENT_AIDE_ROLE_ID;
+    mockMemberRoles(AIDE_ROLE_ID, "");
+    expect(await getStaffRoles("user")).toEqual({ rankingReporter: false, achievementAide: false });
   });
 });

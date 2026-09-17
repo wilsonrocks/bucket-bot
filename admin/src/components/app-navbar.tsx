@@ -11,12 +11,13 @@ import { Route as PlayersRoute } from '@/routes/_app/players/'
 import { Route as TeamsRoute } from '@/routes/_app/teams/'
 import { Route as VenuesRoute } from '@/routes/_app/venues'
 import { Route as FeatureFlagsRoute } from '@/routes/_app/feature-flags'
+import { Route as AchievementsRoute } from '@/routes/_app/achievements'
 
 import { Anchor, Badge, Divider, Group, ScrollArea, Stack, Text } from '@mantine/core'
 import { AppNavLink } from './app-nav-link'
 export const AppNavbar = () => {
   const unmappedIdentities = useGetUnmappedIdentities()
-  const { rankingReporter } = usePermissions()
+  const { rankingReporter, canEditAchievements } = usePermissions()
   const auth = useAuth()
 
   return (
@@ -51,6 +52,9 @@ export const AppNavbar = () => {
           <AppNavLink to={UpcomingEventsRoute.to} label="Upcoming Events" />
         )}
         <AppNavLink to={TeamsRoute.to} label="Teams" />
+        {canEditAchievements && (
+          <AppNavLink to={AchievementsRoute.to} label="Achievements" />
+        )}
         {rankingReporter && (
           <>
             <AppNavLink to={VenuesRoute.to} label="Venues" />

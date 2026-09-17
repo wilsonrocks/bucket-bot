@@ -5,6 +5,16 @@ import jsonWebToken from "jsonwebtoken";
 import type { AppEnv } from "../../hono-env.js";
 import { botChatRouter } from "./v1-routes/discord-bot-chat.js";
 import {
+  announceAchievementsHandler,
+  announceAchievementsRoute,
+  getAchievementsHandler,
+  getAchievementsRoute,
+  syncAchievementsHandler,
+  syncAchievementsRoute,
+  updateAchievementHandler,
+  updateAchievementRoute,
+} from "./v1-routes/achievements";
+import {
   fetchAndStoreDiscordUserIds,
   fetchDiscordUserIdsRoute,
   getAllDiscordUsers,
@@ -378,6 +388,10 @@ v1Router.openapi(pipelineJobStepsRoute, pipelineJobStepsHandler);
 v1Router.openapi(runPipelineRoute, runPipelineHandler);
 v1Router.openapi(retryPipelineStepsRoute, retryPipelineStepsHandler);
 v1Router.openapi(getUpcomingEventsRoute, getUpcomingEventsHandler);
+v1Router.openapi(getAchievementsRoute, getAchievementsHandler);
+v1Router.openapi(syncAchievementsRoute, syncAchievementsHandler);
+v1Router.openapi(announceAchievementsRoute, announceAchievementsHandler);
+v1Router.openapi(updateAchievementRoute, updateAchievementHandler);
 v1Router.openapi(setUpcomingEventVenueRoute, setUpcomingEventVenueHandler);
 v1Router.openapi(setUpcomingEventOrganiserRoute, setUpcomingEventOrganiserHandler);
 v1Router.openapi(syncUpcomingEventsRoute, syncUpcomingEventsHandler);

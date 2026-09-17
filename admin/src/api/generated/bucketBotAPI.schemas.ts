@@ -636,6 +636,7 @@ export type PostBotEventId502 = {
 
 export type GetHasRole200 = {
   rankingReporter: boolean;
+  achievementAide: boolean;
   captainOfTeamIds: number[];
 };
 
@@ -1122,6 +1123,82 @@ export type GetUpcomingEvents200Item = {
   /** @nullable */
   location: string | null;
   [key: string]: unknown | null;
+};
+
+export type GetAchievements200Item = {
+  id: string;
+  name: string;
+  group_name: string;
+  description: string;
+  flavour_text: string;
+  /** @nullable */
+  flavour_source: string | null;
+  /** @nullable */
+  image_key: string | null;
+  display_order: number;
+  award_count: number;
+  unannounced_count: number;
+};
+
+export type PostAchievementsSync200 = {
+  inserted: number;
+  updated: number;
+  deleted: number;
+};
+
+export type PostAchievementsSync403 = {
+  error: string;
+};
+
+export type PostAchievementsAnnounceNext200 = {
+  /** @nullable */
+  playerId: number | null;
+};
+
+export type PostAchievementsAnnounceNext403 = {
+  error: string;
+};
+
+export type PutAchievementsIdBody = {
+  /**
+   * @minLength 1
+   * @maxLength 100
+   */
+  name: string;
+  /**
+   * @minLength 1
+   * @maxLength 100
+   */
+  group_name: string;
+  /**
+   * @minLength 1
+   * @maxLength 500
+   */
+  description: string;
+  /**
+   * @minLength 1
+   * @maxLength 1500
+   */
+  flavour_text: string;
+  /**
+   * @maxLength 200
+   * @nullable
+   */
+  flavour_source: string | null;
+  /** @nullable */
+  image_key: string | null;
+};
+
+export type PutAchievementsId200 = {
+  message: string;
+};
+
+export type PutAchievementsId403 = {
+  error: string;
+};
+
+export type PutAchievementsId404 = {
+  error: string;
 };
 
 export type PutUpcomingEventsIdVenueBody = {

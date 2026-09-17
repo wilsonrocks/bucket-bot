@@ -11,6 +11,18 @@ export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
 
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
+export interface Achievement {
+  created_at: Generated<Timestamp>;
+  description: string;
+  display_order: number;
+  flavour_source: string | null;
+  flavour_text: string;
+  group_name: string;
+  id: string;
+  image_key: string | null;
+  name: string;
+}
+
 export interface DiscordUser {
   created_at: Generated<Timestamp | null>;
   discord_avatar_url: string | null;
@@ -145,6 +157,15 @@ export interface Player {
   longshanks_name: string | null;
   name: string;
   short_name: string | null;
+}
+
+export interface PlayerAchievement {
+  achieved_on: Timestamp;
+  achievement_id: string;
+  awarded_at: Generated<Timestamp>;
+  discord_message_id: string | null;
+  player_id: number;
+  tourney_id: number | null;
 }
 
 export interface PlayerIdentity {
@@ -302,6 +323,7 @@ export interface Venue {
 }
 
 export interface DB {
+  achievement: Achievement;
   discord_user: DiscordUser;
   faction: Faction;
   faction_snapshot: FactionSnapshot;
@@ -317,6 +339,7 @@ export interface DB {
   painting_winner: PaintingWinner;
   pipeline_job_step: PipelineJobStep;
   player: Player;
+  player_achievement: PlayerAchievement;
   player_identity: PlayerIdentity;
   ranking_snapshot: RankingSnapshot;
   ranking_snapshot_batch: RankingSnapshotBatch;

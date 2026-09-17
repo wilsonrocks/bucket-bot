@@ -39,6 +39,7 @@ import type {
   DeleteTeamsTeamIdMembersMembershipId403,
   DeleteTeamsTeamIdMembersMembershipId404,
   DeleteTeamsTeamIdMembersMembershipIdParams,
+  GetAchievements200Item,
   GetAllDiscordUsers200Item,
   GetBotChatChannels200Item,
   GetFactionRankings200Item,
@@ -101,6 +102,10 @@ import type {
   PatchTeamsTeamIdMembersMembershipId403,
   PatchTeamsTeamIdMembersMembershipId404,
   PatchTeamsTeamIdMembersMembershipIdBody,
+  PostAchievementsAnnounceNext200,
+  PostAchievementsAnnounceNext403,
+  PostAchievementsSync200,
+  PostAchievementsSync403,
   PostBotChatClearTestChannel200,
   PostBotChatClearTestChannel404,
   PostBotChatPostMessage200,
@@ -178,6 +183,10 @@ import type {
   PostVenuesIdGeocode200,
   PostVenuesIdGeocode400,
   PostVenuesIdGeocode404,
+  PutAchievementsId200,
+  PutAchievementsId403,
+  PutAchievementsId404,
+  PutAchievementsIdBody,
   PutPlayerId200,
   PutPlayerId400,
   PutPlayerId403,
@@ -6975,7 +6984,364 @@ export function useGetUpcomingEvents<TData = Awaited<ReturnType<typeof getUpcomi
 
 
 
-export type putUpcomingEventsIdVenueResponse200 = {
+export type getAchievementsResponse200 = {
+  data: GetAchievements200Item[]
+  status: 200
+}
+
+export type getAchievementsResponseSuccess = (getAchievementsResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getAchievementsResponse = (getAchievementsResponseSuccess)
+
+export const getGetAchievementsUrl = () => {
+
+
+  
+
+  return `/v1/achievements`
+}
+
+export const getAchievements = async ( options?: RequestInit): Promise<getAchievementsResponse> => {
+  
+  return customFetch<getAchievementsResponse>(getGetAchievementsUrl(),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
+
+export const getGetAchievementsQueryKey = () => {
+    return [
+    `/v1/achievements`
+    ] as const;
+    }
+
+    
+export const getGetAchievementsQueryOptions = <TData = Awaited<ReturnType<typeof getAchievements>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAchievements>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetAchievementsQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAchievements>>> = ({ signal }) => getAchievements({ signal, ...requestOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAchievements>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetAchievementsQueryResult = NonNullable<Awaited<ReturnType<typeof getAchievements>>>
+export type GetAchievementsQueryError = unknown
+
+
+export function useGetAchievements<TData = Awaited<ReturnType<typeof getAchievements>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAchievements>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAchievements>>,
+          TError,
+          Awaited<ReturnType<typeof getAchievements>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetAchievements<TData = Awaited<ReturnType<typeof getAchievements>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAchievements>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAchievements>>,
+          TError,
+          Awaited<ReturnType<typeof getAchievements>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetAchievements<TData = Awaited<ReturnType<typeof getAchievements>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAchievements>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetAchievements<TData = Awaited<ReturnType<typeof getAchievements>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAchievements>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetAchievementsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+export type postAchievementsSyncResponse200 = {
+  data: PostAchievementsSync200
+  status: 200
+}
+
+export type postAchievementsSyncResponse403 = {
+  data: PostAchievementsSync403
+  status: 403
+}
+
+export type postAchievementsSyncResponseSuccess = (postAchievementsSyncResponse200) & {
+  headers: Headers;
+};
+export type postAchievementsSyncResponseError = (postAchievementsSyncResponse403) & {
+  headers: Headers;
+};
+
+export type postAchievementsSyncResponse = (postAchievementsSyncResponseSuccess | postAchievementsSyncResponseError)
+
+export const getPostAchievementsSyncUrl = () => {
+
+
+  
+
+  return `/v1/achievements/sync`
+}
+
+export const postAchievementsSync = async ( options?: RequestInit): Promise<postAchievementsSyncResponse> => {
+  
+  return customFetch<postAchievementsSyncResponse>(getPostAchievementsSyncUrl(),
+  {      
+    ...options,
+    method: 'POST'
+    
+    
+  }
+);}
+  
+
+
+
+export const getPostAchievementsSyncMutationOptions = <TError = PostAchievementsSync403,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postAchievementsSync>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postAchievementsSync>>, TError,void, TContext> => {
+
+const mutationKey = ['postAchievementsSync'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postAchievementsSync>>, void> = () => {
+          
+
+          return  postAchievementsSync(requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostAchievementsSyncMutationResult = NonNullable<Awaited<ReturnType<typeof postAchievementsSync>>>
+    
+    export type PostAchievementsSyncMutationError = PostAchievementsSync403
+
+    export const usePostAchievementsSync = <TError = PostAchievementsSync403,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postAchievementsSync>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postAchievementsSync>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getPostAchievementsSyncMutationOptions(options), queryClient);
+    }
+    export type postAchievementsAnnounceNextResponse200 = {
+  data: PostAchievementsAnnounceNext200
+  status: 200
+}
+
+export type postAchievementsAnnounceNextResponse403 = {
+  data: PostAchievementsAnnounceNext403
+  status: 403
+}
+
+export type postAchievementsAnnounceNextResponseSuccess = (postAchievementsAnnounceNextResponse200) & {
+  headers: Headers;
+};
+export type postAchievementsAnnounceNextResponseError = (postAchievementsAnnounceNextResponse403) & {
+  headers: Headers;
+};
+
+export type postAchievementsAnnounceNextResponse = (postAchievementsAnnounceNextResponseSuccess | postAchievementsAnnounceNextResponseError)
+
+export const getPostAchievementsAnnounceNextUrl = () => {
+
+
+  
+
+  return `/v1/achievements/announce-next`
+}
+
+export const postAchievementsAnnounceNext = async ( options?: RequestInit): Promise<postAchievementsAnnounceNextResponse> => {
+  
+  return customFetch<postAchievementsAnnounceNextResponse>(getPostAchievementsAnnounceNextUrl(),
+  {      
+    ...options,
+    method: 'POST'
+    
+    
+  }
+);}
+  
+
+
+
+export const getPostAchievementsAnnounceNextMutationOptions = <TError = PostAchievementsAnnounceNext403,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postAchievementsAnnounceNext>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postAchievementsAnnounceNext>>, TError,void, TContext> => {
+
+const mutationKey = ['postAchievementsAnnounceNext'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postAchievementsAnnounceNext>>, void> = () => {
+          
+
+          return  postAchievementsAnnounceNext(requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostAchievementsAnnounceNextMutationResult = NonNullable<Awaited<ReturnType<typeof postAchievementsAnnounceNext>>>
+    
+    export type PostAchievementsAnnounceNextMutationError = PostAchievementsAnnounceNext403
+
+    export const usePostAchievementsAnnounceNext = <TError = PostAchievementsAnnounceNext403,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postAchievementsAnnounceNext>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postAchievementsAnnounceNext>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getPostAchievementsAnnounceNextMutationOptions(options), queryClient);
+    }
+    export type putAchievementsIdResponse200 = {
+  data: PutAchievementsId200
+  status: 200
+}
+
+export type putAchievementsIdResponse403 = {
+  data: PutAchievementsId403
+  status: 403
+}
+
+export type putAchievementsIdResponse404 = {
+  data: PutAchievementsId404
+  status: 404
+}
+
+export type putAchievementsIdResponseSuccess = (putAchievementsIdResponse200) & {
+  headers: Headers;
+};
+export type putAchievementsIdResponseError = (putAchievementsIdResponse403 | putAchievementsIdResponse404) & {
+  headers: Headers;
+};
+
+export type putAchievementsIdResponse = (putAchievementsIdResponseSuccess | putAchievementsIdResponseError)
+
+export const getPutAchievementsIdUrl = (id: string,) => {
+
+
+  
+
+  return `/v1/achievements/${id}`
+}
+
+export const putAchievementsId = async (id: string,
+    putAchievementsIdBody: PutAchievementsIdBody, options?: RequestInit): Promise<putAchievementsIdResponse> => {
+  
+  return customFetch<putAchievementsIdResponse>(getPutAchievementsIdUrl(id),
+  {      
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      putAchievementsIdBody,)
+  }
+);}
+  
+
+
+
+export const getPutAchievementsIdMutationOptions = <TError = PutAchievementsId403 | PutAchievementsId404,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putAchievementsId>>, TError,{id: string;data: PutAchievementsIdBody}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof putAchievementsId>>, TError,{id: string;data: PutAchievementsIdBody}, TContext> => {
+
+const mutationKey = ['putAchievementsId'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putAchievementsId>>, {id: string;data: PutAchievementsIdBody}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  putAchievementsId(id,data,requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PutAchievementsIdMutationResult = NonNullable<Awaited<ReturnType<typeof putAchievementsId>>>
+    export type PutAchievementsIdMutationBody = PutAchievementsIdBody
+    export type PutAchievementsIdMutationError = PutAchievementsId403 | PutAchievementsId404
+
+    export const usePutAchievementsId = <TError = PutAchievementsId403 | PutAchievementsId404,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putAchievementsId>>, TError,{id: string;data: PutAchievementsIdBody}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof putAchievementsId>>,
+        TError,
+        {id: string;data: PutAchievementsIdBody},
+        TContext
+      > => {
+      return useMutation(getPutAchievementsIdMutationOptions(options), queryClient);
+    }
+    export type putUpcomingEventsIdVenueResponse200 = {
   data: PutUpcomingEventsIdVenue200
   status: 200
 }

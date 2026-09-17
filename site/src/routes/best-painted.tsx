@@ -49,7 +49,7 @@ function WinnerCard({ winner, onClick }: { winner: PaintingItem; onClick: () => 
               <Link
                 to="/player/$id"
                 params={{ id: winner.playerId }}
-                search={{ tab: 'painting', typeCode: undefined, painting: undefined }}
+                search={{ tab: 'painting', typeCode: undefined, painting: undefined, achievement: undefined }}
               >
                 {winner.playerName}
               </Link>

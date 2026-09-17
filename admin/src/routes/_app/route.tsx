@@ -54,15 +54,15 @@ export const Route = createFileRoute('/_app')({
     const matches = useMatches()
     const title = matches.at(-1)?.staticData.title
 
-    const { rankingReporter, captainOfTeamIds, isLoading: permissionsLoading } = usePermissions()
+    const { rankingReporter, achievementAide, captainOfTeamIds, isLoading: permissionsLoading } = usePermissions()
     const navigate = useNavigate()
 
     useEffect(() => {
       if (permissionsLoading) return
-      if (!rankingReporter && captainOfTeamIds.length === 0) {
+      if (!rankingReporter && !achievementAide && captainOfTeamIds.length === 0) {
         navigate({ to: LoginRoute.to, search: { unauthorized: true } })
       }
-    }, [permissionsLoading, rankingReporter, captainOfTeamIds.length])
+    }, [permissionsLoading, rankingReporter, achievementAide, captainOfTeamIds.length])
 
     return (
       <>

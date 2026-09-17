@@ -4,6 +4,7 @@ import {
   fetchPlayerTeams,
   fetchPlayerTourneys,
   fetchPlayerPaintingWins,
+  fetchPlayerAchievements,
   fetchRankingTypes,
 } from '#/queries'
 import { createFileRoute, notFound } from '@tanstack/react-router'
@@ -12,10 +13,13 @@ import { Link } from '#/components/link'
 import { Tabs } from '#/components/routed-tabs'
 import { PaintingLightbox, positionLabel } from '#/components/painting-lightbox'
 import { Image } from '#/components/image'
-import { formatDate } from 'date-fns'
+import { formatDate, parseISO } from 'date-fns'
 import { PlayerRankingOverTime } from '#/components/charts'
 import { SITE_NAME, SITE_URL, absoluteUrl, jsonLd, seo } from '#/helpers/seo'
 import type { Person, WithContext } from 'schema-dts'
+import { achievementShareText, achievementShareUrl, achievementsTabLabel, earnedCount, groupAchievements } from '#/helpers/achievements'
+import { AchievementModal, type EarnedAchievement } from '#/components/achievement-modal'
+import { ShareButton } from '#/components/share-button'
 
 export const Route = createFileRoute('/player/$id')({
   params: {
@@ -26,24 +30,26 @@ export const Route = createFileRoute('/player/$id')({
     typeCode: optionalString(search.typeCode),
     tab: optionalString(search.tab),
     painting: optionalNumber(search.painting),
+    achievement: optionalString(search.achievement),
   }),
   loader: async ({ params, location }) => {
     const searchParams = new URLSearchParams(location.search)
     const typeCode = searchParams.get('typeCode') ?? 'ROLLING_YEAR'
-    const [player, rankingTypes, rankingsData, tourneys, teams, paintingWins] = await Promise.all([
+    const [player, rankingTypes, rankingsData, tourneys, teams, paintingWins, achievements] = await Promise.all([
       fetchPlayer({ data: { id: params.id } }),
       fetchRankingTypes(),
       fetchPlayerRankingHistory({ data: { playerId: params.id, typeCode } }),
       fetchPlayerTourneys({ data: { playerId: params.id } }),
       fetchPlayerTeams({ data: { playerId: params.id } }),
       fetchPlayerPaintingWins({ data: { playerId: params.id } }),
+      fetchPlayerAchievements({ data: { playerId: params.id } }),
     ])
     if (!player) throw notFound()
-    return { player, rankingTypes, rankingsData, tourneys, teams, paintingWins, typeCode }
+    return { player, rankingTypes, rankingsData, tourneys, teams, paintingWins, achievements, typeCode }
   },
-  head: ({ loaderData, params }) => {
+  head: ({ loaderData, params, match }) => {
     if (!loaderData) return {}
-    const { player, teams, tourneys, rankingsData, typeCode } = loaderData
+    const { player, teams, tourneys, rankingsData, achievements, typeCode } = loaderData
 
     const latestRollingYearRank =
       typeCode === 'ROLLING_YEAR'
@@ -84,12 +90,22 @@ export const Route = createFileRoute('/player/$id')({
         : {}),
     }
 
+    // A shared achievement link gets a preview of that achievement instead.
+    const shared = findEarnedAchievement(achievements, match.search.achievement)
+    const sharedSeo = shared
+      ? {
+          title: `${achievementShareText(player.name, shared.name)} — ${SITE_NAME}`,
+          description: shared.description.trim() || shared.flavourText.trim() || descParts.join(' '),
+          image: shared.imageKey ? `${import.meta.env.VITE_ASSETS_URL}/${shared.imageKey}-ogp.jpg` : avatar,
+        }
+      : undefined
+
     return {
       ...seo({
-        title: `${player.name} — ${SITE_NAME}`,
-        description: descParts.join(' '),
+        title: sharedSeo?.title ?? `${player.name} — ${SITE_NAME}`,
+        description: sharedSeo?.description ?? descParts.join(' '),
         path: `/player/${params.id}`,
-        image: avatar ?? undefined,
+        image: sharedSeo ? sharedSeo.image : avatar ?? undefined,
         type: 'profile',
       }),
       scripts: [jsonLd(schema)],
@@ -98,11 +114,21 @@ export const Route = createFileRoute('/player/$id')({
   component: RouteComponent,
 })
 
+function findEarnedAchievement<T extends { id: string; achievedOn: string | null }>(
+  achievements: T[],
+  id: string | undefined,
+): (T & EarnedAchievement) | null {
+  if (!id) return null
+  const achievement = achievements.find((a) => a.id === id)
+  return achievement?.achievedOn ? (achievement as T & EarnedAchievement) : null
+}
+
 function RouteComponent() {
-  const { player, rankingTypes, rankingsData, tourneys, teams, paintingWins, typeCode } = Route.useLoaderData()
-  const { painting: activePaintingId } = Route.useSearch()
+  const { player, rankingTypes, rankingsData, tourneys, teams, paintingWins, achievements, typeCode } = Route.useLoaderData()
+  const { painting: activePaintingId, achievement: activeAchievementId } = Route.useSearch()
   const navigate = Route.useNavigate()
   const wins = paintingWins ?? []
+  const activeAchievement = findEarnedAchievement(achievements, activeAchievementId)
 
   const activeWinner = activePaintingId ? wins.find((w: any) => w.id === activePaintingId) ?? null : null
   const activeWinnerForLightbox = activeWinner ? {
@@ -128,6 +154,7 @@ function RouteComponent() {
           <Tabs.Tab value="rankings">Rankings</Tabs.Tab>
           <Tabs.Tab value="teams">Teams</Tabs.Tab>
           {wins.length > 0 && <Tabs.Tab value="painting">Painting</Tabs.Tab>}
+          <Tabs.Tab value="achievements">{achievementsTabLabel(achievements)}</Tabs.Tab>
         </Tabs.List>
 
         <Tabs.Panel value="events">
@@ -262,7 +289,108 @@ function RouteComponent() {
             </tbody>
           </table>
         </Tabs.Panel>
+
+        <Tabs.Panel value="achievements">
+          <div className="flex flex-col gap-6">
+            {groupAchievements(achievements).map((group) => (
+              <section key={group.name}>
+                <h3 className="mb-2 font-semibold">
+                  {group.name}{' '}
+                  <span className="font-normal text-muted-foreground">
+                    ({earnedCount(group.achievements)}/{group.achievements.length})
+                  </span>
+                </h3>
+                <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {group.achievements.map((a) => {
+                    const earned = a.achievedOn !== null
+                    return (
+                      <li
+                        key={a.id}
+                        className={`flex gap-3 rounded-md border border-border bg-surface p-3 ${earned ? 'cursor-pointer hover:bg-muted' : 'text-muted-foreground'}`}
+                        onClick={earned ? () => navigate({ search: (prev) => ({ ...prev, achievement: a.id }) }) : undefined}
+                      >
+                        <div className={`w-20 shrink-0 ${earned ? '' : 'opacity-50 grayscale'}`}>
+                          {a.imageKey ? (
+                            <Image
+                              imageKey={a.imageKey}
+                              width={a.imageWidth}
+                              height={a.imageHeight}
+                              alt={a.name}
+                              fallbackWidth={150}
+                              sizes="80px"
+                              className="h-auto w-20 rounded-sm"
+                            />
+                          ) : (
+                            <div className="flex aspect-square w-20 items-center justify-center rounded-sm bg-muted text-2xl" aria-hidden>
+                              🏅
+                            </div>
+                          )}
+                        </div>
+                        <div className="min-w-0 text-sm">
+                          <h4 className="font-semibold">
+                            {earned ? (
+                              <button
+                                type="button"
+                                className="text-left hover:underline"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  navigate({ search: (prev) => ({ ...prev, achievement: a.id }) })
+                                }}
+                              >
+                                {a.name}
+                              </button>
+                            ) : (
+                              a.name
+                            )}
+                            <span className="sr-only">{earned ? ' (earned)' : ' (not yet earned)'}</span>
+                          </h4>
+                          {a.description.trim() && <p>{a.description}</p>}
+                          {earned ? (
+                            <p className="mt-1 text-muted-foreground">
+                              Earned{' '}
+                              {a.tourneyId && a.tourneyName && (
+                                <>
+                                  at{' '}
+                                  <Link
+                                    to="/event/$id"
+                                    params={{ id: a.tourneyId }}
+                                    search={{ tab: undefined, painting: undefined }}
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    {a.tourneyName}
+                                  </Link>{' '}
+                                </>
+                              )}
+                              on {formatDate(parseISO(a.achievedOn!), 'd MMMM yyyy')}
+                            </p>
+                          ) : (
+                            <p className="mt-1">Not yet earned</p>
+                          )}
+                          {earned && (
+                            <ShareButton
+                              className="mt-2"
+                              url={achievementShareUrl(player.id, a.id)}
+                              title={a.name}
+                              text={achievementShareText(player.name, a.name)}
+                            />
+                          )}
+                        </div>
+                      </li>
+                    )
+                  })}
+                </ul>
+              </section>
+            ))}
+          </div>
+        </Tabs.Panel>
       </Tabs>
+
+      <AchievementModal
+        achievement={activeAchievement}
+        playerId={player.id}
+        playerName={player.name}
+        onClose={() => navigate({ search: (prev) => ({ ...prev, achievement: undefined }) })}
+      />
 
       <PaintingLightbox
         winner={activeWinnerForLightbox}
