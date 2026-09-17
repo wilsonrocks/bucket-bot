@@ -41,7 +41,7 @@ jobs:
           npm ci
           ./build-for-prod.sh
 
-      - uses: docker/login-action@v4.6
+      - uses: docker/login-action@v4.6.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
