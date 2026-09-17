@@ -162,7 +162,7 @@ function RouteComponent() {
             <thead>
               <tr className="border-b border-border text-left">
                 <th className="px-2 py-2 font-semibold">Event</th>
-                <th className="px-2 py-2 font-semibold">Points</th>
+                <th className="px-2 py-2 text-right font-semibold">Points</th>
                 <th className="px-2 py-2 font-semibold">Place</th>
                 <th className="px-2 py-2 font-semibold">Faction</th>
                 <th className="px-2 py-2 font-semibold">Date</th>
