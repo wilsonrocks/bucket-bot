@@ -6,6 +6,7 @@ import type { AppEnv } from "../../../hono-env";
 vi.mock("../../../logic/discord-client.js", () => ({
   getDiscordClient: vi.fn(),
   RANKING_REPORTER_ROLE_ID: "reporter-role-id",
+  ACHIEVEMENT_AIDE_ROLE_ID: "aide-role-id",
   UK_MALIFAUX_SERVER_ID: "guild-id",
 }));
 
@@ -75,7 +76,6 @@ beforeEach(async () => {
     .where("id", "=", "FIRST_EVENT")
     .executeTakeFirstOrThrow();
   mockRankingReporter(true);
-  process.env.ACHIEVEMENT_AIDE_ROLE_ID = AIDE_ROLE_ID;
 });
 
 afterEach(async () => {
@@ -258,11 +258,5 @@ describe("achievement aides", () => {
     mockRoles(AIDE_ROLE_ID);
     expect((await post("/achievements/sync")).status).toBe(403);
     expect((await post("/achievements/announce-next")).status).toBe(403);
-  });
-
-  test("no one is an aide when the role id isn't configured", async () => {
-    delete process.env.ACHIEVEMENT_AIDE_ROLE_ID;
-    mockRoles(AIDE_ROLE_ID);
-    expect((await update("FIRST_EVENT", validUpdate)).status).toBe(403);
   });
 });

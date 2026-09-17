@@ -5,6 +5,7 @@ import { addTestDataToDb } from "../test-helpers/add-test-data-to-db";
 vi.mock("../../logic/discord-client.js", () => ({
   getDiscordClient: vi.fn(),
   RANKING_REPORTER_ROLE_ID: "reporter-role-id",
+  ACHIEVEMENT_AIDE_ROLE_ID: "aide-role-id",
   UK_MALIFAUX_SERVER_ID: "guild-id",
 }));
 
@@ -226,14 +227,6 @@ describe("staff roles", () => {
     } as any);
   }
 
-  beforeEach(() => {
-    process.env.ACHIEVEMENT_AIDE_ROLE_ID = AIDE_ROLE_ID;
-  });
-
-  afterEach(() => {
-    delete process.env.ACHIEVEMENT_AIDE_ROLE_ID;
-  });
-
   test.each([
     [["reporter-role-id"], { rankingReporter: true, achievementAide: false }, true],
     [[AIDE_ROLE_ID], { rankingReporter: false, achievementAide: true }, true],
@@ -243,11 +236,5 @@ describe("staff roles", () => {
     mockMemberRoles(...roleIds);
     expect(await getStaffRoles("user")).toEqual(expected);
     expect(await canEditAchievements("user")).toBe(canEdit);
-  });
-
-  test("nobody is an aide when ACHIEVEMENT_AIDE_ROLE_ID is unset", async () => {
-    delete process.env.ACHIEVEMENT_AIDE_ROLE_ID;
-    mockMemberRoles(AIDE_ROLE_ID, "");
-    expect(await getStaffRoles("user")).toEqual({ rankingReporter: false, achievementAide: false });
   });
 });
