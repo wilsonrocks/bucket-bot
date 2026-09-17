@@ -5,7 +5,9 @@ import {
   achievementsEnabled,
   achievementsTabLabel,
   earnedCount,
+  earnedSummary,
   groupAchievements,
+  playerCountLabel,
 } from './achievements'
 
 describe('achievementsTabLabel', () => {
@@ -17,6 +19,10 @@ describe('achievementsTabLabel', () => {
 
   it('shows zero earned', () => {
     expect(achievementsTabLabel([{ achievedOn: null }])).toBe('Achievements (0/1)')
+  })
+
+  it('shows only the earned count when unearned are hidden', () => {
+    expect(achievementsTabLabel([{ achievedOn: '2025-01-01' }, { achievedOn: null }], true)).toBe('Achievements (1)')
   })
 
   it('omits counts when there are no achievements', () => {
@@ -73,5 +79,29 @@ describe('achievementsEnabled', () => {
     expect(achievementsEnabled({ ENABLE_ACHIEVEMENTS_SCHEDULER: 'true' })).toBe(true)
     expect(achievementsEnabled({ ENABLE_ACHIEVEMENTS_SCHEDULER: 'false' })).toBe(false)
     expect(achievementsEnabled({})).toBe(false)
+  })
+})
+
+describe('playerCountLabel', () => {
+  it('says when no one has earned it', () => {
+    expect(playerCountLabel(0)).toBe('No players have earned this yet')
+  })
+
+  it('uses the singular for one player', () => {
+    expect(playerCountLabel(1)).toBe('Earned by 1 player')
+  })
+
+  it('uses the plural for several players', () => {
+    expect(playerCountLabel(4)).toBe('Earned by 4 players')
+  })
+})
+
+describe('earnedSummary', () => {
+  it('shows earned out of total', () => {
+    expect(earnedSummary([{ achievedOn: '2025-01-01' }, { achievedOn: null }])).toBe('1/2')
+  })
+
+  it('shows just the earned count when unearned are hidden', () => {
+    expect(earnedSummary([{ achievedOn: '2025-01-01' }, { achievedOn: null }], true)).toBe('1')
   })
 })

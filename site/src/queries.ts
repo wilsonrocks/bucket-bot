@@ -319,6 +319,12 @@ export const fetchPlayerAchievements = createServerFn()
         sql<string | null>`to_char(player_achievement.achieved_on, 'YYYY-MM-DD')`.as('achievedOn'),
         'tourney.id as tourneyId',
         'tourney.name as tourneyName',
+        (eb) =>
+          eb
+            .selectFrom('player_achievement as holders')
+            .whereRef('holders.achievement_id', '=', 'achievement.id')
+            .select(sql<number>`count(*)::int`.as('count'))
+            .as('playerCount'),
       ])
       .orderBy('achievement.display_order')
       .execute()

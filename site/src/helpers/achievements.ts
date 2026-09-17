@@ -8,9 +8,15 @@ export function achievementsEnabled(env: Record<string, string | undefined>): bo
 type EarnableAchievement = { achievedOn: string | null }
 
 /** Label summarising how many achievements were earned, e.g. "Achievements (1/2)". */
-export function achievementsTabLabel(achievements: EarnableAchievement[]): string {
+export function achievementsTabLabel(achievements: EarnableAchievement[], earnedOnly = false): string {
   if (achievements.length === 0) return 'Achievements'
-  return `Achievements (${earnedCount(achievements)}/${achievements.length})`
+  return `Achievements (${earnedSummary(achievements, earnedOnly)})`
+}
+
+/** "1/2" earned out of total, or just "1" when unearned achievements are hidden. */
+export function earnedSummary(achievements: EarnableAchievement[], earnedOnly = false): string {
+  const earned = earnedCount(achievements)
+  return earnedOnly ? String(earned) : `${earned}/${achievements.length}`
 }
 
 export function earnedCount(achievements: EarnableAchievement[]): number {
@@ -42,4 +48,10 @@ export function achievementShareUrl(playerId: number, achievementId: string): st
 
 export function achievementShareText(playerName: string, achievementName: string): string {
   return `${playerName} earned the “${achievementName}” achievement`
+}
+
+/** How many players hold an achievement, e.g. "Earned by 3 players". */
+export function playerCountLabel(count: number): string {
+  if (count === 0) return 'No players have earned this yet'
+  return `Earned by ${count} ${count === 1 ? 'player' : 'players'}`
 }
