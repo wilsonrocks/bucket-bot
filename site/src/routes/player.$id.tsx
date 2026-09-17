@@ -91,7 +91,7 @@ export const Route = createFileRoute('/player/$id')({
     }
 
     // A shared achievement link gets a preview of that achievement instead.
-    const shared = findEarnedAchievement(achievements, match.search.achievement)
+    const shared = achievements && findEarnedAchievement(achievements, match.search.achievement)
     const sharedSeo = shared
       ? {
           title: `${achievementShareText(player.name, shared.name)} — ${SITE_NAME}`,
@@ -128,7 +128,7 @@ function RouteComponent() {
   const { painting: activePaintingId, achievement: activeAchievementId } = Route.useSearch()
   const navigate = Route.useNavigate()
   const wins = paintingWins ?? []
-  const activeAchievement = findEarnedAchievement(achievements, activeAchievementId)
+  const activeAchievement = achievements && findEarnedAchievement(achievements, activeAchievementId)
 
   const activeWinner = activePaintingId ? wins.find((w: any) => w.id === activePaintingId) ?? null : null
   const activeWinnerForLightbox = activeWinner ? {
@@ -154,7 +154,7 @@ function RouteComponent() {
           <Tabs.Tab value="rankings">Rankings</Tabs.Tab>
           <Tabs.Tab value="teams">Teams</Tabs.Tab>
           {wins.length > 0 && <Tabs.Tab value="painting">Painting</Tabs.Tab>}
-          <Tabs.Tab value="achievements">{achievementsTabLabel(achievements)}</Tabs.Tab>
+          {achievements && <Tabs.Tab value="achievements">{achievementsTabLabel(achievements)}</Tabs.Tab>}
         </Tabs.List>
 
         <Tabs.Panel value="events">
@@ -290,107 +290,111 @@ function RouteComponent() {
           </table>
         </Tabs.Panel>
 
-        <Tabs.Panel value="achievements">
-          <div className="flex flex-col gap-6">
-            {groupAchievements(achievements).map((group) => (
-              <section key={group.name}>
-                <h3 className="mb-2 font-semibold">
-                  {group.name}{' '}
-                  <span className="font-normal text-muted-foreground">
-                    ({earnedCount(group.achievements)}/{group.achievements.length})
-                  </span>
-                </h3>
-                <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                  {group.achievements.map((a) => {
-                    const earned = a.achievedOn !== null
-                    return (
-                      <li
-                        key={a.id}
-                        className={`flex gap-3 rounded-md border border-border bg-surface p-3 ${earned ? 'cursor-pointer hover:bg-muted' : 'text-muted-foreground'}`}
-                        onClick={earned ? () => navigate({ search: (prev) => ({ ...prev, achievement: a.id }) }) : undefined}
-                      >
-                        <div className={`w-20 shrink-0 ${earned ? '' : 'opacity-50 grayscale'}`}>
-                          {a.imageKey ? (
-                            <Image
-                              imageKey={a.imageKey}
-                              width={a.imageWidth}
-                              height={a.imageHeight}
-                              alt={a.name}
-                              fallbackWidth={150}
-                              sizes="80px"
-                              className="h-auto w-20 rounded-sm"
-                            />
-                          ) : (
-                            <div className="flex aspect-square w-20 items-center justify-center rounded-sm bg-muted text-2xl" aria-hidden>
-                              🏅
-                            </div>
-                          )}
-                        </div>
-                        <div className="min-w-0 text-sm">
-                          <h4 className="font-semibold">
-                            {earned ? (
-                              <button
-                                type="button"
-                                className="text-left hover:underline"
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  navigate({ search: (prev) => ({ ...prev, achievement: a.id }) })
-                                }}
-                              >
-                                {a.name}
-                              </button>
+        {achievements && (
+          <Tabs.Panel value="achievements">
+            <div className="flex flex-col gap-6">
+              {groupAchievements(achievements).map((group) => (
+                <section key={group.name}>
+                  <h3 className="mb-2 font-semibold">
+                    {group.name}{' '}
+                    <span className="font-normal text-muted-foreground">
+                      ({earnedCount(group.achievements)}/{group.achievements.length})
+                    </span>
+                  </h3>
+                  <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    {group.achievements.map((a) => {
+                      const earned = a.achievedOn !== null
+                      return (
+                        <li
+                          key={a.id}
+                          className={`flex gap-3 rounded-md border border-border bg-surface p-3 ${earned ? 'cursor-pointer hover:bg-muted' : 'text-muted-foreground'}`}
+                          onClick={earned ? () => navigate({ search: (prev) => ({ ...prev, achievement: a.id }) }) : undefined}
+                        >
+                          <div className={`w-20 shrink-0 ${earned ? '' : 'opacity-50 grayscale'}`}>
+                            {a.imageKey ? (
+                              <Image
+                                imageKey={a.imageKey}
+                                width={a.imageWidth}
+                                height={a.imageHeight}
+                                alt={a.name}
+                                fallbackWidth={150}
+                                sizes="80px"
+                                className="h-auto w-20 rounded-sm"
+                              />
                             ) : (
-                              a.name
+                              <div className="flex aspect-square w-20 items-center justify-center rounded-sm bg-muted text-2xl" aria-hidden>
+                                🏅
+                              </div>
                             )}
-                            <span className="sr-only">{earned ? ' (earned)' : ' (not yet earned)'}</span>
-                          </h4>
-                          {a.description.trim() && <p>{a.description}</p>}
-                          {earned ? (
-                            <p className="mt-1 text-muted-foreground">
-                              Earned{' '}
-                              {a.tourneyId && a.tourneyName && (
-                                <>
-                                  at{' '}
-                                  <Link
-                                    to="/event/$id"
-                                    params={{ id: a.tourneyId }}
-                                    search={{ tab: undefined, painting: undefined }}
-                                    onClick={(e) => e.stopPropagation()}
-                                  >
-                                    {a.tourneyName}
-                                  </Link>{' '}
-                                </>
+                          </div>
+                          <div className="min-w-0 text-sm">
+                            <h4 className="font-semibold">
+                              {earned ? (
+                                <button
+                                  type="button"
+                                  className="text-left hover:underline"
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    navigate({ search: (prev) => ({ ...prev, achievement: a.id }) })
+                                  }}
+                                >
+                                  {a.name}
+                                </button>
+                              ) : (
+                                a.name
                               )}
-                              on {formatDate(parseISO(a.achievedOn!), 'd MMMM yyyy')}
-                            </p>
-                          ) : (
-                            <p className="mt-1">Not yet earned</p>
-                          )}
-                          {earned && (
-                            <ShareButton
-                              className="mt-2"
-                              url={achievementShareUrl(player.id, a.id)}
-                              title={a.name}
-                              text={achievementShareText(player.name, a.name)}
-                            />
-                          )}
-                        </div>
-                      </li>
-                    )
-                  })}
-                </ul>
-              </section>
-            ))}
-          </div>
-        </Tabs.Panel>
+                              <span className="sr-only">{earned ? ' (earned)' : ' (not yet earned)'}</span>
+                            </h4>
+                            {a.description.trim() && <p>{a.description}</p>}
+                            {earned ? (
+                              <p className="mt-1 text-muted-foreground">
+                                Earned{' '}
+                                {a.tourneyId && a.tourneyName && (
+                                  <>
+                                    at{' '}
+                                    <Link
+                                      to="/event/$id"
+                                      params={{ id: a.tourneyId }}
+                                      search={{ tab: undefined, painting: undefined }}
+                                      onClick={(e) => e.stopPropagation()}
+                                    >
+                                      {a.tourneyName}
+                                    </Link>{' '}
+                                  </>
+                                )}
+                                on {formatDate(parseISO(a.achievedOn!), 'd MMMM yyyy')}
+                              </p>
+                            ) : (
+                              <p className="mt-1">Not yet earned</p>
+                            )}
+                            {earned && (
+                              <ShareButton
+                                className="mt-2"
+                                url={achievementShareUrl(player.id, a.id)}
+                                title={a.name}
+                                text={achievementShareText(player.name, a.name)}
+                              />
+                            )}
+                          </div>
+                        </li>
+                      )
+                    })}
+                  </ul>
+                </section>
+              ))}
+            </div>
+          </Tabs.Panel>
+        )}
       </Tabs>
 
-      <AchievementModal
-        achievement={activeAchievement}
-        playerId={player.id}
-        playerName={player.name}
-        onClose={() => navigate({ search: (prev) => ({ ...prev, achievement: undefined }) })}
-      />
+      {achievements && (
+        <AchievementModal
+          achievement={activeAchievement}
+          playerId={player.id}
+          playerName={player.name}
+          onClose={() => navigate({ search: (prev) => ({ ...prev, achievement: undefined }) })}
+        />
+      )}
 
       <PaintingLightbox
         winner={activeWinnerForLightbox}
