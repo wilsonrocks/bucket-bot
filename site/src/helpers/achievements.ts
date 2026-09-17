@@ -43,3 +43,9 @@ export function achievementShareUrl(playerId: number, achievementId: string): st
 export function achievementShareText(playerName: string, achievementName: string): string {
   return `${playerName} earned the “${achievementName}” achievement`
 }
+
+/** How many players hold an achievement, e.g. "Earned by 3 players". */
+export function playerCountLabel(count: number): string {
+  if (count === 0) return 'No players have earned this yet'
+  return `Earned by ${count} ${count === 1 ? 'player' : 'players'}`
+}

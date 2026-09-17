@@ -17,7 +17,7 @@ import { formatDate, parseISO } from 'date-fns'
 import { PlayerRankingOverTime } from '#/components/charts'
 import { SITE_NAME, SITE_URL, absoluteUrl, jsonLd, seo } from '#/helpers/seo'
 import type { Person, WithContext } from 'schema-dts'
-import { achievementShareText, achievementShareUrl, achievementsTabLabel, earnedCount, groupAchievements } from '#/helpers/achievements'
+import { achievementShareText, achievementShareUrl, achievementsTabLabel, earnedCount, groupAchievements, playerCountLabel } from '#/helpers/achievements'
 import { AchievementModal, type EarnedAchievement } from '#/components/achievement-modal'
 import { ShareButton } from '#/components/share-button'
 
@@ -367,6 +367,7 @@ function RouteComponent() {
                             ) : (
                               <p className="mt-1">Not yet earned</p>
                             )}
+                            <p className="mt-1 text-muted-foreground">{playerCountLabel(a.playerCount ?? 0)}</p>
                             {earned && (
                               <ShareButton
                                 className="mt-2"

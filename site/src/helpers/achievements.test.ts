@@ -6,6 +6,7 @@ import {
   achievementsTabLabel,
   earnedCount,
   groupAchievements,
+  playerCountLabel,
 } from './achievements'
 
 describe('achievementsTabLabel', () => {
@@ -73,5 +74,19 @@ describe('achievementsEnabled', () => {
     expect(achievementsEnabled({ ENABLE_ACHIEVEMENTS_SCHEDULER: 'true' })).toBe(true)
     expect(achievementsEnabled({ ENABLE_ACHIEVEMENTS_SCHEDULER: 'false' })).toBe(false)
     expect(achievementsEnabled({})).toBe(false)
+  })
+})
+
+describe('playerCountLabel', () => {
+  it('says when no one has earned it', () => {
+    expect(playerCountLabel(0)).toBe('No players have earned this yet')
+  })
+
+  it('uses the singular for one player', () => {
+    expect(playerCountLabel(1)).toBe('Earned by 1 player')
+  })
+
+  it('uses the plural for several players', () => {
+    expect(playerCountLabel(4)).toBe('Earned by 4 players')
   })
 })
