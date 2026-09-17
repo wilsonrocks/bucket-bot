@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   achievementShareText,
   achievementShareUrl,
+  achievementsEnabled,
   achievementsTabLabel,
   earnedCount,
   groupAchievements,
@@ -64,5 +65,13 @@ describe('achievementShareUrl', () => {
 describe('achievementShareText', () => {
   it('names the player and achievement', () => {
     expect(achievementShareText('Alice', 'Winner')).toBe('Alice earned the “Winner” achievement')
+  })
+})
+
+describe('achievementsEnabled', () => {
+  it('is only enabled when ENABLE_ACHIEVEMENTS_SCHEDULER is "true"', () => {
+    expect(achievementsEnabled({ ENABLE_ACHIEVEMENTS_SCHEDULER: 'true' })).toBe(true)
+    expect(achievementsEnabled({ ENABLE_ACHIEVEMENTS_SCHEDULER: 'false' })).toBe(false)
+    expect(achievementsEnabled({})).toBe(false)
   })
 })

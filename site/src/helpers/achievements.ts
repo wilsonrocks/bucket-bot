@@ -1,5 +1,10 @@
 import { absoluteUrl } from './seo'
 
+/** Achievements are shown on the site only alongside the backend's achievements scheduler. */
+export function achievementsEnabled(env: Record<string, string | undefined>): boolean {
+  return env.ENABLE_ACHIEVEMENTS_SCHEDULER === 'true'
+}
+
 type EarnableAchievement = { achievedOn: string | null }
 
 /** Label summarising how many achievements were earned, e.g. "Achievements (1/2)". */

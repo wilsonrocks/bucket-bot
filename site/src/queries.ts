@@ -2,6 +2,7 @@ import { createServerFn } from '@tanstack/react-start'
 import { sql } from 'kysely'
 import { formatISO } from 'date-fns'
 import { db } from './db-client'
+import { achievementsEnabled } from '#/helpers/achievements'
 
 // ── Rankings ───────────────────────────────────────────────────────────────
 
@@ -293,6 +294,8 @@ export const fetchPlayerPaintingWins = createServerFn()
 export const fetchPlayerAchievements = createServerFn()
   .inputValidator((d: { playerId: number }) => d)
   .handler(async ({ data: { playerId } }) => {
+    // Hidden until the backend is awarding and announcing them.
+    if (!achievementsEnabled(process.env)) return null
     // Every achievement is listed so unearned ones can be shown greyed out.
     return db
       .selectFrom('achievement')
