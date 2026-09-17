@@ -25,3 +25,8 @@ export function enumParam<T extends string>(
 ): T | undefined {
   return allowed.includes(value as T) ? (value as T) : undefined
 }
+
+/** `true` when the flag is set (`?flag=true`), otherwise undefined so it drops out of the URL. */
+export function optionalFlag(value: unknown): true | undefined {
+  return value === true || value === 'true' ? true : undefined
+}

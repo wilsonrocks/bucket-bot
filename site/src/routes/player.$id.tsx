@@ -8,7 +8,7 @@ import {
   fetchRankingTypes,
 } from '#/queries'
 import { createFileRoute, notFound } from '@tanstack/react-router'
-import { optionalNumber, optionalString } from '#/helpers/search-params'
+import { optionalFlag, optionalNumber, optionalString } from '#/helpers/search-params'
 import { Link } from '#/components/link'
 import { Tabs } from '#/components/routed-tabs'
 import { PaintingLightbox, positionLabel } from '#/components/painting-lightbox'
@@ -17,7 +17,7 @@ import { formatDate, parseISO } from 'date-fns'
 import { PlayerRankingOverTime } from '#/components/charts'
 import { SITE_NAME, SITE_URL, absoluteUrl, jsonLd, seo } from '#/helpers/seo'
 import type { Person, WithContext } from 'schema-dts'
-import { achievementShareText, achievementShareUrl, achievementsTabLabel, earnedCount, groupAchievements, playerCountLabel } from '#/helpers/achievements'
+import { achievementShareText, achievementShareUrl, achievementsTabLabel, earnedCount, earnedSummary, groupAchievements, playerCountLabel } from '#/helpers/achievements'
 import { AchievementModal, type EarnedAchievement } from '#/components/achievement-modal'
 import { ShareButton } from '#/components/share-button'
 
@@ -26,11 +26,21 @@ export const Route = createFileRoute('/player/$id')({
     parse: (raw: Record<string, string>) => ({ id: Number(raw.id) }),
     stringify: (params: { id: number }) => ({ id: String(params.id) }),
   },
-  validateSearch: (search: Record<string, unknown>) => ({
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): {
+    typeCode: string | undefined
+    tab: string | undefined
+    painting: number | undefined
+    achievement: string | undefined
+    // Optional so links elsewhere don't need to pass it.
+    earnedOnly?: true
+  } => ({
     typeCode: optionalString(search.typeCode),
     tab: optionalString(search.tab),
     painting: optionalNumber(search.painting),
     achievement: optionalString(search.achievement),
+    earnedOnly: optionalFlag(search.earnedOnly),
   }),
   loader: async ({ params, location }) => {
     const searchParams = new URLSearchParams(location.search)
@@ -125,7 +135,7 @@ function findEarnedAchievement<T extends { id: string; achievedOn: string | null
 
 function RouteComponent() {
   const { player, rankingTypes, rankingsData, tourneys, teams, paintingWins, achievements, typeCode } = Route.useLoaderData()
-  const { painting: activePaintingId, achievement: activeAchievementId } = Route.useSearch()
+  const { painting: activePaintingId, achievement: activeAchievementId, earnedOnly: hideUnearned } = Route.useSearch()
   const navigate = Route.useNavigate()
   const wins = paintingWins ?? []
   const activeAchievement = achievements && findEarnedAchievement(achievements, activeAchievementId)
@@ -154,7 +164,7 @@ function RouteComponent() {
           <Tabs.Tab value="rankings">Rankings</Tabs.Tab>
           <Tabs.Tab value="teams">Teams</Tabs.Tab>
           {wins.length > 0 && <Tabs.Tab value="painting">Painting</Tabs.Tab>}
-          {achievements && <Tabs.Tab value="achievements">{achievementsTabLabel(achievements)}</Tabs.Tab>}
+          {achievements && <Tabs.Tab value="achievements">{achievementsTabLabel(achievements, hideUnearned)}</Tabs.Tab>}
         </Tabs.List>
 
         <Tabs.Panel value="events">
@@ -292,17 +302,33 @@ function RouteComponent() {
 
         {achievements && (
           <Tabs.Panel value="achievements">
+            <label className="mb-4 flex w-fit cursor-pointer items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={!!hideUnearned}
+                onChange={(e) =>
+                  navigate({ search: (prev) => ({ ...prev, earnedOnly: e.target.checked || undefined }), replace: true })
+                }
+              />
+              Only show earned achievements
+            </label>
+            {hideUnearned && earnedCount(achievements) === 0 && (
+              <p className="text-sm text-muted-foreground">{player.name} hasn't earned any achievements yet.</p>
+            )}
             <div className="flex flex-col gap-6">
-              {groupAchievements(achievements).map((group) => (
+              {groupAchievements(achievements).map((group) => {
+                const shown = hideUnearned ? group.achievements.filter((a) => a.achievedOn !== null) : group.achievements
+                if (shown.length === 0) return null
+                return (
                 <section key={group.name}>
                   <h3 className="mb-2 font-semibold">
                     {group.name}{' '}
                     <span className="font-normal text-muted-foreground">
-                      ({earnedCount(group.achievements)}/{group.achievements.length})
+                      ({earnedSummary(group.achievements, hideUnearned)})
                     </span>
                   </h3>
                   <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                    {group.achievements.map((a) => {
+                    {shown.map((a) => {
                       const earned = a.achievedOn !== null
                       return (
                         <li
@@ -382,7 +408,8 @@ function RouteComponent() {
                     })}
                   </ul>
                 </section>
-              ))}
+                )
+              })}
             </div>
           </Tabs.Panel>
         )}
