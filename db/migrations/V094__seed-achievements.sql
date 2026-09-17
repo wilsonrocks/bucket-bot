@@ -20,4 +20,9 @@ INSERT INTO public.achievement (id, name, description, flavour_text, flavour_sou
     ('DIFFERENT_FACTION', 'PLACEHOLDER', 'Declare a second faction at an event',                       '', NULL, NULL, 15),
     ('RAINBOW',           'PLACEHOLDER', 'Declare every faction across your events',                   '', NULL, NULL, 16),
     ('HALF_RAINBOW',      'PLACEHOLDER', 'Declare 4 different factions across your events',            '', NULL, NULL, 17),
-    ('ASTBURYS_DREAM',    'PLACEHOLDER', 'Finish last and be best in faction at the same event',       '', NULL, NULL, 18);
+    ('ASTBURYS_DREAM',    'PLACEHOLDER', 'Finish last and be best in faction at the same event',       '', NULL, NULL, 18),
+    ('TWENTY_EVENTS',     'PLACEHOLDER', 'Play in 20 events',                                          '', NULL, NULL, 19),
+    ('FIFTY_EVENTS',      'PLACEHOLDER', 'Play in 50 events',                                          '', NULL, NULL, 20),
+    ('HUNDRED_EVENTS',    'PLACEHOLDER', 'Play in 100 events',                                         '', NULL, NULL, 21),
+    ('BIG_YEAR',          'PLACEHOLDER', 'Play in a Nationals and 3 GTs in the same year',             '', NULL, NULL, 22),
+    ('WANDERER',          'PLACEHOLDER', 'Play events at 5 different venues',                          '', NULL, NULL, 23);

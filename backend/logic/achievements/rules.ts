@@ -25,6 +25,7 @@ const RESULTS = sql`
     player_identity.player_id,
     result.tourney_id,
     tourney.date,
+    tourney.venue_id,
     coalesce(tourney.tier_code, 'EVENT') AS tier_code,
     result.place,
     result.faction_code,
@@ -109,6 +110,112 @@ function nthFaction(n: number | "all"): AchievementRule {
 }
 
 /**
+ * The tourney at which a player first played at their nth distinct venue.
+ * Tourneys without a venue don't count.
+ */
+function nthVenue(n: number): AchievementRule {
+  return earliest(sql`
+    SELECT player_id, tourney_id, date
+    FROM (
+      SELECT player_id, tourney_id, date,
+        row_number() OVER (PARTITION BY player_id ORDER BY date, tourney_id, venue_id) AS n
+      FROM (
+        SELECT DISTINCT ON (player_id, venue_id) player_id, venue_id, tourney_id, date
+        FROM (${RESULTS}) results
+        WHERE player_id IS NOT NULL AND venue_id IS NOT NULL
+        ORDER BY player_id, venue_id, date, tourney_id
+      ) first_visits
+    ) numbered
+    WHERE n = ${n}
+  `);
+}
+
+/**
+ * The tourney at which a player completed a "big year": a Nationals and three
+ * GTs within one calendar year. The award lands on whichever of those came
+ * last, in the earliest year it happened.
+ */
+function bigYear(): AchievementRule {
+  return earliest(sql`
+    SELECT player_id, tourney_id, date
+    FROM (
+      SELECT player_id, tourney_id, date,
+        count(*) OVER (PARTITION BY player_id, year) AS milestones,
+        row_number() OVER (PARTITION BY player_id, year ORDER BY date DESC, tourney_id DESC) AS latest
+      FROM (
+        SELECT player_id, tourney_id, date, tier_code,
+          extract(year FROM date) AS year,
+          row_number() OVER (
+            PARTITION BY player_id, extract(year FROM date), tier_code
+            ORDER BY date, tourney_id
+          ) AS n
+        FROM (
+          SELECT DISTINCT player_id, tourney_id, date, tier_code
+          FROM (${RESULTS}) results
+          WHERE player_id IS NOT NULL AND tier_code IN ('GT', 'NATIONALS')
+        ) events
+      ) numbered
+      WHERE (tier_code = 'NATIONALS' AND n = 1) OR (tier_code = 'GT' AND n = 3)
+    ) milestones
+    WHERE milestones = 2 AND latest = 1
+  `);
+}
+
+/** Every painting placing with its player and tourney. */
+const PAINTING = sql`
+  SELECT
+    player_identity.player_id,
+    painting_category.tourney_id,
+    tourney.date,
+    coalesce(tourney.tier_code, 'EVENT') AS tier_code,
+    painting_winner.position,
+    painting_winner.id AS painting_winner_id
+  FROM painting_winner
+  JOIN painting_category ON painting_category.id = painting_winner.category_id
+  JOIN tourney ON tourney.id = painting_category.tourney_id
+  JOIN player_identity ON player_identity.id = painting_winner.player_identity_id
+`;
+
+/** First painting placing matching `condition` (columns of PAINTING). */
+function firstPaintingWhere(condition: RawBuilder<unknown>): AchievementRule {
+  return earliest(sql`SELECT * FROM (${PAINTING}) painting WHERE ${condition}`);
+}
+
+/**
+ * The tourney at which a player won their nth best painted. Each category won
+ * counts, so winning two categories at one event counts twice.
+ */
+function nthBestPainted(n: number): AchievementRule {
+  return earliest(sql`
+    SELECT player_id, tourney_id, date
+    FROM (
+      SELECT player_id, tourney_id, date,
+        row_number() OVER (PARTITION BY player_id ORDER BY date, tourney_id, painting_winner_id) AS n
+      FROM (${PAINTING}) painting
+      WHERE player_id IS NOT NULL AND position = 1
+    ) numbered
+    WHERE n = ${n}
+  `);
+}
+
+/**
+ * The nth event a player organised (any tier), matching the tourney's
+ * organiser to the player's Discord id.
+ */
+function nthOrganised(n: number): AchievementRule {
+  return earliest(sql`
+    SELECT player_id, tourney_id, date
+    FROM (
+      SELECT player.id AS player_id, tourney.id AS tourney_id, tourney.date,
+        row_number() OVER (PARTITION BY player.id ORDER BY tourney.date, tourney.id) AS n
+      FROM tourney
+      JOIN player ON player.discord_id = tourney.organiser_discord_id
+    ) numbered
+    WHERE n = ${n}
+  `);
+}
+
+/**
  * Per-faction achievements, e.g. RESSERS_PODIUM. Ids use the faction's
  * name_code; the rows are seeded for every faction by V095.
  */
@@ -138,6 +245,9 @@ export const ACHIEVEMENT_RULES: Record<string, AchievementRule> = {
   SECOND_EVENT: nthEvent(2),
   FIVE_EVENTS: nthEvent(5),
   TEN_EVENTS: nthEvent(10),
+  TWENTY_EVENTS: nthEvent(20),
+  FIFTY_EVENTS: nthEvent(50),
+  HUNDRED_EVENTS: nthEvent(100),
 
   FIRST_GT: firstResultWhere(tier("GT")),
   FIRST_NATIONALS: firstResultWhere(tier("NATIONALS")),
@@ -162,6 +272,22 @@ export const ACHIEVEMENT_RULES: Record<string, AchievementRule> = {
   DIFFERENT_FACTION: nthFaction(2),
   HALF_RAINBOW: nthFaction(4),
   RAINBOW: nthFaction("all"),
+
+  BIG_YEAR: bigYear(),
+  WANDERER: nthVenue(5),
+
+  // Painting: a win in any category counts as best painted.
+  BEST_PAINTED: firstPaintingWhere(sql`position = 1`),
+  BEST_PAINTED_GT: firstPaintingWhere(sql`position = 1 AND ${tier("GT")}`),
+  BEST_PAINTED_NATIONALS: firstPaintingWhere(sql`position = 1 AND ${tier("NATIONALS")}`),
+  PODIUM_PAINTER_NATIONALS: firstPaintingWhere(sql`position <= 3 AND ${tier("NATIONALS")}`),
+  FIVE_BEST_PAINTED: nthBestPainted(5),
+  TEN_BEST_PAINTED: nthBestPainted(10),
+
+  FIRST_TO: nthOrganised(1),
+  SECOND_TO: nthOrganised(2),
+  FIVE_TO: nthOrganised(5),
+  TEN_TO: nthOrganised(10),
 
   ...Object.fromEntries(
     Object.values(Faction).flatMap((f) => Object.entries(factionRules(f))),

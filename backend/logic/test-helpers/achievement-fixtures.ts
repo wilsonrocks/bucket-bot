@@ -20,17 +20,41 @@ export function makeAchievementFixtures(prefix: string) {
       .where("external_id", "like", `${prefix}%`)
       .execute();
     await dbClient.deleteFrom("player").where("name", "like", `${prefix}%`).execute();
+    await dbClient
+      .deleteFrom("discord_user")
+      .where("discord_user_id", "like", `${prefix}%`)
+      .execute();
+    await dbClient.deleteFrom("venue").where("name", "like", `${prefix}%`).execute();
   }
 
   async function addTourney(
     name: string,
     date: string,
     tier: "EVENT" | "GT" | "NATIONALS" = "EVENT",
+    venueId: number | null = null,
+    organiserDiscordId: string | null = null,
   ) {
     return (
       await dbClient
         .insertInto("tourney")
-        .values({ name: `${prefix}${name}`, date, number_of_players: 8, tier_code: tier })
+        .values({
+          name: `${prefix}${name}`,
+          date,
+          number_of_players: 8,
+          tier_code: tier,
+          venue_id: venueId,
+          organiser_discord_id: organiserDiscordId,
+        })
+        .returning("id")
+        .executeTakeFirstOrThrow()
+    ).id;
+  }
+
+  async function addVenue(name: string) {
+    return (
+      await dbClient
+        .insertInto("venue")
+        .values({ name: `${prefix}${name}` })
         .returning("id")
         .executeTakeFirstOrThrow()
     ).id;
@@ -51,10 +75,18 @@ export function makeAchievementFixtures(prefix: string) {
     ).id;
   }
 
-  async function addPlayer(name: string) {
+  /** A player with a linked Discord user; returns their Discord id too. */
+  async function addDiscordPlayer(name: string) {
+    const discordId = `${prefix}${name}`;
+    await dbClient.insertInto("discord_user").values({ discord_user_id: discordId }).execute();
+    const player = await addPlayer(name, discordId);
+    return { ...player, discordId };
+  }
+
+  async function addPlayer(name: string, discordId: string | null = null) {
     const player = await dbClient
       .insertInto("player")
-      .values({ name: `${prefix}${name}` })
+      .values({ name: `${prefix}${name}`, discord_id: discordId })
       .returning("id")
       .executeTakeFirstOrThrow();
     const identityId = await addIdentity(name, player.id);
@@ -80,6 +112,23 @@ export function makeAchievementFixtures(prefix: string) {
       .execute();
   }
 
+  async function addPaintingCategory(tourneyId: number, name = "Best Painted") {
+    return (
+      await dbClient
+        .insertInto("painting_category")
+        .values({ tourney_id: tourneyId, name })
+        .returning("id")
+        .executeTakeFirstOrThrow()
+    ).id;
+  }
+
+  async function addPaintingPlacing(identityId: number, categoryId: number, position: number) {
+    await dbClient
+      .insertInto("painting_winner")
+      .values({ player_identity_id: identityId, category_id: categoryId, position })
+      .execute();
+  }
+
   async function awardsFor(playerId: number) {
     return dbClient
       .selectFrom("player_achievement")
@@ -94,5 +143,16 @@ export function makeAchievementFixtures(prefix: string) {
       .execute();
   }
 
-  return { cleanup, addTourney, addIdentity, addPlayer, addResult, awardsFor };
+  return {
+    cleanup,
+    addTourney,
+    addVenue,
+    addIdentity,
+    addPlayer,
+    addDiscordPlayer,
+    addResult,
+    addPaintingCategory,
+    addPaintingPlacing,
+    awardsFor,
+  };
 }

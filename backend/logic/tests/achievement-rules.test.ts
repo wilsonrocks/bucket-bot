@@ -4,7 +4,17 @@ import { ACHIEVEMENT_RULES } from "../achievements/rules";
 import { Faction } from "../fixtures";
 import { makeAchievementFixtures } from "../test-helpers/achievement-fixtures";
 
-const { cleanup, addTourney, addIdentity, addPlayer, addResult } =
+const {
+  cleanup,
+  addTourney,
+  addVenue,
+  addIdentity,
+  addPlayer,
+  addDiscordPlayer,
+  addResult,
+  addPaintingCategory,
+  addPaintingPlacing,
+} =
   makeAchievementFixtures("test-achievement-rules-");
 
 beforeEach(cleanup);
@@ -35,6 +45,21 @@ describe("event counts (all tiers)", () => {
     expect(await awarded("SECOND_EVENT", alice.playerId)).toEqual({ [alice.playerId]: tourneys[1] });
     expect(await awarded("FIVE_EVENTS", alice.playerId)).toEqual({ [alice.playerId]: tourneys[4] });
     expect(await awarded("TEN_EVENTS", alice.playerId)).toEqual({ [alice.playerId]: tourneys[9] });
+  });
+
+  test("TWENTY_EVENTS, FIFTY_EVENTS and HUNDRED_EVENTS land on the nth event played", async () => {
+    const alice = await addPlayer("alice");
+    const tourneys: number[] = [];
+    for (let i = 0; i < 100; i++) {
+      const date = new Date(Date.UTC(2020, 0, 1 + i)).toISOString().slice(0, 10);
+      const id = await addTourney(`t${i}`, date);
+      tourneys.push(id);
+      await addResult(alice.identityId, id, 2);
+    }
+
+    expect(await awarded("TWENTY_EVENTS", alice.playerId)).toEqual({ [alice.playerId]: tourneys[19] });
+    expect(await awarded("FIFTY_EVENTS", alice.playerId)).toEqual({ [alice.playerId]: tourneys[49] });
+    expect(await awarded("HUNDRED_EVENTS", alice.playerId)).toEqual({ [alice.playerId]: tourneys[99] });
   });
 
   test("an event counts once even if the player has two identities in it", async () => {
@@ -268,6 +293,156 @@ describe("per-faction achievements", () => {
           .sort(),
       );
     }
+  });
+});
+
+describe("WANDERER", () => {
+  test("lands on the first event at the 5th distinct venue", async () => {
+    const alice = await addPlayer("alice");
+    const venues = [];
+    for (let i = 0; i < 5; i++) venues.push(await addVenue(`v${i}`));
+    // Repeat visits and venue-less tourneys don't advance the count.
+    const order = [venues[0], venues[1], venues[0], null, venues[2], venues[3], venues[1], venues[4], venues[4]];
+    const tourneys: number[] = [];
+    for (const [i, venue] of order.entries()) {
+      const t = await addTourney(`t${i}`, `2024-01-${String(i + 10)}`, "EVENT", venue);
+      tourneys.push(t);
+      await addResult(alice.identityId, t, 3);
+    }
+
+    expect(await awarded("WANDERER", alice.playerId)).toEqual({ [alice.playerId]: tourneys[7] });
+  });
+
+  test("not awarded at 4 venues", async () => {
+    const alice = await addPlayer("alice");
+    for (let i = 0; i < 4; i++) {
+      const t = await addTourney(`t${i}`, `2024-01-1${i}`, "EVENT", await addVenue(`v${i}`));
+      await addResult(alice.identityId, t, 3);
+    }
+    await addResult(alice.identityId, await addTourney("no-venue", "2024-02-01"), 3);
+
+    expect(await awarded("WANDERER", alice.playerId)).toEqual({});
+  });
+});
+
+describe("BIG_YEAR", () => {
+  test("lands on whichever of the Nationals and third GT came last in the year", async () => {
+    const alice = await addPlayer("alice");
+    const bob = await addPlayer("bob");
+    const gt1 = await addTourney("gt1", "2024-02-01", "GT");
+    const nationals = await addTourney("nationals", "2024-05-01", "NATIONALS");
+    const gt2 = await addTourney("gt2", "2024-06-01", "GT");
+    const gt3 = await addTourney("gt3", "2024-09-01", "GT");
+    const gt4 = await addTourney("gt4", "2024-10-01", "GT");
+    const lateNationals = await addTourney("late-nationals", "2024-11-01", "NATIONALS");
+    for (const t of [gt1, nationals, gt2, gt3, gt4]) await addResult(alice.identityId, t, 5);
+    for (const t of [gt1, gt2, gt3, gt4, lateNationals]) await addResult(bob.identityId, t, 5);
+
+    expect(await awarded("BIG_YEAR", alice.playerId, bob.playerId)).toEqual({
+      [alice.playerId]: gt3,
+      [bob.playerId]: lateNationals,
+    });
+  });
+
+  test("needs everything in the same calendar year, and GTs to be GT tier", async () => {
+    const alice = await addPlayer("alice");
+    await addResult(alice.identityId, await addTourney("nationals", "2023-12-01", "NATIONALS"), 5);
+    await addResult(alice.identityId, await addTourney("gt1", "2024-01-01", "GT"), 5);
+    await addResult(alice.identityId, await addTourney("gt2", "2024-02-01", "GT"), 5);
+    await addResult(alice.identityId, await addTourney("gt3", "2024-03-01", "GT"), 5);
+    expect(await awarded("BIG_YEAR", alice.playerId)).toEqual({});
+
+    const bob = await addPlayer("bob");
+    await addResult(bob.identityId, await addTourney("b-nationals", "2024-05-01", "NATIONALS"), 5);
+    await addResult(bob.identityId, await addTourney("b-nationals2", "2024-06-01", "NATIONALS"), 5);
+    await addResult(bob.identityId, await addTourney("b-gt1", "2024-07-01", "GT"), 5);
+    await addResult(bob.identityId, await addTourney("b-gt2", "2024-08-01", "GT"), 5);
+    await addResult(bob.identityId, await addTourney("b-event", "2024-09-01", "EVENT"), 5);
+    expect(await awarded("BIG_YEAR", bob.playerId)).toEqual({});
+  });
+});
+
+describe("painting", () => {
+  test.each([
+    ["BEST_PAINTED", "EVENT", 1, true],
+    ["BEST_PAINTED", "NATIONALS", 1, true],
+    ["BEST_PAINTED", "EVENT", 2, false],
+    ["BEST_PAINTED_GT", "GT", 1, true],
+    ["BEST_PAINTED_GT", "EVENT", 1, false],
+    ["BEST_PAINTED_GT", "GT", 2, false],
+    ["BEST_PAINTED_NATIONALS", "NATIONALS", 1, true],
+    ["BEST_PAINTED_NATIONALS", "GT", 1, false],
+    ["PODIUM_PAINTER_NATIONALS", "NATIONALS", 3, true],
+    ["PODIUM_PAINTER_NATIONALS", "NATIONALS", 4, false],
+    ["PODIUM_PAINTER_NATIONALS", "GT", 1, false],
+  ] as const)("%s at %s tier, position %i → %s", async (ruleId, tier, position, expected) => {
+    const alice = await addPlayer("alice");
+    const t = await addTourney("t", "2024-01-01", tier);
+    await addPaintingPlacing(alice.identityId, await addPaintingCategory(t), position);
+
+    expect(await awarded(ruleId, alice.playerId)).toEqual(
+      expected ? { [alice.playerId]: t } : {},
+    );
+  });
+
+  test("a win in any category counts", async () => {
+    const alice = await addPlayer("alice");
+    const bob = await addPlayer("bob");
+    const t = await addTourney("t", "2024-01-01", "GT");
+    const models = await addPaintingCategory(t, "Best Model");
+    const crews = await addPaintingCategory(t, "Best Crew");
+    await addPaintingPlacing(alice.identityId, models, 1);
+    await addPaintingPlacing(bob.identityId, models, 2);
+    await addPaintingPlacing(bob.identityId, crews, 1);
+
+    expect(await awarded("BEST_PAINTED_GT", alice.playerId, bob.playerId)).toEqual({
+      [alice.playerId]: t,
+      [bob.playerId]: t,
+    });
+  });
+
+  test("FIVE_BEST_PAINTED and TEN_BEST_PAINTED count each category win", async () => {
+    const alice = await addPlayer("alice");
+    const tourneys: number[] = [];
+    for (let i = 0; i < 6; i++) {
+      const t = await addTourney(`t${i}`, `2024-01-${String(i + 10)}`);
+      tourneys.push(t);
+      // Two category wins per event, plus a runner-up that shouldn't count.
+      await addPaintingPlacing(alice.identityId, await addPaintingCategory(t, "Model"), 1);
+      await addPaintingPlacing(alice.identityId, await addPaintingCategory(t, "Crew"), 1);
+      await addPaintingPlacing(alice.identityId, await addPaintingCategory(t, "Terrain"), 2);
+    }
+
+    expect(await awarded("FIVE_BEST_PAINTED", alice.playerId)).toEqual({ [alice.playerId]: tourneys[2] });
+    expect(await awarded("TEN_BEST_PAINTED", alice.playerId)).toEqual({ [alice.playerId]: tourneys[4] });
+  });
+});
+
+describe("TO-ing", () => {
+  test("FIRST_TO, SECOND_TO, FIVE_TO and TEN_TO land on the nth event organised, at any tier", async () => {
+    const alice = await addDiscordPlayer("alice");
+    const bob = await addDiscordPlayer("bob");
+    const tiers = ["GT", "EVENT", "NATIONALS"] as const;
+    const tourneys: number[] = [];
+    for (let i = 0; i < 10; i++) {
+      const t = await addTourney(`t${i}`, `2024-01-${String(i + 10)}`, tiers[i % 3], null, alice.discordId);
+      tourneys.push(t);
+      // Playing in an event isn't organising it.
+      await addResult(bob.identityId, t, 1);
+    }
+
+    for (const [ruleId, index] of [["FIRST_TO", 0], ["SECOND_TO", 1], ["FIVE_TO", 4], ["TEN_TO", 9]] as const) {
+      expect(await awarded(ruleId, alice.playerId, bob.playerId)).toEqual({ [alice.playerId]: tourneys[index] });
+    }
+  });
+
+  test("not awarded before reaching the count", async () => {
+    const alice = await addDiscordPlayer("alice");
+    for (let i = 0; i < 4; i++) {
+      await addTourney(`t${i}`, `2024-01-1${i}`, "EVENT", null, alice.discordId);
+    }
+    expect(await awarded("SECOND_TO", alice.playerId)).not.toEqual({});
+    expect(await awarded("FIVE_TO", alice.playerId)).toEqual({});
   });
 });
 
