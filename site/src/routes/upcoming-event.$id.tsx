@@ -84,6 +84,7 @@ function RouteComponent() {
                 tab: undefined,
                 typeCode: undefined,
                 painting: undefined,
+                achievement: undefined,
               }}
             >
               {event.organiserName}

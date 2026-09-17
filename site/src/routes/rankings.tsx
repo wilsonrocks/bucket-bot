@@ -94,7 +94,7 @@ function RouteComponent() {
                       <Link
                         to="/player/$id"
                         params={{ id: player.player_id! }}
-                        search={{ tab: undefined, typeCode: undefined, painting: undefined }}
+                        search={{ tab: undefined, typeCode: undefined, painting: undefined, achievement: undefined }}
                       >
                         {isMobile ? playerShortName(player) : player.name}
                       </Link>

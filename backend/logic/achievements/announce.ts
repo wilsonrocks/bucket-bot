@@ -13,7 +13,10 @@ export const MAX_EMBEDS_PER_MESSAGE = 10;
 /** ...and at most 6000 characters across all of a message's embeds. */
 export const MAX_EMBED_CHARS_PER_MESSAGE = 6000;
 
+const DEFAULT_SITE_URL = "https://malifaux.uk";
+
 export interface AnnouncedAchievement {
+  playerId: number;
   achievementId: string;
   name: string;
   description: string;
@@ -25,9 +28,22 @@ export interface AnnouncedAchievement {
   achievedOn: string;
 }
 
+/** Public page showing one player's achievement, with a native share button. */
+export function achievementShareUrl(
+  a: Pick<AnnouncedAchievement, "playerId" | "achievementId">,
+  siteUrl: string = process.env.SITE_URL ?? DEFAULT_SITE_URL,
+): string {
+  const params = new URLSearchParams({
+    tab: "achievements",
+    achievement: a.achievementId,
+  });
+  return `${siteUrl}/player/${a.playerId}?${params}`;
+}
+
 export function buildAchievementEmbed(
   a: AnnouncedAchievement,
   assetsUrl: string | undefined = process.env.ASSETS_URL,
+  siteUrl: string = process.env.SITE_URL ?? DEFAULT_SITE_URL,
 ): EmbedBuilder {
   // Text is filled in from admin, so any of it may still be blank.
   const sections: string[] = [];
@@ -44,6 +60,7 @@ export function buildAchievementEmbed(
 
   const embed = new EmbedBuilder()
     .setTitle(a.name)
+    .setURL(achievementShareUrl(a, siteUrl))
     .setDescription(sections.join("\n\n"));
   if (a.imageKey && assetsUrl) {
     embed.setThumbnail(`${assetsUrl}/${a.imageKey}-w400.webp`);
@@ -61,6 +78,7 @@ export function buildAchievementMessage(
   mention: string,
   achievements: AnnouncedAchievement[],
   assetsUrl: string | undefined = process.env.ASSETS_URL,
+  siteUrl: string = process.env.SITE_URL ?? DEFAULT_SITE_URL,
 ): {
   content: string;
   embeds: EmbedBuilder[];
@@ -72,7 +90,7 @@ export function buildAchievementMessage(
 
   for (const achievement of achievements) {
     if (embeds.length === MAX_EMBEDS_PER_MESSAGE) break;
-    const embed = buildAchievementEmbed(achievement, assetsUrl);
+    const embed = buildAchievementEmbed(achievement, assetsUrl, siteUrl);
     const length = embedLength(embed.data);
     // A single embed always fits: EmbedBuilder caps title (256) and
     // description (4096), and the admin form caps the text well below that.
@@ -135,6 +153,7 @@ export async function announceNextPlayer(db: Kysely<DB>): Promise<number | null>
       .where("player_achievement.player_id", "=", next.player_id)
       .where("player_achievement.discord_message_id", "is", null)
       .select([
+        "player_achievement.player_id as playerId",
         "achievement.id as achievementId",
         "achievement.name",
         "achievement.description",

@@ -1,3 +1,5 @@
+import { absoluteUrl } from './seo'
+
 type EarnableAchievement = { achievedOn: string | null }
 
 /** Label summarising how many achievements were earned, e.g. "Achievements (1/2)". */
@@ -25,4 +27,14 @@ export function groupAchievements<T extends { groupName: string }>(
     else groups.set(achievement.groupName, [achievement])
   }
   return [...groups].map(([name, items]) => ({ name, achievements: items }))
+}
+
+/** Page showing a single earned achievement, opened in a modal on the player page. */
+export function achievementShareUrl(playerId: number, achievementId: string): string {
+  const params = new URLSearchParams({ tab: 'achievements', achievement: achievementId })
+  return absoluteUrl(`/player/${playerId}?${params}`)
+}
+
+export function achievementShareText(playerName: string, achievementName: string): string {
+  return `${playerName} earned the “${achievementName}” achievement`
 }

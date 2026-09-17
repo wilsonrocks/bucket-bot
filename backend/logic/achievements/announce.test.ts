@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { embedLength } from "discord.js";
 import {
+  achievementShareUrl,
   buildAchievementEmbed,
   buildAchievementMessage,
   MAX_EMBED_CHARS_PER_MESSAGE,
@@ -10,6 +11,7 @@ import {
 const achievement = (
   overrides: Partial<AnnouncedAchievement> = {},
 ): AnnouncedAchievement => ({
+  playerId: 42,
   achievementId: "FIRST_EVENT",
   name: "Through the Breach",
   description: "Attend 1 event",
@@ -118,5 +120,25 @@ describe("buildAchievementMessage", () => {
     ];
     const { included } = buildAchievementMessage("Alice", achievements, undefined);
     expect(included.map((a) => a.achievementId)).toEqual(["BIG1"]);
+  });
+
+  it("links each embed title to the achievement's share page", () => {
+    const { embeds } = buildAchievementMessage(
+      "Alice",
+      [achievement()],
+      undefined,
+      "https://site.example",
+    );
+    expect(embeds[0]!.toJSON().url).toBe(
+      "https://site.example/player/42?tab=achievements&achievement=FIRST_EVENT",
+    );
+  });
+});
+
+describe("achievementShareUrl", () => {
+  it("encodes the achievement id", () => {
+    expect(
+      achievementShareUrl({ playerId: 1, achievementId: "A&B" }, "https://site.example"),
+    ).toBe("https://site.example/player/1?tab=achievements&achievement=A%26B");
   });
 });

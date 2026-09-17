@@ -138,6 +138,7 @@ function RouteComponent() {
                           tab: undefined,
                           typeCode: undefined,
                           painting: undefined,
+                          achievement: undefined,
                         }}
                       >
                         {row.playerName}
@@ -194,6 +195,7 @@ function RouteComponent() {
                                 tab: "painting",
                                 typeCode: undefined,
                                 painting: undefined,
+                                achievement: undefined,
                               }}
                             >
                               {winner.playerName}

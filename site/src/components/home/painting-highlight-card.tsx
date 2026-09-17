@@ -39,7 +39,7 @@ export function PaintingHighlightCard({ data }: { data: RecentPainting }) {
                 <Link
                   to="/player/$id"
                   params={{ id: data.playerId }}
-                  search={{ tab: 'painting', typeCode: undefined, painting: undefined }}
+                  search={{ tab: 'painting', typeCode: undefined, painting: undefined, achievement: undefined }}
                 >
                   {data.playerName}
                 </Link>

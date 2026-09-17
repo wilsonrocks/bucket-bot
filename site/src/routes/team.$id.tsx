@@ -96,7 +96,7 @@ function RouteComponent() {
                 <Link
                   to="/player/$id"
                   params={{ id: member.player_id }}
-                  search={{ tab: undefined, typeCode: undefined, painting: undefined }}
+                  search={{ tab: undefined, typeCode: undefined, painting: undefined, achievement: undefined }}
                 >
                   {member.player_name}
                 </Link>

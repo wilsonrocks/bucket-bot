@@ -68,7 +68,7 @@ export function PaintingLightbox({
                 <Link
                   to="/player/$id"
                   params={{ id: winner.playerId }}
-                  search={{ tab: 'painting', typeCode: undefined, painting: undefined }}
+                  search={{ tab: 'painting', typeCode: undefined, painting: undefined, achievement: undefined }}
                   className="font-semibold"
                 >
                   {winner.playerName}
