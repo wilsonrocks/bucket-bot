@@ -1,6 +1,7 @@
 import type { Kysely } from "kysely";
 import type { DB } from "kysely-codegen";
 import {
+  ACHIEVEMENT_AIDE_ROLE_ID,
   getDiscordClient,
   RANKING_REPORTER_ROLE_ID,
   UK_MALIFAUX_SERVER_ID,
@@ -21,11 +22,9 @@ export async function getStaffRoles(userId: string): Promise<StaffRoles> {
   const client = await getDiscordClient();
   const guild = await client.guilds.fetch(UK_MALIFAUX_SERVER_ID);
   const member = await guild.members.fetch(userId);
-  // Unset means nobody is an aide, rather than has("") matching nothing by luck.
-  const aideRoleId = process.env.ACHIEVEMENT_AIDE_ROLE_ID;
   return {
     rankingReporter: member.roles.cache.has(RANKING_REPORTER_ROLE_ID),
-    achievementAide: !!aideRoleId && member.roles.cache.has(aideRoleId),
+    achievementAide: member.roles.cache.has(ACHIEVEMENT_AIDE_ROLE_ID),
   };
 }
 

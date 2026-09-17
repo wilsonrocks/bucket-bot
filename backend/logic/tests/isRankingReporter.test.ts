@@ -3,6 +3,7 @@ import { describe, expect, test, vi } from "vitest";
 vi.mock("../../logic/discord-client.js", () => ({
   getDiscordClient: vi.fn(),
   RANKING_REPORTER_ROLE_ID: "reporter-role-id",
+  ACHIEVEMENT_AIDE_ROLE_ID: "aide-role-id",
   UK_MALIFAUX_SERVER_ID: "guild-id",
 }));
 
