@@ -158,7 +158,7 @@ function RouteComponent() {
         </Tabs.List>
 
         <Tabs.Panel value="events">
-          <table className="min-w-full text-sm tabular-nums">
+          <table className="text-sm tabular-nums">
             <thead>
               <tr className="border-b border-border text-left">
                 <th className="px-2 py-2 font-semibold">Event</th>
