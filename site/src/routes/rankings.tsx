@@ -91,7 +91,9 @@ function RouteComponent() {
           <table className="min-w-full text-sm tabular-nums">
             <thead className="sticky top-0 bg-surface">
               <tr className="border-b border-border text-left">
-                <th className="whitespace-nowrap px-2 py-2 font-semibold">Rank</th>
+                {/* Reserve room for 3 digits so the column doesn't resize when filtering
+                    drops the 3-figure ranks. `ch` is a digit's width under tabular-nums. */}
+                <th className="min-w-[calc(3ch_+_1rem)] whitespace-nowrap px-2 py-2 font-semibold">Rank</th>
                 <th className="whitespace-nowrap px-2 py-2 font-semibold">Change</th>
                 <th className="px-2 py-2 font-semibold">Player</th>
                 <th className="px-2 py-2 font-semibold">Total Points</th>
@@ -101,7 +103,7 @@ function RouteComponent() {
             <tbody>
               {rows.map((player) => (
                 <tr key={player.id} className="border-b border-border">
-                  <td className="whitespace-nowrap px-2 py-1.5">{player.rank}</td>
+                  <td className="min-w-[calc(3ch_+_1rem)] whitespace-nowrap px-2 py-1.5">{player.rank}</td>
                   <td className="whitespace-nowrap px-2 py-1.5">
                     <RankChange change={player.rank_change} newPlayer={player.new_player} />
                   </td>
