@@ -51,7 +51,7 @@ export function TopPlayersCard({ data }: { data: RankingEntry[] }) {
           </tbody>
         </table>
       </div>
-      <Link to="/rankings" search={{ typeCode: 'ROLLING_YEAR' }} className="mt-2 text-sm">
+      <Link to="/rankings" search={{ typeCode: 'ROLLING_YEAR', minFiveEvents: undefined }} className="mt-2 text-sm">
         Full rankings →
       </Link>
     </div>
