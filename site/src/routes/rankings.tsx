@@ -88,21 +88,19 @@ function RouteComponent() {
           <Tabs.Tab value="animation">Animation</Tabs.Tab>
         </Tabs.List>
         <Tabs.Panel value="table">
-          <table className="min-w-full text-sm tabular-nums">
+          <table className="max-w-full text-sm tabular-nums">
             <thead className="sticky top-0 bg-surface">
               <tr className="border-b border-border text-left">
-                {/* Fixed widths on every column but Player, which soaks up the slack, so
-                    toggling the filter can't resize anything as the content changes. */}
+                {/* Every column is sized, so toggling the filter can't resize the table.
+                    The table is no longer stretched to full width, otherwise the slack
+                    would all land on Player and leave it enormous on a wide screen. */}
                 <th className="w-16 whitespace-nowrap px-2 py-2 font-semibold">Rank</th>
                 <th className="w-20 whitespace-nowrap px-2 py-2 font-semibold">Change</th>
-                <th className="px-2 py-2 font-semibold">Player</th>
+                <th className="w-64 px-2 py-2 font-semibold">Player</th>
                 <th className="w-28 whitespace-nowrap px-2 py-2 font-semibold">Total Points</th>
-                {/* Every filtered row reads 5/5, so the column only earns its place unfiltered. */}
-                {!minFiveEvents && (
-                  <th className="hidden w-20 whitespace-nowrap px-2 py-2 font-semibold min-[601px]:table-cell">
-                    Events
-                  </th>
-                )}
+                <th className="hidden w-20 whitespace-nowrap px-2 py-2 font-semibold min-[601px]:table-cell">
+                  Events
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -129,9 +127,7 @@ function RouteComponent() {
                     </div>
                   </td>
                   <td className="px-2 py-1.5">{(player.total_points ?? 0).toFixed(2)}</td>
-                  {!minFiveEvents && (
-                    <td className="hidden px-2 py-1.5 min-[601px]:table-cell">{Number(player.event_count ?? 0)}/5</td>
-                  )}
+                  <td className="hidden px-2 py-1.5 min-[601px]:table-cell">{Number(player.event_count ?? 0)}/5</td>
                 </tr>
               ))}
             </tbody>
