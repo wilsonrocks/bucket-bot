@@ -50,6 +50,15 @@ export const fetchRankings = createServerFn()
         'current_team.id as current_team_id',
         'current_team.name as current_team_name',
         'current_team.image_key as team_image_key',
+        // ranking_snapshot_event holds exactly the events that counted towards the
+        // score (the best five), so this is 0-5 rather than a lifetime event count.
+        (eb) =>
+          eb
+            .selectFrom('ranking_snapshot_event')
+            .whereRef('ranking_snapshot_event.player_id', '=', 'ranking_snapshot.player_id')
+            .where('ranking_snapshot_event.batch_id', '=', snapshot.id)
+            .select((eb2) => eb2.fn.countAll<number>().as('count'))
+            .as('event_count'),
       ])
       .orderBy('ranking_snapshot.rank', 'asc')
       .execute()
