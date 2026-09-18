@@ -42,9 +42,10 @@ export const Route = createFileRoute('/player/$id')({
     achievement: optionalString(search.achievement),
     earnedOnly: optionalFlag(search.earnedOnly),
   }),
-  loader: async ({ params, location }) => {
-    const searchParams = new URLSearchParams(location.search)
-    const typeCode = searchParams.get('typeCode') ?? 'ROLLING_YEAR'
+  // Only typeCode belongs here — tab/painting/achievement/earnedOnly are client-side
+  // state, and including them would refetch the whole page on every tab switch.
+  loaderDeps: ({ search: { typeCode } }) => ({ typeCode: typeCode ?? 'ROLLING_YEAR' }),
+  loader: async ({ params, deps: { typeCode } }) => {
     const [player, rankingTypes, rankingsData, tourneys, teams, paintingWins, achievements] = await Promise.all([
       fetchPlayer({ data: { id: params.id } }),
       fetchRankingTypes(),
@@ -55,11 +56,12 @@ export const Route = createFileRoute('/player/$id')({
       fetchPlayerAchievements({ data: { playerId: params.id } }),
     ])
     if (!player) throw notFound()
-    return { player, rankingTypes, rankingsData, tourneys, teams, paintingWins, achievements, typeCode }
+    return { player, rankingTypes, rankingsData, tourneys, teams, paintingWins, achievements }
   },
   head: ({ loaderData, params, match }) => {
     if (!loaderData) return {}
-    const { player, teams, tourneys, rankingsData, achievements, typeCode } = loaderData
+    const { player, teams, tourneys, rankingsData, achievements } = loaderData
+    const typeCode = match.search.typeCode ?? 'ROLLING_YEAR'
 
     const latestRollingYearRank =
       typeCode === 'ROLLING_YEAR'
@@ -134,8 +136,8 @@ function findEarnedAchievement<T extends { id: string; achievedOn: string | null
 }
 
 function RouteComponent() {
-  const { player, rankingTypes, rankingsData, tourneys, teams, paintingWins, achievements, typeCode } = Route.useLoaderData()
-  const { painting: activePaintingId, achievement: activeAchievementId, earnedOnly: hideUnearned } = Route.useSearch()
+  const { player, rankingTypes, rankingsData, tourneys, teams, paintingWins, achievements } = Route.useLoaderData()
+  const { typeCode = 'ROLLING_YEAR', painting: activePaintingId, achievement: activeAchievementId, earnedOnly: hideUnearned } = Route.useSearch()
   const navigate = Route.useNavigate()
   const wins = paintingWins ?? []
   const activeAchievement = achievements && findEarnedAchievement(achievements, activeAchievementId)
