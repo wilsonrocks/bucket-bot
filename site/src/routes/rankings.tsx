@@ -70,7 +70,8 @@ function RouteComponent() {
             <option key={rt.code} value={rt.code}>{rt.name}</option>
           ))}
         </select>
-        <label className="flex w-fit cursor-pointer items-center gap-2 whitespace-nowrap text-sm">
+        {rankingDescription && <p>{rankingDescription}</p>}
+        <label className="flex w-fit cursor-pointer items-center gap-2 whitespace-nowrap text-sm sm:ml-auto">
           <input
             type="checkbox"
             checked={!!minFiveEvents}
@@ -80,7 +81,6 @@ function RouteComponent() {
           />
           Only players with 5+ events
         </label>
-        {rankingDescription && <p>{rankingDescription}</p>}
       </div>
       <Tabs defaultValue="table">
         <Tabs.List>
@@ -95,7 +95,7 @@ function RouteComponent() {
                 <th className="whitespace-nowrap px-2 py-2 font-semibold">Change</th>
                 <th className="px-2 py-2 font-semibold">Player</th>
                 <th className="px-2 py-2 font-semibold">Total Points</th>
-                <th className="px-2 py-2 font-semibold">Events</th>
+                <th className="hidden px-2 py-2 font-semibold min-[601px]:table-cell">Events</th>
               </tr>
             </thead>
             <tbody>
@@ -122,7 +122,7 @@ function RouteComponent() {
                     </div>
                   </td>
                   <td className="px-2 py-1.5">{(player.total_points ?? 0).toFixed(2)}</td>
-                  <td className="px-2 py-1.5">{Number(player.event_count ?? 0)}/5</td>
+                  <td className="hidden px-2 py-1.5 min-[601px]:table-cell">{Number(player.event_count ?? 0)}/5</td>
                 </tr>
               ))}
             </tbody>
