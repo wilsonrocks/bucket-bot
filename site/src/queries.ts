@@ -667,6 +667,41 @@ export const fetchRegionsOverTime = createServerFn().handler(async () => {
   }))
 })
 
+// The individual tourneys behind the region snapshot counts. A past tourney only
+// reaches a region via its venue (`tourney` has no region_id of its own), which is
+// exactly the join `generateRegionSnapshot` counts — keep the two in step.
+export const fetchRegionEvents = createServerFn()
+  .inputValidator((d: { since: string }) => d)
+  .handler(async ({ data: { since } }) => {
+    const rows = await db
+      .selectFrom('tourney')
+      .innerJoin('venue', 'tourney.venue_id', 'venue.id')
+      .innerJoin('region', 'venue.region_id', 'region.id')
+      .leftJoin('result', 'result.tourney_id', 'tourney.id')
+      .where(sql<boolean>`${sql.ref('tourney.date')} >= ${since}::date`)
+      .select([
+        'tourney.id',
+        'tourney.name',
+        sql<string>`${sql.ref('tourney.date')}::text`.as('date'),
+        'venue.name as venueName',
+        'venue.town',
+        'region.geojson_name',
+        db.fn.count('result.id').as('players'),
+      ])
+      .groupBy([
+        'tourney.id',
+        'tourney.name',
+        'tourney.date',
+        'venue.name',
+        'venue.town',
+        'region.geojson_name',
+      ])
+      .orderBy('tourney.date', 'desc')
+      .execute()
+
+    return rows.map((r) => ({ ...r, players: parseInt(r.players as string) }))
+  })
+
 // ── Painting ───────────────────────────────────────────────────────────────
 
 export const fetchAllPainting = createServerFn().handler(async () => {

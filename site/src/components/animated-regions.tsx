@@ -1,13 +1,25 @@
-import { Pause, Play, SkipBack } from 'lucide-react'
+import { Pause, Play, SkipBack, X } from 'lucide-react'
 import { interpolateRgb } from 'd3-interpolate'
 import { geoMercator, geoPath, type GeoPermissibleObjects } from 'd3-geo'
 import { select } from 'd3-selection'
 import { timeFormat } from 'd3-time-format'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { Link } from '#/components/link'
 import type { UkRegionFeature } from '#/data/uk-regions-geo'
 type RegionSnapshot = {
   date: string
   regions: Array<{ region_id: number; geojson_name: string; event_count: number }>
+}
+
+export type RegionEvent = {
+  id: number
+  name: string
+  /** YYYY-MM-DD */
+  date: string
+  venueName: string | null
+  town: string | null
+  geojson_name: string
+  players: number
 }
 
 function catmullRom(p0: number, p1: number, p2: number, p3: number, t: number) {
@@ -40,15 +52,19 @@ function getColor(count: number): string {
   return interpolateRgb(COLORS[lower], COLORS[upper])(frac)
 }
 
-const formatDate = timeFormat('%d %b %Y')
+const formatMapDate = timeFormat('%d %b %Y')
+
+const isoDate = (d: Date) => d.toISOString().slice(0, 10)
 
 type AnimatedRegionsProps = {
   snapshots: RegionSnapshot[]
+  events?: RegionEvent[]
   duration?: number
 }
 
 export function AnimatedRegions({
   snapshots,
+  events = [],
   duration = 750,
 }: AnimatedRegionsProps) {
   const svgRef = useRef<SVGSVGElement | null>(null)
@@ -66,6 +82,12 @@ export function AnimatedRegions({
   }, [])
   const hoveredNameRef = useRef<((name: string | null) => void) | null>(null)
   const [hoveredRegion, setHoveredRegion] = useState<string | null>(null)
+  const [selectedRegion, setSelectedRegion] = useState<string | null>(null)
+  // The d3 handlers are attached once, when the geometry lands, so they must not
+  // close over `selectedRegion` directly.
+  const toggleSelectedRef = useRef<((name: string) => void) | null>(null)
+  toggleSelectedRef.current = (name: string) =>
+    setSelectedRegion((prev) => (prev === name ? null : name))
   const [mousePos, setMousePos] = useState<{ x: number; y: number } | null>(
     null,
   )
@@ -199,15 +221,35 @@ export function AnimatedRegions({
   const countMapRef = useRef(countMap)
   countMapRef.current = countMap
 
-  const displayedDate = useMemo(() => {
+  const interpolatedDate = useMemo(() => {
     const cur = snapshots[frame]
-    if (!cur) return ''
+    if (!cur) return null
     const next = snapshots[Math.min(frame + 1, snapshots.length - 1)]
     const dateA = new Date(cur.date)
     const dateB = new Date(next.date)
-    const interpTime = dateA.getTime() + (dateB.getTime() - dateA.getTime()) * t
-    return formatDate(new Date(interpTime))
+    return new Date(dateA.getTime() + (dateB.getTime() - dateA.getTime()) * t)
   }, [frame, t, snapshots])
+
+  const displayedDate = interpolatedDate ? formatMapDate(interpolatedDate) : ''
+
+  // The snapshot counts cover the year up to their own date, so the event list has
+  // to use the same window or it won't agree with the colour it sits under.
+  const eventWindow = useMemo(() => {
+    if (!interpolatedDate) return null
+    const start = new Date(interpolatedDate)
+    start.setFullYear(start.getFullYear() - 1)
+    return { start: isoDate(start), end: isoDate(interpolatedDate) }
+  }, [interpolatedDate])
+
+  const selectedEvents = useMemo(() => {
+    if (!selectedRegion || !eventWindow) return []
+    return events.filter(
+      (e) =>
+        e.geojson_name === selectedRegion &&
+        e.date >= eventWindow.start &&
+        e.date <= eventWindow.end,
+    )
+  }, [events, selectedRegion, eventWindow])
 
   // Set up SVG paths (runs once the geometry has loaded)
   useEffect(() => {
@@ -240,11 +282,24 @@ export function AnimatedRegions({
       )
       .attr('stroke', '#fff')
       .attr('stroke-width', 0.5)
+      .attr('data-region', (d) => d.properties.rgn19nm)
+      .attr('tabindex', 0)
+      .attr('role', 'button')
+      .attr('aria-label', (d) => `${d.properties.rgn19nm} — show events`)
+      .attr('cursor', 'pointer')
       .on('mouseenter', (_event, d) => {
         hoveredNameRef.current?.(d.properties.rgn19nm)
       })
       .on('mouseleave', () => {
         hoveredNameRef.current?.(null)
+      })
+      .on('click', (_event, d) => {
+        toggleSelectedRef.current?.(d.properties.rgn19nm)
+      })
+      .on('keydown', (event: KeyboardEvent, d) => {
+        if (event.key !== 'Enter' && event.key !== ' ') return
+        event.preventDefault()
+        toggleSelectedRef.current?.(d.properties.rgn19nm)
       })
   }, [features, width, height])
 
@@ -256,7 +311,14 @@ export function AnimatedRegions({
     select(svgRef.current)
       .selectAll<SVGPathElement, UkRegionFeature>('path')
       .attr('fill', (d) => getColor(countMap.get(d.properties.rgn19nm) ?? 0))
-  }, [countMap, features])
+      // Same pass as the fill on purpose: a separate effect is what broke #110.
+      .attr('stroke', (d) =>
+        d.properties.rgn19nm === selectedRegion ? '#111827' : '#fff',
+      )
+      .attr('stroke-width', (d) =>
+        d.properties.rgn19nm === selectedRegion ? 2 : 0.5,
+      )
+  }, [countMap, features, selectedRegion])
 
   return (
     <div
@@ -309,7 +371,80 @@ export function AnimatedRegions({
             whiteSpace: 'nowrap',
           }}
         >
-          {hoveredRegion}
+          {hoveredRegion} — {Math.round(countMap.get(hoveredRegion) ?? 0)}{' '}
+          {Math.round(countMap.get(hoveredRegion) ?? 0) === 1
+            ? 'event'
+            : 'events'}
+        </div>
+      )}
+      {selectedRegion && eventWindow && (
+        <RegionEventsPanel
+          region={selectedRegion}
+          events={selectedEvents}
+          windowEnd={eventWindow.end}
+          onClose={() => setSelectedRegion(null)}
+        />
+      )}
+    </div>
+  )
+}
+
+function RegionEventsPanel({
+  region,
+  events,
+  windowEnd,
+  onClose,
+}: {
+  region: string
+  events: RegionEvent[]
+  /** YYYY-MM-DD; the window is the year ending here. */
+  windowEnd: string
+  onClose: () => void
+}) {
+  return (
+    <div className="mt-4 rounded-lg border border-border bg-surface p-4">
+      <div className="mb-2 flex items-start justify-between gap-3">
+        <div>
+          <h3 className="text-lg font-semibold">{region}</h3>
+          <p className="text-sm text-muted-foreground">
+            Year up to {formatMapDate(new Date(windowEnd))}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close events list"
+          className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded hover:bg-muted"
+        >
+          <X size={16} />
+        </button>
+      </div>
+      {events.length === 0 ? (
+        <p className="text-sm text-muted-foreground">
+          No events in this region in this period.
+        </p>
+      ) : (
+        <div className="flex flex-col gap-2">
+          {events.map((event) => {
+            const place = event.venueName ?? event.town
+            return (
+              <div key={event.id}>
+                <Link
+                  to="/event/$id"
+                  params={{ id: event.id }}
+                  search={{ tab: undefined, painting: undefined }}
+                  className="font-semibold"
+                >
+                  {event.name}
+                </Link>
+                <p className="text-sm text-muted-foreground">
+                  {formatMapDate(new Date(event.date))}
+                  {place ? ` · ${place}` : ''}
+                  {event.players ? ` · ${event.players} players` : ''}
+                </p>
+              </div>
+            )
+          })}
         </div>
       )}
     </div>
