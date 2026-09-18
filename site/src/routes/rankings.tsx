@@ -94,19 +94,22 @@ function RouteComponent() {
                 {/* Reserve room for 3 digits so the column doesn't resize when filtering
                     drops the 3-figure ranks. `ch` is a digit's width under tabular-nums. */}
                 <th className="min-w-[calc(3ch_+_1rem)] whitespace-nowrap px-2 py-2 font-semibold">Rank</th>
-                <th className="whitespace-nowrap px-2 py-2 font-semibold">Change</th>
+                {!minFiveEvents && <th className="whitespace-nowrap px-2 py-2 font-semibold">Change</th>}
                 <th className="px-2 py-2 font-semibold">Player</th>
                 <th className="px-2 py-2 font-semibold">Total Points</th>
-                <th className="hidden px-2 py-2 font-semibold min-[601px]:table-cell">Events</th>
+                {/* Every filtered row reads 5/5, so the column only earns its place unfiltered. */}
+                {!minFiveEvents && <th className="hidden px-2 py-2 font-semibold min-[601px]:table-cell">Events</th>}
               </tr>
             </thead>
             <tbody>
               {rows.map((player) => (
                 <tr key={player.id} className="border-b border-border">
                   <td className="min-w-[calc(3ch_+_1rem)] whitespace-nowrap px-2 py-1.5">{player.rank}</td>
-                  <td className="whitespace-nowrap px-2 py-1.5">
-                    <RankChange change={player.rank_change} newPlayer={player.new_player} />
-                  </td>
+                  {!minFiveEvents && (
+                    <td className="whitespace-nowrap px-2 py-1.5">
+                      <RankChange change={player.rank_change} newPlayer={player.new_player} />
+                    </td>
+                  )}
                   <td className="px-2 py-1.5">
                     <div className="flex items-center gap-2 whitespace-nowrap">
                       <Link
@@ -124,7 +127,9 @@ function RouteComponent() {
                     </div>
                   </td>
                   <td className="px-2 py-1.5">{(player.total_points ?? 0).toFixed(2)}</td>
-                  <td className="hidden px-2 py-1.5 min-[601px]:table-cell">{Number(player.event_count ?? 0)}/5</td>
+                  {!minFiveEvents && (
+                    <td className="hidden px-2 py-1.5 min-[601px]:table-cell">{Number(player.event_count ?? 0)}/5</td>
+                  )}
                 </tr>
               ))}
             </tbody>
