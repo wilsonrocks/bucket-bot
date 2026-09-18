@@ -26,15 +26,16 @@ export const Route = createFileRoute('/rankings')({
     if (!context.search.typeCode)
       throw redirect({ to: '/rankings', search: { typeCode: 'ROLLING_YEAR' } })
   },
-  loader: async ({ location }) => {
-    const params = new URLSearchParams(location.search)
-    const typeCode = params.get('typeCode') ?? 'ROLLING_YEAR'
+  // Search params are only part of the loader's cache key if they're declared here,
+  // otherwise switching ranking type reuses the stale loader data.
+  loaderDeps: ({ search: { typeCode } }) => ({ typeCode: typeCode ?? 'ROLLING_YEAR' }),
+  loader: async ({ deps: { typeCode } }) => {
     const [rankingTypes, rankings, playersOverTime] = await Promise.all([
       fetchRankingTypes(),
       fetchRankings({ data: { typeCode } }),
       fetchPlayersOverTime({ data: { typeCode } }),
     ])
-    return { rankingTypes, rankings, playersOverTime, typeCode }
+    return { rankingTypes, rankings, playersOverTime }
   },
   head: () =>
     seo({
@@ -47,7 +48,8 @@ export const Route = createFileRoute('/rankings')({
 })
 
 function RouteComponent() {
-  const { rankingTypes, rankings, playersOverTime, typeCode } = Route.useLoaderData()
+  const { rankingTypes, rankings, playersOverTime } = Route.useLoaderData()
+  const { typeCode = 'ROLLING_YEAR' } = Route.useSearch()
   const navigate = Route.useNavigate()
   const isMobile = useMediaQuery('(max-width: 600px)')
 
