@@ -29,8 +29,8 @@ function RouteComponent() {
       <p>Each player's final score will be made up of their best five events across the year.</p>
       <p>
         Players who have attended fewer than five eligible events in the last year are still ranked, but on fewer
-        results. The <strong>Only players with 5+ events</strong> checkbox on the rankings page hides them, so you can
-        compare like with like.
+        results. The <strong>5+ events only</strong> checkbox on the rankings page hides them, so you can compare like
+        with like.
       </p>
       <p>
         Each event will be worth a starting point of 100 points. This is based on 16 players and a 3 round event. The

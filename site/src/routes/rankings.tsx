@@ -79,7 +79,7 @@ function RouteComponent() {
               navigate({ search: (prev) => ({ ...prev, minFiveEvents: e.target.checked || undefined }), replace: true })
             }
           />
-          Only players with 5+ events
+          5+ events only
         </label>
       </div>
       <Tabs defaultValue="table">
