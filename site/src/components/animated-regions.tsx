@@ -194,6 +194,11 @@ export function AnimatedRegions({
     return result
   }, [frame, t, snapshots])
 
+  // Lets the path-creation effect read the current counts without depending on
+  // them (which would rebuild every path on every animation tick).
+  const countMapRef = useRef(countMap)
+  countMapRef.current = countMap
+
   const displayedDate = useMemo(() => {
     const cur = snapshots[frame]
     if (!cur) return ''
@@ -228,6 +233,11 @@ export function AnimatedRegions({
       .data(features)
       .join('path')
       .attr('d', (d) => pathGen(d as GeoPermissibleObjects) ?? '')
+      // Seed the fill here too: a freshly joined <path> has no fill attribute and
+      // would otherwise fall back to the SVG default of black.
+      .attr('fill', (d) =>
+        getColor(countMapRef.current.get(d.properties.rgn19nm) ?? 0),
+      )
       .attr('stroke', '#fff')
       .attr('stroke-width', 0.5)
       .on('mouseenter', (_event, d) => {
@@ -238,13 +248,15 @@ export function AnimatedRegions({
       })
   }, [features, width, height])
 
-  // Update fills on each animation tick
+  // Update fills on each animation tick, and once the geometry has arrived — the
+  // paths are created asynchronously after `countMap` has already settled, so
+  // `features` must be a dependency or the map never gets its first colouring.
   useEffect(() => {
     if (!svgRef.current) return
     select(svgRef.current)
       .selectAll<SVGPathElement, UkRegionFeature>('path')
       .attr('fill', (d) => getColor(countMap.get(d.properties.rgn19nm) ?? 0))
-  }, [countMap])
+  }, [countMap, features])
 
   return (
     <div
@@ -276,6 +288,7 @@ export function AnimatedRegions({
       </div>
       <svg
         ref={svgRef}
+        data-testid="regions-map"
         viewBox={`0 0 ${width} ${height}`}
         width="100%"
         style={{ maxHeight: '70vh' }}
