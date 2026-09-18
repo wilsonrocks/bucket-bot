@@ -381,7 +381,7 @@ export function AnimatedRegions({
         <RegionEventsPanel
           region={selectedRegion}
           events={selectedEvents}
-          window={eventWindow}
+          windowEnd={eventWindow.end}
           onClose={() => setSelectedRegion(null)}
         />
       )}
@@ -392,12 +392,13 @@ export function AnimatedRegions({
 function RegionEventsPanel({
   region,
   events,
-  window: eventWindow,
+  windowEnd,
   onClose,
 }: {
   region: string
   events: RegionEvent[]
-  window: { start: string; end: string }
+  /** YYYY-MM-DD; the window is the year ending here. */
+  windowEnd: string
   onClose: () => void
 }) {
   return (
@@ -406,8 +407,7 @@ function RegionEventsPanel({
         <div>
           <h3 className="text-lg font-semibold">{region}</h3>
           <p className="text-sm text-muted-foreground">
-            {formatMapDate(new Date(eventWindow.start))} to{' '}
-            {formatMapDate(new Date(eventWindow.end))}
+            Year up to {formatMapDate(new Date(windowEnd))}
           </p>
         </div>
         <button
