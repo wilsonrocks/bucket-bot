@@ -17,6 +17,10 @@ import { IconRotate, IconRotateClockwise } from '@tabler/icons-react'
 import { notifications } from '@mantine/notifications'
 import { cropImageFile } from '@/helpers/crop-image'
 
+const MIN_ZOOM = 1
+// react-easy-crop defaults to a max of 3; keep pinch-zoom and the slider in step.
+const MAX_ZOOM = 5
+
 const ASPECTS: { value: string; label: string; ratio: number | null }[] = [
   { value: 'original', label: 'Original', ratio: null },
   { value: 'square', label: '1:1', ratio: 1 },
@@ -150,8 +154,8 @@ export function ImageCropModal({
               Zoom
             </Text>
             <Slider
-              min={1}
-              max={5}
+              min={MIN_ZOOM}
+              max={MAX_ZOOM}
               step={0.01}
               label={(v) => `${v.toFixed(1)}×`}
               value={zoom}
@@ -186,6 +190,8 @@ export function ImageCropModal({
               image={imageUrl}
               crop={crop}
               zoom={zoom}
+              minZoom={MIN_ZOOM}
+              maxZoom={MAX_ZOOM}
               rotation={rotation}
               aspect={aspect}
               onCropChange={setCrop}
