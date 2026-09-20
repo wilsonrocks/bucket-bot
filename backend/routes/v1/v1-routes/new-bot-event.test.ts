@@ -6,28 +6,41 @@ import { IdentityProvider } from "../../../logic/fixtures";
 import { addTestDataToDb } from "../../../logic/test-helpers/add-test-data-to-db";
 import { newBotEventHandler, newBotEventRoute } from "./new-bot-event";
 
-type LeagueEntry = { uid: string; name: string; faction: string };
+type LeagueEntry = {
+  profileId: string | null;
+  name: string;
+  faction: string;
+};
 
-// Real entries from the captured payload, in finishing order. Note the mix of
-// Firebase push ids and UUIDs — both formats occur in the same event. Ten
-// players keeps us over calculatePoints' 8-player threshold, below which every
-// place scores 0 and the importer refuses the event.
+// Real entries from the captured payload, in finishing order. Milo Van Mesdag
+// genuinely has no profileId in this event: he's an entry the TO added for
+// someone without a BOT account. Ten players keeps us over calculatePoints'
+// 8-player threshold, below which every place scores 0 and the importer refuses
+// the event.
 const REAL_LEAGUE: LeagueEntry[] = [
-  { uid: "ErokenGeJQngdBYmiiNq", name: "Ben Salmon", faction: "ten-thunders" },
-  { uid: "RMHgzyUhgpnZ5xg1WomN", name: "Reice Chaudhry", faction: "guild" },
-  { uid: "e362cbcf-7cbc-4922-8143-1b8ff4f683e5", name: "Ollie Hedges", faction: "neverborn" },
-  { uid: "DV0yLE8YuZYfJSa4jfTm", name: "Callum Palin", faction: "outcasts" },
-  { uid: "c60ef994-f06a-4849-8665-b4b46eb96087", name: "Patryk Moskal", faction: "explorers-society" },
-  { uid: "tCdANZ7h0bbO7eVzUo2l", name: "Kit Prakkamakul", faction: "neverborn" },
-  { uid: "vEtQilUPUwxV0dzDsrhi", name: "Steven Thomson", faction: "guild" },
-  { uid: "b8bd6cc0-ff76-4289-8688-83c2dbe7826f", name: "Milo Van Mesdag", faction: "arcanists" },
-  { uid: "OhY7FeF5nMgXeBqNjH2a", name: "Sean Chambers-Gray", faction: "resurrectionists" },
-  { uid: "60e4d4c0-fc1a-4e8a-acba-c48450bd7544", name: "David Laing", faction: "bayou" },
+  { profileId: "profile-mrSd9E1TXhgNHmC6oumn8z", name: "Ben Salmon", faction: "ten-thunders" },
+  { profileId: "profile-09C2FC_tA0g4p9lhbQFz6i", name: "Reice Chaudhry", faction: "guild" },
+  { profileId: "profile-rHue_y_bwbwqP4CLLDs-1i", name: "Ollie Hedges", faction: "neverborn" },
+  { profileId: "profile-zbbEbah3sX6-nPJZ8x3HRw", name: "Callum Palin", faction: "outcasts" },
+  { profileId: "profile-VTS1w7STz1YKmQkq3S_5Ti", name: "Patryk Moskal", faction: "explorers-society" },
+  { profileId: "profile-uoEsET-G93ybcrnYyBFr0S", name: "Kit Prakkamakul", faction: "neverborn" },
+  { profileId: "profile-pc512-ha9pnpcaD2Ws496M", name: "Steven Thomson", faction: "guild" },
+  { profileId: null, name: "Milo Van Mesdag", faction: "arcanists" },
+  { profileId: "profile-eriIy7LQ0v9v3pO5DKX21f", name: "Sean Chambers-Gray", faction: "resurrectionists" },
+  { profileId: "profile-DeKetebphYhJN-OScSAE5p", name: "David Laing", faction: "bayou" },
 ];
+
+const GT_BOT_ID = "VdWPmzd2vFvjKTn8qWiS";
+
+// What the importer should store for each entry: the profile id where there is
+// one, otherwise the event id plus the name.
+function expectedExternalId(entry: LeagueEntry, botid = GT_BOT_ID): string {
+  return entry.profileId ?? `${botid}:${entry.name}`;
+}
 
 // Shape of the BOT4 payload, captured from
 // https://bag-o-tools.web.app/api/event/VdWPmzd2vFvjKTn8qWiS. Keeps the fields
-// the importer ignores (team/pts/vpf/vpa/vpd and the top-level `fixtures`
+// the importer ignores (uid/team/pts/vpf/vpa/vpd and the top-level `fixtures`
 // block) so we prove they don't break parsing.
 function botPayload(
   overrides: { botid?: string; league?: LeagueEntry[] } = {},
@@ -35,7 +48,7 @@ function botPayload(
   const league = overrides.league ?? REAL_LEAGUE;
 
   return {
-    botid: overrides.botid ?? "VdWPmzd2vFvjKTn8qWiS",
+    botid: overrides.botid ?? GT_BOT_ID,
     name: "Scottish Malifaux GT 2026",
     date: "2026-08-01",
     rounds: 4,
@@ -59,7 +72,8 @@ function botPayload(
       vpf: 40,
       vpa: 30,
       vpd: 10,
-      uid: entry.uid,
+      uid: `entry-id-${index}`,
+      profileId: entry.profileId,
     })),
   };
 }
@@ -148,9 +162,10 @@ describe("POST /bot-event/{id}", () => {
     // rounds_played is w + d + l, not the event's round count.
     expect(results.every((r) => r.rounds_played === 4)).toBe(true);
 
-    // Identities are keyed by uid, with the display name kept for the admin UI.
+    // Identities are keyed by profileId, with the display name kept for the
+    // admin UI. The one entry with no profile falls back to an event-scoped key.
     expect(results.map((r) => [r.external_id, r.provider_name])).toEqual(
-      REAL_LEAGUE.map((entry) => [entry.uid, entry.name]),
+      REAL_LEAGUE.map((entry) => [expectedExternalId(entry), entry.name]),
     );
 
     // Every BOT4 faction slug maps, including the hyphenated ones.
@@ -168,15 +183,15 @@ describe("POST /bot-event/{id}", () => {
     ]);
   });
 
-  test("reuses the identity when a player is renamed on BOT4", async () => {
+  test("reuses the identity across events when a player is renamed", async () => {
     const [player, ...others] = REAL_LEAGUE;
 
     mockBotApi(
       botPayload({ botid: "event-one" }),
       botPayload({
         botid: "event-two",
-        // Same uid, different display name — this is the case that used to
-        // create a duplicate identity and placeholder player under BOT.
+        // Same profileId, different display name. Nothing else about the entry
+        // carries between events, so profileId is what has to hold this together.
         league: [{ ...player!, name: "Benjamin Salmon" }, ...others],
       }),
     );
@@ -188,7 +203,7 @@ describe("POST /bot-event/{id}", () => {
     const identities = await dbClient
       .selectFrom("player_identity")
       .where("identity_provider_id", "=", IdentityProvider.BOT4)
-      .where("external_id", "=", player!.uid)
+      .where("external_id", "=", player!.profileId!)
       .selectAll()
       .execute();
 
@@ -202,6 +217,106 @@ describe("POST /bot-event/{id}", () => {
       .select(({ fn }) => fn.countAll<string>().as("count"))
       .executeTakeFirstOrThrow();
     expect(Number(resultCount.count)).toBe(2);
+  });
+
+  test("stores a profileId verbatim whether or not it carries the profile- prefix", async () => {
+    const [prefixed, bare, ...others] = REAL_LEAGUE;
+
+    mockBotApi(
+      botPayload({
+        botid: "mixed-id-formats",
+        // Both forms are live in the API; neither may be rewritten.
+        league: [prefixed!, { ...bare!, profileId: "L1neSZpibJHezECatcUn" }, ...others],
+      }),
+    );
+
+    expect((await importEvent(makeApp(), "mixed-id-formats")).status).toBe(200);
+
+    const identities = await dbClient
+      .selectFrom("player_identity")
+      .where("identity_provider_id", "=", IdentityProvider.BOT4)
+      .where("external_id", "in", [prefixed!.profileId!, "L1neSZpibJHezECatcUn"])
+      .select("external_id")
+      .execute();
+
+    expect(identities.map((i) => i.external_id).sort()).toEqual(
+      ["L1neSZpibJHezECatcUn", prefixed!.profileId!].sort(),
+    );
+  });
+
+  test("gives an unclaimed entry a fresh identity in each event", async () => {
+    const unclaimed = REAL_LEAGUE.find((entry) => entry.profileId === null)!;
+
+    mockBotApi(botPayload({ botid: "event-one" }), botPayload({ botid: "event-two" }));
+
+    const app = makeApp();
+    expect((await importEvent(app, "event-one")).status).toBe(200);
+    expect((await importEvent(app, "event-two")).status).toBe(200);
+
+    const identities = await dbClient
+      .selectFrom("player_identity")
+      .where("identity_provider_id", "=", IdentityProvider.BOT4)
+      .where("external_id", "like", `%:${unclaimed.name}`)
+      .select("external_id")
+      .orderBy("external_id")
+      .execute();
+
+    // Deliberate: with no profile there is nothing safe to match on, so each
+    // appearance is a separate record for an admin to map by hand.
+    expect(identities.map((i) => i.external_id)).toEqual([
+      `event-one:${unclaimed.name}`,
+      `event-two:${unclaimed.name}`,
+    ]);
+  });
+
+  test("normalises whitespace in an unclaimed entry's name", async () => {
+    const unclaimed = REAL_LEAGUE.find((entry) => entry.profileId === null)!;
+
+    mockBotApi(
+      botPayload({
+        botid: "untidy-name-event",
+        league: REAL_LEAGUE.map((entry) =>
+          entry === unclaimed ? { ...entry, name: "  Milo  Van   Mesdag " } : entry,
+        ),
+      }),
+    );
+
+    expect((await importEvent(makeApp(), "untidy-name-event")).status).toBe(200);
+
+    const identity = await dbClient
+      .selectFrom("player_identity")
+      .where("identity_provider_id", "=", IdentityProvider.BOT4)
+      .where("external_id", "=", "untidy-name-event:Milo Van Mesdag")
+      .select("provider_name")
+      .executeTakeFirstOrThrow();
+
+    expect(identity.provider_name).toBe("Milo Van Mesdag");
+  });
+
+  test("rejects an event where two unclaimed entries share a name", async () => {
+    const [first, second, ...others] = REAL_LEAGUE;
+
+    mockBotApi(
+      botPayload({
+        botid: "ambiguous-event",
+        league: [
+          { ...first!, profileId: null, name: "Sam Smith" },
+          { ...second!, profileId: null, name: "Sam  Smith " },
+          ...others,
+        ],
+      }),
+    );
+
+    const response = await importEvent(makeApp(), "ambiguous-event");
+    expect(response.status).toBe(400);
+    expect((await response.json() as { error: string }).error).toContain("Sam Smith");
+
+    const tourneys = await dbClient
+      .selectFrom("tourney")
+      .where("bot_id", "=", "ambiguous-event")
+      .selectAll()
+      .execute();
+    expect(tourneys).toHaveLength(0);
   });
 
   test("rejects an event that has already been imported", async () => {

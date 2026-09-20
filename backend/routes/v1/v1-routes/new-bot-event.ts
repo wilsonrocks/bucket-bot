@@ -2,15 +2,18 @@ import { createRoute, z, type RouteHandler } from "@hono/zod-openapi";
 import type { AppEnv } from "../../../hono-env.js";
 import { IdentityProvider } from "../../../logic/fixtures.js";
 import { mapBotFactionToFactionCode } from "../../../logic/bot/map-bot-faction.js";
+import { normaliseBotName } from "../../../logic/bot/normalise-bot-name";
 import { calculatePoints, maxPoints } from "../../../logic/points.js";
 import { createIdentityWithPlaceholderPlayer } from "../../../logic/identities/create-identity-with-placeholder.js";
 
 const BotApiLeagueEntrySchema = z.object({
   position: z.number(),
   name: z.string(),
-  // Opaque stable player id introduced in BOT4. Mixed format (Firebase push ids
-  // and UUIDs), so never validate it as a UUID.
-  uid: z.string(),
+  // The player's BOT profile, stable across events and the only thing in the
+  // payload that identifies a person. Null for entries a TO added for someone
+  // with no BOT account. Nullish rather than nullable so a response predating
+  // the field still parses.
+  profileId: z.string().nullish(),
   faction: z.string(),
   w: z.number(),
   d: z.number(),
@@ -69,6 +72,37 @@ export const newBotEventHandler: RouteHandler<typeof newBotEventRoute, AppEnv> =
 
   const apiData = BotApiResponseSchema.parse(await response.json());
 
+  const league = apiData.league.map((entry) => {
+    const name = normaliseBotName(entry.name);
+    const profileId = entry.profileId?.trim();
+
+    return {
+      ...entry,
+      name,
+      // An entry with no BOT profile has nothing stable to identify it, so it
+      // keys on the event and is matched to a player by hand afterwards. Never
+      // key it on the name alone: that would silently merge two people who
+      // happen to share one.
+      externalId: profileId || `${apiData.botid}:${name}`,
+    };
+  });
+
+  // Two entries resolving to the same key would collide on the
+  // (provider, external_id) unique index — inside a Promise.all, which would
+  // surface as an opaque 500. Say what's actually wrong instead.
+  const duplicate = league.find(
+    (entry, index) => league.findIndex((o) => o.externalId === entry.externalId) !== index,
+  );
+
+  if (duplicate) {
+    throw Object.assign(
+      new Error(
+        `Two entries in this event resolve to the same player ("${duplicate.name}"), so they can't be told apart. Give them separate BOT profiles and re-import.`,
+      ),
+      { status: 400 },
+    );
+  }
+
   const db = c.get("db");
 
   await db.transaction().execute(async (trx) => {
@@ -100,18 +134,18 @@ export const newBotEventHandler: RouteHandler<typeof newBotEventRoute, AppEnv> =
       .executeTakeFirstOrThrow();
 
     await Promise.all(
-      apiData.league.map(async (entry) => {
+      league.map(async (entry) => {
         let dbPlayerIdentity = await trx
           .selectFrom("player_identity")
           .where("identity_provider_id", "=", IdentityProvider.BOT4)
-          .where("external_id", "=", entry.uid)
+          .where("external_id", "=", entry.externalId)
           .select("id")
           .executeTakeFirst();
 
         if (!dbPlayerIdentity) {
           dbPlayerIdentity = await createIdentityWithPlaceholderPlayer(trx, {
             providerId: IdentityProvider.BOT4,
-            externalId: entry.uid,
+            externalId: entry.externalId,
             providerName: entry.name,
           });
         }
