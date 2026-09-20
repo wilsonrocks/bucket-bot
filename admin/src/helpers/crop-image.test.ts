@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { computeRotatedBounds, getOutputType, renameForExt } from './crop-image'
+import {
+  computeRotatedBounds,
+  getOutputType,
+  percentCropToPixels,
+  renameForExt,
+} from './crop-image'
 
 describe('computeRotatedBounds', () => {
   it('leaves an unrotated image alone', () => {
@@ -40,6 +45,35 @@ describe('computeRotatedBounds', () => {
     expect(computeRotatedBounds(800, 600, -90)).toEqual(
       computeRotatedBounds(800, 600, 90),
     )
+  })
+})
+
+describe('percentCropToPixels', () => {
+  const bounds = { width: 800, height: 600 }
+
+  it('maps a full selection onto the whole image', () => {
+    expect(
+      percentCropToPixels({ x: 0, y: 0, width: 100, height: 100 }, bounds),
+    ).toEqual({ x: 0, y: 0, width: 800, height: 600 })
+  })
+
+  it('maps a centred quarter selection', () => {
+    expect(
+      percentCropToPixels({ x: 25, y: 25, width: 50, height: 50 }, bounds),
+    ).toEqual({ x: 200, y: 150, width: 400, height: 300 })
+  })
+
+  it('rounds to whole pixels', () => {
+    expect(
+      percentCropToPixels({ x: 10.4, y: 0, width: 33.3, height: 100 }, bounds),
+    ).toEqual({ x: 83, y: 0, width: 266, height: 600 })
+  })
+
+  it('uses the rotated bounds, so a quarter turn swaps the axes', () => {
+    const rotated = computeRotatedBounds(800, 600, 90)
+    expect(
+      percentCropToPixels({ x: 0, y: 0, width: 50, height: 50 }, rotated),
+    ).toEqual({ x: 0, y: 0, width: 300, height: 400 })
   })
 })
 
