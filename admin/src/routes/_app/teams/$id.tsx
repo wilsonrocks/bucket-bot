@@ -90,11 +90,6 @@ function RouteComponent() {
         image_key: team.image_key ?? null,
         venue_id: team.venue_id != null ? String(team.venue_id) : null,
       })
-      if (team.image_key) {
-        setImagePreview(
-          `${import.meta.env.VITE_ASSETS_URL}/${team.image_key}-w150.webp`,
-        )
-      }
     }
   }, [team?.id])
 
@@ -117,7 +112,6 @@ function RouteComponent() {
     { query: { enabled: discordSearch.trim().length > 0 } },
   )
   const [imageFile, setImageFile] = useState<File | null>(null)
-  const [imagePreview, setImagePreview] = useState<string | null>(null)
 
   if (!team) return <div>Loading...</div>
 
@@ -196,11 +190,8 @@ function RouteComponent() {
               <ImageUploader
                 label="Team Image"
                 value={editForm.values.image_key}
-                preview={imagePreview}
-                onChange={(file) => {
-                  setImageFile(file)
-                  setImagePreview(URL.createObjectURL(file))
-                }}
+                previewFile={imageFile}
+                onChange={setImageFile}
               />
             </Grid.Col>
           </Grid>
