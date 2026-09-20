@@ -306,7 +306,7 @@ function RouteComponent() {
                     <Grid.Col span={{ base: 12, xs: 2 }}>
                       <ImageUploader
                         value={winner.imageKey}
-                        preview={winner._pendingFile ? URL.createObjectURL(winner._pendingFile) : null}
+                        previewFile={winner._pendingFile}
                         onChange={(file) => {
                           detailsForm.setFieldValue(`paintingCategories.${catIndex}.winners.${winIndex}._pendingFile`, file)
                         }}

@@ -1,21 +1,56 @@
+import { useEffect, useState } from 'react'
 import { Dropzone, IMAGE_MIME_TYPE } from '@mantine/dropzone'
 import { useHover } from '@mantine/hooks'
 import { IconPhoto } from '@tabler/icons-react'
-import { Box, Center, Image, Overlay, Text } from '@mantine/core'
+import { Box, Button, Center, Group, Image, Overlay, Text } from '@mantine/core'
+import { ImageCropModal } from './ImageCropModal'
 
 interface ImageUploaderProps {
   value: string | null
   onChange: (file: File) => void
+  /** The pending local file, if one has been picked but not uploaded yet. */
+  previewFile?: File | null
+  /** Escape hatch for callers that already have a preview URL of their own. */
   preview?: string | null
   label?: string
+  /** Set false to hand the raw picked file straight through, with no crop step. */
+  enableCrop?: boolean
 }
 
-export function ImageUploader({ value, onChange, preview, label }: ImageUploaderProps) {
+export function ImageUploader({
+  value,
+  onChange,
+  previewFile,
+  preview,
+  label,
+  enableCrop = true,
+}: ImageUploaderProps) {
   const { hovered, ref } = useHover<HTMLDivElement>()
-  const effectivePreview = preview ?? (value ? `${import.meta.env.VITE_ASSETS_URL}/${value}-w150.webp` : null)
+  const [editing, setEditing] = useState<File | null>(null)
+  const [localPreview, setLocalPreview] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!previewFile) {
+      setLocalPreview(null)
+      return
+    }
+    const url = URL.createObjectURL(previewFile)
+    setLocalPreview(url)
+    return () => URL.revokeObjectURL(url)
+  }, [previewFile])
+
+  const effectivePreview =
+    preview ??
+    localPreview ??
+    (value ? `${import.meta.env.VITE_ASSETS_URL}/${value}-w150.webp` : null)
 
   const handleFile = (file: File) => {
-    if (file.type.startsWith('image/')) onChange(file)
+    if (!file.type.startsWith('image/')) return
+    if (enableCrop) {
+      setEditing(file)
+    } else {
+      onChange(file)
+    }
   }
 
   return (
@@ -71,9 +106,23 @@ export function ImageUploader({ value, onChange, preview, label }: ImageUploader
                   style={{ borderRadius: 'var(--mantine-radius-sm)' }}
                 >
                   <Center h="100%">
-                    <Text size="xs" c="white">
-                      Change
-                    </Text>
+                    <Group gap={4}>
+                      <Text size="xs" c="white">
+                        Change
+                      </Text>
+                      {enableCrop && previewFile && (
+                        <Button
+                          size="compact-xs"
+                          variant="white"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setEditing(previewFile)
+                          }}
+                        >
+                          Crop
+                        </Button>
+                      )}
+                    </Group>
                   </Center>
                 </Overlay>
               )}
@@ -92,6 +141,16 @@ export function ImageUploader({ value, onChange, preview, label }: ImageUploader
           )}
         </Dropzone>
       </Box>
+
+      <ImageCropModal
+        file={editing}
+        opened={editing !== null}
+        onCancel={() => setEditing(null)}
+        onConfirm={(file) => {
+          setEditing(null)
+          onChange(file)
+        }}
+      />
     </Box>
   )
 }

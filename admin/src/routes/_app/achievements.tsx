@@ -147,11 +147,6 @@ function AchievementForm({
 }) {
   const updateAchievement = usePutAchievementsId()
   const [imageFile, setImageFile] = useState<File | null>(null)
-  const [imagePreview, setImagePreview] = useState<string | null>(
-    achievement.image_key
-      ? `${import.meta.env.VITE_ASSETS_URL}/${achievement.image_key}-w150.webp`
-      : null,
-  )
 
   const form = useForm({
     initialValues: {
@@ -240,11 +235,8 @@ function AchievementForm({
             <ImageUploader
               label="Image"
               value={form.values.image_key}
-              preview={imagePreview}
-              onChange={(file) => {
-                setImageFile(file)
-                setImagePreview(URL.createObjectURL(file))
-              }}
+              previewFile={imageFile}
+              onChange={setImageFile}
             />
             {!form.values.image_key && !imageFile && (
               <Text size="xs" c="dimmed" mt={4}>
