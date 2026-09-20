@@ -2,15 +2,21 @@ import { createRoute, z, type RouteHandler } from "@hono/zod-openapi";
 import type { AppEnv } from "../../../hono-env.js";
 import { IdentityProvider } from "../../../logic/fixtures.js";
 import { mapBotFactionToFactionCode } from "../../../logic/bot/map-bot-faction.js";
+import { botIdentityKey, normaliseBotName } from "../../../logic/bot/bot-identity-key";
 import { calculatePoints, maxPoints } from "../../../logic/points.js";
 import { createIdentityWithPlaceholderPlayer } from "../../../logic/identities/create-identity-with-placeholder.js";
 
 const BotApiLeagueEntrySchema = z.object({
   position: z.number(),
   name: z.string(),
-  // Opaque stable player id introduced in BOT4. Mixed format (Firebase push ids
-  // and UUIDs), so never validate it as a UUID.
+  // The event-entry id, not the player. BOT mints a fresh one per event, so the
+  // same person has a different uid in every event — never identify a player by
+  // it. Mixed format (Firebase push ids and UUIDs), so never parse it either.
   uid: z.string(),
+  // The player's BOT profile, stable across events. Null for entries a TO added
+  // for someone with no BOT account. Nullish rather than nullable so a response
+  // predating the field still parses.
+  profileId: z.string().nullish(),
   faction: z.string(),
   w: z.number(),
   d: z.number(),
@@ -69,6 +75,25 @@ export const newBotEventHandler: RouteHandler<typeof newBotEventRoute, AppEnv> =
 
   const apiData = BotApiResponseSchema.parse(await response.json());
 
+  // Unclaimed entries key on the event plus the name, so two of them sharing a
+  // name would collide on the (provider, external_id) unique index — inside a
+  // Promise.all, which would surface as an opaque 500. Say what's wrong instead.
+  const unclaimedNames = apiData.league
+    .filter((entry) => !entry.profileId?.trim())
+    .map((entry) => normaliseBotName(entry.name));
+  const duplicateName = unclaimedNames.find(
+    (name, index) => unclaimedNames.indexOf(name) !== index,
+  );
+
+  if (duplicateName) {
+    throw Object.assign(
+      new Error(
+        `Two players called "${duplicateName}" have no BOT profile, so they can't be told apart. Link them on BOT and re-import.`,
+      ),
+      { status: 400 },
+    );
+  }
+
   const db = c.get("db");
 
   await db.transaction().execute(async (trx) => {
@@ -101,18 +126,20 @@ export const newBotEventHandler: RouteHandler<typeof newBotEventRoute, AppEnv> =
 
     await Promise.all(
       apiData.league.map(async (entry) => {
+        const externalId = botIdentityKey(entry, apiData.botid);
+
         let dbPlayerIdentity = await trx
           .selectFrom("player_identity")
           .where("identity_provider_id", "=", IdentityProvider.BOT4)
-          .where("external_id", "=", entry.uid)
+          .where("external_id", "=", externalId)
           .select("id")
           .executeTakeFirst();
 
         if (!dbPlayerIdentity) {
           dbPlayerIdentity = await createIdentityWithPlaceholderPlayer(trx, {
             providerId: IdentityProvider.BOT4,
-            externalId: entry.uid,
-            providerName: entry.name,
+            externalId,
+            providerName: normaliseBotName(entry.name),
           });
         }
 
