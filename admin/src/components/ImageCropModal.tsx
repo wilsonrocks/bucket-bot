@@ -99,33 +99,31 @@ export function ImageCropModal({
   }
 
   return (
-    <Modal opened={opened} onClose={onCancel} title="Crop image" size="lg">
-      <Stack>
-        <Box
-          style={{
-            position: 'relative',
-            height: 400,
-            background: 'var(--mantine-color-dark-8)',
-          }}
-        >
-          {imageUrl && (
-            <Cropper
-              image={imageUrl}
-              crop={crop}
-              zoom={zoom}
-              rotation={rotation}
-              aspect={aspect}
-              onCropChange={setCrop}
-              onZoomChange={setZoom}
-              onRotationChange={setRotation}
-              onCropComplete={onCropComplete}
-              onMediaLoaded={onMediaLoaded}
-              showGrid
-            />
-          )}
-        </Box>
-
-        <Group justify="space-between" align="center">
+    <Modal
+      opened={opened}
+      onClose={onCancel}
+      title="Crop image"
+      size="lg"
+      yOffset="2vh"
+      styles={{
+        content: {
+          display: 'flex',
+          flexDirection: 'column',
+          maxHeight: '96dvh',
+        },
+        body: {
+          display: 'flex',
+          flexDirection: 'column',
+          flex: 1,
+          minHeight: 0,
+          overflowY: 'auto',
+        },
+      }}
+    >
+      <Stack gap="sm">
+        {/* Controls sit above the image so they're never below the fold on a
+            tall portrait photo. */}
+        <Group justify="space-between" align="center" wrap="wrap" gap="xs">
           <SegmentedControl
             size="xs"
             value={aspectKey}
@@ -146,35 +144,70 @@ export function ImageCropModal({
           </Group>
         </Group>
 
-        <Box>
-          <Text size="sm" fw={500}>
-            Zoom
-          </Text>
-          <Slider
-            min={1}
-            max={5}
-            step={0.01}
-            label={(v) => `${v.toFixed(1)}×`}
-            value={zoom}
-            onChange={setZoom}
-          />
+        <Group grow align="flex-start" gap="md">
+          <Box>
+            <Text size="xs" fw={500} c="dimmed">
+              Zoom
+            </Text>
+            <Slider
+              min={1}
+              max={5}
+              step={0.01}
+              label={(v) => `${v.toFixed(1)}×`}
+              value={zoom}
+              onChange={setZoom}
+            />
+          </Box>
+          <Box>
+            <Text size="xs" fw={500} c="dimmed">
+              Rotation
+            </Text>
+            <Slider
+              min={0}
+              max={359}
+              step={1}
+              label={(v) => `${v}°`}
+              value={rotation}
+              onChange={setRotation}
+            />
+          </Box>
+        </Group>
+
+        <Box
+          style={{
+            position: 'relative',
+            height: 'clamp(200px, 45dvh, 420px)',
+            flexShrink: 0,
+            background: 'var(--mantine-color-dark-8)',
+          }}
+        >
+          {imageUrl && (
+            <Cropper
+              image={imageUrl}
+              crop={crop}
+              zoom={zoom}
+              rotation={rotation}
+              aspect={aspect}
+              onCropChange={setCrop}
+              onZoomChange={setZoom}
+              onRotationChange={setRotation}
+              onCropComplete={onCropComplete}
+              onMediaLoaded={onMediaLoaded}
+              showGrid
+            />
+          )}
         </Box>
 
-        <Box>
-          <Text size="sm" fw={500}>
-            Rotation
-          </Text>
-          <Slider
-            min={0}
-            max={359}
-            step={1}
-            label={(v) => `${v}°`}
-            value={rotation}
-            onChange={setRotation}
-          />
-        </Box>
-
-        <Group justify="flex-end">
+        {/* Sticky so Cancel / Use image stay reachable however far the body scrolls. */}
+        <Group
+          justify="flex-end"
+          style={{
+            position: 'sticky',
+            bottom: 0,
+            background: 'var(--mantine-color-body)',
+            paddingTop: 'var(--mantine-spacing-xs)',
+          }}
+        >
           <Button variant="default" onClick={onCancel}>
             Cancel
           </Button>
