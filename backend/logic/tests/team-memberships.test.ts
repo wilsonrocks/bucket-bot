@@ -5,6 +5,7 @@ import { addTeamMember, removeTeamMember } from "../team-memberships";
 const DISCORD_ALICE = "test-memberships-discord-alice";
 const DISCORD_BOB = "test-memberships-discord-bob";
 const DISCORD_UNKNOWN = "test-memberships-discord-unknown";
+const PLAYER_NO_DISCORD = "test-memberships-Carol No Discord";
 const TEAM_NAME = "test-memberships-Team Alpha";
 const TEAM_NAME_2 = "test-memberships-Team Beta";
 
@@ -14,7 +15,13 @@ async function cleanup() {
       eb.selectFrom("player").select("id").where("discord_id", "in", [DISCORD_ALICE, DISCORD_BOB])
     ))
     .execute();
+  await dbClient.deleteFrom("membership")
+    .where((eb) => eb("player_id", "in",
+      eb.selectFrom("player").select("id").where("name", "=", PLAYER_NO_DISCORD)
+    ))
+    .execute();
   await dbClient.deleteFrom("player").where("discord_id", "in", [DISCORD_ALICE, DISCORD_BOB]).execute();
+  await dbClient.deleteFrom("player").where("name", "=", PLAYER_NO_DISCORD).execute();
   await dbClient.deleteFrom("discord_user").where("discord_user_id", "in", [DISCORD_ALICE, DISCORD_BOB]).execute();
   await dbClient.deleteFrom("team").where("name", "in", [TEAM_NAME, TEAM_NAME_2]).execute();
 }
@@ -36,12 +43,12 @@ afterEach(cleanup);
 
 describe("addTeamMember", () => {
   test("returns discord_user_not_found when discord user does not exist", async () => {
-    const result = await addTeamMember(dbClient, teamId, DISCORD_UNKNOWN, false);
+    const result = await addTeamMember(dbClient, teamId, { discordUserId: DISCORD_UNKNOWN }, false);
     expect(result.type).toBe("discord_user_not_found");
   });
 
   test("creates a player row and membership for a discord user with no prior player", async () => {
-    const result = await addTeamMember(dbClient, teamId, DISCORD_ALICE, false);
+    const result = await addTeamMember(dbClient, teamId, { discordUserId: DISCORD_ALICE }, false);
 
     expect(result.type).toBe("success");
     if (result.type !== "success") return;
@@ -56,7 +63,7 @@ describe("addTeamMember", () => {
   });
 
   test("uses discord_username as player name when display_name is null", async () => {
-    const result = await addTeamMember(dbClient, teamId, DISCORD_BOB, false);
+    const result = await addTeamMember(dbClient, teamId, { discordUserId: DISCORD_BOB }, false);
 
     expect(result.type).toBe("success");
     if (result.type !== "success") return;
@@ -66,7 +73,7 @@ describe("addTeamMember", () => {
   test("reuses an existing player row without creating a duplicate", async () => {
     await dbClient.insertInto("player").values({ discord_id: DISCORD_ALICE, name: "Alice Existing" }).execute();
 
-    const result = await addTeamMember(dbClient, teamId, DISCORD_ALICE, false);
+    const result = await addTeamMember(dbClient, teamId, { discordUserId: DISCORD_ALICE }, false);
 
     expect(result.type).toBe("success");
     if (result.type !== "success") return;
@@ -78,7 +85,7 @@ describe("addTeamMember", () => {
   });
 
   test("sets is_captain correctly", async () => {
-    const result = await addTeamMember(dbClient, teamId, DISCORD_ALICE, true);
+    const result = await addTeamMember(dbClient, teamId, { discordUserId: DISCORD_ALICE }, true);
 
     expect(result.type).toBe("success");
     if (result.type !== "success") return;
@@ -91,15 +98,15 @@ describe("addTeamMember", () => {
     ).id;
 
     // Add to first team
-    await addTeamMember(dbClient, teamId, DISCORD_ALICE, false);
+    await addTeamMember(dbClient, teamId, { discordUserId: DISCORD_ALICE }, false);
 
     // Try to add to second team
-    const result = await addTeamMember(dbClient, teamId2, DISCORD_ALICE, false);
+    const result = await addTeamMember(dbClient, teamId2, { discordUserId: DISCORD_ALICE }, false);
     expect(result.type).toBe("conflict");
   });
 
   test("sets join_date to 2025-12-01 when founding_member is true", async () => {
-    const result = await addTeamMember(dbClient, teamId, DISCORD_ALICE, false, true);
+    const result = await addTeamMember(dbClient, teamId, { discordUserId: DISCORD_ALICE }, false, true);
 
     expect(result.type).toBe("success");
     if (result.type !== "success") return;
@@ -113,7 +120,7 @@ describe("addTeamMember", () => {
   test("sets join_date to today when founding_member is false", async () => {
     const now = new Date();
     const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
-    const result = await addTeamMember(dbClient, teamId, DISCORD_ALICE, false, false);
+    const result = await addTeamMember(dbClient, teamId, { discordUserId: DISCORD_ALICE }, false, false);
 
     expect(result.type).toBe("success");
     if (result.type !== "success") return;
@@ -137,14 +144,65 @@ describe("addTeamMember", () => {
       await dbClient.insertInto("team").values({ name: TEAM_NAME_2 }).returning("id").executeTakeFirstOrThrow()
     ).id;
 
-    const result = await addTeamMember(dbClient, teamId2, DISCORD_ALICE, false);
+    const result = await addTeamMember(dbClient, teamId2, { discordUserId: DISCORD_ALICE }, false);
     expect(result.type).toBe("success");
+  });
+
+  test("adds a player who has no discord id by playerId", async () => {
+    const player = await dbClient
+      .insertInto("player").values({ name: PLAYER_NO_DISCORD }).returningAll().executeTakeFirstOrThrow();
+
+    const result = await addTeamMember(dbClient, teamId, { playerId: player.id }, false);
+
+    expect(result.type).toBe("success");
+    if (result.type !== "success") return;
+    expect(result.playerName).toBe(PLAYER_NO_DISCORD);
+    expect(result.membership.team_id).toBe(teamId);
+    expect(result.membership.player_id).toBe(player.id);
+
+    const players = await dbClient
+      .selectFrom("player").selectAll().where("name", "=", PLAYER_NO_DISCORD).execute();
+    expect(players).toHaveLength(1);
+    expect(players[0]!.discord_id).toBeNull();
+  });
+
+  test("returns player_not_found for an unknown playerId", async () => {
+    const result = await addTeamMember(dbClient, teamId, { playerId: -1 }, false);
+    expect(result.type).toBe("player_not_found");
+  });
+
+  test("returns conflict when a playerId already has an active membership", async () => {
+    const player = await dbClient
+      .insertInto("player").values({ name: PLAYER_NO_DISCORD }).returningAll().executeTakeFirstOrThrow();
+    const teamId2 = (
+      await dbClient.insertInto("team").values({ name: TEAM_NAME_2 }).returning("id").executeTakeFirstOrThrow()
+    ).id;
+
+    await addTeamMember(dbClient, teamId, { playerId: player.id }, false);
+
+    const result = await addTeamMember(dbClient, teamId2, { playerId: player.id }, false);
+    expect(result.type).toBe("conflict");
+  });
+
+  test("sets join_date to 2025-12-01 for a founding member added by playerId", async () => {
+    const player = await dbClient
+      .insertInto("player").values({ name: PLAYER_NO_DISCORD }).returningAll().executeTakeFirstOrThrow();
+
+    const result = await addTeamMember(dbClient, teamId, { playerId: player.id }, false, true);
+
+    expect(result.type).toBe("success");
+    if (result.type !== "success") return;
+
+    const membership = await dbClient
+      .selectFrom("membership").selectAll().where("id", "=", result.membership.id).executeTakeFirstOrThrow();
+    const d = membership.join_date as unknown as Date;
+    expect(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`).toBe("2025-12-01");
   });
 });
 
 describe("removeTeamMember", () => {
   async function addAlice() {
-    const result = await addTeamMember(dbClient, teamId, DISCORD_ALICE, false);
+    const result = await addTeamMember(dbClient, teamId, { discordUserId: DISCORD_ALICE }, false);
     if (result.type !== "success") throw new Error("failed to add member");
     return result.membership.id;
   }

@@ -12,11 +12,16 @@ const ForbiddenSchema = z.object({ error: z.string() });
 
 // ── POST /teams/:teamId/members ────────────────────────────────────────────
 
-const AddMemberBodySchema = z.object({
-  discord_user_id: z.string().min(1),
-  is_captain: z.boolean().default(false),
-  founding_member: z.boolean().default(false),
-});
+const AddMemberBodySchema = z
+  .object({
+    discord_user_id: z.string().min(1).optional(),
+    player_id: z.number().int().positive().optional(),
+    is_captain: z.boolean().default(false),
+    founding_member: z.boolean().default(false),
+  })
+  .refine((b) => !!b.discord_user_id !== !!b.player_id, {
+    message: "Provide exactly one of discord_user_id or player_id",
+  });
 
 export const addTeamMemberRoute = createRoute({
   method: "post",
@@ -38,7 +43,7 @@ export const addTeamMemberRoute = createRoute({
     },
     404: {
       content: { "application/json": { schema: ErrorSchema } },
-      description: "Discord user not found",
+      description: "Player or Discord user not found",
     },
     409: {
       content: { "application/json": { schema: ErrorSchema } },
@@ -58,18 +63,23 @@ export const addTeamMemberHandler: RouteHandler<
     return c.json({ error: "Forbidden" }, 403);
   }
 
-  const { discord_user_id, is_captain, founding_member } = c.req.valid("json");
+  const { discord_user_id, player_id, is_captain, founding_member } =
+    c.req.valid("json");
 
   const result = await addTeamMember(
     c.get("db"),
     teamId,
-    discord_user_id,
+    player_id != null ? { playerId: player_id } : { discordUserId: discord_user_id! },
     is_captain,
     founding_member,
   );
 
   if (result.type === "discord_user_not_found") {
     return c.json({ error: "Discord user not found" }, 404);
+  }
+
+  if (result.type === "player_not_found") {
+    return c.json({ error: "Player not found" }, 404);
   }
 
   if (result.type === "conflict") {

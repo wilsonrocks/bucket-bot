@@ -432,6 +432,8 @@ export type GetSearchPlayers200Item = {
   id: number;
   name: string;
   /** @nullable */
+  discord_id: string | null;
+  /** @nullable */
   discord_username: string | null;
   /** @nullable */
   discord_display_name: string | null;
@@ -960,7 +962,9 @@ export type PostCreateTeam403 = {
 
 export type PostTeamsTeamIdMembersBody = {
   /** @minLength 1 */
-  discord_user_id: string;
+  discord_user_id?: string;
+  /** @exclusiveMinimum 0 */
+  player_id?: number;
   is_captain?: boolean;
   founding_member?: boolean;
 };

@@ -8,6 +8,7 @@ import { isRankingReporter } from "../permissions.js";
 const PlayerSearchResultSchema = z.object({
   id: z.number(),
   name: z.string(),
+  discord_id: z.string().nullable(),
   discord_username: z.string().nullable(),
   discord_display_name: z.string().nullable(),
   discord_avatar_url: z.string().nullable(),
@@ -36,6 +37,7 @@ export const searchPlayersHandler: RouteHandler<typeof searchPlayersRoute, AppEn
     .select([
       "player.id",
       "player.name",
+      "player.discord_id",
       "discord_user.discord_username",
       "discord_user.discord_display_name",
       "discord_user.discord_avatar_url",

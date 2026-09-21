@@ -2,6 +2,7 @@ import {
   uploadTeamImage,
   useDeleteTeamsTeamIdMembersMembershipId,
   useGetSearchDiscordUsers,
+  useGetSearchPlayers,
   useGetTeamsId,
   useGetVenues,
   usePatchTeamsTeamIdMembersMembershipId,
@@ -93,10 +94,11 @@ function RouteComponent() {
     }
   }, [team?.id])
 
-  const [discordSearch, setDiscordSearch] = useState('')
-  const [selectedDiscordUserId, setSelectedDiscordUserId] = useState<
-    string | null
-  >(null)
+  // Candidates come from two places, so the Select value is tagged:
+  // "player:<id>" for an existing player, "discord:<id>" for a Discord user
+  // we've never seen play.
+  const [memberSearch, setMemberSearch] = useState('')
+  const [selectedMember, setSelectedMember] = useState<string | null>(null)
   const [joinModalOpened, { open: openJoinModal, close: closeJoinModal }] =
     useDisclosure(false)
   const [
@@ -107,11 +109,55 @@ function RouteComponent() {
     membership_id: number
     player_name: string
   } | null>(null)
+  const searchEnabled = memberSearch.trim().length > 0
   const { data: discordResults } = useGetSearchDiscordUsers(
-    { text: discordSearch },
-    { query: { enabled: discordSearch.trim().length > 0 } },
+    { text: memberSearch },
+    { query: { enabled: searchEnabled } },
+  )
+  const { data: playerResults } = useGetSearchPlayers(
+    { text: memberSearch },
+    { query: { enabled: searchEnabled } },
   )
   const [imageFile, setImageFile] = useState<File | null>(null)
+
+  // A player who is also a Discord user appears once, under Players.
+  const linkedDiscordIds = new Set(
+    playerResults?.map((p) => p.discord_id).filter((id) => id != null) ?? [],
+  )
+  const memberOptions = [
+    {
+      group: 'Players',
+      items:
+        playerResults?.map((p) => ({
+          value: `player:${p.id}`,
+          label: p.name,
+        })) ?? [],
+    },
+    {
+      group: 'Discord users',
+      items:
+        discordResults
+          ?.filter((u) => !linkedDiscordIds.has(u.discord_user_id))
+          .map((u) => ({
+            value: `discord:${u.discord_user_id}`,
+            label:
+              u.discord_display_name || u.discord_username || u.discord_user_id,
+          })) ?? [],
+    },
+  ].filter((g) => g.items.length > 0)
+
+  const addMemberData = (foundingMember: boolean) => {
+    if (!selectedMember) return null
+    const [kind, ...rest] = selectedMember.split(':')
+    const id = rest.join(':')
+    return {
+      ...(kind === 'player'
+        ? { player_id: Number(id) }
+        : { discord_user_id: id }),
+      is_captain: false,
+      founding_member: foundingMember,
+    }
+  }
 
   if (!team) return <div>Loading...</div>
 
@@ -283,30 +329,19 @@ function RouteComponent() {
         <Group align="flex-end">
           <Select
             label="Add member"
-            placeholder="Search Discord users..."
+            placeholder="Search players or Discord users..."
             searchable
-            data={
-              discordResults?.map((u) => {
-                return {
-                  value: u.discord_user_id,
-                  label:
-                    u.discord_display_name ||
-                    u.discord_username ||
-                    u.discord_user_id,
-                }
-              }) ?? []
-            }
-            value={selectedDiscordUserId}
-            onChange={setSelectedDiscordUserId}
-            onSearchChange={setDiscordSearch}
-            searchValue={discordSearch}
-            w={250}
+            // The server already fuzzy-matches (including on short_name), so
+            // don't let Mantine's substring filter drop those results.
+            filter={({ options }) => options}
+            data={memberOptions}
+            value={selectedMember}
+            onChange={setSelectedMember}
+            onSearchChange={setMemberSearch}
+            searchValue={memberSearch}
+            w={280}
           />
-          <Button
-            mb={4}
-            disabled={!selectedDiscordUserId}
-            onClick={openJoinModal}
-          >
+          <Button mb={4} disabled={!selectedMember} onClick={openJoinModal}>
             Add
           </Button>
         </Group>
@@ -330,20 +365,14 @@ function RouteComponent() {
             <Button
               loading={addMember.isPending}
               onClick={() => {
-                if (!selectedDiscordUserId) return
+                const data = addMemberData(true)
+                if (!data) return
                 addMember.mutate(
-                  {
-                    teamId: String(id),
-                    data: {
-                      discord_user_id: selectedDiscordUserId,
-                      is_captain: false,
-                      founding_member: true,
-                    },
-                  },
+                  { teamId: String(id), data },
                   {
                     onSuccess: () => {
-                      setSelectedDiscordUserId(null)
-                      setDiscordSearch('')
+                      setSelectedMember(null)
+                      setMemberSearch('')
                       closeJoinModal()
                     },
                   },
@@ -356,20 +385,14 @@ function RouteComponent() {
               variant="default"
               loading={addMember.isPending}
               onClick={() => {
-                if (!selectedDiscordUserId) return
+                const data = addMemberData(false)
+                if (!data) return
                 addMember.mutate(
-                  {
-                    teamId: String(id),
-                    data: {
-                      discord_user_id: selectedDiscordUserId,
-                      is_captain: false,
-                      founding_member: false,
-                    },
-                  },
+                  { teamId: String(id), data },
                   {
                     onSuccess: () => {
-                      setSelectedDiscordUserId(null)
-                      setDiscordSearch('')
+                      setSelectedMember(null)
+                      setMemberSearch('')
                       closeJoinModal()
                     },
                   },
