@@ -12,11 +12,15 @@ vi.mock("../../../logic/discord-client.js", () => ({
 
 import { getDiscordClient } from "../../../logic/discord-client.js";
 import {
+  addTeamMemberHandler,
+  addTeamMemberRoute,
   removeTeamMemberHandler,
   removeTeamMemberRoute,
 } from "./team-memberships";
 
 const PLAYER_NAME = "test-remove-route-player";
+// A player with results but no linked Discord account
+const UNLINKED_PLAYER_NAME = "test-add-route-unlinked-player";
 const TEAM_NAME = "test-remove-route-Team Alpha";
 
 // canAccessTeam gates on the ranking-reporter Discord role (or team captaincy).
@@ -42,6 +46,7 @@ function makeApp() {
     await next();
   });
   app.openapi(removeTeamMemberRoute, removeTeamMemberHandler);
+  app.openapi(addTeamMemberRoute, addTeamMemberHandler);
   return app;
 }
 
@@ -52,19 +57,30 @@ function removeMember(teamId: number, membershipId: number, mode?: string) {
   });
 }
 
+function addMember(teamId: number, body: unknown) {
+  return makeApp().request(`/teams/${teamId}/members`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+}
+
 async function cleanup() {
   await dbClient
     .deleteFrom("membership")
     .where((eb) =>
-      eb("player_id", "in", eb.selectFrom("player").select("id").where("name", "=", PLAYER_NAME)),
+      eb("player_id", "in",
+        eb.selectFrom("player").select("id")
+          .where("name", "in", [PLAYER_NAME, UNLINKED_PLAYER_NAME])),
     )
     .execute();
-  await dbClient.deleteFrom("player").where("name", "=", PLAYER_NAME).execute();
+  await dbClient.deleteFrom("player").where("name", "in", [PLAYER_NAME, UNLINKED_PLAYER_NAME]).execute();
   await dbClient.deleteFrom("team").where("name", "=", TEAM_NAME).execute();
 }
 
 let teamId: number;
 let membershipId: number;
+let unlinkedPlayerId: number;
 
 beforeEach(async () => {
   await cleanup();
@@ -75,6 +91,9 @@ beforeEach(async () => {
   ).id;
   const playerId = (
     await dbClient.insertInto("player").values({ name: PLAYER_NAME }).returning("id").executeTakeFirstOrThrow()
+  ).id;
+  unlinkedPlayerId = (
+    await dbClient.insertInto("player").values({ name: UNLINKED_PLAYER_NAME }).returning("id").executeTakeFirstOrThrow()
   ).id;
   membershipId = (
     await dbClient
@@ -126,5 +145,49 @@ describe("DELETE /teams/{teamId}/members/{membershipId}", () => {
   test("returns 400 for an unrecognised mode", async () => {
     const response = await removeMember(teamId, membershipId, "banana");
     expect(response.status).toBe(400);
+  });
+});
+
+describe("POST /teams/{teamId}/members", () => {
+  test("adds a player who has no linked Discord account by player_id", async () => {
+    const response = await addMember(teamId, {
+      player_id: unlinkedPlayerId,
+      founding_member: true,
+    });
+    expect(response.status).toBe(201);
+    expect(await response.json()).toMatchObject({
+      player_id: unlinkedPlayerId,
+      player_name: UNLINKED_PLAYER_NAME,
+      is_captain: false,
+    });
+
+    const membership = await dbClient
+      .selectFrom("membership").selectAll().where("player_id", "=", unlinkedPlayerId).executeTakeFirstOrThrow();
+    expect(membership.team_id).toBe(teamId);
+  });
+
+  test("returns 404 for an unknown player_id", async () => {
+    const response = await addMember(teamId, { player_id: 999999999 });
+    expect(response.status).toBe(404);
+  });
+
+  test("returns 400 when both player_id and discord_user_id are given", async () => {
+    const response = await addMember(teamId, {
+      player_id: unlinkedPlayerId,
+      discord_user_id: "some-discord-id",
+    });
+    expect(response.status).toBe(400);
+  });
+
+  test("returns 400 when neither identifier is given", async () => {
+    const response = await addMember(teamId, { is_captain: true });
+    expect(response.status).toBe(400);
+  });
+
+  test("returns 403 when the user cannot access the team", async () => {
+    mockRankingReporter(false);
+
+    const response = await addMember(teamId, { player_id: unlinkedPlayerId });
+    expect(response.status).toBe(403);
   });
 });

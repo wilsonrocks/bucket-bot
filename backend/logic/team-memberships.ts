@@ -3,8 +3,18 @@ import type { DB } from "kysely-codegen";
 
 type AddMemberResult =
   | { type: "discord_user_not_found" }
+  | { type: "player_not_found" }
   | { type: "conflict" }
   | { type: "success"; membership: { id: number; player_id: number | null; team_id: number | null; is_captain: boolean }; playerName: string };
+
+/**
+ * Members can be identified either by a Discord user (creating the player row if
+ * this is the first we've heard of them) or by an existing player — players with
+ * results but no linked Discord account can only be reached the second way.
+ */
+export type MemberIdentifier =
+  | { discordUserId: string }
+  | { playerId: number };
 
 const FOUNDING_MEMBER_JOIN_DATE = "2025-12-01";
 
@@ -45,49 +55,68 @@ export async function removeTeamMember(
 export async function addTeamMember(
   db: Kysely<DB>,
   teamId: number,
-  discordUserId: string,
+  identifier: MemberIdentifier,
   isCaptain: boolean,
   foundingMember = false,
 ): Promise<AddMemberResult> {
-  const discordUser = await db
-    .selectFrom("discord_user")
-    .where("discord_user_id", "=", discordUserId)
-    .selectAll()
-    .executeTakeFirst();
+  const discordUser =
+    "discordUserId" in identifier
+      ? await db
+          .selectFrom("discord_user")
+          .where("discord_user_id", "=", identifier.discordUserId)
+          .selectAll()
+          .executeTakeFirst()
+      : undefined;
 
-  if (!discordUser) {
+  if ("discordUserId" in identifier && !discordUser) {
     return { type: "discord_user_not_found" };
   }
 
   return db.transaction().execute(async (trx) => {
-    let player = await trx
-      .selectFrom("player")
-      .where("discord_id", "=", discordUserId)
-      .selectAll()
-      .executeTakeFirst();
+    let player;
 
-    if (!player) {
+    if ("playerId" in identifier) {
       player = await trx
-        .insertInto("player")
-        .values({
-          discord_id: discordUserId,
-          name:
-            discordUser.discord_display_name ||
-            discordUser.discord_username ||
-            discordUser.discord_nickname ||
-            "Unknown User",
-        })
-        .onConflict((oc) => oc.column("discord_id").doNothing())
-        .returningAll()
+        .selectFrom("player")
+        .where("id", "=", identifier.playerId)
+        .selectAll()
         .executeTakeFirst();
 
-      // Race condition: another request inserted the player between our select and insert
+      if (!player) {
+        return { type: "player_not_found" } as const;
+      }
+    } else {
+      const discordUserId = identifier.discordUserId;
+
+      player = await trx
+        .selectFrom("player")
+        .where("discord_id", "=", discordUserId)
+        .selectAll()
+        .executeTakeFirst();
+
       if (!player) {
         player = await trx
-          .selectFrom("player")
-          .where("discord_id", "=", discordUserId)
-          .selectAll()
-          .executeTakeFirstOrThrow();
+          .insertInto("player")
+          .values({
+            discord_id: discordUserId,
+            name:
+              discordUser!.discord_display_name ||
+              discordUser!.discord_username ||
+              discordUser!.discord_nickname ||
+              "Unknown User",
+          })
+          .onConflict((oc) => oc.column("discord_id").doNothing())
+          .returningAll()
+          .executeTakeFirst();
+
+        // Race condition: another request inserted the player between our select and insert
+        if (!player) {
+          player = await trx
+            .selectFrom("player")
+            .where("discord_id", "=", discordUserId)
+            .selectAll()
+            .executeTakeFirstOrThrow();
+        }
       }
     }
 
