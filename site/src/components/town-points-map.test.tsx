@@ -367,6 +367,11 @@ describe('labelMetrics', () => {
     expect(labelMetrics(PHONE).narrow).toBe(true)
   })
 
+  test('enlarges the dots only on a narrow map', () => {
+    expect(labelMetrics(WIDE).dotScale).toBe(1)
+    expect(labelMetrics(PHONE).dotScale).toBeGreaterThan(1)
+  })
+
   test('never lets the gutters squeeze the map out', () => {
     // Two 92px gutters would not fit either side of a 150px box, so they get
     // capped and the map keeps a workable share of it.
@@ -375,6 +380,23 @@ describe('labelMetrics', () => {
       expect(500 / (500 + gutter * 2)).toBeGreaterThan(0.4)
     }
   })
+})
+
+test('dots are drawn larger on a narrow map than a wide one', async () => {
+  setWidth(PHONE)
+  const phone = await renderMap()
+  const phoneR = Number(
+    phone.map.querySelector('[data-town] circle + circle')!.getAttribute('r'),
+  )
+  cleanup()
+
+  setWidth(WIDE)
+  const wide = await renderMap()
+  const wideR = Number(
+    wide.map.querySelector('[data-town] circle + circle')!.getAttribute('r'),
+  )
+
+  expect(phoneR).toBeCloseTo(wideR * 1.5)
 })
 
 test('a narrow viewport gives each dot a tap target bigger than the dot', async () => {

@@ -146,6 +146,9 @@ export function labelMetrics(containerWidth: number) {
   const unitsPerPx = MAP_W / mapPx
   return {
     narrow,
+    // A dot that reads as small but clear on a desktop map is lost on a phone,
+    // where the whole country is a few hundred pixels wide.
+    dotScale: narrow ? 1.5 : 1,
     gutter: gutterPx * unitsPerPx,
     /** How wide a label may grow before wrapping, in CSS pixels. */
     gutterPx,
@@ -208,7 +211,7 @@ export function TownPointsMap({ events, windowEnd }: TownPointsMapProps) {
     return () => observer.disconnect()
   }, [])
 
-  const { narrow, gutter, gutterPx, labelGap, labelInset, elbow } = useMemo(
+  const { narrow, dotScale, gutter, gutterPx, labelGap, labelInset, elbow } = useMemo(
     () => labelMetrics(containerWidth),
     [containerWidth],
   )
@@ -313,7 +316,7 @@ export function TownPointsMap({ events, windowEnd }: TownPointsMapProps) {
             {laidOut.map(({ point, x, y }) => {
               // Area, not radius, carries the count — a 4-event town should look
               // four times the size of a 1-event one, not four times as wide.
-              const r = 6 + 4.5 * Math.sqrt(point.count)
+              const r = (4 + 3 * Math.sqrt(point.count)) * dotScale
               const isSelected = point.key === selectedTown
               return (
                 // Purely a click target: every town's gutter label is a real
