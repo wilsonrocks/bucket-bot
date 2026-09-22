@@ -319,7 +319,7 @@ export interface Venue {
   name: string | null;
   post_code: string | null;
   region_id: number | null;
-  town: string | null;
+  town: string;
 }
 
 export interface DB {

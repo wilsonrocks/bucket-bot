@@ -1,6 +1,7 @@
 import { Link } from '#/components/link'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { GeoPermissibleObjects } from 'd3-geo'
+import { UK_BBOX } from '#/data/uk-bbox'
 import type { UkRegionFeature } from '#/data/uk-regions-geo'
 
 type RegionData = { geojson_name: string; event_count: number }
@@ -34,12 +35,7 @@ function RegionsThumbnail({ countMap }: { countMap: Map<string, number> }) {
         import('#/data/uk-regions-geo'),
       ])
       if (cancelled) return
-      const ukBbox = {
-        type: 'Feature' as const,
-        geometry: { type: 'MultiPoint' as const, coordinates: [[-8.62, 49.94], [1.76, 58.8]] },
-        properties: {},
-      }
-      const projection = geoMercator().fitSize([width, height], ukBbox)
+      const projection = geoMercator().fitSize([width, height], UK_BBOX)
       const pathGen = geoPath().projection(projection)
       select(svg)
         .selectAll<SVGPathElement, UkRegionFeature>('path')

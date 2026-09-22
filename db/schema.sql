@@ -1,5 +1,5 @@
 
-\restrict HmIE448wI29w2KPaewYh3fExeQJT8ScmE3EUCUowut0ljPQhHf3TSYaX4CGv4NV
+\restrict SfBcudyZAaBePs3YcgadZUNxUVizxpeXg4zDVtexa94uhZDMJwcY604ShJ3nlbS
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -380,7 +380,7 @@ CREATE TABLE public.upcoming_event (
 CREATE TABLE public.venue (
     id integer NOT NULL,
     name text,
-    town text,
+    town text NOT NULL,
     post_code text,
     geom public.geometry(Point,4326),
     region_id integer
@@ -674,5 +674,5 @@ ALTER TABLE ONLY public.upcoming_event
 ALTER TABLE ONLY public.venue
     ADD CONSTRAINT venue_region_id_fkey FOREIGN KEY (region_id) REFERENCES public.region(id);
 
-\unrestrict HmIE448wI29w2KPaewYh3fExeQJT8ScmE3EUCUowut0ljPQhHf3TSYaX4CGv4NV
+\unrestrict SfBcudyZAaBePs3YcgadZUNxUVizxpeXg4zDVtexa94uhZDMJwcY604ShJ3nlbS
 

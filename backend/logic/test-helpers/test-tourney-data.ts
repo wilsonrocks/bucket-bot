@@ -72,8 +72,8 @@ export async function addTestTourneyData(db: Kysely<DB>) {
   await db
     .insertInto("venue")
     .values([
-      { id: TEST_VENUE_NW_ID, name: "Test Venue North West", post_code: "TEST-NW-1", region_id: TEST_REGION_NORTH_WEST },
-      { id: TEST_VENUE_LDN_ID, name: "Test Venue London", post_code: "TEST-LDN-1", region_id: TEST_REGION_LONDON },
+      { id: TEST_VENUE_NW_ID, name: "Test Venue North West", town: "Test Town North West", post_code: "TEST-NW-1", region_id: TEST_REGION_NORTH_WEST },
+      { id: TEST_VENUE_LDN_ID, name: "Test Venue London", town: "Test Town London", post_code: "TEST-LDN-1", region_id: TEST_REGION_LONDON },
     ])
     .execute();
 

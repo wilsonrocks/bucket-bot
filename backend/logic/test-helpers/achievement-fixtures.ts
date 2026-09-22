@@ -54,7 +54,7 @@ export function makeAchievementFixtures(prefix: string) {
     return (
       await dbClient
         .insertInto("venue")
-        .values({ name: `${prefix}${name}` })
+        .values({ name: `${prefix}${name}`, town: `${prefix}Town` })
         .returning("id")
         .executeTakeFirstOrThrow()
     ).id;

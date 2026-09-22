@@ -42,3 +42,20 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+/* Fades a modal's backdrop in rather than having it snap on. */
+@keyframes overlay-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Every Dialog.Overlay wears this, so the timing is set in one place. */
+@media (prefers-reduced-motion: no-preference) {
+  .overlay-fade {
+    animation: overlay-fade-in 0.1s ease-out;
+  }
+}
