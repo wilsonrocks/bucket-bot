@@ -255,6 +255,34 @@ export const fetchPlayerTourneys = createServerFn()
       .execute()
   })
 
+export const fetchPlayerCountingEvents = createServerFn()
+  .inputValidator((d: { playerId: number }) => d)
+  .handler(async ({ data: { playerId } }) => {
+    // ranking_snapshot_event holds exactly the events that counted towards the score
+    // in that batch (the best five), so this is the 0-5 events making up the player's
+    // Rolling Year total as of the most recent snapshot. It can lag behind events
+    // imported since that snapshot, hence returning the date alongside it.
+    const batch = await db
+      .selectFrom('ranking_snapshot_batch')
+      .where('type_code', '=', 'ROLLING_YEAR')
+      .select(['id', 'created_at'])
+      .orderBy('id', 'desc')
+      .executeTakeFirst()
+    if (!batch) return { tourneyIds: [] as number[], snapshotDate: null }
+
+    const rows = await db
+      .selectFrom('ranking_snapshot_event')
+      .where('batch_id', '=', batch.id)
+      .where('player_id', '=', playerId)
+      .select('tourney_id')
+      .execute()
+
+    return {
+      tourneyIds: rows.map((r) => r.tourney_id),
+      snapshotDate: batch.created_at,
+    }
+  })
+
 export const fetchPlayerPaintingWins = createServerFn()
   .inputValidator((d: { playerId: number }) => d)
   .handler(async ({ data: { playerId } }) => {
