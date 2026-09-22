@@ -5,6 +5,7 @@ import type { RegionEvent } from '#/components/animated-regions'
 import {
   VenuePointsMap,
   aggregateVenues,
+  labelMetrics,
   spreadApart,
 } from '#/components/venue-points-map'
 
@@ -19,18 +20,27 @@ vi.mock('#/components/link', () => ({
 
 afterEach(cleanup)
 
-// jsdom has no matchMedia, which `useMediaQuery` needs to pick the wide callout
-// layout over the narrow one.
-function setViewport(narrow: boolean) {
-  window.matchMedia = ((query: string) => ({
-    matches: narrow,
-    media: query,
-    addEventListener: () => {},
-    removeEventListener: () => {},
-  })) as unknown as typeof window.matchMedia
+// The layout is driven by the map's measured width, which jsdom reports as 0 and
+// never observes, so both have to be stubbed to choose a layout.
+function setWidth(px: number) {
+  window.ResizeObserver = class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  } as unknown as typeof ResizeObserver
+  vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({
+    width: px,
+    height: (px * 700) / 850,
+  } as DOMRect)
 }
 
-beforeEach(() => setViewport(false))
+const WIDE = 820
+const PHONE = 390
+
+beforeEach(() => {
+  vi.restoreAllMocks()
+  setWidth(WIDE)
+})
 
 function event(overrides: Partial<RegionEvent> & Pick<RegionEvent, 'id'>): RegionEvent {
   return {
@@ -246,38 +256,47 @@ test('a venue can be opened from its label as well as its dot', async () => {
   expect(queryByText('Falkirk Open')).not.toBeNull()
 })
 
-test('a narrow viewport drops the callouts for a list under the map', async () => {
-  setViewport(true)
+test('a narrow viewport keeps the callouts, dropping only the counts', async () => {
+  setWidth(PHONE)
   const { map, getByRole, queryByText } = await renderMap()
 
-  expect(map.querySelectorAll('polyline')).toHaveLength(0)
+  // Same leader lines and labels as the wide layout…
+  expect(map.querySelectorAll('polyline')).toHaveLength(2)
+  const label = getByRole('button', { name: 'Stockport — 2 events' })
+  expect(label.className).toContain('text-xs')
+  // …but the count is off the map, so the gutters can stay narrow.
+  expect(label.textContent).toBe('Stockport')
   expect(queryByText('Stockport (2)')).toBeNull()
-  expect(map.querySelectorAll('[data-venue]')).toHaveLength(2)
-
-  fireEvent.click(getByRole('button', { name: /Stockport · 2 events/ }))
-  expect(queryByText('Stockport Open')).not.toBeNull()
 })
 
-test('a narrow viewport shows a tapped venue in a modal, not a panel below', async () => {
-  setViewport(true)
-  const { map, getByRole, queryByRole, queryByText } = await renderMap()
+describe('labelMetrics', () => {
+  test('grows the viewBox gaps as the map shrinks, so they stay constant on screen', () => {
+    const wide = labelMetrics(WIDE)
+    const phone = labelMetrics(PHONE)
 
-  expect(queryByRole('dialog')).toBeNull()
+    // A fixed viewBox gap would shrink with the map and let labels collide on a
+    // phone, so in viewBox units the spacing has to grow as the map gets smaller.
+    expect(phone.labelGap).toBeGreaterThan(wide.labelGap)
+    expect(phone.elbow).toBeGreaterThan(wide.elbow)
+  })
 
-  fireEvent.click(map.querySelector('[data-venue="1"]')!)
+  test('switches to the narrow treatment below the breakpoint', () => {
+    expect(labelMetrics(WIDE).narrow).toBe(false)
+    expect(labelMetrics(PHONE).narrow).toBe(true)
+  })
 
-  const dialog = getByRole('dialog')
-  expect(dialog.textContent).toContain('Stockport Open')
-  expect(dialog.textContent).toContain('Stockport Masters')
-  expect(dialog.textContent).not.toContain('Falkirk Open')
-
-  fireEvent.click(getByRole('button', { name: 'Close events list' }))
-  expect(queryByRole('dialog')).toBeNull()
-  expect(queryByText('Stockport Open')).toBeNull()
+  test('never lets the gutters squeeze the map out', () => {
+    // Two 92px gutters would not fit either side of a 150px box, so they get
+    // capped and the map keeps a workable share of it.
+    for (const width of [150, 320, PHONE, WIDE]) {
+      const { gutter } = labelMetrics(width)
+      expect(500 / (500 + gutter * 2)).toBeGreaterThan(0.4)
+    }
+  })
 })
 
 test('a narrow viewport gives each dot a tap target bigger than the dot', async () => {
-  setViewport(true)
+  setWidth(PHONE)
   const { map } = await renderMap()
 
   for (const group of map.querySelectorAll('[data-venue]')) {

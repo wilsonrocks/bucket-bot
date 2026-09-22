@@ -1,8 +1,7 @@
 import { geoMercator, geoPath, type GeoPermissibleObjects } from 'd3-geo'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { RegionEventsModal, RegionEventsPanel } from '#/components/region-events'
 import type { RegionEvent } from '#/components/animated-regions'
-import { useMediaQuery } from '#/helpers/use-media-query'
 import { UK_BBOX } from '#/data/uk-bbox'
 import type { UkRegionFeature } from '#/data/uk-regions-geo'
 
@@ -100,12 +99,40 @@ export function spreadApart(
 /** The map itself; labels live in gutters either side of this box. */
 const MAP_W = 500
 const MAP_H = Math.round(MAP_W * 1.4)
-/** Room for a label like "Newport Pagnell (2)" beside the map. */
-const GUTTER = 175
-const LABEL_GAP = 24
-const LABEL_INSET = 12
-/** Length of the horizontal run of a leader line, next to its label. */
-const ELBOW = 26
+/** Width the map falls back to before it has been measured. */
+const DEFAULT_WIDTH = 820
+/** Below this the labels drop their counts and shrink, to keep the gutters narrow. */
+const NARROW_PX = 640
+
+/**
+ * Everything about the labels is specified in CSS pixels and converted into
+ * viewBox units against the measured width, never written in viewBox units
+ * directly: a viewBox length is scaled by however much the map was fitted to the
+ * page by, which would shrink the gaps between labels on exactly the screens
+ * where they're already tightest.
+ */
+export function labelMetrics(containerWidth: number) {
+  const narrow = containerWidth < NARROW_PX
+  // Never let the gutters eat the map itself, however cramped it gets: capping
+  // each at a share of the width leaves the map at least 44% of the box.
+  const gutterPx = Math.min(narrow ? 92 : 150, containerWidth * 0.28)
+  const mapPx = containerWidth - gutterPx * 2
+  const unitsPerPx = MAP_W / mapPx
+  return {
+    narrow,
+    gutter: gutterPx * unitsPerPx,
+    /** How wide a label may grow before wrapping, in CSS pixels. */
+    gutterPx,
+    // Narrow labels wrap rather than run off the screen, so they have to be
+    // allowed the height of two lines.
+    /** Vertical clearance between stacked labels. */
+    labelGap: (narrow ? 30 : 21) * unitsPerPx,
+    /** Gap between a label and the map edge. */
+    labelInset: 10 * unitsPerPx,
+    /** Length of the horizontal run of a leader line, next to its label. */
+    elbow: 22 * unitsPerPx,
+  }
+}
 
 type LaidOutPoint = {
   point: VenuePoint
@@ -136,9 +163,29 @@ export function VenuePointsMap({ events, windowEnd }: VenuePointsMapProps) {
   }, [])
 
   const [selectedVenue, setSelectedVenue] = useState<number | null>(null)
-  // The callout gutters need more width than a phone has, so small screens get the
-  // plain dots and read the names off the list underneath instead.
-  const isNarrow = useMediaQuery('(max-width: 640px)')
+
+  // The label layout is driven by how wide the map actually ended up, not by a
+  // media query: the same component is narrow in a sidebar and wide on a phone in
+  // landscape, and only the element knows which.
+  const containerRef = useRef<HTMLDivElement | null>(null)
+  const [containerWidth, setContainerWidth] = useState(DEFAULT_WIDTH)
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el || typeof ResizeObserver === 'undefined') return
+    const measure = () => {
+      const width = el.getBoundingClientRect().width
+      if (width > 0) setContainerWidth(width)
+    }
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
+  const { narrow, gutter, gutterPx, labelGap, labelInset, elbow } = useMemo(
+    () => labelMetrics(containerWidth),
+    [containerWidth],
+  )
 
   const { points, unplaced } = useMemo(
     () => aggregateVenues(events, windowEnd),
@@ -173,13 +220,13 @@ export function VenuePointsMap({ events, windowEnd }: VenuePointsMapProps) {
       const column = sides[side].sort((a, b) => a.y - b.y)
       const ys = spreadApart(
         column.map((c) => c.y),
-        LABEL_GAP,
-        LABEL_GAP / 2,
-        MAP_H - LABEL_GAP / 2,
+        labelGap,
+        labelGap / 2,
+        MAP_H - labelGap / 2,
       )
       return column.map((c, i) => ({ ...c, side, labelY: ys[i] }))
     })
-  }, [points, projection])
+  }, [points, projection, labelGap])
 
   const selected = points.find((p) => p.venueId === selectedVenue) ?? null
 
@@ -187,7 +234,6 @@ export function VenuePointsMap({ events, windowEnd }: VenuePointsMapProps) {
     setSelectedVenue((prev) => (prev === venueId ? null : venueId))
   }
 
-  const gutter = isNarrow ? 0 : GUTTER
   const viewBoxW = MAP_W + gutter * 2
 
   /** A viewBox x/y as a percentage of the SVG box, for positioning HTML over it. */
@@ -196,8 +242,9 @@ export function VenuePointsMap({ events, windowEnd }: VenuePointsMapProps) {
 
   return (
     <div
+      ref={containerRef}
       className="relative mx-auto"
-      style={{ maxWidth: isNarrow ? 480 : 820 }}
+      style={{ maxWidth: DEFAULT_WIDTH }}
     >
       {/*
         No maxHeight: the SVG has to fill its box exactly for the percentage
@@ -219,20 +266,18 @@ export function VenuePointsMap({ events, windowEnd }: VenuePointsMapProps) {
             />
           ))}
         </g>
-        {!isNarrow && (
-          <g className="stroke-muted-foreground" strokeWidth={1} fill="none">
-            {laidOut.map(({ point, x, y, side, labelY }) => {
-              const labelX = side === 'left' ? -LABEL_INSET : MAP_W + LABEL_INSET
-              const elbowX = side === 'left' ? labelX + ELBOW : labelX - ELBOW
-              return (
-                <polyline
-                  key={point.venueId}
-                  points={`${x},${y} ${elbowX},${labelY} ${labelX},${labelY}`}
-                />
-              )
-            })}
-          </g>
-        )}
+        <g className="stroke-muted-foreground" strokeWidth={1} fill="none">
+          {laidOut.map(({ point, x, y, side, labelY }) => {
+            const labelX = side === 'left' ? -labelInset : MAP_W + labelInset
+            const elbowX = side === 'left' ? labelX + elbow : labelX - elbow
+            return (
+              <polyline
+                key={point.venueId}
+                points={`${x},${y} ${elbowX},${labelY} ${labelX},${labelY}`}
+              />
+            )
+          })}
+        </g>
         <g>
           {laidOut.map(({ point, x, y }) => {
             // Area, not radius, carries the count — a 4-event town should look
@@ -240,9 +285,9 @@ export function VenuePointsMap({ events, windowEnd }: VenuePointsMapProps) {
             const r = 4 + 3 * Math.sqrt(point.count)
             const isSelected = point.venueId === selectedVenue
             return (
-              // Purely a click target: every venue also has a real <button> — its
-              // gutter label, or its row in the narrow-screen list — so giving the
-              // dot its own tab stop would just duplicate that in the a11y tree.
+              // Purely a click target: every venue's gutter label is a real
+              // <button>, so giving the dot its own tab stop would just duplicate
+              // it in the a11y tree.
               <g
                 key={point.venueId}
                 cursor="pointer"
@@ -277,51 +322,49 @@ export function VenuePointsMap({ events, windowEnd }: VenuePointsMapProps) {
         font size. Inside the SVG they'd scale with the viewBox, which left them
         around 11px once the map was fitted to the page.
       */}
-      {!isNarrow &&
-        laidOut.map(({ point, side, labelY }) => {
-          const isSelected = point.venueId === selectedVenue
-          const labelX = side === 'left' ? -LABEL_INSET : MAP_W + LABEL_INSET
-          return (
-            <button
-              key={point.venueId}
-              type="button"
-              onClick={() => toggleVenue(point.venueId)}
-              className={`absolute whitespace-nowrap text-base leading-none hover:underline ${
-                isSelected ? 'font-semibold' : ''
-              }`}
-              style={{
-                left: `${pctX(labelX)}%`,
-                top: `${pctY(labelY)}%`,
-                transform: `translate(${side === 'left' ? '-100%' : '0'}, -50%)`,
-              }}
-            >
-              {point.label}{' '}
-              <span className="text-muted-foreground">({point.count})</span>
-            </button>
-          )
-        })}
+      {laidOut.map(({ point, side, labelY }) => {
+        const isSelected = point.venueId === selectedVenue
+        const labelX = side === 'left' ? -labelInset : MAP_W + labelInset
+        return (
+          <button
+            key={point.venueId}
+            type="button"
+            onClick={() => toggleVenue(point.venueId)}
+            // Wide labels already read the count out; narrow ones drop it, so
+            // spell it out for anyone not looking at the map.
+            aria-label={
+              narrow
+                ? `${point.label} — ${point.count} ${point.count === 1 ? 'event' : 'events'}`
+                : undefined
+            }
+            className={`absolute leading-tight hover:underline ${
+              narrow ? 'text-xs' : 'whitespace-nowrap text-base'
+            } ${side === 'left' ? 'text-right' : 'text-left'} ${
+              isSelected ? 'font-semibold' : ''
+            }`}
+            style={{
+              left: `${pctX(labelX)}%`,
+              top: `${pctY(labelY)}%`,
+              transform: `translate(${side === 'left' ? '-100%' : '0'}, -50%)`,
+              // A long name would otherwise run off a phone screen entirely.
+              maxWidth: narrow ? gutterPx : undefined,
+            }}
+          >
+            {point.label}
+            {/* The count needs a gutter of its own; too tight to spare on a phone. */}
+            {!narrow && (
+              <>
+                {' '}
+                <span className="text-muted-foreground">({point.count})</span>
+              </>
+            )}
+          </button>
+        )
+      })}
       {points.length === 0 && features && (
         <p className="text-sm text-muted-foreground">
           No events with a known location in this period.
         </p>
-      )}
-      {isNarrow && points.length > 0 && (
-        <ul className="mt-3 flex flex-col gap-1">
-          {points.map((point) => (
-            <li key={point.venueId}>
-              <button
-                type="button"
-                onClick={() => toggleVenue(point.venueId)}
-                className="w-full rounded px-1 py-0.5 text-left hover:bg-muted"
-              >
-                {point.label}{' '}
-                <span className="text-muted-foreground">
-                  · {point.count} {point.count === 1 ? 'event' : 'events'}
-                </span>
-              </button>
-            </li>
-          ))}
-        </ul>
       )}
       {unplaced > 0 && (
         <p className="mt-2 text-sm text-muted-foreground">
@@ -332,16 +375,16 @@ export function VenuePointsMap({ events, windowEnd }: VenuePointsMapProps) {
       {selected &&
         // Below the map is off-screen on a phone, so a tapped dot would look
         // like it had done nothing.
-        (isNarrow ? (
+        (narrow ? (
           <RegionEventsModal
-            title={selected.events[0].venueName ?? selected.label}
+            title={selected.label}
             events={selected.events}
             windowEnd={windowEnd}
             onClose={() => setSelectedVenue(null)}
           />
         ) : (
           <RegionEventsPanel
-            title={selected.events[0].venueName ?? selected.label}
+            title={selected.label}
             events={selected.events}
             windowEnd={windowEnd}
             onClose={() => setSelectedVenue(null)}
