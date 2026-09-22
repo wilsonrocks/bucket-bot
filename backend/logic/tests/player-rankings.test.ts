@@ -185,7 +185,7 @@ describe("generating player rankings", () => {
     // A venue for the extra tourneys.
     const [venue] = await dbClient
       .insertInto("venue")
-      .values({ name: "New Test Venue", post_code: "TEST-NEW-1", region_id: 2 })
+      .values({ name: "New Test Venue", town: "Test Town", post_code: "TEST-NEW-1", region_id: 2 })
       .returning("id")
       .execute();
 

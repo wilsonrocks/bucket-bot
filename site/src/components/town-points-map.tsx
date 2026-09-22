@@ -23,12 +23,12 @@ function isoDate(d: Date) {
 
 /**
  * Events are grouped by town rather than by venue, because a dot stands for a
- * place: two venues in one town belong on one dot, under one name. A venue with
- * no town recorded keeps a dot of its own rather than being lumped in with every
- * other townless venue.
+ * place: two venues in one town belong on one dot, under one name. `venue.town`
+ * is NOT NULL but may still be blank, and a venue with an unusable town keeps a
+ * dot of its own rather than being lumped in with every other nameless one.
  */
 function townKey(event: RegionEvent): string {
-  const town = event.town?.trim()
+  const town = event.town.trim()
   return town ? `town:${town.toLowerCase()}` : `venue:${event.venueId}`
 }
 
@@ -68,7 +68,7 @@ export function aggregateTowns(
     }
     byTown.set(key, {
       key,
-      label: event.town?.trim() || event.venueName || 'Unknown',
+      label: event.town.trim() || event.venueName || 'Unknown',
       count: 1,
       events: [event],
       venues: new Map([[event.venueId, [event.lon, event.lat]]]),

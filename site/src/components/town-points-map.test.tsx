@@ -106,8 +106,8 @@ describe('aggregateTowns', () => {
     expect(unplaced).toBe(1)
   })
 
-  test('falls back to the venue name when the town is unknown', () => {
-    const { points } = aggregateTowns([event({ id: 1, town: null })], windowEnd)
+  test('falls back to the venue name when the town is blank', () => {
+    const { points } = aggregateTowns([event({ id: 1, town: '' })], windowEnd)
     expect(points[0].label).toBe('Element Games')
   })
 })
@@ -160,17 +160,17 @@ describe('aggregateTowns grouping by town', () => {
     expect(points[0].label).toBe('Stockport')
   })
 
-  test('keeps a venue with no town on a dot of its own', () => {
+  test('keeps a venue with a blank town on a dot of its own', () => {
     const { points } = aggregateTowns(
       [
         event({ id: 1, venueId: 1, town: 'Stockport' }),
-        event({ id: 2, venueId: 7, town: null, venueName: 'Somewhere Hall' }),
+        event({ id: 2, venueId: 7, town: '', venueName: 'Somewhere Hall' }),
         event({ id: 3, venueId: 8, town: '  ', venueName: 'Another Hall' }),
       ],
       windowEnd,
     )
 
-    // Townless venues are not lumped together under one nameless dot.
+    // Venues with a blank town are not lumped together under one nameless dot.
     expect(points.map((p) => p.label).sort()).toEqual([
       'Another Hall',
       'Somewhere Hall',

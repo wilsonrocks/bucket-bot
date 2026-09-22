@@ -19,7 +19,8 @@ export type RegionEvent = {
   date: string
   venueId: number
   venueName: string | null
-  town: string | null
+  /** Non-null in the database, but not guaranteed to be non-blank. */
+  town: string
   /** Venue coordinates; null when the venue has never been geocoded. */
   lon: number | null
   lat: number | null
