@@ -188,14 +188,26 @@ export function VenuePointsMap({ events, windowEnd }: VenuePointsMapProps) {
   }
 
   const gutter = isNarrow ? 0 : GUTTER
+  const viewBoxW = MAP_W + gutter * 2
+
+  /** A viewBox x/y as a percentage of the SVG box, for positioning HTML over it. */
+  const pctX = (x: number) => ((x + gutter) / viewBoxW) * 100
+  const pctY = (y: number) => (y / MAP_H) * 100
 
   return (
-    <div style={{ maxWidth: isNarrow ? 480 : 820, margin: '0 auto' }}>
+    <div
+      className="relative mx-auto"
+      style={{ maxWidth: isNarrow ? 480 : 820 }}
+    >
+      {/*
+        No maxHeight: the SVG has to fill its box exactly for the percentage
+        positions above to line the HTML labels up with their leader lines.
+      */}
       <svg
         data-testid="venue-points-map"
-        viewBox={`${-gutter} 0 ${MAP_W + gutter * 2} ${MAP_H}`}
+        viewBox={`${-gutter} 0 ${viewBoxW} ${MAP_H}`}
         width="100%"
-        style={{ maxHeight: '75vh' }}
+        className="block"
       >
         <g>
           {features?.map((feature) => (
@@ -222,26 +234,21 @@ export function VenuePointsMap({ events, windowEnd }: VenuePointsMapProps) {
           </g>
         )}
         <g>
-          {laidOut.map(({ point, x, y, side, labelY }) => {
+          {laidOut.map(({ point, x, y }) => {
             // Area, not radius, carries the count — a 4-event town should look
             // four times the size of a 1-event one, not four times as wide.
             const r = 4 + 3 * Math.sqrt(point.count)
             const isSelected = point.venueId === selectedVenue
-            const labelX = side === 'left' ? -LABEL_INSET : MAP_W + LABEL_INSET
             return (
+              // Purely a click target: every venue also has a real <button> — its
+              // gutter label, or its row in the narrow-screen list — so giving the
+              // dot its own tab stop would just duplicate that in the a11y tree.
               <g
                 key={point.venueId}
                 cursor="pointer"
-                tabIndex={0}
-                role="button"
+                aria-hidden
                 data-venue={point.venueId}
-                aria-label={`${point.label} — ${point.count} ${point.count === 1 ? 'event' : 'events'}`}
                 onClick={() => toggleVenue(point.venueId)}
-                onKeyDown={(e) => {
-                  if (e.key !== 'Enter' && e.key !== ' ') return
-                  e.preventDefault()
-                  toggleVenue(point.venueId)
-                }}
               >
                 <circle
                   cx={x}
@@ -254,26 +261,39 @@ export function VenuePointsMap({ events, windowEnd }: VenuePointsMapProps) {
                   }
                   strokeWidth={isSelected ? 2 : 1}
                 />
-                {!isNarrow && (
-                  <text
-                    x={labelX}
-                    y={labelY + 5}
-                    textAnchor={side === 'left' ? 'end' : 'start'}
-                    fontSize={15}
-                    className={
-                      isSelected
-                        ? 'fill-foreground font-semibold'
-                        : 'fill-foreground'
-                    }
-                  >
-                    {point.label} ({point.count})
-                  </text>
-                )}
               </g>
             )
           })}
         </g>
       </svg>
+      {/*
+        The labels are HTML rather than SVG <text> so they render at a real CSS
+        font size. Inside the SVG they'd scale with the viewBox, which left them
+        around 11px once the map was fitted to the page.
+      */}
+      {!isNarrow &&
+        laidOut.map(({ point, side, labelY }) => {
+          const isSelected = point.venueId === selectedVenue
+          const labelX = side === 'left' ? -LABEL_INSET : MAP_W + LABEL_INSET
+          return (
+            <button
+              key={point.venueId}
+              type="button"
+              onClick={() => toggleVenue(point.venueId)}
+              className={`absolute whitespace-nowrap text-base leading-none hover:underline ${
+                isSelected ? 'font-semibold' : ''
+              }`}
+              style={{
+                left: `${pctX(labelX)}%`,
+                top: `${pctY(labelY)}%`,
+                transform: `translate(${side === 'left' ? '-100%' : '0'}, -50%)`,
+              }}
+            >
+              {point.label}{' '}
+              <span className="text-muted-foreground">({point.count})</span>
+            </button>
+          )
+        })}
       {points.length === 0 && features && (
         <p className="text-sm text-muted-foreground">
           No events with a known location in this period.

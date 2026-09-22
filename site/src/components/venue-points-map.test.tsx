@@ -152,11 +152,11 @@ async function renderMap() {
 }
 
 test('renders one labelled dot per venue with events in the window', async () => {
-  const { map, getByText } = await renderMap()
+  const { map, getByRole } = await renderMap()
 
   expect(map.querySelectorAll('circle')).toHaveLength(2)
-  getByText('Stockport (2)')
-  getByText('Falkirk (1)')
+  getByRole('button', { name: 'Stockport (2)' })
+  getByRole('button', { name: 'Falkirk (1)' })
 })
 
 test('every dot is projected inside the map box', async () => {
@@ -172,29 +172,42 @@ test('every dot is projected inside the map box', async () => {
   }
 })
 
-test('labels sit in the gutters, clear of each other, joined by leader lines', async () => {
-  const { map } = await renderMap()
+test('labels are HTML at a real font size, not text scaled with the viewBox', async () => {
+  const { map, getByRole } = await renderMap()
 
-  const labels = [...map.querySelectorAll('text')]
-  expect(labels).toHaveLength(2)
-  for (const label of labels) {
-    const x = Number(label.getAttribute('x'))
-    // Outside the 0..500 map box, i.e. in a gutter rather than over the country.
-    expect(x < 0 || x > 500).toBe(true)
+  // SVG <text> would shrink with the map; these have to be HTML.
+  expect(map.querySelectorAll('text')).toHaveLength(0)
+  const label = getByRole('button', { name: 'Stockport (2)' })
+  expect(label.tagName).toBe('BUTTON')
+  expect(label.className).toContain('text-base')
+})
+
+test('labels sit in the gutters, clear of each other, joined by leader lines', async () => {
+  const { map, getByRole } = await renderMap()
+
+  // The gutters are the outer 175/850 of the box on each side, so a label anchored
+  // inside that range is clear of the country rather than sitting over it.
+  for (const name of ['Stockport (2)', 'Falkirk (1)']) {
+    const left = parseFloat(getByRole('button', { name }).style.left)
+    expect(left < (175 / 850) * 100 || left > (675 / 850) * 100).toBe(true)
   }
 
-  // One leader line per venue, each ending at its label.
+  // One leader line per venue, each ending level with a label.
   const lines = [...map.querySelectorAll('polyline')]
   expect(lines).toHaveLength(2)
+  const labelTops = ['Stockport (2)', 'Falkirk (1)'].map((name) =>
+    parseFloat(getByRole('button', { name }).style.top),
+  )
   for (const line of lines) {
     const pts = line
       .getAttribute('points')!
       .split(' ')
       .map((p) => p.split(',').map(Number))
     expect(pts).toHaveLength(3)
-    // The last segment is horizontal, so the line meets the label head on.
+    // The last segment is horizontal, so the line meets its label head on.
     expect(pts[1][1]).toBe(pts[2][1])
-    expect(labels.some((l) => Number(l.getAttribute('x')) === pts[2][0])).toBe(true)
+    const topPct = (pts[2][1] / 700) * 100
+    expect(labelTops.some((t) => Math.abs(t - topPct) < 0.001)).toBe(true)
   }
 })
 
@@ -225,10 +238,10 @@ test('clicking the same dot again, or the close button, dismisses the panel', as
   expect(queryByText('Stockport Open')).toBeNull()
 })
 
-test('Enter on a focused dot opens its panel', async () => {
-  const { map, queryByText } = await renderMap()
+test('a venue can be opened from its label as well as its dot', async () => {
+  const { getByRole, queryByText } = await renderMap()
 
-  fireEvent.keyDown(map.querySelector('[data-venue="2"]')!, { key: 'Enter' })
+  fireEvent.click(getByRole('button', { name: 'Falkirk (1)' }))
 
   expect(queryByText('Falkirk Open')).not.toBeNull()
 })
@@ -237,8 +250,8 @@ test('a narrow viewport drops the callouts for a list under the map', async () =
   setViewport(true)
   const { map, getByRole, queryByText } = await renderMap()
 
-  expect(map.querySelectorAll('text')).toHaveLength(0)
   expect(map.querySelectorAll('polyline')).toHaveLength(0)
+  expect(queryByText('Stockport (2)')).toBeNull()
   expect(map.querySelectorAll('circle')).toHaveLength(2)
 
   fireEvent.click(getByRole('button', { name: /Stockport · 2 events/ }))
