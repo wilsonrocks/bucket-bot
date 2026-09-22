@@ -3,6 +3,7 @@ import {
   fetchPlayerRankingHistory,
   fetchPlayerTeams,
   fetchPlayerTourneys,
+  fetchPlayerCountingEvents,
   fetchPlayerPaintingWins,
   fetchPlayerAchievements,
   fetchRankingTypes,
@@ -46,17 +47,18 @@ export const Route = createFileRoute('/player/$id')({
   // state, and including them would refetch the whole page on every tab switch.
   loaderDeps: ({ search: { typeCode } }) => ({ typeCode: typeCode ?? 'ROLLING_YEAR' }),
   loader: async ({ params, deps: { typeCode } }) => {
-    const [player, rankingTypes, rankingsData, tourneys, teams, paintingWins, achievements] = await Promise.all([
+    const [player, rankingTypes, rankingsData, tourneys, countingEvents, teams, paintingWins, achievements] = await Promise.all([
       fetchPlayer({ data: { id: params.id } }),
       fetchRankingTypes(),
       fetchPlayerRankingHistory({ data: { playerId: params.id, typeCode } }),
       fetchPlayerTourneys({ data: { playerId: params.id } }),
+      fetchPlayerCountingEvents({ data: { playerId: params.id } }),
       fetchPlayerTeams({ data: { playerId: params.id } }),
       fetchPlayerPaintingWins({ data: { playerId: params.id } }),
       fetchPlayerAchievements({ data: { playerId: params.id } }),
     ])
     if (!player) throw notFound()
-    return { player, rankingTypes, rankingsData, tourneys, teams, paintingWins, achievements }
+    return { player, rankingTypes, rankingsData, tourneys, countingEvents, teams, paintingWins, achievements }
   },
   head: ({ loaderData, params, match }) => {
     if (!loaderData) return {}
@@ -136,11 +138,14 @@ function findEarnedAchievement<T extends { id: string; achievedOn: string | null
 }
 
 function RouteComponent() {
-  const { player, rankingTypes, rankingsData, tourneys, teams, paintingWins, achievements } = Route.useLoaderData()
+  const { player, rankingTypes, rankingsData, tourneys, countingEvents, teams, paintingWins, achievements } = Route.useLoaderData()
   const { typeCode = 'ROLLING_YEAR', painting: activePaintingId, achievement: activeAchievementId, earnedOnly: hideUnearned } = Route.useSearch()
   const navigate = Route.useNavigate()
   const wins = paintingWins ?? []
   const activeAchievement = achievements && findEarnedAchievement(achievements, activeAchievementId)
+  // The best five events making up the player's Rolling Year score, as of the most
+  // recent snapshot. Empty (and the legend hidden) if rankings have never been generated.
+  const countingIds = new Set(countingEvents.tourneyIds)
 
   const activeWinner = activePaintingId ? wins.find((w: any) => w.id === activePaintingId) ?? null : null
   const activeWinnerForLightbox = activeWinner ? {
@@ -173,6 +178,9 @@ function RouteComponent() {
           <table className="text-sm tabular-nums">
             <thead>
               <tr className="border-b border-border text-left">
+                <th className="px-2 py-2 font-semibold">
+                  <span className="sr-only">Counts towards ranking</span>
+                </th>
                 <th className="px-2 py-2 font-semibold">Event</th>
                 <th className="px-2 py-2 text-right font-semibold">Points</th>
                 <th className="px-2 py-2 font-semibold">Place</th>
@@ -183,6 +191,13 @@ function RouteComponent() {
             <tbody>
               {(tourneys as any[]).map((t: any) => (
                 <tr key={t.tourneyId} className="border-b border-border">
+                  <td className="px-2 py-1.5 text-foreground">
+                    {countingIds.has(t.tourneyId) && (
+                      <span title="Counts towards Rolling Year ranking" aria-label="Counts towards Rolling Year ranking">
+                        ★
+                      </span>
+                    )}
+                  </td>
                   <td className="px-2 py-1.5">
                     <Link to="/event/$id" params={{ id: t.tourneyId }} search={{ tab: undefined, painting: undefined }}>
                       {t.tourneyName}
@@ -198,6 +213,12 @@ function RouteComponent() {
               ))}
             </tbody>
           </table>
+          {countingEvents.snapshotDate && (
+            <p className="mt-2 px-2 text-xs text-muted-foreground">
+              ★ counts towards the Rolling Year ranking (best five events), as of{' '}
+              {formatDate(new Date(countingEvents.snapshotDate), 'd MMMM yyyy')}.
+            </p>
+          )}
         </Tabs.Panel>
 
         <Tabs.Panel value="rankings">
