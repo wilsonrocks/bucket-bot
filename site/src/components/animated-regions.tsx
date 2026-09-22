@@ -4,7 +4,7 @@ import { geoMercator, geoPath, type GeoPermissibleObjects } from 'd3-geo'
 import { select } from 'd3-selection'
 import { timeFormat } from 'd3-time-format'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { RegionEventsPanel } from '#/components/region-events-panel'
+import { RegionEventsPanel } from '#/components/region-events'
 import { UK_BBOX } from '#/data/uk-bbox'
 import type { UkRegionFeature } from '#/data/uk-regions-geo'
 type RegionSnapshot = {

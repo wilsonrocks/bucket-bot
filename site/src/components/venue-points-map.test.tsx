@@ -154,7 +154,7 @@ async function renderMap() {
 test('renders one labelled dot per venue with events in the window', async () => {
   const { map, getByRole } = await renderMap()
 
-  expect(map.querySelectorAll('circle')).toHaveLength(2)
+  expect(map.querySelectorAll('[data-venue]')).toHaveLength(2)
   getByRole('button', { name: 'Stockport (2)' })
   getByRole('button', { name: 'Falkirk (1)' })
 })
@@ -162,7 +162,7 @@ test('renders one labelled dot per venue with events in the window', async () =>
 test('every dot is projected inside the map box', async () => {
   const { map } = await renderMap()
 
-  for (const circle of map.querySelectorAll('circle')) {
+  for (const circle of map.querySelectorAll('[data-venue] circle')) {
     const cx = Number(circle.getAttribute('cx'))
     const cy = Number(circle.getAttribute('cy'))
     expect(cx).toBeGreaterThan(0)
@@ -252,8 +252,47 @@ test('a narrow viewport drops the callouts for a list under the map', async () =
 
   expect(map.querySelectorAll('polyline')).toHaveLength(0)
   expect(queryByText('Stockport (2)')).toBeNull()
-  expect(map.querySelectorAll('circle')).toHaveLength(2)
+  expect(map.querySelectorAll('[data-venue]')).toHaveLength(2)
 
   fireEvent.click(getByRole('button', { name: /Stockport · 2 events/ }))
   expect(queryByText('Stockport Open')).not.toBeNull()
+})
+
+test('a narrow viewport shows a tapped venue in a modal, not a panel below', async () => {
+  setViewport(true)
+  const { map, getByRole, queryByRole, queryByText } = await renderMap()
+
+  expect(queryByRole('dialog')).toBeNull()
+
+  fireEvent.click(map.querySelector('[data-venue="1"]')!)
+
+  const dialog = getByRole('dialog')
+  expect(dialog.textContent).toContain('Stockport Open')
+  expect(dialog.textContent).toContain('Stockport Masters')
+  expect(dialog.textContent).not.toContain('Falkirk Open')
+
+  fireEvent.click(getByRole('button', { name: 'Close events list' }))
+  expect(queryByRole('dialog')).toBeNull()
+  expect(queryByText('Stockport Open')).toBeNull()
+})
+
+test('a narrow viewport gives each dot a tap target bigger than the dot', async () => {
+  setViewport(true)
+  const { map } = await renderMap()
+
+  for (const group of map.querySelectorAll('[data-venue]')) {
+    const [hit, dot] = [...group.querySelectorAll('circle')]
+    expect(hit.getAttribute('fill')).toBe('transparent')
+    expect(Number(hit.getAttribute('r'))).toBeGreaterThanOrEqual(18)
+    expect(Number(hit.getAttribute('r'))).toBeGreaterThan(Number(dot.getAttribute('r')))
+  }
+})
+
+test('a wide viewport keeps the panel below the map rather than a modal', async () => {
+  const { map, queryByRole, getByText } = await renderMap()
+
+  fireEvent.click(map.querySelector('[data-venue="1"]')!)
+
+  expect(queryByRole('dialog')).toBeNull()
+  getByText('Stockport Open')
 })

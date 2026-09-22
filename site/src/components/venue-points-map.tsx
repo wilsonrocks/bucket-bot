@@ -1,6 +1,6 @@
 import { geoMercator, geoPath, type GeoPermissibleObjects } from 'd3-geo'
 import { useEffect, useMemo, useState } from 'react'
-import { RegionEventsPanel } from '#/components/region-events-panel'
+import { RegionEventsModal, RegionEventsPanel } from '#/components/region-events'
 import type { RegionEvent } from '#/components/animated-regions'
 import { useMediaQuery } from '#/helpers/use-media-query'
 import { UK_BBOX } from '#/data/uk-bbox'
@@ -250,6 +250,12 @@ export function VenuePointsMap({ events, windowEnd }: VenuePointsMapProps) {
                 data-venue={point.venueId}
                 onClick={() => toggleVenue(point.venueId)}
               >
+                {/*
+                  A dot is only ~11px across once the map is fitted to a phone,
+                  well under a comfortable tap target, so the visible circle sits
+                  on a bigger invisible one.
+                */}
+                <circle cx={x} cy={y} r={Math.max(r + 8, 18)} fill="transparent" />
                 <circle
                   cx={x}
                   cy={y}
@@ -323,14 +329,24 @@ export function VenuePointsMap({ events, windowEnd }: VenuePointsMapProps) {
           venue has no location on record.
         </p>
       )}
-      {selected && (
-        <RegionEventsPanel
-          title={selected.events[0].venueName ?? selected.label}
-          events={selected.events}
-          windowEnd={windowEnd}
-          onClose={() => setSelectedVenue(null)}
-        />
-      )}
+      {selected &&
+        // Below the map is off-screen on a phone, so a tapped dot would look
+        // like it had done nothing.
+        (isNarrow ? (
+          <RegionEventsModal
+            title={selected.events[0].venueName ?? selected.label}
+            events={selected.events}
+            windowEnd={windowEnd}
+            onClose={() => setSelectedVenue(null)}
+          />
+        ) : (
+          <RegionEventsPanel
+            title={selected.events[0].venueName ?? selected.label}
+            events={selected.events}
+            windowEnd={windowEnd}
+            onClose={() => setSelectedVenue(null)}
+          />
+        ))}
     </div>
   )
 }
