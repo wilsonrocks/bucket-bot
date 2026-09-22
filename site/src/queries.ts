@@ -720,8 +720,13 @@ export const fetchRegionEvents = createServerFn()
         'tourney.id',
         'tourney.name',
         sql<string>`${sql.ref('tourney.date')}::text`.as('date'),
+        'venue.id as venueId',
         'venue.name as venueName',
         'venue.town',
+        // `venue.geom` is typed as a string, so the coordinates have to come out
+        // through PostGIS accessors rather than the raw column.
+        sql<number | null>`ST_X(${sql.ref('venue.geom')})`.as('lon'),
+        sql<number | null>`ST_Y(${sql.ref('venue.geom')})`.as('lat'),
         'region.geojson_name',
         db.fn.count('result.id').as('players'),
       ])
@@ -729,8 +734,10 @@ export const fetchRegionEvents = createServerFn()
         'tourney.id',
         'tourney.name',
         'tourney.date',
+        'venue.id',
         'venue.name',
         'venue.town',
+        'venue.geom',
         'region.geojson_name',
       ])
       .orderBy('tourney.date', 'desc')

@@ -1,10 +1,11 @@
-import { Pause, Play, SkipBack, X } from 'lucide-react'
+import { Pause, Play, SkipBack } from 'lucide-react'
 import { interpolateRgb } from 'd3-interpolate'
 import { geoMercator, geoPath, type GeoPermissibleObjects } from 'd3-geo'
 import { select } from 'd3-selection'
 import { timeFormat } from 'd3-time-format'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Link } from '#/components/link'
+import { RegionEventsPanel } from '#/components/region-events-panel'
+import { UK_BBOX } from '#/data/uk-bbox'
 import type { UkRegionFeature } from '#/data/uk-regions-geo'
 type RegionSnapshot = {
   date: string
@@ -16,8 +17,12 @@ export type RegionEvent = {
   name: string
   /** YYYY-MM-DD */
   date: string
+  venueId: number
   venueName: string | null
   town: string | null
+  /** Venue coordinates; null when the venue has never been geocoded. */
+  lon: number | null
+  lat: number | null
   geojson_name: string
   players: number
 }
@@ -255,18 +260,7 @@ export function AnimatedRegions({
   useEffect(() => {
     if (!features || !svgRef.current) return
 
-    const ukBbox = {
-      type: 'Feature' as const,
-      geometry: {
-        type: 'MultiPoint' as const,
-        coordinates: [
-          [-8.62, 49.94],
-          [1.76, 58.8],
-        ],
-      },
-      properties: {},
-    }
-    const projection = geoMercator().fitSize([width, height], ukBbox)
+    const projection = geoMercator().fitSize([width, height], UK_BBOX)
     const pathGen = geoPath().projection(projection)
 
     const svg = select(svgRef.current)
@@ -379,73 +373,11 @@ export function AnimatedRegions({
       )}
       {selectedRegion && eventWindow && (
         <RegionEventsPanel
-          region={selectedRegion}
+          title={selectedRegion}
           events={selectedEvents}
           windowEnd={eventWindow.end}
           onClose={() => setSelectedRegion(null)}
         />
-      )}
-    </div>
-  )
-}
-
-function RegionEventsPanel({
-  region,
-  events,
-  windowEnd,
-  onClose,
-}: {
-  region: string
-  events: RegionEvent[]
-  /** YYYY-MM-DD; the window is the year ending here. */
-  windowEnd: string
-  onClose: () => void
-}) {
-  return (
-    <div className="mt-4 rounded-lg border border-border bg-surface p-4">
-      <div className="mb-2 flex items-start justify-between gap-3">
-        <div>
-          <h3 className="text-lg font-semibold">{region}</h3>
-          <p className="text-sm text-muted-foreground">
-            Year up to {formatMapDate(new Date(windowEnd))}
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label="Close events list"
-          className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded hover:bg-muted"
-        >
-          <X size={16} />
-        </button>
-      </div>
-      {events.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          No events in this region in this period.
-        </p>
-      ) : (
-        <div className="flex flex-col gap-2">
-          {events.map((event) => {
-            const place = event.venueName ?? event.town
-            return (
-              <div key={event.id}>
-                <Link
-                  to="/event/$id"
-                  params={{ id: event.id }}
-                  search={{ tab: undefined, painting: undefined }}
-                  className="font-semibold"
-                >
-                  {event.name}
-                </Link>
-                <p className="text-sm text-muted-foreground">
-                  {formatMapDate(new Date(event.date))}
-                  {place ? ` · ${place}` : ''}
-                  {event.players ? ` · ${event.players} players` : ''}
-                </p>
-              </div>
-            )
-          })}
-        </div>
       )}
     </div>
   )
