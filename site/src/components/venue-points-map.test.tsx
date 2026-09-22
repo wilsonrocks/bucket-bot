@@ -1,10 +1,11 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, waitFor } from '@testing-library/react'
-import { afterEach, describe, expect, test, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import type { RegionEvent } from '#/components/animated-regions'
 import {
   VenuePointsMap,
   aggregateVenues,
+  spreadApart,
 } from '#/components/venue-points-map'
 
 // The real Link needs a RouterProvider; the panel's behaviour is what's under test.
@@ -17,6 +18,19 @@ vi.mock('#/components/link', () => ({
 }))
 
 afterEach(cleanup)
+
+// jsdom has no matchMedia, which `useMediaQuery` needs to pick the wide callout
+// layout over the narrow one.
+function setViewport(narrow: boolean) {
+  window.matchMedia = ((query: string) => ({
+    matches: narrow,
+    media: query,
+    addEventListener: () => {},
+    removeEventListener: () => {},
+  })) as unknown as typeof window.matchMedia
+}
+
+beforeEach(() => setViewport(false))
 
 function event(overrides: Partial<RegionEvent> & Pick<RegionEvent, 'id'>): RegionEvent {
   return {
@@ -88,6 +102,30 @@ describe('aggregateVenues', () => {
   })
 })
 
+describe('spreadApart', () => {
+  test('leaves positions that already clear the gap alone', () => {
+    expect(spreadApart([10, 60, 110], 20, 0, 200)).toEqual([10, 60, 110])
+  })
+
+  test('pushes crowded positions apart by at least the gap', () => {
+    const out = spreadApart([100, 105, 108], 20, 0, 400)
+    expect(out).toEqual([100, 120, 140])
+  })
+
+  test('keeps the run inside the bounds, still spaced, when it overflows', () => {
+    const out = spreadApart([380, 385, 390], 20, 0, 400)
+    expect(out).toEqual([360, 380, 400])
+  })
+
+  test('spaces a run too long for the bounds from the top edge down', () => {
+    const out = spreadApart([50, 50, 50, 50], 20, 0, 40)
+    expect(out).toEqual([0, 20, 40, 60])
+    for (let i = 1; i < out.length; i++) {
+      expect(out[i] - out[i - 1]).toBeGreaterThanOrEqual(20)
+    }
+  })
+})
+
 const events: RegionEvent[] = [
   event({ id: 1, name: 'Stockport Open', date: '2025-03-01' }),
   event({ id: 2, name: 'Stockport Masters', date: '2025-04-01' }),
@@ -121,7 +159,7 @@ test('renders one labelled dot per venue with events in the window', async () =>
   getByText('Falkirk (1)')
 })
 
-test('every dot is projected inside the viewBox', async () => {
+test('every dot is projected inside the map box', async () => {
   const { map } = await renderMap()
 
   for (const circle of map.querySelectorAll('circle')) {
@@ -131,6 +169,32 @@ test('every dot is projected inside the viewBox', async () => {
     expect(cx).toBeLessThan(500)
     expect(cy).toBeGreaterThan(0)
     expect(cy).toBeLessThan(700)
+  }
+})
+
+test('labels sit in the gutters, clear of each other, joined by leader lines', async () => {
+  const { map } = await renderMap()
+
+  const labels = [...map.querySelectorAll('text')]
+  expect(labels).toHaveLength(2)
+  for (const label of labels) {
+    const x = Number(label.getAttribute('x'))
+    // Outside the 0..500 map box, i.e. in a gutter rather than over the country.
+    expect(x < 0 || x > 500).toBe(true)
+  }
+
+  // One leader line per venue, each ending at its label.
+  const lines = [...map.querySelectorAll('polyline')]
+  expect(lines).toHaveLength(2)
+  for (const line of lines) {
+    const pts = line
+      .getAttribute('points')!
+      .split(' ')
+      .map((p) => p.split(',').map(Number))
+    expect(pts).toHaveLength(3)
+    // The last segment is horizontal, so the line meets the label head on.
+    expect(pts[1][1]).toBe(pts[2][1])
+    expect(labels.some((l) => Number(l.getAttribute('x')) === pts[2][0])).toBe(true)
   }
 })
 
@@ -167,4 +231,16 @@ test('Enter on a focused dot opens its panel', async () => {
   fireEvent.keyDown(map.querySelector('[data-venue="2"]')!, { key: 'Enter' })
 
   expect(queryByText('Falkirk Open')).not.toBeNull()
+})
+
+test('a narrow viewport drops the callouts for a list under the map', async () => {
+  setViewport(true)
+  const { map, getByRole, queryByText } = await renderMap()
+
+  expect(map.querySelectorAll('text')).toHaveLength(0)
+  expect(map.querySelectorAll('polyline')).toHaveLength(0)
+  expect(map.querySelectorAll('circle')).toHaveLength(2)
+
+  fireEvent.click(getByRole('button', { name: /Stockport · 2 events/ }))
+  expect(queryByText('Stockport Open')).not.toBeNull()
 })

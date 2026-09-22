@@ -1,7 +1,8 @@
 import { geoMercator, geoPath, type GeoPermissibleObjects } from 'd3-geo'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { RegionEventsPanel } from '#/components/region-events-panel'
 import type { RegionEvent } from '#/components/animated-regions'
+import { useMediaQuery } from '#/helpers/use-media-query'
 import { UK_BBOX } from '#/data/uk-bbox'
 import type { UkRegionFeature } from '#/data/uk-regions-geo'
 
@@ -65,6 +66,55 @@ export function aggregateVenues(
   }
 }
 
+/**
+ * Push an ascending list of wanted positions apart until every neighbouring pair
+ * is at least `gap` apart, keeping the whole run inside [min, max] and staying as
+ * close to the wanted positions as that allows.
+ */
+export function spreadApart(
+  wanted: number[],
+  gap: number,
+  min: number,
+  max: number,
+): number[] {
+  const out = [...wanted]
+  for (let i = 0; i < out.length; i++) {
+    out[i] = i === 0 ? Math.max(out[i], min) : Math.max(out[i], out[i - 1] + gap)
+  }
+  // The forward pass can run the tail off the bottom edge; walking back up pulls
+  // the overflow into the slack above.
+  if (out.length > 0 && out[out.length - 1] > max) {
+    out[out.length - 1] = max
+    for (let i = out.length - 2; i >= 0; i--) {
+      out[i] = Math.min(out[i], out[i + 1] - gap)
+    }
+    // …which can in turn push the head off the top. Both sequences step by at
+    // least `gap`, so taking the larger of the two keeps every pair apart.
+    for (let i = 0; i < out.length; i++) {
+      out[i] = Math.max(out[i], min + i * gap)
+    }
+  }
+  return out
+}
+
+/** The map itself; labels live in gutters either side of this box. */
+const MAP_W = 500
+const MAP_H = Math.round(MAP_W * 1.4)
+/** Room for a label like "Newport Pagnell (2)" beside the map. */
+const GUTTER = 175
+const LABEL_GAP = 24
+const LABEL_INSET = 12
+/** Length of the horizontal run of a leader line, next to its label. */
+const ELBOW = 26
+
+type LaidOutPoint = {
+  point: VenuePoint
+  x: number
+  y: number
+  side: 'left' | 'right'
+  labelY: number
+}
+
 type VenuePointsMapProps = {
   events: RegionEvent[]
   /** YYYY-MM-DD; the window shown is the year ending here. */
@@ -86,33 +136,50 @@ export function VenuePointsMap({ events, windowEnd }: VenuePointsMapProps) {
   }, [])
 
   const [selectedVenue, setSelectedVenue] = useState<number | null>(null)
-  const [hovered, setHovered] = useState<VenuePoint | null>(null)
-  const [mousePos, setMousePos] = useState<{ x: number; y: number } | null>(null)
-  const containerRef = useRef<HTMLDivElement | null>(null)
-
-  const width = 500
-  const height = Math.round(width * 1.4)
+  // The callout gutters need more width than a phone has, so small screens get the
+  // plain dots and read the names off the list underneath instead.
+  const isNarrow = useMediaQuery('(max-width: 640px)')
 
   const { points, unplaced } = useMemo(
     () => aggregateVenues(events, windowEnd),
     [events, windowEnd],
   )
 
-  // Nothing animates here, so the projection is plain React rendering rather than
-  // the d3 data-join the choropleth needs.
+  // Nothing animates here, so this is plain React rendering rather than the d3
+  // data-join the choropleth needs.
   const { pathGen, projection } = useMemo(() => {
-    const proj = geoMercator().fitSize([width, height], UK_BBOX)
+    const proj = geoMercator().fitSize([MAP_W, MAP_H], UK_BBOX)
     return { projection: proj, pathGen: geoPath().projection(proj) }
-  }, [width, height])
+  }, [])
 
-  const placed = useMemo(
-    () =>
-      points.flatMap((point) => {
-        const xy = projection([point.lon, point.lat])
-        return xy ? [{ point, x: xy[0], y: xy[1] }] : []
-      }),
-    [points, projection],
-  )
+  // Labels are stacked down each gutter in map order and joined to their dot by a
+  // leader line, so no two can ever overlap however tightly the venues cluster.
+  const laidOut = useMemo<LaidOutPoint[]>(() => {
+    const sides: Record<'left' | 'right', Array<{ point: VenuePoint; x: number; y: number }>> = {
+      left: [],
+      right: [],
+    }
+    const projected = points.flatMap((point) => {
+      const xy = projection([point.lon, point.lat])
+      return xy ? [{ point, x: xy[0], y: xy[1] }] : []
+    })
+    // Split down the middle of where the venues actually are rather than the middle
+    // of the map: UK venues cluster well east of centre, so a fixed midpoint would
+    // send almost every label to the right gutter in one long stack.
+    const xs = projected.map((p) => p.x)
+    const split = xs.length > 0 ? (Math.min(...xs) + Math.max(...xs)) / 2 : MAP_W / 2
+    for (const p of projected) sides[p.x < split ? 'left' : 'right'].push(p)
+    return (['left', 'right'] as const).flatMap((side) => {
+      const column = sides[side].sort((a, b) => a.y - b.y)
+      const ys = spreadApart(
+        column.map((c) => c.y),
+        LABEL_GAP,
+        LABEL_GAP / 2,
+        MAP_H - LABEL_GAP / 2,
+      )
+      return column.map((c, i) => ({ ...c, side, labelY: ys[i] }))
+    })
+  }, [points, projection])
 
   const selected = points.find((p) => p.venueId === selectedVenue) ?? null
 
@@ -120,24 +187,15 @@ export function VenuePointsMap({ events, windowEnd }: VenuePointsMapProps) {
     setSelectedVenue((prev) => (prev === venueId ? null : venueId))
   }
 
+  const gutter = isNarrow ? 0 : GUTTER
+
   return (
-    <div
-      ref={containerRef}
-      style={{ maxWidth: 480, margin: '0 auto', position: 'relative' }}
-      onMouseMove={(e) => {
-        const rect = e.currentTarget.getBoundingClientRect()
-        setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top })
-      }}
-      onMouseLeave={() => {
-        setMousePos(null)
-        setHovered(null)
-      }}
-    >
+    <div style={{ maxWidth: isNarrow ? 480 : 820, margin: '0 auto' }}>
       <svg
         data-testid="venue-points-map"
-        viewBox={`0 0 ${width} ${height}`}
+        viewBox={`${-gutter} 0 ${MAP_W + gutter * 2} ${MAP_H}`}
         width="100%"
-        style={{ maxHeight: '70vh' }}
+        style={{ maxHeight: '75vh' }}
       >
         <g>
           {features?.map((feature) => (
@@ -149,53 +207,68 @@ export function VenuePointsMap({ events, windowEnd }: VenuePointsMapProps) {
             />
           ))}
         </g>
+        {!isNarrow && (
+          <g className="stroke-muted-foreground" strokeWidth={1} fill="none">
+            {laidOut.map(({ point, x, y, side, labelY }) => {
+              const labelX = side === 'left' ? -LABEL_INSET : MAP_W + LABEL_INSET
+              const elbowX = side === 'left' ? labelX + ELBOW : labelX - ELBOW
+              return (
+                <polyline
+                  key={point.venueId}
+                  points={`${x},${y} ${elbowX},${labelY} ${labelX},${labelY}`}
+                />
+              )
+            })}
+          </g>
+        )}
         <g>
-          {placed.map(({ point, x, y }) => {
+          {laidOut.map(({ point, x, y, side, labelY }) => {
             // Area, not radius, carries the count — a 4-event town should look
             // four times the size of a 1-event one, not four times as wide.
-            const r = 3 + 2.5 * Math.sqrt(point.count)
-            // Labels sit to the right of their dot, flipping to the left near the
-            // east coast so they don't run off the viewBox.
-            const flip = x > width * 0.6
+            const r = 4 + 3 * Math.sqrt(point.count)
+            const isSelected = point.venueId === selectedVenue
+            const labelX = side === 'left' ? -LABEL_INSET : MAP_W + LABEL_INSET
             return (
-              <g key={point.venueId}>
+              <g
+                key={point.venueId}
+                cursor="pointer"
+                tabIndex={0}
+                role="button"
+                data-venue={point.venueId}
+                aria-label={`${point.label} — ${point.count} ${point.count === 1 ? 'event' : 'events'}`}
+                onClick={() => toggleVenue(point.venueId)}
+                onKeyDown={(e) => {
+                  if (e.key !== 'Enter' && e.key !== ' ') return
+                  e.preventDefault()
+                  toggleVenue(point.venueId)
+                }}
+              >
                 <circle
                   cx={x}
                   cy={y}
                   r={r}
                   className={
-                    point.venueId === selectedVenue
+                    isSelected
                       ? 'fill-blue-800 stroke-foreground dark:fill-blue-200'
                       : 'fill-blue-600 stroke-background dark:fill-blue-400'
                   }
-                  strokeWidth={point.venueId === selectedVenue ? 2 : 1}
-                  cursor="pointer"
-                  tabIndex={0}
-                  role="button"
-                  data-venue={point.venueId}
-                  aria-label={`${point.label} — ${point.count} ${point.count === 1 ? 'event' : 'events'}`}
-                  onMouseEnter={() => setHovered(point)}
-                  onMouseLeave={() => setHovered(null)}
-                  onClick={() => toggleVenue(point.venueId)}
-                  onKeyDown={(e) => {
-                    if (e.key !== 'Enter' && e.key !== ' ') return
-                    e.preventDefault()
-                    toggleVenue(point.venueId)
-                  }}
+                  strokeWidth={isSelected ? 2 : 1}
                 />
-                <text
-                  x={flip ? x - r - 4 : x + r + 4}
-                  y={y + 4}
-                  textAnchor={flip ? 'end' : 'start'}
-                  fontSize={12}
-                  // The halo keeps the label readable where it crosses a coastline
-                  // or another region's fill, in either theme.
-                  className="fill-foreground stroke-background pointer-events-none"
-                  strokeWidth={3}
-                  style={{ paintOrder: 'stroke' }}
-                >
-                  {point.label} ({point.count})
-                </text>
+                {!isNarrow && (
+                  <text
+                    x={labelX}
+                    y={labelY + 5}
+                    textAnchor={side === 'left' ? 'end' : 'start'}
+                    fontSize={15}
+                    className={
+                      isSelected
+                        ? 'fill-foreground font-semibold'
+                        : 'fill-foreground'
+                    }
+                  >
+                    {point.label} ({point.count})
+                  </text>
+                )}
               </g>
             )
           })}
@@ -206,20 +279,29 @@ export function VenuePointsMap({ events, windowEnd }: VenuePointsMapProps) {
           No events with a known location in this period.
         </p>
       )}
+      {isNarrow && points.length > 0 && (
+        <ul className="mt-3 flex flex-col gap-1">
+          {points.map((point) => (
+            <li key={point.venueId}>
+              <button
+                type="button"
+                onClick={() => toggleVenue(point.venueId)}
+                className="w-full rounded px-1 py-0.5 text-left hover:bg-muted"
+              >
+                {point.label}{' '}
+                <span className="text-muted-foreground">
+                  · {point.count} {point.count === 1 ? 'event' : 'events'}
+                </span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
       {unplaced > 0 && (
         <p className="mt-2 text-sm text-muted-foreground">
           {unplaced} {unplaced === 1 ? 'event is' : 'events are'} not shown — their
           venue has no location on record.
         </p>
-      )}
-      {hovered && mousePos && (
-        <div
-          className="pointer-events-none absolute whitespace-nowrap rounded border border-border bg-surface px-2.5 py-1 text-[13px] shadow"
-          style={{ left: mousePos.x + 12, top: mousePos.y - 8 }}
-        >
-          {hovered.events[0].venueName ?? hovered.label} — {hovered.count}{' '}
-          {hovered.count === 1 ? 'event' : 'events'}
-        </div>
       )}
       {selected && (
         <RegionEventsPanel
