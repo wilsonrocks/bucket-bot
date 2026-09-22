@@ -3,11 +3,11 @@ import { cleanup, fireEvent, render, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import type { RegionEvent } from '#/components/animated-regions'
 import {
-  VenuePointsMap,
-  aggregateVenues,
+  TownPointsMap,
+  aggregateTowns,
   labelMetrics,
   spreadApart,
-} from '#/components/venue-points-map'
+} from '#/components/town-points-map'
 
 // The real Link needs a RouterProvider; the panel's behaviour is what's under test.
 vi.mock('#/components/link', () => ({
@@ -59,9 +59,9 @@ function event(overrides: Partial<RegionEvent> & Pick<RegionEvent, 'id'>): Regio
 
 const windowEnd = '2025-06-01'
 
-describe('aggregateVenues', () => {
+describe('aggregateTowns', () => {
   test('groups by venue and counts events in the window', () => {
-    const { points } = aggregateVenues(
+    const { points } = aggregateTowns(
       [
         event({ id: 1 }),
         event({ id: 2, date: '2025-04-01' }),
@@ -79,7 +79,7 @@ describe('aggregateVenues', () => {
   })
 
   test('includes both window boundaries and excludes what falls outside', () => {
-    const { points } = aggregateVenues(
+    const { points } = aggregateTowns(
       [
         event({ id: 1, date: '2024-06-01' }),
         event({ id: 2, date: '2025-06-01' }),
@@ -94,7 +94,7 @@ describe('aggregateVenues', () => {
   })
 
   test('reports events at a venue with no coordinates instead of placing them', () => {
-    const { points, unplaced } = aggregateVenues(
+    const { points, unplaced } = aggregateTowns(
       [
         event({ id: 1 }),
         event({ id: 2, venueId: 3, town: 'Nowhere', lon: null, lat: null }),
@@ -107,8 +107,90 @@ describe('aggregateVenues', () => {
   })
 
   test('falls back to the venue name when the town is unknown', () => {
-    const { points } = aggregateVenues([event({ id: 1, town: null })], windowEnd)
+    const { points } = aggregateTowns([event({ id: 1, town: null })], windowEnd)
     expect(points[0].label).toBe('Element Games')
+  })
+})
+
+describe('aggregateTowns grouping by town', () => {
+  test('merges two venues in one town into a single dot', () => {
+    const { points } = aggregateTowns(
+      [
+        event({ id: 1, venueId: 1, venueName: 'Element Games', lon: -2.2, lat: 53.4 }),
+        event({ id: 2, venueId: 7, venueName: 'The Games Shop', lon: -2.1, lat: 53.5 }),
+      ],
+      windowEnd,
+    )
+
+    expect(points).toHaveLength(1)
+    expect(points[0].label).toBe('Stockport')
+    expect(points[0].count).toBe(2)
+    // Placed at the mean of the two venues.
+    expect(points[0].lon).toBeCloseTo(-2.15)
+    expect(points[0].lat).toBeCloseTo(53.45)
+  })
+
+  test('weights the position by venue, not by how many events each ran', () => {
+    const { points } = aggregateTowns(
+      [
+        event({ id: 1, venueId: 1, lon: -2.2, lat: 53.4 }),
+        event({ id: 2, venueId: 1, lon: -2.2, lat: 53.4 }),
+        event({ id: 3, venueId: 1, lon: -2.2, lat: 53.4 }),
+        event({ id: 4, venueId: 7, lon: -2.0, lat: 53.6 }),
+      ],
+      windowEnd,
+    )
+
+    expect(points[0].count).toBe(4)
+    expect(points[0].lon).toBeCloseTo(-2.1)
+    expect(points[0].lat).toBeCloseTo(53.5)
+  })
+
+  test('treats town names case- and whitespace-insensitively', () => {
+    const { points } = aggregateTowns(
+      [
+        event({ id: 1, venueId: 1, town: 'Stockport' }),
+        event({ id: 2, venueId: 7, town: '  stockport ' }),
+      ],
+      windowEnd,
+    )
+
+    expect(points).toHaveLength(1)
+    // Labelled as first written, not as last matched.
+    expect(points[0].label).toBe('Stockport')
+  })
+
+  test('keeps a venue with no town on a dot of its own', () => {
+    const { points } = aggregateTowns(
+      [
+        event({ id: 1, venueId: 1, town: 'Stockport' }),
+        event({ id: 2, venueId: 7, town: null, venueName: 'Somewhere Hall' }),
+        event({ id: 3, venueId: 8, town: '  ', venueName: 'Another Hall' }),
+      ],
+      windowEnd,
+    )
+
+    // Townless venues are not lumped together under one nameless dot.
+    expect(points.map((p) => p.label).sort()).toEqual([
+      'Another Hall',
+      'Somewhere Hall',
+      'Stockport',
+    ])
+  })
+
+  test('gathers every event of the town behind its dot', () => {
+    const { points } = aggregateTowns(
+      [
+        event({ id: 1, venueId: 1, name: 'At Element' }),
+        event({ id: 2, venueId: 7, name: 'At The Games Shop' }),
+      ],
+      windowEnd,
+    )
+
+    expect(points[0].events.map((e) => e.name)).toEqual([
+      'At Element',
+      'At The Games Shop',
+    ])
   })
 })
 
@@ -153,8 +235,8 @@ const events: RegionEvent[] = [
 ]
 
 async function renderMap() {
-  const utils = render(<VenuePointsMap events={events} windowEnd={windowEnd} />)
-  const map = utils.getByTestId('venue-points-map')
+  const utils = render(<TownPointsMap events={events} windowEnd={windowEnd} />)
+  const map = utils.getByTestId('town-points-map')
   await waitFor(() => {
     expect(map.querySelectorAll('path').length).toBeGreaterThan(0)
   })
@@ -164,7 +246,7 @@ async function renderMap() {
 test('renders one labelled dot per venue with events in the window', async () => {
   const { map, getByRole } = await renderMap()
 
-  expect(map.querySelectorAll('[data-venue]')).toHaveLength(2)
+  expect(map.querySelectorAll('[data-town]')).toHaveLength(2)
   getByRole('button', { name: 'Stockport (2)' })
   getByRole('button', { name: 'Falkirk (1)' })
 })
@@ -172,7 +254,7 @@ test('renders one labelled dot per venue with events in the window', async () =>
 test('every dot is projected inside the map box', async () => {
   const { map } = await renderMap()
 
-  for (const circle of map.querySelectorAll('[data-venue] circle')) {
+  for (const circle of map.querySelectorAll('[data-town] circle')) {
     const cx = Number(circle.getAttribute('cx'))
     const cy = Number(circle.getAttribute('cy'))
     expect(cx).toBeGreaterThan(0)
@@ -226,7 +308,7 @@ test('clicking a dot lists only that venue’s in-window events', async () => {
 
   expect(queryByText('Stockport Open')).toBeNull()
 
-  fireEvent.click(map.querySelector('[data-venue="1"]')!)
+  fireEvent.click(map.querySelector('[data-town="town:stockport"]')!)
 
   getByText('Stockport Open')
   getByText('Stockport Masters')
@@ -236,7 +318,7 @@ test('clicking a dot lists only that venue’s in-window events', async () => {
 
 test('clicking the same dot again, or the close button, dismisses the panel', async () => {
   const { map, getByLabelText, queryByText } = await renderMap()
-  const stockport = map.querySelector('[data-venue="1"]')!
+  const stockport = map.querySelector('[data-town="town:stockport"]')!
 
   fireEvent.click(stockport)
   fireEvent.click(getByLabelText('Close events list'))
@@ -299,7 +381,7 @@ test('a narrow viewport gives each dot a tap target bigger than the dot', async 
   setWidth(PHONE)
   const { map } = await renderMap()
 
-  for (const group of map.querySelectorAll('[data-venue]')) {
+  for (const group of map.querySelectorAll('[data-town]')) {
     const [hit, dot] = [...group.querySelectorAll('circle')]
     expect(hit.getAttribute('fill')).toBe('transparent')
     expect(Number(hit.getAttribute('r'))).toBeGreaterThanOrEqual(18)
@@ -310,7 +392,7 @@ test('a narrow viewport gives each dot a tap target bigger than the dot', async 
 test('a wide viewport keeps the panel below the map rather than a modal', async () => {
   const { map, queryByRole, getByText } = await renderMap()
 
-  fireEvent.click(map.querySelector('[data-venue="1"]')!)
+  fireEvent.click(map.querySelector('[data-town="town:stockport"]')!)
 
   expect(queryByRole('dialog')).toBeNull()
   getByText('Stockport Open')

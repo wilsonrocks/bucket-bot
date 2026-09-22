@@ -1,6 +1,6 @@
 import { fetchRegionEvents, fetchRegionsOverTime } from '#/queries'
 import { AnimatedRegions } from '#/components/animated-regions'
-import { VenuePointsMap } from '#/components/venue-points-map'
+import { TownPointsMap } from '#/components/town-points-map'
 import { Tabs } from '#/components/routed-tabs'
 import { createFileRoute } from '@tanstack/react-router'
 import { SITE_NAME, seo } from '#/helpers/seo'
@@ -29,20 +29,20 @@ export const Route = createFileRoute('/regions')({
 
 function RouteComponent() {
   const { snapshots, events } = Route.useLoaderData()
-  // The venue map isn't animated, so it shows the same window as the choropleth's
+  // The town map isn't animated, so it shows the same window as the choropleth's
   // final frame: the year ending at the most recent snapshot.
   const windowEnd = snapshots.at(-1)?.date ?? new Date().toISOString().slice(0, 10)
   return (
     <Tabs defaultValue="regions">
       <Tabs.List mb="md">
         <Tabs.Tab value="regions">Regions</Tabs.Tab>
-        <Tabs.Tab value="venues">Venues</Tabs.Tab>
+        <Tabs.Tab value="towns">Towns</Tabs.Tab>
       </Tabs.List>
       <Tabs.Panel value="regions">
         <AnimatedRegions snapshots={snapshots as any} events={events} />
       </Tabs.Panel>
-      <Tabs.Panel value="venues">
-        <VenuePointsMap events={events} windowEnd={windowEnd} />
+      <Tabs.Panel value="towns">
+        <TownPointsMap events={events} windowEnd={windowEnd} />
       </Tabs.Panel>
     </Tabs>
   )

@@ -5,10 +5,12 @@ import type { RegionEvent } from '#/components/animated-regions'
 import { UK_BBOX } from '#/data/uk-bbox'
 import type { UkRegionFeature } from '#/data/uk-regions-geo'
 
-export type VenuePoint = {
-  venueId: number
-  /** Venue name where there is one, otherwise the town. */
+export type TownPoint = {
+  /** Stable identity for the group — see `townKey`. */
+  key: string
+  /** The town, or the venue's name where the venue has no town recorded. */
   label: string
+  /** Centre of the town's venues. */
   lon: number
   lat: number
   count: number
@@ -20,19 +22,34 @@ function isoDate(d: Date) {
 }
 
 /**
- * Roll the flat event list up into one point per venue, over the same rolling year
+ * Events are grouped by town rather than by venue, because a dot stands for a
+ * place: two venues in one town belong on one dot, under one name. A venue with
+ * no town recorded keeps a dot of its own rather than being lumped in with every
+ * other townless venue.
+ */
+function townKey(event: RegionEvent): string {
+  const town = event.town?.trim()
+  return town ? `town:${town.toLowerCase()}` : `venue:${event.venueId}`
+}
+
+/**
+ * Roll the flat event list up into one point per town, over the same rolling year
  * the choropleth's final frame shades. Events at a venue that was never geocoded
  * can't be placed, so they're reported separately rather than silently dropped.
  */
-export function aggregateVenues(
+export function aggregateTowns(
   events: RegionEvent[],
   windowEnd: string,
-): { points: VenuePoint[]; unplaced: number } {
+): { points: TownPoint[]; unplaced: number } {
   const start = new Date(windowEnd)
   start.setFullYear(start.getFullYear() - 1)
   const windowStart = isoDate(start)
 
-  const byVenue = new Map<number, VenuePoint>()
+  type Group = Omit<TownPoint, 'lon' | 'lat'> & {
+    /** Coordinates per venue, so a town with two venues counts each one once. */
+    venues: Map<number, [number, number]>
+  }
+  const byTown = new Map<string, Group>()
   let unplaced = 0
 
   for (const event of events) {
@@ -41,28 +58,37 @@ export function aggregateVenues(
       unplaced++
       continue
     }
-    const existing = byVenue.get(event.venueId)
+    const key = townKey(event)
+    const existing = byTown.get(key)
     if (existing) {
       existing.count++
       existing.events.push(event)
+      existing.venues.set(event.venueId, [event.lon, event.lat])
       continue
     }
-    byVenue.set(event.venueId, {
-      venueId: event.venueId,
-      label: event.town ?? event.venueName ?? 'Unknown',
-      lon: event.lon,
-      lat: event.lat,
+    byTown.set(key, {
+      key,
+      label: event.town?.trim() || event.venueName || 'Unknown',
       count: 1,
       events: [event],
+      venues: new Map([[event.venueId, [event.lon, event.lat]]]),
     })
   }
 
-  // Biggest first so the busiest venues paint underneath the smaller ones rather
+  const points = [...byTown.values()].map(({ venues, ...group }) => {
+    // The venues of one town sit a street apart, so their mean is a fair enough
+    // spot for the town — and it's exact for the usual single-venue case.
+    const coords = [...venues.values()]
+    return {
+      ...group,
+      lon: coords.reduce((sum, [lon]) => sum + lon, 0) / coords.length,
+      lat: coords.reduce((sum, [, lat]) => sum + lat, 0) / coords.length,
+    }
+  })
+
+  // Biggest first so the busiest towns paint underneath the smaller ones rather
   // than hiding them.
-  return {
-    points: [...byVenue.values()].sort((a, b) => b.count - a.count),
-    unplaced,
-  }
+  return { points: points.sort((a, b) => b.count - a.count), unplaced }
 }
 
 /**
@@ -135,20 +161,20 @@ export function labelMetrics(containerWidth: number) {
 }
 
 type LaidOutPoint = {
-  point: VenuePoint
+  point: TownPoint
   x: number
   y: number
   side: 'left' | 'right'
   labelY: number
 }
 
-type VenuePointsMapProps = {
+type TownPointsMapProps = {
   events: RegionEvent[]
   /** YYYY-MM-DD; the window shown is the year ending here. */
   windowEnd: string
 }
 
-export function VenuePointsMap({ events, windowEnd }: VenuePointsMapProps) {
+export function TownPointsMap({ events, windowEnd }: TownPointsMapProps) {
   // Same deal as AnimatedRegions: the ~98KB of geometry is client-only so it stays
   // out of the SSR payload and the eager bundle.
   const [features, setFeatures] = useState<UkRegionFeature[] | null>(null)
@@ -162,7 +188,7 @@ export function VenuePointsMap({ events, windowEnd }: VenuePointsMapProps) {
     }
   }, [])
 
-  const [selectedVenue, setSelectedVenue] = useState<number | null>(null)
+  const [selectedTown, setSelectedTown] = useState<string | null>(null)
 
   // The label layout is driven by how wide the map actually ended up, not by a
   // media query: the same component is narrow in a sidebar and wide on a phone in
@@ -188,7 +214,7 @@ export function VenuePointsMap({ events, windowEnd }: VenuePointsMapProps) {
   )
 
   const { points, unplaced } = useMemo(
-    () => aggregateVenues(events, windowEnd),
+    () => aggregateTowns(events, windowEnd),
     [events, windowEnd],
   )
 
@@ -202,7 +228,7 @@ export function VenuePointsMap({ events, windowEnd }: VenuePointsMapProps) {
   // Labels are stacked down each gutter in map order and joined to their dot by a
   // leader line, so no two can ever overlap however tightly the venues cluster.
   const laidOut = useMemo<LaidOutPoint[]>(() => {
-    const sides: Record<'left' | 'right', Array<{ point: VenuePoint; x: number; y: number }>> = {
+    const sides: Record<'left' | 'right', Array<{ point: TownPoint; x: number; y: number }>> = {
       left: [],
       right: [],
     }
@@ -228,10 +254,10 @@ export function VenuePointsMap({ events, windowEnd }: VenuePointsMapProps) {
     })
   }, [points, projection, labelGap])
 
-  const selected = points.find((p) => p.venueId === selectedVenue) ?? null
+  const selected = points.find((p) => p.key === selectedTown) ?? null
 
-  function toggleVenue(venueId: number) {
-    setSelectedVenue((prev) => (prev === venueId ? null : venueId))
+  function toggleTown(key: string) {
+    setSelectedTown((prev) => (prev === key ? null : key))
   }
 
   const viewBoxW = MAP_W + gutter * 2
@@ -256,7 +282,7 @@ export function VenuePointsMap({ events, windowEnd }: VenuePointsMapProps) {
       */}
       <div ref={containerRef} className="relative">
         <svg
-          data-testid="venue-points-map"
+          data-testid="town-points-map"
           viewBox={`${-gutter} 0 ${viewBoxW} ${MAP_H}`}
           width="100%"
           className="block"
@@ -277,7 +303,7 @@ export function VenuePointsMap({ events, windowEnd }: VenuePointsMapProps) {
               const elbowX = side === 'left' ? labelX + elbow : labelX - elbow
               return (
                 <polyline
-                  key={point.venueId}
+                  key={point.key}
                   points={`${x},${y} ${elbowX},${labelY} ${labelX},${labelY}`}
                 />
               )
@@ -288,17 +314,17 @@ export function VenuePointsMap({ events, windowEnd }: VenuePointsMapProps) {
               // Area, not radius, carries the count — a 4-event town should look
               // four times the size of a 1-event one, not four times as wide.
               const r = 4 + 3 * Math.sqrt(point.count)
-              const isSelected = point.venueId === selectedVenue
+              const isSelected = point.key === selectedTown
               return (
-                // Purely a click target: every venue's gutter label is a real
+                // Purely a click target: every town's gutter label is a real
                 // <button>, so giving the dot its own tab stop would just duplicate
                 // it in the a11y tree.
                 <g
-                  key={point.venueId}
+                  key={point.key}
                   cursor="pointer"
                   aria-hidden
-                  data-venue={point.venueId}
-                  onClick={() => toggleVenue(point.venueId)}
+                  data-town={point.key}
+                  onClick={() => toggleTown(point.key)}
                 >
                   {/*
                     A dot is only ~11px across once the map is fitted to a phone,
@@ -328,13 +354,13 @@ export function VenuePointsMap({ events, windowEnd }: VenuePointsMapProps) {
           around 11px once the map was fitted to the page.
         */}
         {laidOut.map(({ point, side, labelY }) => {
-          const isSelected = point.venueId === selectedVenue
+          const isSelected = point.key === selectedTown
           const labelX = side === 'left' ? -labelInset : MAP_W + labelInset
           return (
             <button
-              key={point.venueId}
+              key={point.key}
               type="button"
-              onClick={() => toggleVenue(point.venueId)}
+              onClick={() => toggleTown(point.key)}
               // Wide labels already read the count out; narrow ones drop it, so
               // spell it out for anyone not looking at the map.
               aria-label={
@@ -386,14 +412,14 @@ export function VenuePointsMap({ events, windowEnd }: VenuePointsMapProps) {
             title={selected.label}
             events={selected.events}
             windowEnd={windowEnd}
-            onClose={() => setSelectedVenue(null)}
+            onClose={() => setSelectedTown(null)}
           />
         ) : (
           <RegionEventsPanel
             title={selected.label}
             events={selected.events}
             windowEnd={windowEnd}
-            onClose={() => setSelectedVenue(null)}
+            onClose={() => setSelectedTown(null)}
           />
         ))}
     </figure>
