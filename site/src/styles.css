@@ -52,3 +52,10 @@ body {
     opacity: 1;
   }
 }
+
+/* Every Dialog.Overlay wears this, so the timing is set in one place. */
+@media (prefers-reduced-motion: no-preference) {
+  .overlay-fade {
+    animation: overlay-fade-in 0.1s ease-out;
+  }
+}

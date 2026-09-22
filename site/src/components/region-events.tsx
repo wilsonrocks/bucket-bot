@@ -97,7 +97,7 @@ export function RegionEventsModal({
   return (
     <Dialog.Root open onOpenChange={(open) => !open && onClose()}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-40 bg-black/50 motion-safe:animate-[overlay-fade-in_0.2s_ease-out]" />
+        <Dialog.Overlay className="overlay-fade fixed inset-0 z-40 bg-black/50" />
         <Dialog.Content className="fixed left-1/2 top-1/2 z-50 max-h-[80vh] w-[92vw] max-w-sm -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-lg bg-surface p-5 shadow-xl">
           <div className="mb-3 flex items-start justify-between gap-3">
             <div>

@@ -313,7 +313,7 @@ export function TownPointsMap({ events, windowEnd }: TownPointsMapProps) {
             {laidOut.map(({ point, x, y }) => {
               // Area, not radius, carries the count — a 4-event town should look
               // four times the size of a 1-event one, not four times as wide.
-              const r = 4 + 3 * Math.sqrt(point.count)
+              const r = 6 + 4.5 * Math.sqrt(point.count)
               const isSelected = point.key === selectedTown
               return (
                 // Purely a click target: every town's gutter label is a real
