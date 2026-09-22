@@ -241,126 +241,132 @@ export function VenuePointsMap({ events, windowEnd }: VenuePointsMapProps) {
   const pctY = (y: number) => (y / MAP_H) * 100
 
   return (
-    <div
-      ref={containerRef}
-      className="relative mx-auto"
-      style={{ maxWidth: DEFAULT_WIDTH }}
-    >
+    <figure className="mx-auto" style={{ maxWidth: DEFAULT_WIDTH }}>
+      <figcaption className="mb-2 text-lg font-semibold">
+        UK Events in last 12 months
+      </figcaption>
       {/*
-        No maxHeight: the SVG has to fill its box exactly for the percentage
-        positions above to line the HTML labels up with their leader lines.
+        Nothing but the map and its labels belongs in this box: the labels are
+        positioned as percentages of it, so anything else inside — a caption, the
+        events panel — would stretch it and drag every label out of line with the
+        leader line it belongs to.
+
+        No maxHeight, for the same reason: the SVG has to fill the box exactly
+        for those percentages to land where the lines end.
       */}
-      <svg
-        data-testid="venue-points-map"
-        viewBox={`${-gutter} 0 ${viewBoxW} ${MAP_H}`}
-        width="100%"
-        className="block"
-      >
-        <g>
-          {features?.map((feature) => (
-            <path
-              key={feature.properties.rgn19nm}
-              d={pathGen(feature as GeoPermissibleObjects) ?? ''}
-              className="fill-muted stroke-background"
-              strokeWidth={0.5}
-            />
-          ))}
-        </g>
-        <g className="stroke-muted-foreground" strokeWidth={1} fill="none">
-          {laidOut.map(({ point, x, y, side, labelY }) => {
-            const labelX = side === 'left' ? -labelInset : MAP_W + labelInset
-            const elbowX = side === 'left' ? labelX + elbow : labelX - elbow
-            return (
-              <polyline
-                key={point.venueId}
-                points={`${x},${y} ${elbowX},${labelY} ${labelX},${labelY}`}
+      <div ref={containerRef} className="relative">
+        <svg
+          data-testid="venue-points-map"
+          viewBox={`${-gutter} 0 ${viewBoxW} ${MAP_H}`}
+          width="100%"
+          className="block"
+        >
+          <g>
+            {features?.map((feature) => (
+              <path
+                key={feature.properties.rgn19nm}
+                d={pathGen(feature as GeoPermissibleObjects) ?? ''}
+                className="fill-muted stroke-background"
+                strokeWidth={0.5}
               />
-            )
-          })}
-        </g>
-        <g>
-          {laidOut.map(({ point, x, y }) => {
-            // Area, not radius, carries the count — a 4-event town should look
-            // four times the size of a 1-event one, not four times as wide.
-            const r = 4 + 3 * Math.sqrt(point.count)
-            const isSelected = point.venueId === selectedVenue
-            return (
-              // Purely a click target: every venue's gutter label is a real
-              // <button>, so giving the dot its own tab stop would just duplicate
-              // it in the a11y tree.
-              <g
-                key={point.venueId}
-                cursor="pointer"
-                aria-hidden
-                data-venue={point.venueId}
-                onClick={() => toggleVenue(point.venueId)}
-              >
-                {/*
-                  A dot is only ~11px across once the map is fitted to a phone,
-                  well under a comfortable tap target, so the visible circle sits
-                  on a bigger invisible one.
-                */}
-                <circle cx={x} cy={y} r={Math.max(r + 8, 18)} fill="transparent" />
-                <circle
-                  cx={x}
-                  cy={y}
-                  r={r}
-                  className={
-                    isSelected
-                      ? 'fill-blue-800 stroke-foreground dark:fill-blue-200'
-                      : 'fill-blue-600 stroke-background dark:fill-blue-400'
-                  }
-                  strokeWidth={isSelected ? 2 : 1}
+            ))}
+          </g>
+          <g className="stroke-muted-foreground" strokeWidth={1} fill="none">
+            {laidOut.map(({ point, x, y, side, labelY }) => {
+              const labelX = side === 'left' ? -labelInset : MAP_W + labelInset
+              const elbowX = side === 'left' ? labelX + elbow : labelX - elbow
+              return (
+                <polyline
+                  key={point.venueId}
+                  points={`${x},${y} ${elbowX},${labelY} ${labelX},${labelY}`}
                 />
-              </g>
-            )
-          })}
-        </g>
-      </svg>
-      {/*
-        The labels are HTML rather than SVG <text> so they render at a real CSS
-        font size. Inside the SVG they'd scale with the viewBox, which left them
-        around 11px once the map was fitted to the page.
-      */}
-      {laidOut.map(({ point, side, labelY }) => {
-        const isSelected = point.venueId === selectedVenue
-        const labelX = side === 'left' ? -labelInset : MAP_W + labelInset
-        return (
-          <button
-            key={point.venueId}
-            type="button"
-            onClick={() => toggleVenue(point.venueId)}
-            // Wide labels already read the count out; narrow ones drop it, so
-            // spell it out for anyone not looking at the map.
-            aria-label={
-              narrow
-                ? `${point.label} — ${point.count} ${point.count === 1 ? 'event' : 'events'}`
-                : undefined
-            }
-            className={`absolute leading-tight hover:underline ${
-              narrow ? 'text-xs' : 'whitespace-nowrap text-base'
-            } ${side === 'left' ? 'text-right' : 'text-left'} ${
-              isSelected ? 'font-semibold' : ''
-            }`}
-            style={{
-              left: `${pctX(labelX)}%`,
-              top: `${pctY(labelY)}%`,
-              transform: `translate(${side === 'left' ? '-100%' : '0'}, -50%)`,
-              // A long name would otherwise run off a phone screen entirely.
-              maxWidth: narrow ? gutterPx : undefined,
-            }}
-          >
-            {point.label}
-            {/* The count needs a gutter of its own; too tight to spare on a phone. */}
-            {!narrow && (
-              <>
-                {' '}
-                <span className="text-muted-foreground">({point.count})</span>
-              </>
-            )}
-          </button>
-        )
-      })}
+              )
+            })}
+          </g>
+          <g>
+            {laidOut.map(({ point, x, y }) => {
+              // Area, not radius, carries the count — a 4-event town should look
+              // four times the size of a 1-event one, not four times as wide.
+              const r = 4 + 3 * Math.sqrt(point.count)
+              const isSelected = point.venueId === selectedVenue
+              return (
+                // Purely a click target: every venue's gutter label is a real
+                // <button>, so giving the dot its own tab stop would just duplicate
+                // it in the a11y tree.
+                <g
+                  key={point.venueId}
+                  cursor="pointer"
+                  aria-hidden
+                  data-venue={point.venueId}
+                  onClick={() => toggleVenue(point.venueId)}
+                >
+                  {/*
+                    A dot is only ~11px across once the map is fitted to a phone,
+                    well under a comfortable tap target, so the visible circle sits
+                    on a bigger invisible one.
+                  */}
+                  <circle cx={x} cy={y} r={Math.max(r + 8, 18)} fill="transparent" />
+                  <circle
+                    cx={x}
+                    cy={y}
+                    r={r}
+                    className={
+                      isSelected
+                        ? 'fill-blue-800 stroke-foreground dark:fill-blue-200'
+                        : 'fill-blue-600 stroke-background dark:fill-blue-400'
+                    }
+                    strokeWidth={isSelected ? 2 : 1}
+                  />
+                </g>
+              )
+            })}
+          </g>
+        </svg>
+        {/*
+          The labels are HTML rather than SVG <text> so they render at a real CSS
+          font size. Inside the SVG they'd scale with the viewBox, which left them
+          around 11px once the map was fitted to the page.
+        */}
+        {laidOut.map(({ point, side, labelY }) => {
+          const isSelected = point.venueId === selectedVenue
+          const labelX = side === 'left' ? -labelInset : MAP_W + labelInset
+          return (
+            <button
+              key={point.venueId}
+              type="button"
+              onClick={() => toggleVenue(point.venueId)}
+              // Wide labels already read the count out; narrow ones drop it, so
+              // spell it out for anyone not looking at the map.
+              aria-label={
+                narrow
+                  ? `${point.label} — ${point.count} ${point.count === 1 ? 'event' : 'events'}`
+                  : undefined
+              }
+              className={`absolute leading-tight hover:underline ${
+                narrow ? 'text-xs' : 'whitespace-nowrap text-base'
+              } ${side === 'left' ? 'text-right' : 'text-left'} ${
+                isSelected ? 'font-semibold' : ''
+              }`}
+              style={{
+                left: `${pctX(labelX)}%`,
+                top: `${pctY(labelY)}%`,
+                transform: `translate(${side === 'left' ? '-100%' : '0'}, -50%)`,
+                // A long name would otherwise run off a phone screen entirely.
+                maxWidth: narrow ? gutterPx : undefined,
+              }}
+            >
+              {point.label}
+              {/* The count needs a gutter of its own; too tight to spare on a phone. */}
+              {!narrow && (
+                <>
+                  {' '}
+                  <span className="text-muted-foreground">({point.count})</span>
+                </>
+              )}
+            </button>
+          )
+        })}
+      </div>
       {points.length === 0 && features && (
         <p className="text-sm text-muted-foreground">
           No events with a known location in this period.
@@ -390,6 +396,6 @@ export function VenuePointsMap({ events, windowEnd }: VenuePointsMapProps) {
             onClose={() => setSelectedVenue(null)}
           />
         ))}
-    </div>
+    </figure>
   )
 }
