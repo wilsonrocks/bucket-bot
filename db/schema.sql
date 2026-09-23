@@ -1,5 +1,5 @@
 
-\restrict SfBcudyZAaBePs3YcgadZUNxUVizxpeXg4zDVtexa94uhZDMJwcY604ShJ3nlbS
+\restrict NO0uaYfqk2iTY0fLrTpMiw1yQ1x0rf0cRZRvfVCYh8SXBJQohmcTCqbvcjcbyWX
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -496,6 +496,9 @@ ALTER TABLE ONLY public.tier
     ADD CONSTRAINT tier_pkey PRIMARY KEY (code);
 
 ALTER TABLE ONLY public.tourney
+    ADD CONSTRAINT tourney_bot_id_key UNIQUE (bot_id);
+
+ALTER TABLE ONLY public.tourney
     ADD CONSTRAINT tourney_discord_post_id_key UNIQUE (discord_post_id);
 
 ALTER TABLE ONLY public.tourney
@@ -563,8 +566,6 @@ CREATE INDEX idx_result_tourney_id ON public.result USING btree (tourney_id);
 CREATE INDEX idx_team_ranking_snapshot_batch_type_code ON public.team_ranking_snapshot_batch USING btree (type_code);
 
 CREATE INDEX idx_team_venue_id ON public.team USING btree (venue_id);
-
-CREATE INDEX idx_tourney_bot_id ON public.tourney USING btree (bot_id);
 
 CREATE INDEX idx_tourney_venue_id ON public.tourney USING btree (venue_id);
 
@@ -674,5 +675,5 @@ ALTER TABLE ONLY public.upcoming_event
 ALTER TABLE ONLY public.venue
     ADD CONSTRAINT venue_region_id_fkey FOREIGN KEY (region_id) REFERENCES public.region(id);
 
-\unrestrict SfBcudyZAaBePs3YcgadZUNxUVizxpeXg4zDVtexa94uhZDMJwcY604ShJ3nlbS
+\unrestrict NO0uaYfqk2iTY0fLrTpMiw1yQ1x0rf0cRZRvfVCYh8SXBJQohmcTCqbvcjcbyWX
 
