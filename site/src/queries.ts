@@ -978,11 +978,29 @@ export const searchSite = createServerFn()
     const [players, events, upcomingEvents, teams, rankingTypes] = await Promise.all([
       db
         .selectFrom('player')
-        .select(['id', 'name'])
-        .where(sql<boolean>`search_vector @@ ${tsquery} OR name % ${text} OR short_name % ${text}`)
-        .orderBy(sql`search_vector @@ ${tsquery}`, 'desc')
-        .orderBy(sql`GREATEST(similarity(name, ${text}), COALESCE(similarity(short_name, ${text}), 0))`, 'desc')
-        .orderBy('name')
+        .leftJoin('discord_user', 'discord_user.discord_user_id', 'player.discord_id')
+        .select(['player.id', 'player.name'])
+        .where(
+          sql<boolean>`player.search_vector @@ ${tsquery}
+            OR discord_user.search_vector @@ ${tsquery}
+            OR player.name % ${text}
+            OR player.short_name % ${text}`,
+        )
+        .orderBy(
+          sql`player.search_vector @@ ${tsquery}
+            OR COALESCE(discord_user.search_vector @@ ${tsquery}, false)`,
+          'desc',
+        )
+        .orderBy(
+          sql`GREATEST(
+            similarity(player.name, ${text}),
+            COALESCE(similarity(player.short_name, ${text}), 0),
+            COALESCE(similarity(discord_user.discord_display_name, ${text}), 0),
+            COALESCE(similarity(discord_user.discord_username, ${text}), 0)
+          )`,
+          'desc',
+        )
+        .orderBy('player.name')
         .limit(SEARCH_LIMIT)
         .execute(),
       db
