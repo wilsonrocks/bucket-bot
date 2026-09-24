@@ -11,6 +11,8 @@ type Entry = {
   lastmod?: string;
 };
 
+// New entity pages also belong in the site search: searchSite in #/queries
+// (database-backed pages) and #/helpers/search-pages (static pages).
 const STATIC_ENTRIES: Entry[] = [
   { url: "/best-painted", priority: 1.0, changefreq: "weekly" },
   { url: "/", priority: 0.9, changefreq: "weekly" },

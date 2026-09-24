@@ -1,8 +1,10 @@
 import { AppNavLink } from "./app-nav-link";
+import { SiteSearch } from "./site-search";
 
 export const SiteNavbar = () => {
   return (
     <div className="flex h-full flex-col gap-1 overflow-y-auto">
+      <SiteSearch />
       <AppNavLink to="/events" label="Past Events" />
       <AppNavLink to="/upcoming-events" label="Upcoming Events" />
       <AppNavLink to="/players" label="Players" />

@@ -1,8 +1,9 @@
 import { createServerFn } from '@tanstack/react-start'
 import { sql } from 'kysely'
-import { formatISO } from 'date-fns'
+import { format, formatISO } from 'date-fns'
 import { db } from './db-client'
 import { achievementsEnabled } from '#/helpers/achievements'
+import { prefixTsquery } from '#/helpers/prefix-tsquery'
 
 // ── Rankings ───────────────────────────────────────────────────────────────
 
@@ -953,4 +954,108 @@ export const fetchUpcomingEvent = createServerFn()
         row.organiserUsername ??
         null,
     }
+  })
+
+// ── Search ─────────────────────────────────────────────────────────────────
+// Backs the site search box. Every page type with its own page belongs here
+// (static pages are in #/helpers/search-pages) — keep in step with
+// sitemap[.]xml.ts when adding entity pages.
+
+export type SearchResult = { href: string; label: string; detail?: string }
+export type SearchGroup = { heading: string; results: SearchResult[] }
+
+const SEARCH_LIMIT = 5
+
+export const searchSite = createServerFn()
+  .inputValidator((d: { text: string }) => d)
+  .handler(async ({ data: { text } }): Promise<SearchGroup[]> => {
+    const query = prefixTsquery(text)
+    if (!query) return []
+    const tsquery = sql`to_tsquery('simple', ${query})`
+
+    // Word-prefix matches first, then trigram similarity as a typo fallback —
+    // the same shape as the admin player search.
+    const [players, events, upcomingEvents, teams, rankingTypes] = await Promise.all([
+      db
+        .selectFrom('player')
+        .select(['id', 'name'])
+        .where(sql<boolean>`search_vector @@ ${tsquery} OR name % ${text} OR short_name % ${text}`)
+        .orderBy(sql`search_vector @@ ${tsquery}`, 'desc')
+        .orderBy(sql`GREATEST(similarity(name, ${text}), COALESCE(similarity(short_name, ${text}), 0))`, 'desc')
+        .orderBy('name')
+        .limit(SEARCH_LIMIT)
+        .execute(),
+      db
+        .selectFrom('tourney')
+        .select(['id', 'name', 'date'])
+        .where(sql<boolean>`search_vector @@ ${tsquery} OR name % ${text}`)
+        .orderBy(sql`search_vector @@ ${tsquery}`, 'desc')
+        .orderBy(sql`similarity(name, ${text})`, 'desc')
+        .orderBy('date', 'desc')
+        .limit(SEARCH_LIMIT)
+        .execute(),
+      db
+        .selectFrom('upcoming_event')
+        .select(['id', 'name', 'starts_at'])
+        .where('starts_at', '>=', new Date())
+        .where(sql<boolean>`search_vector @@ ${tsquery} OR name % ${text}`)
+        .orderBy(sql`search_vector @@ ${tsquery}`, 'desc')
+        .orderBy(sql`similarity(name, ${text})`, 'desc')
+        .orderBy('starts_at')
+        .limit(SEARCH_LIMIT)
+        .execute(),
+      db
+        .selectFrom('team')
+        .select(['id', 'name'])
+        .where(sql<boolean>`search_vector @@ ${tsquery} OR name % ${text}`)
+        .orderBy(sql`search_vector @@ ${tsquery}`, 'desc')
+        .orderBy(sql`similarity(name, ${text})`, 'desc')
+        .orderBy('name')
+        .limit(SEARCH_LIMIT)
+        .execute(),
+      // A handful of rows, so no stored vector or index.
+      db
+        .selectFrom('ranking_snapshot_type')
+        .select(['code', 'name'])
+        .where('display', '=', true)
+        .where(sql<boolean>`to_tsvector('simple', name) @@ ${tsquery} OR name % ${text}`)
+        .orderBy('display_order')
+        .limit(SEARCH_LIMIT)
+        .execute(),
+    ])
+
+    const groups: SearchGroup[] = [
+      {
+        heading: 'Players',
+        results: players.map((p) => ({ href: `/player/${p.id}`, label: p.name })),
+      },
+      {
+        heading: 'Rankings',
+        results: rankingTypes.map((r) => ({
+          href: `/rankings?typeCode=${encodeURIComponent(r.code)}`,
+          label: r.name,
+        })),
+      },
+      {
+        heading: 'Teams',
+        results: teams.map((t) => ({ href: `/team/${t.id}`, label: t.name })),
+      },
+      {
+        heading: 'Upcoming Events',
+        results: upcomingEvents.map((e) => ({
+          href: `/upcoming-event/${e.id}`,
+          label: e.name,
+          detail: format(e.starts_at, 'd MMM yyyy'),
+        })),
+      },
+      {
+        heading: 'Past Events',
+        results: events.map((e) => ({
+          href: `/event/${e.id}`,
+          label: e.name,
+          detail: format(e.date, 'd MMM yyyy'),
+        })),
+      },
+    ]
+    return groups.filter((g) => g.results.length > 0)
   })
