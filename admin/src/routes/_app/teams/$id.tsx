@@ -130,7 +130,10 @@ function RouteComponent() {
       items:
         playerResults?.map((p) => ({
           value: `player:${p.id}`,
-          label: p.name,
+          // Players can match on their Discord name, so show it alongside.
+          label: p.discord_username
+            ? `${p.name} · @${p.discord_username}`
+            : p.name,
         })) ?? [],
     },
     {

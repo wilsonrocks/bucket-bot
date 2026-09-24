@@ -1,5 +1,5 @@
 
-\restrict NO0uaYfqk2iTY0fLrTpMiw1yQ1x0rf0cRZRvfVCYh8SXBJQohmcTCqbvcjcbyWX
+\restrict iiwW75bbgm5nYJEhOQ8o1sEzTOzRJNScrsJGvpJHhrgokfV9YUFYIshmllHvAla
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -47,7 +47,8 @@ CREATE TABLE public.discord_user (
     discord_nickname text,
     discord_avatar_url text,
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
-    discord_username text
+    discord_username text,
+    search_vector tsvector GENERATED ALWAYS AS (to_tsvector('simple'::regconfig, ((((COALESCE(discord_username, ''::text) || ' '::text) || COALESCE(discord_display_name, ''::text)) || ' '::text) || COALESCE(discord_nickname, ''::text)))) STORED
 );
 
 CREATE TABLE public.faction (
@@ -183,7 +184,8 @@ CREATE TABLE public.player (
     name text NOT NULL,
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
     longshanks_name text,
-    short_name text
+    short_name text,
+    search_vector tsvector GENERATED ALWAYS AS (to_tsvector('simple'::regconfig, ((COALESCE(name, ''::text) || ' '::text) || COALESCE(short_name, ''::text)))) STORED
 );
 
 CREATE TABLE public.player_achievement (
@@ -531,6 +533,8 @@ CREATE INDEX idx_discord_user_display_name_trgm ON public.discord_user USING gin
 
 CREATE INDEX idx_discord_user_nickname_trgm ON public.discord_user USING gin (discord_nickname public.gin_trgm_ops);
 
+CREATE INDEX idx_discord_user_search_vector ON public.discord_user USING gin (search_vector);
+
 CREATE INDEX idx_discord_user_username_trgm ON public.discord_user USING gin (discord_username public.gin_trgm_ops);
 
 CREATE INDEX idx_membership_player_id ON public.membership USING btree (player_id);
@@ -550,6 +554,8 @@ CREATE INDEX idx_player_achievement_tourney_id ON public.player_achievement USIN
 CREATE INDEX idx_player_achievement_unannounced ON public.player_achievement USING btree (player_id) WHERE (discord_message_id IS NULL);
 
 CREATE INDEX idx_player_identity_provider_external ON public.player_identity USING btree (identity_provider_id, external_id);
+
+CREATE INDEX idx_player_search_vector ON public.player USING gin (search_vector);
 
 CREATE INDEX idx_ranking_snapshot_batch_type_code ON public.ranking_snapshot_batch USING btree (type_code);
 
@@ -675,5 +681,5 @@ ALTER TABLE ONLY public.upcoming_event
 ALTER TABLE ONLY public.venue
     ADD CONSTRAINT venue_region_id_fkey FOREIGN KEY (region_id) REFERENCES public.region(id);
 
-\unrestrict NO0uaYfqk2iTY0fLrTpMiw1yQ1x0rf0cRZRvfVCYh8SXBJQohmcTCqbvcjcbyWX
+\unrestrict iiwW75bbgm5nYJEhOQ8o1sEzTOzRJNScrsJGvpJHhrgokfV9YUFYIshmllHvAla
 

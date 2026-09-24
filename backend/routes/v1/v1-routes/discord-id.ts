@@ -4,9 +4,18 @@ import type { AppEnv } from "../../../hono-env.js";
 import { syncDiscordUsers } from "../../../logic/discord/sync-discord-users.js";
 import { runManualStep } from "../../../logic/pipeline/run-step.js";
 import { attachDiscordUserToPlayer } from "../../../logic/identities/merge-player.js";
+import { prefixTsquery } from "../../../logic/search/prefix-tsquery";
 import { isRankingReporter } from "../permissions.js";
 
 const ErrorSchema = z.object({ error: z.string() });
+
+const DISCORD_USER_COLUMNS = [
+  "discord_user.discord_user_id",
+  "discord_user.discord_username",
+  "discord_user.discord_display_name",
+  "discord_user.discord_nickname",
+  "discord_user.discord_avatar_url",
+] as const;
 
 const DiscordUserSchema = z.object({
   discord_user_id: z.string(),
@@ -47,7 +56,7 @@ export const getAllDiscordUsers: RouteHandler<typeof getAllDiscordUsersRoute, Ap
   const users = await c.get("db")
     .selectFrom("discord_user")
     .leftJoin("player", "player.discord_id", "discord_user.discord_user_id")
-    .selectAll()
+    .select([...DISCORD_USER_COLUMNS, "player.name"])
     .orderBy("discord_username", "asc")
     .execute();
 
@@ -79,20 +88,36 @@ export const searchDiscordUsersByName: RouteHandler<typeof searchDiscordUsersRou
     return c.json({ error: "Invalid or missing 'text' query parameter" }, 400);
   }
 
+  const query = prefixTsquery(text);
+  if (!query) {
+    return c.json([], 200);
+  }
+
+  // Word matches find "Radek (washed up weak player)" from "radek"; trigram
+  // similarity on the whole name is kept as a fallback for typos.
   const candidates = await c.get("db")
     .selectFrom("discord_user")
-    .selectAll()
+    .select(DISCORD_USER_COLUMNS)
     .where(
-      sql<boolean>`discord_user.discord_username % ${text} OR discord_display_name % ${text} OR discord_nickname % ${text}`,
+      sql<boolean>`discord_user.search_vector @@ to_tsquery('simple', ${query})
+        OR discord_user.discord_username % ${text}
+        OR discord_display_name % ${text}
+        OR discord_nickname % ${text}`,
+    )
+    .orderBy(
+      sql<boolean>`discord_user.search_vector @@ to_tsquery('simple', ${query})`,
+      "desc",
     )
     .orderBy(
       sql<number>`GREATEST(
         similarity(discord_user.discord_username, ${text}),
-        similarity(discord_display_name, ${text}),
-        similarity(discord_nickname, ${text})
+        COALESCE(similarity(discord_display_name, ${text}), 0),
+        COALESCE(similarity(discord_nickname, ${text}), 0)
       )`,
       "desc",
     )
+    .orderBy("discord_user.discord_user_id")
+    .limit(20)
     .execute();
 
   return c.json(candidates as any, 200);
