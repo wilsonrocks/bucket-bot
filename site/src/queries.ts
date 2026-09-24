@@ -973,6 +973,8 @@ export const searchSite = createServerFn()
     if (!query) return []
     const tsquery = sql`to_tsquery('simple', ${query})`
 
+    // The OR conditions are bracketed because Kysely doesn't wrap raw sql, and
+    // they're ANDed with other filters (e.g. upcoming events' date).
     // Word-prefix matches first, then trigram similarity as a typo fallback —
     // the same shape as the admin player search.
     const [players, events, upcomingEvents, teams, rankingTypes] = await Promise.all([
@@ -981,10 +983,10 @@ export const searchSite = createServerFn()
         .leftJoin('discord_user', 'discord_user.discord_user_id', 'player.discord_id')
         .select(['player.id', 'player.name'])
         .where(
-          sql<boolean>`player.search_vector @@ ${tsquery}
+          sql<boolean>`(player.search_vector @@ ${tsquery}
             OR discord_user.search_vector @@ ${tsquery}
             OR player.name % ${text}
-            OR player.short_name % ${text}`,
+            OR player.short_name % ${text})`,
         )
         .orderBy(
           sql`player.search_vector @@ ${tsquery}
@@ -1006,7 +1008,7 @@ export const searchSite = createServerFn()
       db
         .selectFrom('tourney')
         .select(['id', 'name', 'date'])
-        .where(sql<boolean>`search_vector @@ ${tsquery} OR name % ${text}`)
+        .where(sql<boolean>`(search_vector @@ ${tsquery} OR name % ${text})`)
         .orderBy(sql`search_vector @@ ${tsquery}`, 'desc')
         .orderBy(sql`similarity(name, ${text})`, 'desc')
         .orderBy('date', 'desc')
@@ -1016,7 +1018,7 @@ export const searchSite = createServerFn()
         .selectFrom('upcoming_event')
         .select(['id', 'name', 'starts_at'])
         .where('starts_at', '>=', new Date())
-        .where(sql<boolean>`search_vector @@ ${tsquery} OR name % ${text}`)
+        .where(sql<boolean>`(search_vector @@ ${tsquery} OR name % ${text})`)
         .orderBy(sql`search_vector @@ ${tsquery}`, 'desc')
         .orderBy(sql`similarity(name, ${text})`, 'desc')
         .orderBy('starts_at')
@@ -1025,7 +1027,7 @@ export const searchSite = createServerFn()
       db
         .selectFrom('team')
         .select(['id', 'name'])
-        .where(sql<boolean>`search_vector @@ ${tsquery} OR name % ${text}`)
+        .where(sql<boolean>`(search_vector @@ ${tsquery} OR name % ${text})`)
         .orderBy(sql`search_vector @@ ${tsquery}`, 'desc')
         .orderBy(sql`similarity(name, ${text})`, 'desc')
         .orderBy('name')
@@ -1036,7 +1038,7 @@ export const searchSite = createServerFn()
         .selectFrom('ranking_snapshot_type')
         .select(['code', 'name'])
         .where('display', '=', true)
-        .where(sql<boolean>`to_tsvector('simple', name) @@ ${tsquery} OR name % ${text}`)
+        .where(sql<boolean>`(to_tsvector('simple', name) @@ ${tsquery} OR name % ${text})`)
         .orderBy('display_order')
         .limit(SEARCH_LIMIT)
         .execute(),
