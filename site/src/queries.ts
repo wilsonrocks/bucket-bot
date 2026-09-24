@@ -977,7 +977,7 @@ export const searchSite = createServerFn()
     // they're ANDed with other filters (e.g. upcoming events' date).
     // Word-prefix matches first, then trigram similarity as a typo fallback —
     // the same shape as the admin player search.
-    const [players, events, upcomingEvents, teams, rankingTypes] = await Promise.all([
+    const [players, events, upcomingEvents, teams, rankingTypes, paintings] = await Promise.all([
       db
         .selectFrom('player')
         .leftJoin('discord_user', 'discord_user.discord_user_id', 'player.discord_id')
@@ -1042,6 +1042,27 @@ export const searchSite = createServerFn()
         .orderBy('display_order')
         .limit(SEARCH_LIMIT)
         .execute(),
+      db
+        .selectFrom('painting_winner')
+        .innerJoin('painting_category', 'painting_category.id', 'painting_winner.category_id')
+        .innerJoin('tourney', 'tourney.id', 'painting_category.tourney_id')
+        .innerJoin('player_identity', 'player_identity.id', 'painting_winner.player_identity_id')
+        .leftJoin('player', 'player.id', 'player_identity.player_id')
+        .select([
+          'painting_winner.id',
+          'painting_winner.model',
+          'painting_category.name as categoryName',
+          'tourney.name as tourneyName',
+          sql<string>`coalesce(player.name, player_identity.provider_name)`.as('playerName'),
+        ])
+        .where(
+          sql<boolean>`(painting_winner.search_vector @@ ${tsquery} OR painting_winner.model % ${text})`,
+        )
+        .orderBy(sql`painting_winner.search_vector @@ ${tsquery}`, 'desc')
+        .orderBy(sql`COALESCE(similarity(painting_winner.model, ${text}), 0)`, 'desc')
+        .orderBy('tourney.date', 'desc')
+        .limit(SEARCH_LIMIT)
+        .execute(),
     ])
 
     const groups: SearchGroup[] = [
@@ -1066,6 +1087,14 @@ export const searchSite = createServerFn()
           href: `/upcoming-event/${e.id}`,
           label: e.name,
           detail: format(e.starts_at, 'd MMM yyyy'),
+        })),
+      },
+      {
+        heading: 'Best Painted',
+        results: paintings.map((w) => ({
+          href: `/best-painted?painting=${w.id}`,
+          label: w.model ?? w.categoryName,
+          detail: `${w.playerName} · ${w.tourneyName}`,
         })),
       },
       {

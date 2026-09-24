@@ -1,5 +1,5 @@
 
-\restrict ACgc3kaSjsNnhfdg9eZT7aDPdaHfiGh5Ierl9ch5ysPxELNSkKVnm7AzsKUcu4y
+\restrict NCPq8O6uoixL5w9sehn95UDaUe4psvgur8qSUkcOG0lWDdkKgYc754JozrLdA5f
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -155,6 +155,7 @@ CREATE TABLE public.painting_winner (
     player_identity_id integer NOT NULL,
     image_key text,
     description text,
+    search_vector tsvector GENERATED ALWAYS AS (to_tsvector('simple'::regconfig, ((COALESCE(model, ''::text) || ' '::text) || COALESCE(description, ''::text)))) STORED,
     CONSTRAINT painting_winner_position_check CHECK (("position" > 0))
 );
 
@@ -550,6 +551,8 @@ CREATE INDEX idx_painting_winner_category_id ON public.painting_winner USING btr
 
 CREATE INDEX idx_painting_winner_player_identity_id ON public.painting_winner USING btree (player_identity_id);
 
+CREATE INDEX idx_painting_winner_search_vector ON public.painting_winner USING gin (search_vector);
+
 CREATE INDEX idx_player_achievement_achievement_id ON public.player_achievement USING btree (achievement_id);
 
 CREATE INDEX idx_player_achievement_tourney_id ON public.player_achievement USING btree (tourney_id);
@@ -690,5 +693,5 @@ ALTER TABLE ONLY public.upcoming_event
 ALTER TABLE ONLY public.venue
     ADD CONSTRAINT venue_region_id_fkey FOREIGN KEY (region_id) REFERENCES public.region(id);
 
-\unrestrict ACgc3kaSjsNnhfdg9eZT7aDPdaHfiGh5Ierl9ch5ysPxELNSkKVnm7AzsKUcu4y
+\unrestrict NCPq8O6uoixL5w9sehn95UDaUe4psvgur8qSUkcOG0lWDdkKgYc754JozrLdA5f
 

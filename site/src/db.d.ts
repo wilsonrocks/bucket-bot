@@ -137,6 +137,7 @@ export interface PaintingWinner {
   model: string | null;
   player_identity_id: number;
   position: number;
+  search_vector: Generated<string | null>;
 }
 
 export interface PipelineJobStep {
