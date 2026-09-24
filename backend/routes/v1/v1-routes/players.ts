@@ -3,6 +3,7 @@ import { sql, type Kysely } from "kysely";
 import type { DB } from "kysely-codegen";
 import type { AppEnv } from "../../../hono-env.js";
 import { mergePlaceholderIntoPlayer } from "../../../logic/identities/merge-player.js";
+import { prefixTsquery } from "../../../logic/search/prefix-tsquery";
 import { isRankingReporter } from "../permissions.js";
 
 const PlayerSearchResultSchema = z.object({
@@ -31,6 +32,14 @@ export const searchPlayersRoute = createRoute({
 export const searchPlayersHandler: RouteHandler<typeof searchPlayersRoute, AppEnv> = async (c) => {
   const { text } = c.req.valid("query");
 
+  const query = prefixTsquery(text);
+  if (!query) {
+    return c.json([], 200);
+  }
+
+  // Word matches on the player's own names or their linked Discord names find
+  // "Radek (washed up weak player)" from "radek"; trigram similarity on the
+  // whole name is kept as a fallback for typos.
   const players = await c.get("db")
     .selectFrom("player")
     .leftJoin("discord_user", "discord_user.discord_user_id", "player.discord_id")
@@ -43,15 +52,26 @@ export const searchPlayersHandler: RouteHandler<typeof searchPlayersRoute, AppEn
       "discord_user.discord_avatar_url",
     ])
     .where(
-      sql<boolean>`player.name % ${text} OR player.short_name % ${text}`,
+      sql<boolean>`player.search_vector @@ to_tsquery('simple', ${query})
+        OR discord_user.search_vector @@ to_tsquery('simple', ${query})
+        OR player.name % ${text}
+        OR player.short_name % ${text}`,
+    )
+    .orderBy(
+      sql<boolean>`player.search_vector @@ to_tsquery('simple', ${query})
+        OR COALESCE(discord_user.search_vector @@ to_tsquery('simple', ${query}), false)`,
+      "desc",
     )
     .orderBy(
       sql<number>`GREATEST(
         similarity(player.name, ${text}),
-        COALESCE(similarity(player.short_name, ${text}), 0)
+        COALESCE(similarity(player.short_name, ${text}), 0),
+        COALESCE(similarity(discord_user.discord_display_name, ${text}), 0),
+        COALESCE(similarity(discord_user.discord_username, ${text}), 0)
       )`,
       "desc",
     )
+    .orderBy("player.name")
     .limit(10)
     .execute();
 

@@ -30,6 +30,7 @@ export interface DiscordUser {
   discord_nickname: string | null;
   discord_user_id: string;
   discord_username: string | null;
+  search_vector: Generated<string | null>;
 }
 
 export interface Faction {
@@ -156,6 +157,7 @@ export interface Player {
   id: Generated<number>;
   longshanks_name: string | null;
   name: string;
+  search_vector: Generated<string | null>;
   short_name: string | null;
 }
 
