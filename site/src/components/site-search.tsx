@@ -115,9 +115,9 @@ export function SiteSearch() {
         )}
       </div>
       {searching && (
-        <div id={listId} role="listbox" aria-label="Search results" className="mt-2 text-sm">
+        <div id={listId} role="listbox" aria-label="Search results" className="mt-2 max-h-[60vh] overflow-y-auto rounded-md border border-border bg-muted p-1 text-sm shadow-sm">
           {groups.map((group) => (
-            <div key={group.heading} role="group" aria-label={group.heading} className="mb-2">
+            <div key={group.heading} role="group" aria-label={group.heading} className="mb-1 last:mb-0">
               <div className="px-3 py-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 {group.heading}
               </div>
@@ -137,7 +137,7 @@ export function SiteSearch() {
                     }}
                     onMouseEnter={() => setActive(i)}
                     className={`block rounded px-3 py-1.5 text-foreground no-underline ${
-                      i === active ? 'bg-muted' : ''
+                      i === active ? 'bg-surface ring-1 ring-border' : 'hover:bg-surface'
                     }`}
                   >
                     <span className="block truncate">{result.label}</span>
