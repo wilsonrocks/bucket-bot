@@ -1,5 +1,5 @@
 
-\restrict iiwW75bbgm5nYJEhOQ8o1sEzTOzRJNScrsJGvpJHhrgokfV9YUFYIshmllHvAla
+\restrict NCPq8O6uoixL5w9sehn95UDaUe4psvgur8qSUkcOG0lWDdkKgYc754JozrLdA5f
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -155,6 +155,7 @@ CREATE TABLE public.painting_winner (
     player_identity_id integer NOT NULL,
     image_key text,
     description text,
+    search_vector tsvector GENERATED ALWAYS AS (to_tsvector('simple'::regconfig, ((COALESCE(model, ''::text) || ' '::text) || COALESCE(description, ''::text)))) STORED,
     CONSTRAINT painting_winner_position_check CHECK (("position" > 0))
 );
 
@@ -305,7 +306,8 @@ CREATE TABLE public.team (
     description text,
     venue_id integer,
     brand_colour text,
-    image_key text
+    image_key text,
+    search_vector tsvector GENERATED ALWAYS AS (to_tsvector('simple'::regconfig, COALESCE(name, ''::text))) STORED
 );
 
     AS integer
@@ -355,7 +357,8 @@ CREATE TABLE public.tourney (
     rounds integer DEFAULT 3 NOT NULL,
     days integer DEFAULT 1 NOT NULL,
     organiser_discord_id text,
-    bot_id text
+    bot_id text,
+    search_vector tsvector GENERATED ALWAYS AS (to_tsvector('simple'::regconfig, ((COALESCE(name, ''::text) || ' '::text) || COALESCE(venue, ''::text)))) STORED
 );
 
     AS integer
@@ -372,7 +375,8 @@ CREATE TABLE public.upcoming_event (
     organiser_discord_id text,
     location text,
     geom public.geometry(Point,4326),
-    region_id integer
+    region_id integer,
+    search_vector tsvector GENERATED ALWAYS AS (to_tsvector('simple'::regconfig, ((COALESCE(name, ''::text) || ' '::text) || COALESCE(location, ''::text)))) STORED
 );
 
     AS integer
@@ -547,6 +551,8 @@ CREATE INDEX idx_painting_winner_category_id ON public.painting_winner USING btr
 
 CREATE INDEX idx_painting_winner_player_identity_id ON public.painting_winner USING btree (player_identity_id);
 
+CREATE INDEX idx_painting_winner_search_vector ON public.painting_winner USING gin (search_vector);
+
 CREATE INDEX idx_player_achievement_achievement_id ON public.player_achievement USING btree (achievement_id);
 
 CREATE INDEX idx_player_achievement_tourney_id ON public.player_achievement USING btree (tourney_id);
@@ -571,9 +577,15 @@ CREATE INDEX idx_result_tourney_id ON public.result USING btree (tourney_id);
 
 CREATE INDEX idx_team_ranking_snapshot_batch_type_code ON public.team_ranking_snapshot_batch USING btree (type_code);
 
+CREATE INDEX idx_team_search_vector ON public.team USING gin (search_vector);
+
 CREATE INDEX idx_team_venue_id ON public.team USING btree (venue_id);
 
+CREATE INDEX idx_tourney_search_vector ON public.tourney USING gin (search_vector);
+
 CREATE INDEX idx_tourney_venue_id ON public.tourney USING btree (venue_id);
+
+CREATE INDEX idx_upcoming_event_search_vector ON public.upcoming_event USING gin (search_vector);
 
 CREATE INDEX idx_venue_region_id ON public.venue USING btree (region_id);
 
@@ -681,5 +693,5 @@ ALTER TABLE ONLY public.upcoming_event
 ALTER TABLE ONLY public.venue
     ADD CONSTRAINT venue_region_id_fkey FOREIGN KEY (region_id) REFERENCES public.region(id);
 
-\unrestrict iiwW75bbgm5nYJEhOQ8o1sEzTOzRJNScrsJGvpJHhrgokfV9YUFYIshmllHvAla
+\unrestrict NCPq8O6uoixL5w9sehn95UDaUe4psvgur8qSUkcOG0lWDdkKgYc754JozrLdA5f
 

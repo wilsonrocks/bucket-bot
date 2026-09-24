@@ -137,6 +137,7 @@ export interface PaintingWinner {
   model: string | null;
   player_identity_id: number;
   position: number;
+  search_vector: Generated<string | null>;
 }
 
 export interface PipelineJobStep {
@@ -257,6 +258,7 @@ export interface Team {
   id: Generated<number>;
   image_key: string | null;
   name: string;
+  search_vector: Generated<string | null>;
   venue_id: number | null;
 }
 
@@ -296,6 +298,7 @@ export interface Tourney {
   number_of_players: number;
   organiser_discord_id: string | null;
   rounds: Generated<number>;
+  search_vector: Generated<string | null>;
   submitted: Generated<boolean | null>;
   tier_code: Generated<string | null>;
   venue: string | null;
@@ -311,6 +314,7 @@ export interface UpcomingEvent {
   name: string;
   organiser_discord_id: string | null;
   region_id: number | null;
+  search_vector: Generated<string | null>;
   starts_at: Timestamp;
   venue_id: number | null;
 }
