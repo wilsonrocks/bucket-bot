@@ -966,6 +966,14 @@ export type SearchGroup = { heading: string; results: SearchResult[] }
 
 const SEARCH_LIMIT = 5
 
+// A failing query (e.g. a missing column when migrations lag a deploy) is
+// logged and leaves only its own group empty, not the whole search.
+function rowsOrEmpty<T>(result: PromiseSettledResult<T[]>, name: string): T[] {
+  if (result.status === 'fulfilled') return result.value
+  console.error(`Site search: ${name} query failed`, result.reason)
+  return []
+}
+
 export const searchSite = createServerFn()
   .inputValidator((d: { text: string }) => d)
   .handler(async ({ data: { text } }): Promise<SearchGroup[]> => {
@@ -977,7 +985,7 @@ export const searchSite = createServerFn()
     // they're ANDed with other filters (e.g. upcoming events' date).
     // Word-prefix matches first, then trigram similarity as a typo fallback —
     // the same shape as the admin player search.
-    const [players, events, upcomingEvents, teams, rankingTypes, paintings] = await Promise.all([
+    const settled = await Promise.allSettled([
       db
         .selectFrom('player')
         .leftJoin('discord_user', 'discord_user.discord_user_id', 'player.discord_id')
@@ -1064,6 +1072,14 @@ export const searchSite = createServerFn()
         .limit(SEARCH_LIMIT)
         .execute(),
     ])
+    const [players, events, upcomingEvents, teams, rankingTypes, paintings] = [
+      rowsOrEmpty(settled[0], 'players'),
+      rowsOrEmpty(settled[1], 'events'),
+      rowsOrEmpty(settled[2], 'upcoming events'),
+      rowsOrEmpty(settled[3], 'teams'),
+      rowsOrEmpty(settled[4], 'ranking types'),
+      rowsOrEmpty(settled[5], 'painting winners'),
+    ] as const
 
     const groups: SearchGroup[] = [
       {

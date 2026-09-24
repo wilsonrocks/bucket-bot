@@ -5,6 +5,7 @@ on:
       - main
     paths:
       - "backend/**"
+      - "db/migrations/**"
       - ".github/workflows/deploy-backend.yml"
   workflow_dispatch:
 
