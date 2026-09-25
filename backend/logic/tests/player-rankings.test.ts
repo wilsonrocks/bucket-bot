@@ -359,4 +359,40 @@ describe("generating player rankings", () => {
     expect(eveEvents.length, "only one event for eve").toBe(1);
     expect(eveEvents[0]!.tourney_id).toBe(2); // from tourney2
   });
+
+  test("deleting a tourney cascades to its ranking snapshot events", async () => {
+    await generateRankings(dbClient, "ROLLING_YEAR");
+
+    const eventsFor = (tourneyId: number) =>
+      dbClient
+        .selectFrom("ranking_snapshot_event")
+        .select("tourney_id")
+        .where("tourney_id", "=", tourneyId)
+        .execute();
+
+    expect((await eventsFor(2)).length).toBeGreaterThan(0);
+    const otherEventCount = (
+      await dbClient
+        .selectFrom("ranking_snapshot_event")
+        .select("tourney_id")
+        .where("tourney_id", "!=", 2)
+        .execute()
+    ).length;
+    expect(otherEventCount).toBeGreaterThan(0);
+
+    await dbClient.deleteFrom("tourney").where("id", "=", 2).execute();
+
+    expect(await eventsFor(2)).toEqual([]);
+    const results = await dbClient
+      .selectFrom("result")
+      .select("id")
+      .where("tourney_id", "=", 2)
+      .execute();
+    expect(results).toEqual([]);
+    const remaining = await dbClient
+      .selectFrom("ranking_snapshot_event")
+      .select("tourney_id")
+      .execute();
+    expect(remaining.length).toBe(otherEventCount);
+  });
 });

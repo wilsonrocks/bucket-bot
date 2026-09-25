@@ -1,5 +1,5 @@
 
-\restrict NCPq8O6uoixL5w9sehn95UDaUe4psvgur8qSUkcOG0lWDdkKgYc754JozrLdA5f
+\restrict ke37nqfjztLolYPptsJaUmwh5guObdvgBqgW9dyPclxRgTyKLfeHdVvHG4csXuL
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -649,10 +649,10 @@ ALTER TABLE ONLY public.ranking_snapshot_event
     ADD CONSTRAINT ranking_snapshot_event_batch_id_fkey FOREIGN KEY (batch_id) REFERENCES public.ranking_snapshot_batch(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY public.ranking_snapshot_event
-    ADD CONSTRAINT ranking_snapshot_event_event_id_fkey FOREIGN KEY (tourney_id) REFERENCES public.tourney(id);
+    ADD CONSTRAINT ranking_snapshot_event_player_id_fkey FOREIGN KEY (player_id) REFERENCES public.player(id);
 
 ALTER TABLE ONLY public.ranking_snapshot_event
-    ADD CONSTRAINT ranking_snapshot_event_player_id_fkey FOREIGN KEY (player_id) REFERENCES public.player(id);
+    ADD CONSTRAINT ranking_snapshot_event_tourney_id_fkey FOREIGN KEY (tourney_id) REFERENCES public.tourney(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY public.ranking_snapshot
     ADD CONSTRAINT ranking_snapshot_player_id_fkey FOREIGN KEY (player_id) REFERENCES public.player(id);
@@ -693,5 +693,5 @@ ALTER TABLE ONLY public.upcoming_event
 ALTER TABLE ONLY public.venue
     ADD CONSTRAINT venue_region_id_fkey FOREIGN KEY (region_id) REFERENCES public.region(id);
 
-\unrestrict NCPq8O6uoixL5w9sehn95UDaUe4psvgur8qSUkcOG0lWDdkKgYc754JozrLdA5f
+\unrestrict ke37nqfjztLolYPptsJaUmwh5guObdvgBqgW9dyPclxRgTyKLfeHdVvHG4csXuL
 
