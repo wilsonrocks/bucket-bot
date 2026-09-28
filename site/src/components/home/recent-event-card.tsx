@@ -50,7 +50,7 @@ export function RecentEventCard({ data }: { data: RecentEvent }) {
         <Link
           to="/event/$id"
           params={{ id: data.id }}
-          search={{ tab: undefined, painting: undefined }}
+          search={{ tab: undefined, painting: undefined, photo: undefined }}
           className="font-semibold"
         >
           {data.name}

@@ -65,7 +65,7 @@ export const uploadHandler: RouteHandler<typeof uploadRoute, AppEnv> = async (c)
 
   const { type } = c.req.valid("query");
 
-  const ALLOWED_TYPES = ["team", "painting", "achievement"];
+  const ALLOWED_TYPES = ["team", "painting", "achievement", "event"];
   if (!ALLOWED_TYPES.includes(type)) {
     return c.json({ error: "Invalid upload type" }, 400);
   }

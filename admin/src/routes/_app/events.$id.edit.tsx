@@ -45,6 +45,7 @@ import z from 'zod'
 import { Tabs } from '@/components/routed-tabs'
 import { IconTrash } from '@tabler/icons-react'
 import { ImageUploader } from '@/components/ImageUploader'
+import { EventPhotos } from '@/components/EventPhotos'
 
 const eventParamsValidator = z.object({ id: z.coerce.number() })
 
@@ -169,6 +170,7 @@ function RouteComponent() {
         <Tabs.List>
           <Tabs.Tab value="details">Details</Tabs.Tab>
           <Tabs.Tab value="bestPainted">Best Painted</Tabs.Tab>
+          <Tabs.Tab value="photos">Photos</Tabs.Tab>
           <Tabs.Tab value="players">Players</Tabs.Tab>
           <Tabs.Tab value="discord">Discord</Tabs.Tab>
         </Tabs.List>
@@ -399,6 +401,12 @@ function RouteComponent() {
           >
             Save Best Painted
           </Button>
+        </Tabs.Panel>
+        <Tabs.Panel value="photos">
+          <Title order={3} mb="md">
+            Photos
+          </Title>
+          <EventPhotos tourneyId={Number(id)} />
         </Tabs.Panel>
         <Tabs.Panel value="players">
           <Title order={3} mb="md">

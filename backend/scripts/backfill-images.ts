@@ -47,7 +47,7 @@ async function streamToBuffer(stream: NodeJS.ReadableStream): Promise<Buffer> {
 }
 
 async function distinctImageKeys(): Promise<string[]> {
-  const [teams, paintings] = await Promise.all([
+  const [teams, paintings, eventPhotos] = await Promise.all([
     dbClient
       .selectFrom("team")
       .select("image_key")
@@ -60,9 +60,10 @@ async function distinctImageKeys(): Promise<string[]> {
       .where("image_key", "is not", null)
       .distinct()
       .execute(),
+    dbClient.selectFrom("tourney_photo").select("image_key").distinct().execute(),
   ]);
   const keys = new Set<string>();
-  for (const r of [...teams, ...paintings]) if (r.image_key) keys.add(r.image_key);
+  for (const r of [...teams, ...paintings, ...eventPhotos]) if (r.image_key) keys.add(r.image_key);
   return [...keys];
 }
 

@@ -162,6 +162,18 @@ import {
 } from "./v1-routes/team-memberships";
 import { uploadHandler, uploadRoute } from "./v1-routes/upload";
 import {
+  addTourneyPhotosHandler,
+  addTourneyPhotosRoute,
+  deleteTourneyPhotoHandler,
+  deleteTourneyPhotoRoute,
+  getTourneyPhotosHandler,
+  getTourneyPhotosRoute,
+  reorderTourneyPhotosHandler,
+  reorderTourneyPhotosRoute,
+  updateTourneyPhotoHandler,
+  updateTourneyPhotoRoute,
+} from "./v1-routes/tourney-photos";
+import {
   teamRankingsHandler,
   teamRankingsRoute,
   postTeamRankingsHandler,
@@ -319,6 +331,7 @@ v1Router.openapi(rankingsRoute, rankingsHandler);
 v1Router.openapi(rankingsPlayerRoute, rankingsPlayerHandler);
 v1Router.openapi(allTourneysRoute, allTourneys);
 v1Router.openapi(detailTourneyRoute, detailTourney);
+v1Router.openapi(getTourneyPhotosRoute, getTourneyPhotosHandler);
 v1Router.openapi(getTourneysForPlayerRoute, getTourneysForPlayerHandler);
 v1Router.openapi(getAllVenuesRoute, getAllVenuesHandler);
 v1Router.openapi(getRegionEventCountsRoute, getRegionEventCountsHandler);
@@ -368,6 +381,10 @@ v1Router.openapi(mergeIdentityIntoPlayerRoute, mergeIdentityIntoPlayer);
 v1Router.openapi(postDiscordRankingsRoute, postDiscordRankingsHandler);
 v1Router.openapi(postEventSummaryToDiscordRoute, postEventSummaryToDiscord);
 v1Router.openapi(updateTourneyRoute, updateTourney);
+v1Router.openapi(addTourneyPhotosRoute, addTourneyPhotosHandler);
+v1Router.openapi(reorderTourneyPhotosRoute, reorderTourneyPhotosHandler);
+v1Router.openapi(updateTourneyPhotoRoute, updateTourneyPhotoHandler);
+v1Router.openapi(deleteTourneyPhotoRoute, deleteTourneyPhotoHandler);
 v1Router.route("/bot-chat", botChatRouter);
 v1Router.openapi(generateFactionRankingsRoute, generateFactionRankingsHandler);
 v1Router.openapi(generateRegionSnapshotRoute, generateRegionSnapshotHandler);

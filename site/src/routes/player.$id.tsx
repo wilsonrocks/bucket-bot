@@ -199,7 +199,7 @@ function RouteComponent() {
                     )}
                   </td>
                   <td className="px-2 py-1.5">
-                    <Link to="/event/$id" params={{ id: t.tourneyId }} search={{ tab: undefined, painting: undefined }}>
+                    <Link to="/event/$id" params={{ id: t.tourneyId }} search={{ tab: undefined, painting: undefined, photo: undefined }}>
                       {t.tourneyName}
                     </Link>
                   </td>
@@ -308,7 +308,7 @@ function RouteComponent() {
                     ) : null}
                   </td>
                   <td className="px-2 py-1.5">
-                    <Link to="/event/$id" params={{ id: w.tourneyId }} search={{ tab: 'best-painted', painting: undefined }}>
+                    <Link to="/event/$id" params={{ id: w.tourneyId }} search={{ tab: 'best-painted', painting: undefined, photo: undefined }}>
                       {w.tourneyName}
                     </Link>
                   </td>
@@ -404,7 +404,7 @@ function RouteComponent() {
                                     <Link
                                       to="/event/$id"
                                       params={{ id: a.tourneyId }}
-                                      search={{ tab: undefined, painting: undefined }}
+                                      search={{ tab: undefined, painting: undefined, photo: undefined }}
                                       onClick={(e) => e.stopPropagation()}
                                     >
                                       {a.tourneyName}

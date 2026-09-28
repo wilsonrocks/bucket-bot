@@ -8,6 +8,7 @@ import {
   positionLabel,
 } from "#/components/painting-lightbox";
 import { Image } from "#/components/image";
+import { PhotoLightbox } from "#/components/photo-lightbox";
 import { SITE_NAME, SITE_URL, absoluteUrl, jsonLd, seo } from "#/helpers/seo";
 import type { SportsEvent, WithContext } from "schema-dts";
 
@@ -17,8 +18,9 @@ export const Route = createFileRoute("/event/$id")({
     stringify: (params: { id: number }) => ({ id: String(params.id) }),
   },
   validateSearch: (search: Record<string, unknown>) => ({
-    tab: enumParam(search.tab, ["results", "best-painted"] as const),
+    tab: enumParam(search.tab, ["results", "best-painted", "photos"] as const),
     painting: optionalNumber(search.painting),
+    photo: optionalNumber(search.photo),
   }),
   loader: async ({ params }) => {
     try {
@@ -79,8 +81,10 @@ export const Route = createFileRoute("/event/$id")({
 });
 
 function RouteComponent() {
-  const { players, tourney, paintingCategories } = Route.useLoaderData();
-  const { painting: activePaintingId } = Route.useSearch();
+  const { players, tourney, paintingCategories, photos } =
+    Route.useLoaderData();
+  const { painting: activePaintingId, photo: activePhotoId } =
+    Route.useSearch();
   const navigate = Route.useNavigate();
   const t = tourney as any;
   const cats = paintingCategories as any[];
@@ -110,6 +114,7 @@ function RouteComponent() {
           {hasAnyImages && (
             <Tabs.Tab value="best-painted">Best Painted</Tabs.Tab>
           )}
+          {photos.length > 0 && <Tabs.Tab value="photos">Photos</Tabs.Tab>}
         </Tabs.List>
 
         <Tabs.Panel value="results">
@@ -212,7 +217,49 @@ function RouteComponent() {
             );
           })}
         </Tabs.Panel>
+
+        <Tabs.Panel value="photos">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
+            {photos.map((photo) => (
+              <figure key={photo.id}>
+                <button
+                  type="button"
+                  className="block w-full cursor-pointer"
+                  onClick={() =>
+                    navigate({
+                      search: (prev) => ({ ...prev, photo: photo.id }),
+                    })
+                  }
+                >
+                  <Image
+                    imageKey={photo.imageKey}
+                    width={photo.imageWidth}
+                    height={photo.imageHeight}
+                    alt={photo.caption ?? t.name}
+                    fallbackWidth={400}
+                    sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
+                    className="aspect-[4/3] h-auto w-full rounded-sm object-cover"
+                  />
+                </button>
+                {photo.caption && (
+                  <figcaption className="mt-1 text-center text-xs text-muted-foreground">
+                    {photo.caption}
+                  </figcaption>
+                )}
+              </figure>
+            ))}
+          </div>
+        </Tabs.Panel>
       </Tabs>
+
+      <PhotoLightbox
+        photos={photos}
+        activeId={activePhotoId}
+        title={t.name}
+        onChange={(id) =>
+          navigate({ search: (prev) => ({ ...prev, photo: id }) })
+        }
+      />
 
       <PaintingLightbox
         winner={activeWinner}

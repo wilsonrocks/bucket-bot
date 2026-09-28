@@ -395,7 +395,7 @@ export const fetchTiers = createServerFn().handler(async () => {
 export const fetchTourney = createServerFn()
   .inputValidator((d: { id: number }) => d)
   .handler(async ({ data: { id } }) => {
-    const [players, tourney, paintingCategoryRows] = await Promise.all([
+    const [players, tourney, paintingCategoryRows, photos] = await Promise.all([
       db
         .selectFrom('tourney')
         .innerJoin('result', 'tourney.id', 'result.tourney_id')
@@ -439,6 +439,20 @@ export const fetchTourney = createServerFn()
         .orderBy('painting_category.id')
         .orderBy('painting_winner.position')
         .execute() as unknown as any[],
+      db
+        .selectFrom('tourney_photo')
+        .leftJoin('image', 'image.key', 'tourney_photo.image_key')
+        .where('tourney_photo.tourney_id', '=', id)
+        .select([
+          'tourney_photo.id',
+          'tourney_photo.image_key as imageKey',
+          'tourney_photo.caption',
+          'image.width as imageWidth',
+          'image.height as imageHeight',
+        ])
+        .orderBy('tourney_photo.sort_order')
+        .orderBy('tourney_photo.id')
+        .execute(),
     ])
 
     const paintingCategories = (paintingCategoryRows as any[]).reduce((acc: any[], row: any) => {
@@ -464,7 +478,7 @@ export const fetchTourney = createServerFn()
       return acc
     }, [])
 
-    return { players, tourney, paintingCategories }
+    return { players, tourney, paintingCategories, photos }
   })
 
 // ── Teams ──────────────────────────────────────────────────────────────────

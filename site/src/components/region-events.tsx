@@ -24,7 +24,7 @@ function RegionEventsList({ events }: { events: RegionEvent[] }) {
             <Link
               to="/event/$id"
               params={{ id: event.id }}
-              search={{ tab: undefined, painting: undefined }}
+              search={{ tab: undefined, painting: undefined, photo: undefined }}
               className="font-semibold"
             >
               {event.name}
