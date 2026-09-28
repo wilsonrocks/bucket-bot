@@ -44,7 +44,7 @@ function RouteComponent() {
               <Link
                 to="/event/$id"
                 params={{ id }}
-                search={{ tab: undefined, painting: undefined }}
+                search={{ tab: undefined, painting: undefined, photo: undefined }}
               >
                 {name}
               </Link>

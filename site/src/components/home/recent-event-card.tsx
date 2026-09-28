@@ -1,4 +1,5 @@
 import { Link } from '#/components/link'
+import { Image } from '#/components/image'
 import { formatDate } from 'date-fns'
 
 type Player = {
@@ -14,6 +15,13 @@ type RecentEvent = {
   name: string
   date: string | null
   venue: string | null
+  photo: {
+    id: number
+    imageKey: string
+    caption: string | null
+    imageWidth: number | null
+    imageHeight: number | null
+  } | null
   players: Player[]
 } | null
 
@@ -50,7 +58,7 @@ export function RecentEventCard({ data }: { data: RecentEvent }) {
         <Link
           to="/event/$id"
           params={{ id: data.id }}
-          search={{ tab: undefined, painting: undefined }}
+          search={{ tab: undefined, painting: undefined, photo: undefined }}
           className="font-semibold"
         >
           {data.name}
@@ -60,6 +68,24 @@ export function RecentEventCard({ data }: { data: RecentEvent }) {
             {formatDate(new Date(data.date), 'd MMM yyyy')}
             {data.venue ? ` · ${data.venue}` : ''}
           </p>
+        )}
+        {data.photo && (
+          <Link
+            to="/event/$id"
+            params={{ id: data.id }}
+            search={{ tab: 'photos', painting: undefined, photo: data.photo.id }}
+            className="mb-2 block aspect-[4/3] w-full overflow-hidden rounded-sm"
+          >
+            <Image
+              imageKey={data.photo.imageKey}
+              width={data.photo.imageWidth}
+              height={data.photo.imageHeight}
+              alt={data.photo.caption ?? data.name}
+              sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+              fallbackWidth={400}
+              className="h-full w-full object-contain"
+            />
+          </Link>
         )}
         <div className="flex flex-col gap-1">
           {top3.map((p) => (

@@ -70,6 +70,12 @@ import {
   usePostPostDiscordEventTourneyId as usePostPostDiscordEventTourneyIdGenerated,
   usePostTeamsTeamIdMembers as usePostTeamsTeamIdMembersGenerated,
   usePostTourney as usePostTourneyGenerated,
+  getGetTourneyIdPhotosQueryKey,
+  useGetTourneyIdPhotos as useGetTourneyIdPhotosGenerated,
+  usePostTourneyIdPhotos as usePostTourneyIdPhotosGenerated,
+  usePatchTourneyIdPhotosPhotoId as usePatchTourneyIdPhotosPhotoIdGenerated,
+  useDeleteTourneyIdPhotosPhotoId as useDeleteTourneyIdPhotosPhotoIdGenerated,
+  usePutTourneyIdPhotosOrder as usePutTourneyIdPhotosOrderGenerated,
   usePutPlayerId as usePutPlayerIdGenerated,
   usePutTeamsId as usePutTeamsIdGenerated,
   useGetPaintingAll as useGetPaintingAllGenerated,
@@ -815,6 +821,42 @@ export const useDeleteTeamsTeamIdMembersMembershipId = (teamId: number) => {
     },
   })
 }
+
+// ── Tourney photos ──────────────────────────────────────────────────────────
+
+export const useGetTourneyIdPhotos = (tourneyId: number) =>
+  useGetTourneyIdPhotosGenerated(String(tourneyId), {
+    query: { select: (res) => res.data },
+  })
+
+/** Invalidates the tourney's photo list after any photo mutation succeeds. */
+const useInvalidateTourneyPhotos = (tourneyId: number) => {
+  const queryClient = useQueryClient()
+  return () =>
+    queryClient.invalidateQueries({
+      queryKey: getGetTourneyIdPhotosQueryKey(String(tourneyId)),
+    })
+}
+
+export const usePostTourneyIdPhotos = (tourneyId: number) =>
+  usePostTourneyIdPhotosGenerated({
+    mutation: { onSuccess: useInvalidateTourneyPhotos(tourneyId) },
+  })
+
+export const usePatchTourneyIdPhotosPhotoId = (tourneyId: number) =>
+  usePatchTourneyIdPhotosPhotoIdGenerated({
+    mutation: { onSuccess: useInvalidateTourneyPhotos(tourneyId) },
+  })
+
+export const useDeleteTourneyIdPhotosPhotoId = (tourneyId: number) =>
+  useDeleteTourneyIdPhotosPhotoIdGenerated({
+    mutation: { onSuccess: useInvalidateTourneyPhotos(tourneyId) },
+  })
+
+export const usePutTourneyIdPhotosOrder = (tourneyId: number) =>
+  usePutTourneyIdPhotosOrderGenerated({
+    mutation: { onSuccess: useInvalidateTourneyPhotos(tourneyId) },
+  })
 
 export const uploadTeamImage = async (
   file: File,

@@ -1,5 +1,5 @@
 
-\restrict ke37nqfjztLolYPptsJaUmwh5guObdvgBqgW9dyPclxRgTyKLfeHdVvHG4csXuL
+\restrict pn7pUGsvlWalWP019XkbrfPSRyWmGUqwq3xqY6hs2n8JR0xHgwKGpqDUqKWbULJ
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -365,6 +365,19 @@ CREATE TABLE public.tourney (
     NO MINVALUE
     NO MAXVALUE
 
+CREATE TABLE public.tourney_photo (
+    id integer NOT NULL,
+    tourney_id integer NOT NULL,
+    image_key text NOT NULL,
+    caption text,
+    sort_order integer DEFAULT 0 NOT NULL,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+    AS integer
+    NO MINVALUE
+    NO MAXVALUE
+
 CREATE TABLE public.upcoming_event (
     id integer NOT NULL,
     google_event_id text NOT NULL,
@@ -510,6 +523,9 @@ ALTER TABLE ONLY public.tourney
 ALTER TABLE ONLY public.tourney
     ADD CONSTRAINT tourney_longshanks_id_key UNIQUE (longshanks_id);
 
+ALTER TABLE ONLY public.tourney_photo
+    ADD CONSTRAINT tourney_photo_pkey PRIMARY KEY (id);
+
 ALTER TABLE ONLY public.tourney
     ADD CONSTRAINT tourney_pkey PRIMARY KEY (id);
 
@@ -580,6 +596,8 @@ CREATE INDEX idx_team_ranking_snapshot_batch_type_code ON public.team_ranking_sn
 CREATE INDEX idx_team_search_vector ON public.team USING gin (search_vector);
 
 CREATE INDEX idx_team_venue_id ON public.team USING btree (venue_id);
+
+CREATE INDEX idx_tourney_photo_tourney_id ON public.tourney_photo USING btree (tourney_id, sort_order);
 
 CREATE INDEX idx_tourney_search_vector ON public.tourney USING gin (search_vector);
 
@@ -678,6 +696,9 @@ ALTER TABLE ONLY public.team_ranking_snapshot
 ALTER TABLE ONLY public.team
     ADD CONSTRAINT team_venue_id_fkey FOREIGN KEY (venue_id) REFERENCES public.venue(id);
 
+ALTER TABLE ONLY public.tourney_photo
+    ADD CONSTRAINT tourney_photo_tourney_id_fkey FOREIGN KEY (tourney_id) REFERENCES public.tourney(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY public.tourney
     ADD CONSTRAINT tourney_tier_code_fkey FOREIGN KEY (tier_code) REFERENCES public.tier(code);
 
@@ -693,5 +714,5 @@ ALTER TABLE ONLY public.upcoming_event
 ALTER TABLE ONLY public.venue
     ADD CONSTRAINT venue_region_id_fkey FOREIGN KEY (region_id) REFERENCES public.region(id);
 
-\unrestrict ke37nqfjztLolYPptsJaUmwh5guObdvgBqgW9dyPclxRgTyKLfeHdVvHG4csXuL
+\unrestrict pn7pUGsvlWalWP019XkbrfPSRyWmGUqwq3xqY6hs2n8JR0xHgwKGpqDUqKWbULJ
 

@@ -85,7 +85,7 @@ export function AchievementModal({
                         <Link
                           to="/event/$id"
                           params={{ id: achievement.tourneyId }}
-                          search={{ tab: undefined, painting: undefined }}
+                          search={{ tab: undefined, painting: undefined, photo: undefined }}
                         >
                           {achievement.tourneyName}
                         </Link>{' '}

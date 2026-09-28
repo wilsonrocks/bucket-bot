@@ -305,6 +305,15 @@ export interface Tourney {
   venue_id: number | null;
 }
 
+export interface TourneyPhoto {
+  caption: string | null;
+  created_at: Generated<Timestamp>;
+  id: Generated<number>;
+  image_key: string;
+  sort_order: Generated<number>;
+  tourney_id: number;
+}
+
 export interface UpcomingEvent {
   created_at: Generated<Timestamp>;
   geom: string | null;
@@ -361,6 +370,7 @@ export interface DB {
   team_ranking_snapshot_batch: TeamRankingSnapshotBatch;
   tier: Tier;
   tourney: Tourney;
+  tourney_photo: TourneyPhoto;
   upcoming_event: UpcomingEvent;
   venue: Venue;
 }

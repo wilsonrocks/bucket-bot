@@ -39,6 +39,9 @@ import type {
   DeleteTeamsTeamIdMembersMembershipId403,
   DeleteTeamsTeamIdMembersMembershipId404,
   DeleteTeamsTeamIdMembersMembershipIdParams,
+  DeleteTourneyIdPhotosPhotoId200Item,
+  DeleteTourneyIdPhotosPhotoId403,
+  DeleteTourneyIdPhotosPhotoId404,
   GetAchievements200Item,
   GetAllDiscordUsers200Item,
   GetBotChatChannels200Item,
@@ -89,6 +92,7 @@ import type {
   GetTiers200Item,
   GetTourney200Item,
   GetTourneyId200,
+  GetTourneyIdPhotos200Item,
   GetTourneysPlayerPlayerId200Item,
   GetTourneysPlayerPlayerId400,
   GetUnmappedIdentities200Item,
@@ -102,6 +106,10 @@ import type {
   PatchTeamsTeamIdMembersMembershipId403,
   PatchTeamsTeamIdMembersMembershipId404,
   PatchTeamsTeamIdMembersMembershipIdBody,
+  PatchTourneyIdPhotosPhotoId200Item,
+  PatchTourneyIdPhotosPhotoId403,
+  PatchTourneyIdPhotosPhotoId404,
+  PatchTourneyIdPhotosPhotoIdBody,
   PostAchievementsAnnounceNext200,
   PostAchievementsAnnounceNext403,
   PostAchievementsSync200,
@@ -176,6 +184,10 @@ import type {
   PostTokenBody,
   PostTourney200,
   PostTourneyBody,
+  PostTourneyIdPhotos200Item,
+  PostTourneyIdPhotos403,
+  PostTourneyIdPhotos404,
+  PostTourneyIdPhotosBody,
   PostUpload200,
   PostUpload400,
   PostUpload413,
@@ -196,6 +208,10 @@ import type {
   PutTeamsId403,
   PutTeamsId404,
   PutTeamsIdBody,
+  PutTourneyIdPhotosOrder200Item,
+  PutTourneyIdPhotosOrder400,
+  PutTourneyIdPhotosOrder403,
+  PutTourneyIdPhotosOrderBody,
   PutUpcomingEventsIdOrganiser200,
   PutUpcomingEventsIdOrganiser403,
   PutUpcomingEventsIdOrganiser404,
@@ -912,7 +928,200 @@ export function useGetTourneyId<TData = Awaited<ReturnType<typeof getTourneyId>>
 
 
 
-export type getTourneysPlayerPlayerIdResponse200 = {
+export type getTourneyIdPhotosResponse200 = {
+  data: GetTourneyIdPhotos200Item[]
+  status: 200
+}
+
+export type getTourneyIdPhotosResponseSuccess = (getTourneyIdPhotosResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getTourneyIdPhotosResponse = (getTourneyIdPhotosResponseSuccess)
+
+export const getGetTourneyIdPhotosUrl = (id: string,) => {
+
+
+  
+
+  return `/v1/tourney/${id}/photos`
+}
+
+export const getTourneyIdPhotos = async (id: string, options?: RequestInit): Promise<getTourneyIdPhotosResponse> => {
+  
+  return customFetch<getTourneyIdPhotosResponse>(getGetTourneyIdPhotosUrl(id),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
+
+export const getGetTourneyIdPhotosQueryKey = (id: string,) => {
+    return [
+    `/v1/tourney/${id}/photos`
+    ] as const;
+    }
+
+    
+export const getGetTourneyIdPhotosQueryOptions = <TData = Awaited<ReturnType<typeof getTourneyIdPhotos>>, TError = unknown>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTourneyIdPhotos>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetTourneyIdPhotosQueryKey(id);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTourneyIdPhotos>>> = ({ signal }) => getTourneyIdPhotos(id, { signal, ...requestOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTourneyIdPhotos>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetTourneyIdPhotosQueryResult = NonNullable<Awaited<ReturnType<typeof getTourneyIdPhotos>>>
+export type GetTourneyIdPhotosQueryError = unknown
+
+
+export function useGetTourneyIdPhotos<TData = Awaited<ReturnType<typeof getTourneyIdPhotos>>, TError = unknown>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTourneyIdPhotos>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTourneyIdPhotos>>,
+          TError,
+          Awaited<ReturnType<typeof getTourneyIdPhotos>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetTourneyIdPhotos<TData = Awaited<ReturnType<typeof getTourneyIdPhotos>>, TError = unknown>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTourneyIdPhotos>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTourneyIdPhotos>>,
+          TError,
+          Awaited<ReturnType<typeof getTourneyIdPhotos>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetTourneyIdPhotos<TData = Awaited<ReturnType<typeof getTourneyIdPhotos>>, TError = unknown>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTourneyIdPhotos>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetTourneyIdPhotos<TData = Awaited<ReturnType<typeof getTourneyIdPhotos>>, TError = unknown>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTourneyIdPhotos>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetTourneyIdPhotosQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+export type postTourneyIdPhotosResponse200 = {
+  data: PostTourneyIdPhotos200Item[]
+  status: 200
+}
+
+export type postTourneyIdPhotosResponse403 = {
+  data: PostTourneyIdPhotos403
+  status: 403
+}
+
+export type postTourneyIdPhotosResponse404 = {
+  data: PostTourneyIdPhotos404
+  status: 404
+}
+
+export type postTourneyIdPhotosResponseSuccess = (postTourneyIdPhotosResponse200) & {
+  headers: Headers;
+};
+export type postTourneyIdPhotosResponseError = (postTourneyIdPhotosResponse403 | postTourneyIdPhotosResponse404) & {
+  headers: Headers;
+};
+
+export type postTourneyIdPhotosResponse = (postTourneyIdPhotosResponseSuccess | postTourneyIdPhotosResponseError)
+
+export const getPostTourneyIdPhotosUrl = (id: string,) => {
+
+
+  
+
+  return `/v1/tourney/${id}/photos`
+}
+
+export const postTourneyIdPhotos = async (id: string,
+    postTourneyIdPhotosBody: PostTourneyIdPhotosBody, options?: RequestInit): Promise<postTourneyIdPhotosResponse> => {
+  
+  return customFetch<postTourneyIdPhotosResponse>(getPostTourneyIdPhotosUrl(id),
+  {      
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      postTourneyIdPhotosBody,)
+  }
+);}
+  
+
+
+
+export const getPostTourneyIdPhotosMutationOptions = <TError = PostTourneyIdPhotos403 | PostTourneyIdPhotos404,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postTourneyIdPhotos>>, TError,{id: string;data: PostTourneyIdPhotosBody}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postTourneyIdPhotos>>, TError,{id: string;data: PostTourneyIdPhotosBody}, TContext> => {
+
+const mutationKey = ['postTourneyIdPhotos'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postTourneyIdPhotos>>, {id: string;data: PostTourneyIdPhotosBody}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  postTourneyIdPhotos(id,data,requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostTourneyIdPhotosMutationResult = NonNullable<Awaited<ReturnType<typeof postTourneyIdPhotos>>>
+    export type PostTourneyIdPhotosMutationBody = PostTourneyIdPhotosBody
+    export type PostTourneyIdPhotosMutationError = PostTourneyIdPhotos403 | PostTourneyIdPhotos404
+
+    export const usePostTourneyIdPhotos = <TError = PostTourneyIdPhotos403 | PostTourneyIdPhotos404,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postTourneyIdPhotos>>, TError,{id: string;data: PostTourneyIdPhotosBody}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postTourneyIdPhotos>>,
+        TError,
+        {id: string;data: PostTourneyIdPhotosBody},
+        TContext
+      > => {
+      return useMutation(getPostTourneyIdPhotosMutationOptions(options), queryClient);
+    }
+    export type getTourneysPlayerPlayerIdResponse200 = {
   data: GetTourneysPlayerPlayerId200Item[]
   status: 200
 }
@@ -5342,6 +5551,275 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getPostPostDiscordEventTourneyIdMutationOptions(options), queryClient);
+    }
+    export type putTourneyIdPhotosOrderResponse200 = {
+  data: PutTourneyIdPhotosOrder200Item[]
+  status: 200
+}
+
+export type putTourneyIdPhotosOrderResponse400 = {
+  data: PutTourneyIdPhotosOrder400
+  status: 400
+}
+
+export type putTourneyIdPhotosOrderResponse403 = {
+  data: PutTourneyIdPhotosOrder403
+  status: 403
+}
+
+export type putTourneyIdPhotosOrderResponseSuccess = (putTourneyIdPhotosOrderResponse200) & {
+  headers: Headers;
+};
+export type putTourneyIdPhotosOrderResponseError = (putTourneyIdPhotosOrderResponse400 | putTourneyIdPhotosOrderResponse403) & {
+  headers: Headers;
+};
+
+export type putTourneyIdPhotosOrderResponse = (putTourneyIdPhotosOrderResponseSuccess | putTourneyIdPhotosOrderResponseError)
+
+export const getPutTourneyIdPhotosOrderUrl = (id: string,) => {
+
+
+  
+
+  return `/v1/tourney/${id}/photos/order`
+}
+
+export const putTourneyIdPhotosOrder = async (id: string,
+    putTourneyIdPhotosOrderBody: PutTourneyIdPhotosOrderBody, options?: RequestInit): Promise<putTourneyIdPhotosOrderResponse> => {
+  
+  return customFetch<putTourneyIdPhotosOrderResponse>(getPutTourneyIdPhotosOrderUrl(id),
+  {      
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      putTourneyIdPhotosOrderBody,)
+  }
+);}
+  
+
+
+
+export const getPutTourneyIdPhotosOrderMutationOptions = <TError = PutTourneyIdPhotosOrder400 | PutTourneyIdPhotosOrder403,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putTourneyIdPhotosOrder>>, TError,{id: string;data: PutTourneyIdPhotosOrderBody}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof putTourneyIdPhotosOrder>>, TError,{id: string;data: PutTourneyIdPhotosOrderBody}, TContext> => {
+
+const mutationKey = ['putTourneyIdPhotosOrder'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putTourneyIdPhotosOrder>>, {id: string;data: PutTourneyIdPhotosOrderBody}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  putTourneyIdPhotosOrder(id,data,requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PutTourneyIdPhotosOrderMutationResult = NonNullable<Awaited<ReturnType<typeof putTourneyIdPhotosOrder>>>
+    export type PutTourneyIdPhotosOrderMutationBody = PutTourneyIdPhotosOrderBody
+    export type PutTourneyIdPhotosOrderMutationError = PutTourneyIdPhotosOrder400 | PutTourneyIdPhotosOrder403
+
+    export const usePutTourneyIdPhotosOrder = <TError = PutTourneyIdPhotosOrder400 | PutTourneyIdPhotosOrder403,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putTourneyIdPhotosOrder>>, TError,{id: string;data: PutTourneyIdPhotosOrderBody}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof putTourneyIdPhotosOrder>>,
+        TError,
+        {id: string;data: PutTourneyIdPhotosOrderBody},
+        TContext
+      > => {
+      return useMutation(getPutTourneyIdPhotosOrderMutationOptions(options), queryClient);
+    }
+    export type patchTourneyIdPhotosPhotoIdResponse200 = {
+  data: PatchTourneyIdPhotosPhotoId200Item[]
+  status: 200
+}
+
+export type patchTourneyIdPhotosPhotoIdResponse403 = {
+  data: PatchTourneyIdPhotosPhotoId403
+  status: 403
+}
+
+export type patchTourneyIdPhotosPhotoIdResponse404 = {
+  data: PatchTourneyIdPhotosPhotoId404
+  status: 404
+}
+
+export type patchTourneyIdPhotosPhotoIdResponseSuccess = (patchTourneyIdPhotosPhotoIdResponse200) & {
+  headers: Headers;
+};
+export type patchTourneyIdPhotosPhotoIdResponseError = (patchTourneyIdPhotosPhotoIdResponse403 | patchTourneyIdPhotosPhotoIdResponse404) & {
+  headers: Headers;
+};
+
+export type patchTourneyIdPhotosPhotoIdResponse = (patchTourneyIdPhotosPhotoIdResponseSuccess | patchTourneyIdPhotosPhotoIdResponseError)
+
+export const getPatchTourneyIdPhotosPhotoIdUrl = (id: string,
+    photoId: string,) => {
+
+
+  
+
+  return `/v1/tourney/${id}/photos/${photoId}`
+}
+
+export const patchTourneyIdPhotosPhotoId = async (id: string,
+    photoId: string,
+    patchTourneyIdPhotosPhotoIdBody: PatchTourneyIdPhotosPhotoIdBody, options?: RequestInit): Promise<patchTourneyIdPhotosPhotoIdResponse> => {
+  
+  return customFetch<patchTourneyIdPhotosPhotoIdResponse>(getPatchTourneyIdPhotosPhotoIdUrl(id,photoId),
+  {      
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      patchTourneyIdPhotosPhotoIdBody,)
+  }
+);}
+  
+
+
+
+export const getPatchTourneyIdPhotosPhotoIdMutationOptions = <TError = PatchTourneyIdPhotosPhotoId403 | PatchTourneyIdPhotosPhotoId404,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchTourneyIdPhotosPhotoId>>, TError,{id: string;photoId: string;data: PatchTourneyIdPhotosPhotoIdBody}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof patchTourneyIdPhotosPhotoId>>, TError,{id: string;photoId: string;data: PatchTourneyIdPhotosPhotoIdBody}, TContext> => {
+
+const mutationKey = ['patchTourneyIdPhotosPhotoId'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof patchTourneyIdPhotosPhotoId>>, {id: string;photoId: string;data: PatchTourneyIdPhotosPhotoIdBody}> = (props) => {
+          const {id,photoId,data} = props ?? {};
+
+          return  patchTourneyIdPhotosPhotoId(id,photoId,data,requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PatchTourneyIdPhotosPhotoIdMutationResult = NonNullable<Awaited<ReturnType<typeof patchTourneyIdPhotosPhotoId>>>
+    export type PatchTourneyIdPhotosPhotoIdMutationBody = PatchTourneyIdPhotosPhotoIdBody
+    export type PatchTourneyIdPhotosPhotoIdMutationError = PatchTourneyIdPhotosPhotoId403 | PatchTourneyIdPhotosPhotoId404
+
+    export const usePatchTourneyIdPhotosPhotoId = <TError = PatchTourneyIdPhotosPhotoId403 | PatchTourneyIdPhotosPhotoId404,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchTourneyIdPhotosPhotoId>>, TError,{id: string;photoId: string;data: PatchTourneyIdPhotosPhotoIdBody}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof patchTourneyIdPhotosPhotoId>>,
+        TError,
+        {id: string;photoId: string;data: PatchTourneyIdPhotosPhotoIdBody},
+        TContext
+      > => {
+      return useMutation(getPatchTourneyIdPhotosPhotoIdMutationOptions(options), queryClient);
+    }
+    export type deleteTourneyIdPhotosPhotoIdResponse200 = {
+  data: DeleteTourneyIdPhotosPhotoId200Item[]
+  status: 200
+}
+
+export type deleteTourneyIdPhotosPhotoIdResponse403 = {
+  data: DeleteTourneyIdPhotosPhotoId403
+  status: 403
+}
+
+export type deleteTourneyIdPhotosPhotoIdResponse404 = {
+  data: DeleteTourneyIdPhotosPhotoId404
+  status: 404
+}
+
+export type deleteTourneyIdPhotosPhotoIdResponseSuccess = (deleteTourneyIdPhotosPhotoIdResponse200) & {
+  headers: Headers;
+};
+export type deleteTourneyIdPhotosPhotoIdResponseError = (deleteTourneyIdPhotosPhotoIdResponse403 | deleteTourneyIdPhotosPhotoIdResponse404) & {
+  headers: Headers;
+};
+
+export type deleteTourneyIdPhotosPhotoIdResponse = (deleteTourneyIdPhotosPhotoIdResponseSuccess | deleteTourneyIdPhotosPhotoIdResponseError)
+
+export const getDeleteTourneyIdPhotosPhotoIdUrl = (id: string,
+    photoId: string,) => {
+
+
+  
+
+  return `/v1/tourney/${id}/photos/${photoId}`
+}
+
+export const deleteTourneyIdPhotosPhotoId = async (id: string,
+    photoId: string, options?: RequestInit): Promise<deleteTourneyIdPhotosPhotoIdResponse> => {
+  
+  return customFetch<deleteTourneyIdPhotosPhotoIdResponse>(getDeleteTourneyIdPhotosPhotoIdUrl(id,photoId),
+  {      
+    ...options,
+    method: 'DELETE'
+    
+    
+  }
+);}
+  
+
+
+
+export const getDeleteTourneyIdPhotosPhotoIdMutationOptions = <TError = DeleteTourneyIdPhotosPhotoId403 | DeleteTourneyIdPhotosPhotoId404,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteTourneyIdPhotosPhotoId>>, TError,{id: string;photoId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteTourneyIdPhotosPhotoId>>, TError,{id: string;photoId: string}, TContext> => {
+
+const mutationKey = ['deleteTourneyIdPhotosPhotoId'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteTourneyIdPhotosPhotoId>>, {id: string;photoId: string}> = (props) => {
+          const {id,photoId} = props ?? {};
+
+          return  deleteTourneyIdPhotosPhotoId(id,photoId,requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteTourneyIdPhotosPhotoIdMutationResult = NonNullable<Awaited<ReturnType<typeof deleteTourneyIdPhotosPhotoId>>>
+    
+    export type DeleteTourneyIdPhotosPhotoIdMutationError = DeleteTourneyIdPhotosPhotoId403 | DeleteTourneyIdPhotosPhotoId404
+
+    export const useDeleteTourneyIdPhotosPhotoId = <TError = DeleteTourneyIdPhotosPhotoId403 | DeleteTourneyIdPhotosPhotoId404,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteTourneyIdPhotosPhotoId>>, TError,{id: string;photoId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteTourneyIdPhotosPhotoId>>,
+        TError,
+        {id: string;photoId: string},
+        TContext
+      > => {
+      return useMutation(getDeleteTourneyIdPhotosPhotoIdMutationOptions(options), queryClient);
     }
     export type getBotChatChannelsResponse200 = {
   data: GetBotChatChannels200Item[]

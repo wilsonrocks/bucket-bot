@@ -150,6 +150,50 @@ export type GetTourneyId200 = {
   paintingCategories: GetTourneyId200PaintingCategoriesItem[];
 };
 
+export type GetTourneyIdPhotos200Item = {
+  id: number;
+  imageKey: string;
+  /** @nullable */
+  caption: string | null;
+  sortOrder: number;
+  /** @nullable */
+  width: number | null;
+  /** @nullable */
+  height: number | null;
+};
+
+export type PostTourneyIdPhotosBodyPhotosItem = {
+  /** @minLength 1 */
+  imageKey: string;
+  /** @nullable */
+  caption?: string | null;
+};
+
+export type PostTourneyIdPhotosBody = {
+  /** @minItems 1 */
+  photos: PostTourneyIdPhotosBodyPhotosItem[];
+};
+
+export type PostTourneyIdPhotos200Item = {
+  id: number;
+  imageKey: string;
+  /** @nullable */
+  caption: string | null;
+  sortOrder: number;
+  /** @nullable */
+  width: number | null;
+  /** @nullable */
+  height: number | null;
+};
+
+export type PostTourneyIdPhotos403 = {
+  error: string;
+};
+
+export type PostTourneyIdPhotos404 = {
+  error: string;
+};
+
 export type GetTourneysPlayerPlayerId200Item = {[key: string]: unknown | null};
 
 export type GetTourneysPlayerPlayerId400 = {
@@ -865,6 +909,75 @@ export type PostPostDiscordEventTourneyId400 = {
 };
 
 export type PostPostDiscordEventTourneyId500 = {
+  error: string;
+};
+
+export type PutTourneyIdPhotosOrderBody = {
+  photoIds: number[];
+};
+
+export type PutTourneyIdPhotosOrder200Item = {
+  id: number;
+  imageKey: string;
+  /** @nullable */
+  caption: string | null;
+  sortOrder: number;
+  /** @nullable */
+  width: number | null;
+  /** @nullable */
+  height: number | null;
+};
+
+export type PutTourneyIdPhotosOrder400 = {
+  error: string;
+};
+
+export type PutTourneyIdPhotosOrder403 = {
+  error: string;
+};
+
+export type PatchTourneyIdPhotosPhotoIdBody = {
+  /** @nullable */
+  caption: string | null;
+};
+
+export type PatchTourneyIdPhotosPhotoId200Item = {
+  id: number;
+  imageKey: string;
+  /** @nullable */
+  caption: string | null;
+  sortOrder: number;
+  /** @nullable */
+  width: number | null;
+  /** @nullable */
+  height: number | null;
+};
+
+export type PatchTourneyIdPhotosPhotoId403 = {
+  error: string;
+};
+
+export type PatchTourneyIdPhotosPhotoId404 = {
+  error: string;
+};
+
+export type DeleteTourneyIdPhotosPhotoId200Item = {
+  id: number;
+  imageKey: string;
+  /** @nullable */
+  caption: string | null;
+  sortOrder: number;
+  /** @nullable */
+  width: number | null;
+  /** @nullable */
+  height: number | null;
+};
+
+export type DeleteTourneyIdPhotosPhotoId403 = {
+  error: string;
+};
+
+export type DeleteTourneyIdPhotosPhotoId404 = {
   error: string;
 };
 
