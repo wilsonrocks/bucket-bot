@@ -219,9 +219,9 @@ function RouteComponent() {
         </Tabs.Panel>
 
         <Tabs.Panel value="photos">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
+          <div className="columns-1 gap-4 sm:columns-2 md:columns-3">
             {photos.map((photo) => (
-              <figure key={photo.id}>
+              <figure key={photo.id} className="mb-4 break-inside-avoid">
                 <button
                   type="button"
                   className="block w-full cursor-pointer"
@@ -238,7 +238,7 @@ function RouteComponent() {
                     alt={photo.caption ?? t.name}
                     fallbackWidth={400}
                     sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
-                    className="aspect-[4/3] h-auto w-full rounded-sm object-cover"
+                    className="h-auto w-full rounded-sm"
                   />
                 </button>
                 {photo.caption && (

@@ -117,6 +117,7 @@ function HomePage() {
         name: (latestTourney.tourney as any).name,
         date: (latestTourney.tourney as any).date,
         venue: (latestTourney.tourney as any).venue,
+        photo: latestTourney.photos[0] ?? null,
         players: (latestTourney.players as any[]).map((p: any) => ({
           place: p.place,
           playerId: p.playerId,

@@ -16,6 +16,7 @@ import {
 import {
   IconArrowLeft,
   IconArrowRight,
+  IconCheck,
   IconPhoto,
   IconTrash,
 } from '@tabler/icons-react'
@@ -107,25 +108,23 @@ export function EventPhotos({ tourneyId }: { tourneyId: number }) {
                 <Image
                   src={`${import.meta.env.VITE_ASSETS_URL}/${photo.imageKey}-w400.webp`}
                   h={200}
-                  fit="cover"
+                  fit="contain"
+                  bg="var(--mantine-color-default-hover)"
                   alt={photo.caption ?? ''}
                 />
               </Card.Section>
-              <TextInput
-                mt="xs"
-                placeholder="Caption"
+              <CaptionInput
                 // Keyed on the saved caption so it resets after each save.
                 key={photo.caption ?? ''}
-                defaultValue={photo.caption ?? ''}
-                onBlur={(e) => {
-                  const caption = e.currentTarget.value.trim() || null
-                  if (caption === photo.caption) return
+                saved={photo.caption}
+                saving={updatePhoto.isPending}
+                onSave={(caption) =>
                   updatePhoto.mutate({
                     id: String(tourneyId),
                     photoId: String(photo.id),
                     data: { caption },
                   })
-                }}
+                }
               />
               <Group justify="space-between" mt="xs">
                 <Group gap={4}>
@@ -162,5 +161,50 @@ export function EventPhotos({ tourneyId }: { tourneyId: number }) {
         </SimpleGrid>
       )}
     </Stack>
+  )
+}
+
+/** Caption field with an explicit save: a tick appears once edited, Enter saves, Escape reverts. */
+function CaptionInput({
+  saved,
+  saving,
+  onSave,
+}: {
+  saved: string | null
+  saving: boolean
+  onSave: (caption: string | null) => void
+}) {
+  const [value, setValue] = useState(saved ?? '')
+  const caption = value.trim() || null
+  const dirty = caption !== saved
+
+  const save = () => {
+    if (dirty) onSave(caption)
+  }
+
+  return (
+    <TextInput
+      mt="xs"
+      placeholder="Caption"
+      value={value}
+      onChange={(e) => setValue(e.currentTarget.value)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') save()
+        if (e.key === 'Escape') setValue(saved ?? '')
+      }}
+      rightSection={
+        dirty && (
+          <ActionIcon
+            variant="filled"
+            size="sm"
+            aria-label="Save caption"
+            loading={saving}
+            onClick={save}
+          >
+            <IconCheck size={14} />
+          </ActionIcon>
+        )
+      }
+    />
   )
 }
