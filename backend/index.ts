@@ -1,6 +1,7 @@
 import { serve } from "@hono/node-server";
 import app from "./app.js";
 import { dbClient } from "./db-client.js";
+import { startDiscordCommands } from "./logic/discord/subscription-commands.js";
 import {
   startAchievementsScheduler,
   startCalendarScheduler,
@@ -19,4 +20,12 @@ if (process.env.ENABLE_SCHEDULER === "true") {
   if (process.env.ENABLE_ACHIEVEMENTS_SCHEDULER === "true") {
     startAchievementsScheduler(dbClient);
   }
+}
+
+// Production only: a dev backend on the same bot token would race prod to
+// answer each slash command.
+if (process.env.ENABLE_DISCORD_COMMANDS === "true") {
+  startDiscordCommands(dbClient).catch((err) => {
+    console.error("Failed to start Discord slash commands:", err);
+  });
 }

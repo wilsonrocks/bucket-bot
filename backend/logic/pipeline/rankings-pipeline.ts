@@ -9,6 +9,7 @@ import { postDiscordRankings } from "../discord/post-rankings.js";
 import { postTeamRankingsToDiscord } from "../discord/team-rankings.js";
 import { postFactionRankings } from "../discord/post-faction-rankings.js";
 import { syncDiscordUsers } from "../discord/sync-discord-users.js";
+import { notifyRankingSubscribers } from "../discord/notify-ranking-subscribers.js";
 import { postPipelineSummary } from "./notify-ops.js";
 import {
   runStep,
@@ -62,6 +63,11 @@ export const STEPS: StepDef[] = [
     stepKey: "post-player",
     dependsOn: ["generate-player"],
     fn: (db) => postDiscordRankings(db),
+  },
+  {
+    stepKey: "notify-subscribers",
+    dependsOn: ["generate-player"],
+    fn: (db) => notifyRankingSubscribers(db),
   },
   { stepKey: "generate-faction", fn: (db) => generateFactionRankings(db) },
   {

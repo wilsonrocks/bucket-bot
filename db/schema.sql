@@ -1,5 +1,5 @@
 
-\restrict pn7pUGsvlWalWP019XkbrfPSRyWmGUqwq3xqY6hs2n8JR0xHgwKGpqDUqKWbULJ
+\restrict uIVLspWjSq1UTYWrve15ok21Yiwtg61g4SaFHhIAhPj02QosubwF3kJ0IzNiNcE
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -252,6 +252,12 @@ CREATE TABLE public.ranking_snapshot_type (
     discord_channel_id text
 );
 
+CREATE TABLE public.ranking_subscription (
+    discord_user_id text NOT NULL,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    last_notified_at timestamp without time zone
+);
+
 CREATE TABLE public.region (
     id integer NOT NULL,
     postcodes_api_name text NOT NULL,
@@ -480,6 +486,9 @@ ALTER TABLE ONLY public.ranking_snapshot
 
 ALTER TABLE ONLY public.ranking_snapshot_type
     ADD CONSTRAINT ranking_snapshot_type_pkey PRIMARY KEY (code);
+
+ALTER TABLE ONLY public.ranking_subscription
+    ADD CONSTRAINT ranking_subscription_pkey PRIMARY KEY (discord_user_id);
 
 ALTER TABLE ONLY public.region
     ADD CONSTRAINT region_geojson_name_key UNIQUE (geojson_name);
@@ -714,5 +723,5 @@ ALTER TABLE ONLY public.upcoming_event
 ALTER TABLE ONLY public.venue
     ADD CONSTRAINT venue_region_id_fkey FOREIGN KEY (region_id) REFERENCES public.region(id);
 
-\unrestrict pn7pUGsvlWalWP019XkbrfPSRyWmGUqwq3xqY6hs2n8JR0xHgwKGpqDUqKWbULJ
+\unrestrict uIVLspWjSq1UTYWrve15ok21Yiwtg61g4SaFHhIAhPj02QosubwF3kJ0IzNiNcE
 
