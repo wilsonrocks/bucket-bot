@@ -213,6 +213,12 @@ export interface RankingSnapshotType {
   name: string;
 }
 
+export interface RankingSubscription {
+  created_at: Generated<Timestamp>;
+  discord_user_id: string;
+  last_notified_at: Timestamp | null;
+}
+
 export interface Region {
   geojson_name: string;
   id: Generated<number>;
@@ -360,6 +366,7 @@ export interface DB {
   ranking_snapshot_batch: RankingSnapshotBatch;
   ranking_snapshot_event: RankingSnapshotEvent;
   ranking_snapshot_type: RankingSnapshotType;
+  ranking_subscription: RankingSubscription;
   region: Region;
   region_snapshot: RegionSnapshot;
   region_snapshot_batch: RegionSnapshotBatch;
