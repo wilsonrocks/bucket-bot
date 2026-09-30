@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Dropzone, IMAGE_MIME_TYPE } from '@mantine/dropzone'
 import { modals } from '@mantine/modals'
 import {
@@ -28,6 +28,7 @@ import {
   usePostTourneyIdPhotos,
   usePutTourneyIdPhotosOrder,
 } from '@/api/hooks'
+import { ImageCropModal } from './ImageCropModal'
 
 export function EventPhotos({ tourneyId }: { tourneyId: number }) {
   const photos = useGetTourneyIdPhotos(tourneyId)
@@ -36,24 +37,37 @@ export function EventPhotos({ tourneyId }: { tourneyId: number }) {
   const deletePhoto = useDeleteTourneyIdPhotosPhotoId(tourneyId)
   const reorderPhotos = usePutTourneyIdPhotosOrder(tourneyId)
   const [uploading, setUploading] = useState(0)
+  // Dropped files waiting to go through the crop modal, first one showing.
+  const [queue, setQueue] = useState<File[]>([])
+  const [queueSize, setQueueSize] = useState(0)
+  // Uploads are chained so photos are added in the order they were confirmed.
+  const uploadChain = useRef<Promise<void>>(Promise.resolve())
 
-  const handleDrop = async (files: File[]) => {
-    setUploading(files.length)
-    try {
-      // Upload one at a time so the photos keep the order they were picked in.
-      const keys: string[] = []
+  const upload = (files: File[]) => {
+    setUploading((n) => n + files.length)
+    uploadChain.current = uploadChain.current.then(async () => {
       for (const file of files) {
-        keys.push(await uploadTeamImage(file, 'event'))
-        setUploading((n) => n - 1)
+        try {
+          const imageKey = await uploadTeamImage(file, 'event')
+          await addPhotos.mutateAsync({
+            id: String(tourneyId),
+            data: { photos: [{ imageKey }] },
+          })
+        } catch {
+          // uploadTeamImage and customFetch already show an error notification.
+        } finally {
+          setUploading((n) => n - 1)
+        }
       }
-      await addPhotos.mutateAsync({
-        id: String(tourneyId),
-        data: { photos: keys.map((imageKey) => ({ imageKey })) },
-      })
-    } finally {
-      setUploading(0)
-    }
+    })
   }
+
+  const handleDrop = (files: File[]) => {
+    setQueue((q) => [...q, ...files])
+    setQueueSize((n) => (queue.length === 0 ? files.length : n + files.length))
+  }
+
+  const next = () => setQueue((q) => q.slice(1))
 
   const list = photos.data ?? []
 
@@ -84,7 +98,7 @@ export function EventPhotos({ tourneyId }: { tourneyId: number }) {
         accept={IMAGE_MIME_TYPE}
         maxSize={10 * 1024 * 1024}
         multiple
-        loading={uploading > 0 || addPhotos.isPending}
+        loading={uploading > 0}
       >
         <Center mih={100}>
           <Stack align="center" gap={4}>
@@ -160,6 +174,33 @@ export function EventPhotos({ tourneyId }: { tourneyId: number }) {
           ))}
         </SimpleGrid>
       )}
+
+      <ImageCropModal
+        file={queue[0] ?? null}
+        opened={queue.length > 0}
+        title={
+          queueSize > 1
+            ? `Crop photo ${queueSize - queue.length + 1} of ${queueSize}`
+            : 'Crop photo'
+        }
+        cancelLabel="Skip photo"
+        onCancel={next}
+        onConfirm={(file) => {
+          upload([file])
+          next()
+        }}
+        secondaryAction={
+          queue.length > 1
+            ? {
+                label: `Use all ${queue.length} as-is`,
+                onClick: () => {
+                  upload(queue)
+                  setQueue([])
+                },
+              }
+            : undefined
+        }
+      />
     </Stack>
   )
 }

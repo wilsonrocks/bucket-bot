@@ -56,6 +56,12 @@ interface ImageCropModalProps {
   opened: boolean
   onCancel: () => void
   onConfirm: (file: File) => void
+  /** Defaults to "Crop image". */
+  title?: string
+  /** Defaults to "Cancel". */
+  cancelLabel?: string
+  /** An extra footer button, e.g. to skip cropping for a whole batch. */
+  secondaryAction?: { label: string; onClick: () => void }
 }
 
 export function ImageCropModal({
@@ -63,6 +69,9 @@ export function ImageCropModal({
   opened,
   onCancel,
   onConfirm,
+  title = 'Crop image',
+  cancelLabel = 'Cancel',
+  secondaryAction,
 }: ImageCropModalProps) {
   const imgRef = useRef<HTMLImageElement>(null)
   const [imageUrl, setImageUrl] = useState<string | null>(null)
@@ -159,7 +168,7 @@ export function ImageCropModal({
     <Modal
       opened={opened}
       onClose={onCancel}
-      title="Crop image"
+      title={title}
       size="lg"
       yOffset="2vh"
       styles={{
@@ -249,8 +258,18 @@ export function ImageCropModal({
             paddingTop: 'var(--mantine-spacing-xs)',
           }}
         >
+          {secondaryAction && (
+            <Button
+              variant="subtle"
+              mr="auto"
+              disabled={saving}
+              onClick={secondaryAction.onClick}
+            >
+              {secondaryAction.label}
+            </Button>
+          )}
           <Button variant="default" onClick={onCancel}>
-            Cancel
+            {cancelLabel}
           </Button>
           <Button
             color="green"
