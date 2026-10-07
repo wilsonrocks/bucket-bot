@@ -3,6 +3,7 @@ import { Link } from "#/components/link";
 import { createFileRoute } from "@tanstack/react-router";
 import { format } from "date-fns";
 import { SITE_NAME, seo } from "#/helpers/seo";
+import { SortableTh, useTableSort } from "#/components/sortable-table";
 
 export const Route = createFileRoute("/events")({
   staticData: { title: "Past Events" },
@@ -27,18 +28,29 @@ function RouteComponent() {
   const tierNameByCode = new Map(
     (tiers as any[]).map((t: any) => [t.code, t.name]),
   );
+  const { rows, getSortProps } = useTableSort(tourneys, {
+    name: { value: (t) => t.name },
+    date: { value: (t) => t.date, natural: "desc" },
+    players: { value: (t) => t.players, natural: "desc" },
+    tier: {
+      value: (t) =>
+        t.tier_code && t.tier_code !== "EVENT"
+          ? (tierNameByCode.get(t.tier_code) ?? t.tier_code)
+          : null,
+    },
+  });
   return (
     <table className="min-w-full text-sm">
       <thead>
         <tr className="border-b border-border text-left">
-          <th className="px-2 py-2 font-semibold">Name</th>
-          <th className="px-2 py-2 font-semibold">Date</th>
-          <th className="px-2 py-2 font-semibold">Players</th>
-          <th className="px-2 py-2 font-semibold">Tier</th>
+          <SortableTh {...getSortProps("name")}>Name</SortableTh>
+          <SortableTh {...getSortProps("date")}>Date</SortableTh>
+          <SortableTh {...getSortProps("players")}>Players</SortableTh>
+          <SortableTh {...getSortProps("tier")}>Tier</SortableTh>
         </tr>
       </thead>
       <tbody>
-        {tourneys.map(({ id, name, date, players, tier_code }) => (
+        {rows.map(({ id, name, date, players, tier_code }) => (
           <tr key={id} className="border-b border-border">
             <td className="px-2 py-1.5">
               <Link

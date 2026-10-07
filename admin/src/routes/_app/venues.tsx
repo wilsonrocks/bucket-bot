@@ -1,4 +1,5 @@
 import { useGetVenues, usePostCreateVenue, usePostVenueGeocode } from '@/api/hooks'
+import { SortableTh, useTableSort } from '@/components/sortable-table'
 import { RequireRankingReporter } from '@/components/RequireRankingReporter'
 import { Box, Button, Grid, Paper, Table, TextInput } from '@mantine/core'
 import { useForm } from '@mantine/form'
@@ -23,6 +24,14 @@ function RouteComponent() {
   const createVenueMutation = usePostCreateVenue()
   const geocodeMutation = usePostVenueGeocode()
   const [pendingGeocodeIds, setPendingGeocodeIds] = useState(new Set<number>())
+  const { rows, getSortProps } = useTableSort(venuesData ?? [], {
+    name: { value: (v) => v.name },
+    town: { value: (v) => v.town },
+    postCode: { value: (v) => v.post_code },
+    region: { value: (v) => v.region_name },
+    lat: { value: (v) => v.latitude },
+    long: { value: (v) => v.longitude },
+  })
 
   return (
     <div>
@@ -73,17 +82,17 @@ function RouteComponent() {
         <Table>
           <Table.Thead>
             <Table.Tr>
-              <Table.Th>Venue Name</Table.Th>
-              <Table.Th>Town</Table.Th>
-              <Table.Th>Post Code</Table.Th>
-              <Table.Th>Region</Table.Th>
-              <Table.Th>Lat</Table.Th>
-              <Table.Th>Long</Table.Th>
+              <SortableTh {...getSortProps('name')}>Venue Name</SortableTh>
+              <SortableTh {...getSortProps('town')}>Town</SortableTh>
+              <SortableTh {...getSortProps('postCode')}>Post Code</SortableTh>
+              <SortableTh {...getSortProps('region')}>Region</SortableTh>
+              <SortableTh {...getSortProps('lat')}>Lat</SortableTh>
+              <SortableTh {...getSortProps('long')}>Long</SortableTh>
               <Table.Th />
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
-            {venuesData.map((venue) => (
+            {rows.map((venue) => (
               <Table.Tr key={venue.id}>
                 <Table.Td>{venue.name}</Table.Td>
                 <Table.Td>{venue.town}</Table.Td>

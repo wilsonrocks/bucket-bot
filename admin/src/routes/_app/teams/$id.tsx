@@ -10,6 +10,7 @@ import {
   usePutTeamsId,
 } from '@/api/hooks'
 import { usePermissions } from '@/hooks/usePermissions'
+import { SortableTh, useTableSort } from '@/components/sortable-table'
 import { ImageUploader } from '@/components/ImageUploader'
 import {
   Alert,
@@ -162,6 +163,11 @@ function RouteComponent() {
     }
   }
 
+  const { rows: members, getSortProps } = useTableSort(team?.members ?? [], {
+    player: { value: (m) => m.player_name },
+    captain: { value: (m) => m.is_captain, natural: 'desc' },
+  }, { param: 'membersSort' })
+
   if (!team) return <div>Loading...</div>
 
   return (
@@ -261,13 +267,13 @@ function RouteComponent() {
           <Table mb="md">
             <Table.Thead>
               <Table.Tr>
-                <Table.Th>Player</Table.Th>
-                <Table.Th>Captain</Table.Th>
+                <SortableTh {...getSortProps('player')}>Player</SortableTh>
+                <SortableTh {...getSortProps('captain')}>Captain</SortableTh>
                 <Table.Th />
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
-              {team.members.map((member) => (
+              {members.map((member) => (
                 <Table.Tr key={member.membership_id}>
                   <Table.Td>{member.player_name}</Table.Td>
                   <Table.Td>

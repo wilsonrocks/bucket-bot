@@ -8,6 +8,7 @@ import { Tabs } from '#/components/routed-tabs'
 import { TeamsBarRace } from '#/components/animated-teams'
 import { optionalString } from '#/helpers/search-params'
 import { SITE_NAME, seo } from '#/helpers/seo'
+import { SortableTh, useTableSort } from '#/components/sortable-table'
 
 function RankChange({ change, isNew }: { change: number | null | undefined; isNew?: boolean }) {
   if (isNew) return <span className="text-sm text-green-600 dark:text-green-400">NEW</span>
@@ -52,6 +53,14 @@ function RouteComponent() {
   const navigate = Route.useNavigate()
   const isMd = useMediaQuery('(min-width: 992px)')
   const rankingDescription = rankingTypes.find((rt) => rt.code === typeCode)?.description
+  const { rows, getSortProps } = useTableSort(rankings as any[], {
+    rank: { value: (t) => t.rank },
+    change: { value: (t) => (t.new_team ? null : t.rank_change), natural: 'desc' },
+    team: { value: (t) => t.team_name },
+    points: { value: (t) => t.total_points, natural: 'desc' },
+    players: { value: (t) => t.player_count, natural: 'desc' },
+    events: { value: (t) => t.event_count, natural: 'desc' },
+  })
 
   return (
     <div>
@@ -90,17 +99,17 @@ function RouteComponent() {
             <table className="min-w-full text-sm tabular-nums">
               <thead className="sticky top-0 bg-surface">
                 <tr className="border-b border-border text-left">
-                  <th className="whitespace-nowrap px-2 py-2 font-semibold">Rank</th>
-                  <th className="whitespace-nowrap px-2 py-2 font-semibold">Change</th>
+                  <SortableTh {...getSortProps('rank')}>Rank</SortableTh>
+                  <SortableTh {...getSortProps('change')}>Change</SortableTh>
                   <th className="px-2 py-2 font-semibold">Logo</th>
-                  <th className="px-2 py-2 font-semibold">Team</th>
-                  <th className="px-2 py-2 font-semibold">Total Points</th>
-                  <th className="whitespace-nowrap px-2 py-2 font-semibold">Players</th>
-                  <th className="whitespace-nowrap px-2 py-2 font-semibold">Events</th>
+                  <SortableTh {...getSortProps('team')}>Team</SortableTh>
+                  <SortableTh {...getSortProps('points')}>Total Points</SortableTh>
+                  <SortableTh {...getSortProps('players')}>Players</SortableTh>
+                  <SortableTh {...getSortProps('events')}>Events</SortableTh>
                 </tr>
               </thead>
               <tbody>
-                {(rankings as any[]).map((team: any) => (
+                {rows.map((team: any) => (
                   <tr key={team.team_id} className="border-b border-border">
                     <td className="whitespace-nowrap px-2 py-1.5">{team.rank}</td>
                     <td className="whitespace-nowrap px-2 py-1.5">

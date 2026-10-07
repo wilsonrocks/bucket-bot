@@ -8,6 +8,7 @@ import { Tabs } from '#/components/routed-tabs'
 import { PlayersBarRace } from '#/components/animated-players'
 import { optionalFlag, optionalString } from '#/helpers/search-params'
 import { SITE_NAME, seo } from '#/helpers/seo'
+import { SortableTh, useTableSort } from '#/components/sortable-table'
 
 function RankChange({ change, newPlayer }: { change: number | null | undefined; newPlayer?: boolean }) {
   if (newPlayer) return <span className="text-sm text-green-600 dark:text-green-400">NEW</span>
@@ -56,7 +57,14 @@ function RouteComponent() {
 
   const rankingDescription = rankingTypes.find((rt) => rt.code === typeCode)?.description
   // Ranks are left as-is when filtering, so the gaps show who was dropped.
-  const rows = minFiveEvents ? rankings.filter((p) => Number(p.event_count ?? 0) >= 5) : rankings
+  const filtered = minFiveEvents ? rankings.filter((p) => Number(p.event_count ?? 0) >= 5) : rankings
+  const { rows, getSortProps } = useTableSort(filtered, {
+    rank: { value: (p) => p.rank },
+    change: { value: (p) => (p.new_player ? null : p.rank_change), natural: 'desc' },
+    player: { value: (p) => p.name },
+    points: { value: (p) => p.total_points, natural: 'desc' },
+    events: { value: (p) => Number(p.event_count ?? 0), natural: 'desc' },
+  })
 
   return (
     <div>
@@ -94,13 +102,13 @@ function RouteComponent() {
                 {/* Every column is sized, so toggling the filter can't resize the table.
                     The table is no longer stretched to full width, otherwise the slack
                     would all land on Player and leave it enormous on a wide screen. */}
-                <th className="w-16 whitespace-nowrap px-2 py-2 font-semibold">Rank</th>
-                <th className="w-20 whitespace-nowrap px-2 py-2 font-semibold">Change</th>
-                <th className="w-64 px-2 py-2 font-semibold">Player</th>
-                <th className="w-28 whitespace-nowrap px-2 py-2 font-semibold">Total Points</th>
-                <th className="hidden w-20 whitespace-nowrap px-2 py-2 font-semibold min-[601px]:table-cell">
+                <SortableTh className="w-16" {...getSortProps('rank')}>Rank</SortableTh>
+                <SortableTh className="w-20" {...getSortProps('change')}>Change</SortableTh>
+                <SortableTh className="w-64" {...getSortProps('player')}>Player</SortableTh>
+                <SortableTh className="w-28" {...getSortProps('points')}>Total Points</SortableTh>
+                <SortableTh className="hidden w-20 min-[601px]:table-cell" {...getSortProps('events')}>
                   Events
-                </th>
+                </SortableTh>
               </tr>
             </thead>
             <tbody>

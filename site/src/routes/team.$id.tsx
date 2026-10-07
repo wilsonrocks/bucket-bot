@@ -4,6 +4,7 @@ import { Link } from '#/components/link'
 import { Image } from '#/components/image'
 import { SITE_NAME, SITE_URL, absoluteUrl, jsonLd, seo } from '#/helpers/seo'
 import type { SportsTeam, WithContext } from 'schema-dts'
+import { SortableTh, useTableSort } from '#/components/sortable-table'
 
 function teamLogoUrl(imageKey: string | null | undefined): string | undefined {
   if (!imageKey) return undefined
@@ -67,6 +68,10 @@ export const Route = createFileRoute('/team/$id')({
 
 function RouteComponent() {
   const team = Route.useLoaderData()
+  const { rows, getSortProps } = useTableSort(team.members as any[], {
+    player: { value: (m) => m.player_name },
+    points: { value: (m) => m.rolling_year_points, natural: 'desc' },
+  })
   return (
     <div>
       <h2 className="mb-1 text-xl font-semibold">{team.name}</h2>
@@ -84,13 +89,13 @@ function RouteComponent() {
       <table className="mt-4 min-w-full text-sm tabular-nums">
         <thead>
           <tr className="border-b border-border text-left">
-            <th className="px-2 py-2 font-semibold">Player</th>
-            <th className="px-2 py-2 font-semibold">Rolling Year Points</th>
+            <SortableTh {...getSortProps('player')}>Player</SortableTh>
+            <SortableTh {...getSortProps('points')}>Rolling Year Points</SortableTh>
             <th className="px-2 py-2 font-semibold" />
           </tr>
         </thead>
         <tbody>
-          {(team.members as any[]).map((member: any) => (
+          {rows.map((member: any) => (
             <tr key={member.membership_id} className="border-b border-border">
               <td className="px-2 py-1.5">
                 <Link

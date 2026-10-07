@@ -21,6 +21,7 @@ import type { Person, WithContext } from 'schema-dts'
 import { achievementShareText, achievementShareUrl, achievementsTabLabel, earnedCount, earnedSummary, groupAchievements, playerCountLabel } from '#/helpers/achievements'
 import { AchievementModal, type EarnedAchievement } from '#/components/achievement-modal'
 import { ShareButton } from '#/components/share-button'
+import { SortableTh, useTableSort } from '#/components/sortable-table'
 
 export const Route = createFileRoute('/player/$id')({
   params: {
@@ -146,6 +147,26 @@ function RouteComponent() {
   // The best five events making up the player's Rolling Year score, as of the most
   // recent snapshot. Empty (and the legend hidden) if rankings have never been generated.
   const countingIds = new Set(countingEvents.tourneyIds)
+  const eventsSort = useTableSort(tourneys as any[], {
+    counts: { value: (t) => countingIds.has(t.tourneyId), natural: 'desc' },
+    event: { value: (t) => t.tourneyName },
+    points: { value: (t) => t.points, natural: 'desc' },
+    place: { value: (t) => t.place },
+    faction: { value: (t) => t.factionName },
+    date: { value: (t) => (t.date ? new Date(t.date) : null), natural: 'desc' },
+  }, { param: 'eventsSort' })
+  const teamsSort = useTableSort(teams as any[], {
+    team: { value: (m) => m.team_name },
+    joined: { value: (m) => (m.join_date ? new Date(m.join_date) : null), natural: 'desc' },
+    // A blank left date means current membership, so it sorts as the most recent.
+    left: { value: (m) => (m.left_date ? new Date(m.left_date) : new Date(8.64e15)), natural: 'desc' },
+  }, { param: 'teamsSort' })
+  const paintingSort = useTableSort(wins as any[], {
+    event: { value: (w) => w.tourneyName },
+    category: { value: (w) => w.categoryName },
+    position: { value: (w) => w.position },
+    date: { value: (w) => (w.tourneyDate ? new Date(w.tourneyDate) : null), natural: 'desc' },
+  }, { param: 'paintingSort' })
 
   const activeWinner = activePaintingId ? wins.find((w: any) => w.id === activePaintingId) ?? null : null
   const activeWinnerForLightbox = activeWinner ? {
@@ -178,18 +199,18 @@ function RouteComponent() {
           <table className="text-sm tabular-nums">
             <thead>
               <tr className="border-b border-border text-left">
-                <th className="px-2 py-2 font-semibold">
+                <SortableTh {...eventsSort.getSortProps('counts')}>
                   <span className="sr-only">Counts towards ranking</span>
-                </th>
-                <th className="px-2 py-2 font-semibold">Event</th>
-                <th className="px-2 py-2 text-right font-semibold">Points</th>
-                <th className="px-2 py-2 font-semibold">Place</th>
-                <th className="px-2 py-2 font-semibold">Faction</th>
-                <th className="px-2 py-2 font-semibold">Date</th>
+                </SortableTh>
+                <SortableTh {...eventsSort.getSortProps('event')}>Event</SortableTh>
+                <SortableTh align="right" {...eventsSort.getSortProps('points')}>Points</SortableTh>
+                <SortableTh {...eventsSort.getSortProps('place')}>Place</SortableTh>
+                <SortableTh {...eventsSort.getSortProps('faction')}>Faction</SortableTh>
+                <SortableTh {...eventsSort.getSortProps('date')}>Date</SortableTh>
               </tr>
             </thead>
             <tbody>
-              {(tourneys as any[]).map((t: any) => (
+              {eventsSort.rows.map((t: any) => (
                 <tr key={t.tourneyId} className="border-b border-border">
                   <td className="px-2 py-1.5 text-foreground">
                     {countingIds.has(t.tourneyId) && (
@@ -245,14 +266,14 @@ function RouteComponent() {
             <table className="min-w-full text-sm">
               <thead>
                 <tr className="border-b border-border text-left">
-                  <th className="px-2 py-2 font-semibold">Team</th>
-                  <th className="px-2 py-2 font-semibold">Joined</th>
-                  <th className="px-2 py-2 font-semibold">Left</th>
+                  <SortableTh {...teamsSort.getSortProps('team')}>Team</SortableTh>
+                  <SortableTh {...teamsSort.getSortProps('joined')}>Joined</SortableTh>
+                  <SortableTh {...teamsSort.getSortProps('left')}>Left</SortableTh>
                   <th className="px-2 py-2 font-semibold" />
                 </tr>
               </thead>
               <tbody>
-                {(teams as any[]).map((m: any) => (
+                {teamsSort.rows.map((m: any) => (
                   <tr key={m.membership_id ?? m.team_id} className="border-b border-border">
                     <td className="px-2 py-1.5">
                       <Link to="/team/$id" params={{ id: String(m.team_id) }} search={{ tab: undefined }}>
@@ -280,14 +301,14 @@ function RouteComponent() {
             <thead>
               <tr className="border-b border-border text-left">
                 <th className="px-2 py-2 font-semibold" />
-                <th className="px-2 py-2 font-semibold">Event</th>
-                <th className="px-2 py-2 font-semibold">Category</th>
-                <th className="px-2 py-2 font-semibold">Position</th>
-                <th className="px-2 py-2 font-semibold">Date</th>
+                <SortableTh {...paintingSort.getSortProps('event')}>Event</SortableTh>
+                <SortableTh {...paintingSort.getSortProps('category')}>Category</SortableTh>
+                <SortableTh {...paintingSort.getSortProps('position')}>Position</SortableTh>
+                <SortableTh {...paintingSort.getSortProps('date')}>Date</SortableTh>
               </tr>
             </thead>
             <tbody>
-              {wins.map((w: any) => (
+              {paintingSort.rows.map((w: any) => (
                 <tr key={w.id} className="border-b border-border">
                   <td className="px-2 py-1.5">
                     {w.imageKey ? (

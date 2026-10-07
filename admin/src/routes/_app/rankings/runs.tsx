@@ -18,6 +18,7 @@ import {
   Title,
   Tooltip,
 } from '@mantine/core'
+import { SortableTh, useTableSort } from '@/components/sortable-table'
 
 export const Route = createFileRoute('/_app/rankings/runs')({
   component: () => (
@@ -49,8 +50,8 @@ function formatTime(ts: string | null) {
 }
 
 function duration(step: Step) {
-  if (!step.finished_at) return '—'
-  const ms = new Date(step.finished_at).getTime() - new Date(step.started_at).getTime()
+  const ms = durationMs(step)
+  if (ms == null) return '—'
   if (ms < 1000) return `${ms}ms`
   return `${(ms / 1000).toFixed(1)}s`
 }
@@ -79,6 +80,64 @@ function groupRuns(steps: Step[]) {
       retryKeys: failedOrSkipped.map((s) => s.step_key),
     }
   })
+}
+
+function durationMs(step: Step) {
+  if (!step.finished_at) return null
+  return new Date(step.finished_at).getTime() - new Date(step.started_at).getTime()
+}
+
+// Every run's table shares one `stepsSort` param, so they all sort the same way.
+function RunStepsTable({ steps }: { steps: Step[] }) {
+  const { rows, getSortProps } = useTableSort(steps, {
+    step: { value: (s) => s.step_key },
+    status: { value: (s) => s.status },
+    attempts: { value: (s) => s.attempts, natural: 'desc' },
+    duration: { value: durationMs, natural: 'desc' },
+  }, { param: 'stepsSort' })
+
+  return (
+    <Table>
+      <Table.Thead>
+        <Table.Tr>
+          <SortableTh {...getSortProps('step')}>Step</SortableTh>
+          <SortableTh {...getSortProps('status')}>Status</SortableTh>
+          <SortableTh {...getSortProps('attempts')}>Attempts</SortableTh>
+          <SortableTh {...getSortProps('duration')}>Duration</SortableTh>
+          <Table.Th>Error</Table.Th>
+        </Table.Tr>
+      </Table.Thead>
+      <Table.Tbody>
+        {rows.map((step) => (
+          <Table.Tr key={step.id}>
+            <Table.Td>
+              <Text ff="monospace" size="sm">
+                {step.step_key}
+              </Text>
+            </Table.Td>
+            <Table.Td>
+              <Badge color={statusColor(step.status)} variant="light">
+                {step.status}
+              </Badge>
+            </Table.Td>
+            <Table.Td>{step.attempts}</Table.Td>
+            <Table.Td>{duration(step)}</Table.Td>
+            <Table.Td>
+              {step.error ? (
+                <Tooltip label={step.error} multiline maw={400} withArrow>
+                  <Text size="sm" c="red" lineClamp={1} maw={300}>
+                    {step.error.split('\n')[0]}
+                  </Text>
+                </Tooltip>
+              ) : (
+                '—'
+              )}
+            </Table.Td>
+          </Table.Tr>
+        ))}
+      </Table.Tbody>
+    </Table>
+  )
 }
 
 function RouteComponent() {
@@ -145,46 +204,7 @@ function RouteComponent() {
             )}
           </Group>
 
-          <Table>
-            <Table.Thead>
-              <Table.Tr>
-                <Table.Th>Step</Table.Th>
-                <Table.Th>Status</Table.Th>
-                <Table.Th>Attempts</Table.Th>
-                <Table.Th>Duration</Table.Th>
-                <Table.Th>Error</Table.Th>
-              </Table.Tr>
-            </Table.Thead>
-            <Table.Tbody>
-              {run.steps.map((step) => (
-                <Table.Tr key={step.id}>
-                  <Table.Td>
-                    <Text ff="monospace" size="sm">
-                      {step.step_key}
-                    </Text>
-                  </Table.Td>
-                  <Table.Td>
-                    <Badge color={statusColor(step.status)} variant="light">
-                      {step.status}
-                    </Badge>
-                  </Table.Td>
-                  <Table.Td>{step.attempts}</Table.Td>
-                  <Table.Td>{duration(step)}</Table.Td>
-                  <Table.Td>
-                    {step.error ? (
-                      <Tooltip label={step.error} multiline maw={400} withArrow>
-                        <Text size="sm" c="red" lineClamp={1} maw={300}>
-                          {step.error.split('\n')[0]}
-                        </Text>
-                      </Tooltip>
-                    ) : (
-                      '—'
-                    )}
-                  </Table.Td>
-                </Table.Tr>
-              ))}
-            </Table.Tbody>
-          </Table>
+          <RunStepsTable steps={run.steps} />
         </Card>
       ))}
     </Stack>
