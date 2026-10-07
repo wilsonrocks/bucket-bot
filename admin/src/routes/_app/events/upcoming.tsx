@@ -7,6 +7,7 @@ import {
   usePutUpcomingEventVenue,
 } from '@/api/hooks'
 import { RequireRankingReporter } from '@/components/RequireRankingReporter'
+import { SortableTh, useTableSort } from '@/components/sortable-table'
 import { usePermissions } from '@/hooks/usePermissions'
 import { Button, Group, Select, Table, Text } from '@mantine/core'
 import { createFileRoute } from '@tanstack/react-router'
@@ -43,6 +44,12 @@ function RouteComponent() {
       user.discord_user_id) as string,
   }))
 
+  const { rows, getSortProps } = useTableSort(events ?? [], {
+    event: { value: (e) => e.name },
+    date: { value: (e) => e.starts_at },
+    location: { value: (e) => e.location },
+  })
+
   if (!events) return <div>Loading...</div>
 
   return (
@@ -63,15 +70,15 @@ function RouteComponent() {
       <Table>
         <Table.Thead>
           <Table.Tr>
-            <Table.Th>Event</Table.Th>
-            <Table.Th>Date</Table.Th>
-            <Table.Th>Location</Table.Th>
+            <SortableTh {...getSortProps('event')}>Event</SortableTh>
+            <SortableTh {...getSortProps('date')}>Date</SortableTh>
+            <SortableTh {...getSortProps('location')}>Location</SortableTh>
             <Table.Th>Organiser</Table.Th>
             <Table.Th>Venue</Table.Th>
           </Table.Tr>
         </Table.Thead>
         <Table.Tbody>
-          {events.map((event) => {
+          {rows.map((event) => {
             return (
               <Table.Tr key={event.id}>
                 <Table.Td>{event.name}</Table.Td>

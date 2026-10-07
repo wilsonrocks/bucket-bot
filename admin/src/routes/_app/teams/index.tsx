@@ -4,6 +4,7 @@ import {
   usePostCreateTeam,
 } from '@/api/hooks'
 import { usePermissions } from '@/hooks/usePermissions'
+import { SortableTh, useTableSort } from '@/components/sortable-table'
 import { Link } from '@/components/link'
 import {
   Anchor,
@@ -37,6 +38,11 @@ function RouteComponent() {
   const { data: teams } = useGetTeams()
   const createTeam = usePostCreateTeam()
   const deleteTeam = useDeleteTeamsId()
+  const { rows, getSortProps } = useTableSort(teams ?? [], {
+    name: { value: (t) => t.name },
+    description: { value: (t) => t.description },
+    colour: { value: (t) => t.brand_colour },
+  })
 
   return (
     <div>
@@ -89,14 +95,14 @@ function RouteComponent() {
         <Table>
           <Table.Thead>
             <Table.Tr>
-              <Table.Th>Name</Table.Th>
-              <Table.Th>Description</Table.Th>
-              <Table.Th>Brand Colour</Table.Th>
+              <SortableTh {...getSortProps('name')}>Name</SortableTh>
+              <SortableTh {...getSortProps('description')}>Description</SortableTh>
+              <SortableTh {...getSortProps('colour')}>Brand Colour</SortableTh>
               <Table.Th />
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
-            {teams.map((team) => (
+            {rows.map((team) => (
               <Table.Tr key={team.id}>
                 <Table.Td>
                   <Link to={TeamEditRoute.to} params={{ id: String(team.id) }} search={{ tab: undefined }}>

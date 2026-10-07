@@ -4,6 +4,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { Tabs } from '#/components/routed-tabs'
 import { useState } from 'react'
 import { SITE_NAME, seo } from '#/helpers/seo'
+import { SortableTh, useTableSort } from '#/components/sortable-table'
 
 function RankChange({ change }: { change: number | null | undefined }) {
   if (change == null) return <span className="text-sm text-green-600 dark:text-green-400">NEW</span>
@@ -32,6 +33,15 @@ export const Route = createFileRoute('/faction-rankings')({
 
 function RouteComponent() {
   const { factionRankings, factionsOverTime } = Route.useLoaderData()
+  const { rows, getSortProps } = useTableSort(factionRankings as any[], {
+    rank: { value: (f) => f.rank },
+    change: { value: (f) => f.rank_change, natural: 'desc' },
+    faction: { value: (f) => f.faction_name },
+    declarations: { value: (f) => f.declarations, natural: 'desc' },
+    rate: { value: (f) => f.declaration_rate, natural: 'desc' },
+    points: { value: (f) => f.total_points, natural: 'desc' },
+    average: { value: (f) => f.points_per_declaration, natural: 'desc' },
+  })
   const [metric, setMetric] = useState<'declarations' | 'points_per_declaration' | 'total_points'>('points_per_declaration')
 
   return (
@@ -45,17 +55,17 @@ function RouteComponent() {
           <table className="min-w-full text-sm tabular-nums">
             <thead>
               <tr className="border-b border-border text-left">
-                <th className="whitespace-nowrap px-2 py-2 font-semibold">Rank</th>
-                <th className="whitespace-nowrap px-2 py-2 font-semibold">Change</th>
-                <th className="px-2 py-2 font-semibold">Faction</th>
-                <th className="px-2 py-2 font-semibold">Declarations</th>
-                <th className="px-2 py-2 font-semibold">Play rate</th>
-                <th className="px-2 py-2 font-semibold">Total Points</th>
-                <th className="px-2 py-2 font-semibold">Average Points</th>
+                <SortableTh {...getSortProps('rank')}>Rank</SortableTh>
+                <SortableTh {...getSortProps('change')}>Change</SortableTh>
+                <SortableTh {...getSortProps('faction')}>Faction</SortableTh>
+                <SortableTh {...getSortProps('declarations')}>Declarations</SortableTh>
+                <SortableTh {...getSortProps('rate')}>Play rate</SortableTh>
+                <SortableTh {...getSortProps('points')}>Total Points</SortableTh>
+                <SortableTh {...getSortProps('average')}>Average Points</SortableTh>
               </tr>
             </thead>
             <tbody>
-              {(factionRankings as any[]).map((faction: any) => (
+              {rows.map((faction: any) => (
                 <tr key={faction.faction_code} className="border-b border-border">
                   <td className="whitespace-nowrap px-2 py-1.5">
                     <div style={{ borderLeft: `3px solid ${faction.hex_code}`, paddingLeft: '0.5rem' }}>

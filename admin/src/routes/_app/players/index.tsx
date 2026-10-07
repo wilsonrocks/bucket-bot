@@ -4,6 +4,7 @@ import { Link } from '@/components/link'
 import { Avatar, Table } from '@mantine/core'
 import { createFileRoute } from '@tanstack/react-router'
 import { Route as PlayerEditRoute } from './$id'
+import { SortableTh, useTableSort } from '@/components/sortable-table'
 
 export const Route = createFileRoute('/_app/players/')({
   component: () => (
@@ -16,6 +17,10 @@ export const Route = createFileRoute('/_app/players/')({
 
 function RouteComponent() {
   const { data: players } = useGetPlayers()
+  const { rows, getSortProps } = useTableSort(players ?? [], {
+    name: { value: (p) => p.name },
+    discord: { value: (p) => p.discord_username },
+  })
 
   if (!players) return <div>Loading...</div>
 
@@ -24,12 +29,12 @@ function RouteComponent() {
       <Table.Thead>
         <Table.Tr>
           <Table.Th>Avatar</Table.Th>
-          <Table.Th>Name</Table.Th>
-          <Table.Th>Discord Username</Table.Th>
+          <SortableTh {...getSortProps('name')}>Name</SortableTh>
+          <SortableTh {...getSortProps('discord')}>Discord Username</SortableTh>
         </Table.Tr>
       </Table.Thead>
       <Table.Tbody>
-        {players.map((player) => (
+        {rows.map((player) => (
           <Table.Tr key={player.id}>
             <Table.Td>
               <Avatar src={player.discord_avatar_url ?? undefined} size="sm" />

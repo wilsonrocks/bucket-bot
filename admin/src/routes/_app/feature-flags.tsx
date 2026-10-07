@@ -2,6 +2,7 @@ import { useGetFeatureFlags, usePatchFeatureFlag } from '@/api/hooks'
 import { RequireRankingReporter } from '@/components/RequireRankingReporter'
 import { Switch, Table, Text } from '@mantine/core'
 import { modals } from '@mantine/modals'
+import { SortableTh, useTableSort } from '@/components/sortable-table'
 import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/_app/feature-flags')({
@@ -16,6 +17,10 @@ export const Route = createFileRoute('/_app/feature-flags')({
 function RouteComponent() {
   const { data: flags } = useGetFeatureFlags()
   const patchFlag = usePatchFeatureFlag()
+  const { rows, getSortProps } = useTableSort(flags ?? [], {
+    flag: { value: (f) => f.flag },
+    enabled: { value: (f) => f.is_enabled, natural: 'desc' },
+  })
 
   if (flags && flags.length === 0) {
     return <Text c="dimmed">No feature flags defined.</Text>
@@ -25,12 +30,12 @@ function RouteComponent() {
     <Table>
       <Table.Thead>
         <Table.Tr>
-          <Table.Th>Flag</Table.Th>
-          <Table.Th>Enabled</Table.Th>
+          <SortableTh {...getSortProps('flag')}>Flag</SortableTh>
+          <SortableTh {...getSortProps('enabled')}>Enabled</SortableTh>
         </Table.Tr>
       </Table.Thead>
       <Table.Tbody>
-        {flags?.map((flag) => (
+        {rows.map((flag) => (
           <Table.Tr key={flag.flag}>
             <Table.Td>{flag.flag}</Table.Td>
             <Table.Td>

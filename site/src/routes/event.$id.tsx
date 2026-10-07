@@ -10,6 +10,7 @@ import {
 import { Image } from "#/components/image";
 import { PhotoLightbox } from "#/components/photo-lightbox";
 import { SITE_NAME, SITE_URL, absoluteUrl, jsonLd, seo } from "#/helpers/seo";
+import { SortableTh, useTableSort } from "#/components/sortable-table";
 import type { SportsEvent, WithContext } from "schema-dts";
 
 export const Route = createFileRoute("/event/$id")({
@@ -88,6 +89,12 @@ function RouteComponent() {
   const navigate = Route.useNavigate();
   const t = tourney as any;
   const cats = paintingCategories as any[];
+  const { rows, getSortProps } = useTableSort(players as any[], {
+    place: { value: (r) => r.place },
+    name: { value: (r) => r.playerName },
+    points: { value: (r) => r.points, natural: "desc" },
+    faction: { value: (r) => r.factionName },
+  });
 
   const hasAnyImages = cats.some((cat: any) =>
     (cat.winners ?? []).some((w: any) => w.imageKey),
@@ -121,14 +128,14 @@ function RouteComponent() {
           <table className="min-w-full text-sm tabular-nums">
             <thead>
               <tr className="border-b border-border text-left">
-                <th className="px-2 py-2 font-semibold">Place</th>
-                <th className="px-2 py-2 font-semibold">Name</th>
-                <th className="px-2 py-2 font-semibold">Points</th>
-                <th className="px-2 py-2 font-semibold">Faction</th>
+                <SortableTh {...getSortProps("place")}>Place</SortableTh>
+                <SortableTh {...getSortProps("name")}>Name</SortableTh>
+                <SortableTh {...getSortProps("points")}>Points</SortableTh>
+                <SortableTh {...getSortProps("faction")}>Faction</SortableTh>
               </tr>
             </thead>
             <tbody>
-              {(players as any[]).map((row: any) => (
+              {rows.map((row: any) => (
                 <tr
                   key={`${row.place}-${row.playerName}`}
                   className="border-b border-border"

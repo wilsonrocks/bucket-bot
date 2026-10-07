@@ -12,6 +12,7 @@ import {
   usePutPlayerId,
 } from '@/api/hooks'
 import { RequireRankingReporter } from '@/components/RequireRankingReporter'
+import { SortableTh, useTableSort } from '@/components/sortable-table'
 import { SearchMatchList } from '@/components/search-match-list'
 import {
   Avatar,
@@ -61,6 +62,12 @@ function IdentitiesPanel({ playerId }: { playerId: number }) {
   const { data: identities } = useGetPlayerIdIdentities(String(playerId))
   const ignoreMutation = usePostPlayerIdentityIdIgnore(playerId)
   const detachMutation = useDeletePlayerIdentityIdPlayer(playerId)
+  const { rows, getSortProps } = useTableSort(identities ?? [], {
+    provider: { value: (i) => i.provider_name },
+    name: { value: (i) => i.display_name },
+    external: { value: (i) => i.external_id },
+    events: { value: (i) => i.result_count, natural: 'desc' },
+  }, { param: 'identitiesSort' })
 
   const confirmDetach = (identity: { id: number; display_name: string }) =>
     modals.openConfirmModal({
@@ -107,15 +114,15 @@ function IdentitiesPanel({ playerId }: { playerId: number }) {
         <Table>
           <Table.Thead>
             <Table.Tr>
-              <Table.Th>Provider</Table.Th>
-              <Table.Th>Name</Table.Th>
-              <Table.Th>External ID</Table.Th>
-              <Table.Th>Events</Table.Th>
+              <SortableTh {...getSortProps('provider')}>Provider</SortableTh>
+              <SortableTh {...getSortProps('name')}>Name</SortableTh>
+              <SortableTh {...getSortProps('external')}>External ID</SortableTh>
+              <SortableTh {...getSortProps('events')}>Events</SortableTh>
               <Table.Th />
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
-            {identities.map((identity) => (
+            {rows.map((identity) => (
               <Table.Tr key={identity.id}>
                 <Table.Td>
                   <Badge variant="light">{identity.provider_name}</Badge>
