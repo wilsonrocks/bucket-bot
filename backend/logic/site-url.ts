@@ -1,9 +1,10 @@
-const DEFAULT_SITE_URL = "https://malifaux.uk";
-
 /**
- * Base URL of the public site, for links the bot posts. Set SITE_URL locally
- * (e.g. http://localhost:3001) so dev links point at the dev site.
+ * Base URL of the public site, for links the bot posts. Required, so a dev
+ * backend can't silently post links to prod: set SITE_URL to
+ * http://localhost:3001 locally and https://malifaux.uk in production.
  */
 export function getSiteUrl(): string {
-  return process.env.SITE_URL ?? DEFAULT_SITE_URL;
+  const siteUrl = process.env.SITE_URL;
+  if (!siteUrl) throw new Error("SITE_URL is not defined");
+  return siteUrl;
 }

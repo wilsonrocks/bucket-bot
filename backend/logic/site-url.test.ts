@@ -6,13 +6,13 @@ afterEach(() => {
 });
 
 describe("getSiteUrl", () => {
-  test("uses SITE_URL when set", () => {
+  test("uses SITE_URL", () => {
     vi.stubEnv("SITE_URL", "http://localhost:3001");
     expect(getSiteUrl()).toBe("http://localhost:3001");
   });
 
-  test("falls back to the production site", () => {
+  test("throws when SITE_URL is not set", () => {
     vi.stubEnv("SITE_URL", undefined);
-    expect(getSiteUrl()).toBe("https://malifaux.uk");
+    expect(() => getSiteUrl()).toThrow("SITE_URL is not defined");
   });
 });
