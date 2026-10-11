@@ -7,13 +7,12 @@ import {
   mentionUserInGuild,
   UK_MALIFAUX_SERVER_ID,
 } from "../discord-client";
+import { getSiteUrl } from "../site-url";
 
 /** Discord allows at most 10 embeds per message... */
 export const MAX_EMBEDS_PER_MESSAGE = 10;
 /** ...and at most 6000 characters across all of a message's embeds. */
 export const MAX_EMBED_CHARS_PER_MESSAGE = 6000;
-
-const DEFAULT_SITE_URL = "https://malifaux.uk";
 
 export interface AnnouncedAchievement {
   playerId: number;
@@ -31,7 +30,7 @@ export interface AnnouncedAchievement {
 /** Public page showing one player's achievement, with a native share button. */
 export function achievementShareUrl(
   a: Pick<AnnouncedAchievement, "playerId" | "achievementId">,
-  siteUrl: string = process.env.SITE_URL ?? DEFAULT_SITE_URL,
+  siteUrl: string = getSiteUrl(),
 ): string {
   const params = new URLSearchParams({
     tab: "achievements",
@@ -43,7 +42,7 @@ export function achievementShareUrl(
 export function buildAchievementEmbed(
   a: AnnouncedAchievement,
   assetsUrl: string | undefined = process.env.ASSETS_URL,
-  siteUrl: string = process.env.SITE_URL ?? DEFAULT_SITE_URL,
+  siteUrl: string = getSiteUrl(),
 ): EmbedBuilder {
   // Text is filled in from admin, so any of it may still be blank.
   const sections: string[] = [];
@@ -78,7 +77,7 @@ export function buildAchievementMessage(
   mention: string,
   achievements: AnnouncedAchievement[],
   assetsUrl: string | undefined = process.env.ASSETS_URL,
-  siteUrl: string = process.env.SITE_URL ?? DEFAULT_SITE_URL,
+  siteUrl: string = getSiteUrl(),
 ): {
   content: string;
   embeds: EmbedBuilder[];

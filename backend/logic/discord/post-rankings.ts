@@ -9,6 +9,7 @@ import {
   UK_MALIFAUX_SERVER_ID,
 } from "../discord-client";
 import { mostRecentSnapshot } from "../most-recent-snapshot";
+import { getSiteUrl } from "../site-url";
 
 const TOP_X_PLAYERS = 16;
 
@@ -136,7 +137,7 @@ export const postDiscordRankings = async (db: Kysely<DB>) => {
 
 Here is your weekly breakfast of rankings that I have cooked from data. I hope that it is tasty and nutritious and sustains you until you can next play in an event and generate more data for me. Enjoy!
 
-There's only a maximum of ${TOP_X_PLAYERS} players shown here. But you can see the full rankings [on the website](${process.env.FRONTEND_URL}/site/rankings?typeCode=${typeCode})!
+There's only a maximum of ${TOP_X_PLAYERS} players shown here. But you can see the full rankings [on the website](${getSiteUrl()}/rankings?typeCode=${typeCode})!
 
       `,
 
