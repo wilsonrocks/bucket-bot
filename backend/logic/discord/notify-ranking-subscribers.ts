@@ -2,8 +2,7 @@ import { sql, type Kysely } from "kysely";
 import type { DB } from "kysely-codegen";
 import { getDiscordClient } from "../discord-client";
 import { UNSUBSCRIBE_COMMAND } from "./subscription-commands";
-
-const DEFAULT_SITE_URL = "https://malifaux.uk";
+import { getSiteUrl } from "../site-url";
 
 export interface RankChange {
   discordUserId: string;
@@ -89,7 +88,7 @@ export function formatRankChange({
 
 export function buildRankChangeMessage(
   changes: RankChange[],
-  siteUrl: string = process.env.SITE_URL ?? DEFAULT_SITE_URL,
+  siteUrl: string = getSiteUrl(),
 ): string {
   return [
     ...changes.map(formatRankChange),

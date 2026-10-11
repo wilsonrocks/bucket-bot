@@ -89,4 +89,7 @@ jobs:
           eval "$(ssh-agent -s)"
           echo "$SSH_PRIVATE_KEY" | ssh-add -
           ssh -o "StrictHostKeyChecking=no" $BACKEND_USER@$BACKEND_IP \
-            "docker pull ghcr.io/${{ github.repository }}:latest && sudo systemctl restart bucket-bot-api && docker image prune -af"
+            "docker pull ghcr.io/${{ github.repository }}:latest \
+              && docker run --rm --env-file /etc/bucket-bot/api.env ghcr.io/${{ github.repository }}:latest node check-env.js \
+              && sudo systemctl restart bucket-bot-api \
+              && docker image prune -af"

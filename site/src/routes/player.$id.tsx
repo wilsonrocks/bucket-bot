@@ -115,12 +115,15 @@ export const Route = createFileRoute('/player/$id')({
         }
       : undefined
 
+    const image = sharedSeo ? sharedSeo.image : avatar ?? undefined
+
     return {
       ...seo({
         title: sharedSeo?.title ?? `${player.name} — ${SITE_NAME}`,
         description: sharedSeo?.description ?? descParts.join(' '),
         path: `/player/${params.id}`,
-        image: sharedSeo ? sharedSeo.image : avatar ?? undefined,
+        image,
+        imageShape: image && image === avatar ? 'square' : 'wide',
         type: 'profile',
       }),
       scripts: [jsonLd(schema)],
