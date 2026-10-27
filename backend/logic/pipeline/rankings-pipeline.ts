@@ -64,11 +64,6 @@ export const STEPS: StepDef[] = [
     dependsOn: ["generate-player"],
     fn: (db) => postDiscordRankings(db),
   },
-  {
-    stepKey: "notify-subscribers",
-    dependsOn: ["generate-player"],
-    fn: (db) => notifyRankingSubscribers(db),
-  },
   { stepKey: "generate-faction", fn: (db) => generateFactionRankings(db) },
   {
     stepKey: "post-faction",
@@ -84,6 +79,13 @@ export const STEPS: StepDef[] = [
     stepKey: "post-team",
     dependsOn: ["generate-team"],
     fn: (db) => postTeamRankingsToDiscord(db),
+  },
+  // After generate-team so team moves are included, but only gated on player
+  // rankings: a failed team step should not hold back player DMs.
+  {
+    stepKey: "notify-subscribers",
+    dependsOn: ["generate-player"],
+    fn: (db) => notifyRankingSubscribers(db),
   },
   { stepKey: "generate-region", fn: (db) => generateRegionSnapshot(db) },
 ];

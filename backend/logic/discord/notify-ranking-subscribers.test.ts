@@ -10,21 +10,27 @@ vi.mock("../discord-client", () => ({
 
 import { getDiscordClient } from "../discord-client";
 import {
-  buildRankChangeMessage,
+  buildRankChangeMessages,
+  formatNeighbours,
   formatRankChange,
   getRankChanges,
   notifyRankingSubscribers,
+  type RankChange,
 } from "./notify-ranking-subscribers";
 
 // Player ids from the shared test tourney data.
 const ALICE = 10001;
 const BOB = 10002;
 const CHARLIE = 10003;
+const DAVID = 10004;
+const EVE = 10005;
 
 const DISCORD_ALICE = "test-notify-discord-alice";
 const DISCORD_BOB = "test-notify-discord-bob";
 const DISCORD_CHARLIE = "test-notify-discord-charlie";
 const DISCORD_IDS = [DISCORD_ALICE, DISCORD_BOB, DISCORD_CHARLIE];
+
+const TEAM_NAMES = ["test-notify-Alpha", "test-notify-Beta", "test-notify-Gamma"];
 
 async function linkDiscordUser(playerId: number, discordUserId: string) {
   await dbClient
@@ -59,10 +65,51 @@ async function addBatch(typeCode: string, ranks: Record<number, number>) {
     batch_id: batch.id,
     player_id: Number(playerId),
     rank,
-    total_points: 0,
+    total_points: 100 - rank,
   }));
   if (rows.length > 0) {
     await dbClient.insertInto("ranking_snapshot").values(rows).execute();
+  }
+}
+
+async function addTeam(
+  name: string,
+  members: number[],
+  { joinDate = "2020-01-01", leftDate }: { joinDate?: string; leftDate?: string } = {},
+) {
+  const team = await dbClient
+    .insertInto("team")
+    .values({ name })
+    .returning("id")
+    .executeTakeFirstOrThrow();
+  await dbClient
+    .insertInto("membership")
+    .values(
+      members.map((player_id) => ({
+        player_id,
+        team_id: team.id,
+        join_date: joinDate as any,
+        left_date: (leftDate ?? null) as any,
+      })),
+    )
+    .execute();
+  return team.id;
+}
+
+async function addTeamBatch(typeCode: string, ranks: Record<number, number>) {
+  const batch = await dbClient
+    .insertInto("team_ranking_snapshot_batch")
+    .values({ type_code: typeCode })
+    .returning("id")
+    .executeTakeFirstOrThrow();
+  const rows = Object.entries(ranks).map(([teamId, rank]) => ({
+    batch_id: batch.id,
+    team_id: Number(teamId),
+    rank,
+    total_points: 100 - rank,
+  }));
+  if (rows.length > 0) {
+    await dbClient.insertInto("team_ranking_snapshot").values(rows).execute();
   }
 }
 
@@ -83,9 +130,23 @@ function mockDiscord(send = vi.fn().mockResolvedValue(undefined)) {
   return send;
 }
 
+function summarise(changes: RankChange[]) {
+  return changes.map(({ discordUserId, teamName, typeName, oldRank, newRank }) => ({
+    discordUserId,
+    teamName,
+    typeName,
+    oldRank,
+    newRank,
+  }));
+}
+
 beforeEach(async () => {
-  // addTestDataToDb clears players, which frees the player.discord_id FK — so
+  // Team snapshots reference teams, so they go first. addTestDataToDb clears
+  // players (cascading memberships), which frees the player.discord_id FK — so
   // the discord_user cleanup has to run after it.
+  await dbClient.deleteFrom("team_ranking_snapshot").execute();
+  await dbClient.deleteFrom("team_ranking_snapshot_batch").execute();
+  await dbClient.deleteFrom("team").where("name", "in", TEAM_NAMES).execute();
   await addTestDataToDb(dbClient);
   await dbClient.deleteFrom("ranking_subscription").execute();
   await dbClient
@@ -99,55 +160,166 @@ beforeEach(async () => {
 });
 
 describe("formatRankChange", () => {
-  test("rank going down", () => {
+  const player = { teamName: null };
+
+  test("rank falling", () => {
     expect(
-      formatRankChange({ typeName: "Rolling Year", oldRank: 7, newRank: 11 }),
-    ).toBe("Your ranking in Rolling Year has gone down 4 from 7 to 11.");
+      formatRankChange({ ...player, typeName: "Rolling Year", oldRank: 7, newRank: 11 }),
+    ).toBe("Your ranking in Rolling Year has *fallen* 4 places to 11th.");
   });
 
-  test("rank going up", () => {
+  test("rank rising", () => {
     expect(
-      formatRankChange({ typeName: "Best Resser", oldRank: 5, newRank: 3 }),
-    ).toBe("Your ranking in Best Resser has gone up 2 from 5 to 3.");
+      formatRankChange({ ...player, typeName: "Best Resser", oldRank: 5, newRank: 3 }),
+    ).toBe("Your ranking in Best Resser has *risen* 2 places to 3rd.");
+  });
+
+  test("moving a single place", () => {
+    expect(
+      formatRankChange({ ...player, typeName: "Best Resser", oldRank: 2, newRank: 1 }),
+    ).toBe("Your ranking in Best Resser has *risen* 1 place to 1st.");
   });
 
   test("entering the rankings", () => {
     expect(
-      formatRankChange({ typeName: "Masters", oldRank: null, newRank: 12 }),
-    ).toBe("You have entered the Masters rankings at 12.");
+      formatRankChange({ ...player, typeName: "Best Guild", oldRank: null, newRank: 12 }),
+    ).toBe("You have entered the Best Guild rankings at 12th.");
   });
 
   test("dropping out of the rankings", () => {
     expect(
-      formatRankChange({ typeName: "Masters", oldRank: 9, newRank: null }),
-    ).toBe("You have dropped out of the Masters rankings (you were 9).");
+      formatRankChange({ ...player, typeName: "Best Guild", oldRank: 9, newRank: null }),
+    ).toBe("You have dropped out of the Best Guild rankings (you were 9th).");
+  });
+
+  test("team rank moving", () => {
+    expect(
+      formatRankChange({ teamName: "Alpha", typeName: "Rolling Year", oldRank: 8, newRank: 5 }),
+    ).toBe("**Alpha**'s ranking in Rolling Year has *risen* 3 places to 5th.");
+  });
+
+  test("team entering the rankings", () => {
+    expect(
+      formatRankChange({ teamName: "Alpha", typeName: "Rolling Year", oldRank: null, newRank: 5 }),
+    ).toBe("**Alpha** has entered the Rolling Year team rankings at 5th.");
+  });
+
+  test("team dropping out of the rankings", () => {
+    expect(
+      formatRankChange({ teamName: "Alpha", typeName: "Rolling Year", oldRank: 9, newRank: null }),
+    ).toBe("**Alpha** has dropped out of the Rolling Year team rankings (was 9th).");
+  });
+
+  test("escapes markdown in team names", () => {
+    expect(
+      formatRankChange({ teamName: "*Stars*", typeName: "Rolling Year", oldRank: 2, newRank: 1 }),
+    ).toBe("**\\*Stars\\***'s ranking in Rolling Year has *risen* 1 place to 1st.");
   });
 });
 
-describe("buildRankChangeMessage", () => {
-  test("lists every change, then a player link and how to unsubscribe", () => {
-    const change = {
-      discordUserId: "1",
-      playerId: 42,
-      notifiedUpTo: "2026-01-01 00:00:00",
-    };
+describe("formatNeighbours", () => {
+  test("quotes each row and bolds the subscriber's own", () => {
     expect(
-      buildRankChangeMessage(
+      formatNeighbours(
         [
-          { ...change, typeName: "Rolling Year", oldRank: 7, newRank: 11 },
-          { ...change, typeName: "Best Resser", oldRank: 2, newRank: 3 },
+          { id: 1, name: "Bob", rank: 2, totalPoints: 50 },
+          { id: 2, name: "Alice", rank: 3, totalPoints: 42.123 },
+          { id: 3, name: "Charlie_", rank: 4, totalPoints: 40 },
+        ],
+        2,
+      ),
+    ).toEqual([
+      "> 2nd Bob (50.00 pts)",
+      "> **3rd Alice (42.12 pts)**",
+      "> 4th Charlie\\_ (40.00 pts)",
+    ]);
+  });
+});
+
+describe("buildRankChangeMessages", () => {
+  const base = {
+    discordUserId: "1",
+    playerId: 42,
+    teamId: null,
+    teamName: null,
+    batchId: 1,
+    notifiedUpTo: "2026-01-01 00:00:00",
+    neighbours: [],
+  };
+
+  test("lists every change with its snippet, then links and how to unsubscribe", () => {
+    expect(
+      buildRankChangeMessages(
+        [
+          {
+            ...base,
+            typeName: "Rolling Year",
+            oldRank: 7,
+            newRank: 11,
+            neighbours: [
+              { id: 7, name: "Bob", rank: 10, totalPoints: 12 },
+              { id: 42, name: "Alice", rank: 11, totalPoints: 11 },
+            ],
+          },
+          { ...base, typeName: "Best Resser", oldRank: 2, newRank: null },
+          {
+            ...base,
+            teamId: 5,
+            teamName: "Alpha",
+            typeName: "Rolling Year",
+            oldRank: 3,
+            newRank: 2,
+            neighbours: [
+              { id: 9, name: "Beta", rank: 1, totalPoints: 80 },
+              { id: 5, name: "Alpha", rank: 2, totalPoints: 70 },
+            ],
+          },
         ],
         "https://site.example",
       ),
-    ).toBe(
+    ).toEqual([
       [
-        "Your ranking in Rolling Year has gone down 4 from 7 to 11.",
-        "Your ranking in Best Resser has gone down 1 from 2 to 3.",
+        "Your ranking in Rolling Year has *fallen* 4 places to 11th.",
+        "> 10th Bob (12.00 pts)",
+        "> **11th Alice (11.00 pts)**",
+        "",
+        "You have dropped out of the Best Resser rankings (you were 2nd).",
+        "",
+        "**Alpha**'s ranking in Rolling Year has *risen* 1 place to 2nd.",
+        "> 1st Beta (80.00 pts)",
+        "> **2nd Alpha (70.00 pts)**",
         "",
         "[See your rankings](https://site.example/player/42)",
+        "[See Alpha](https://site.example/team/5)",
         "-# Use /stopinformingme to stop getting these messages.",
       ].join("\n"),
-    );
+    ]);
+  });
+
+  test("splits between changes when too long for one Discord message", () => {
+    const neighbours = Array.from({ length: 5 }, (_, i) => ({
+      id: i,
+      name: "x".repeat(80),
+      rank: i + 1,
+      totalPoints: 1,
+    }));
+    const changes = Array.from({ length: 10 }, () => ({
+      ...base,
+      typeName: "Rolling Year",
+      oldRank: 1,
+      newRank: 2,
+      neighbours,
+    }));
+
+    const messages = buildRankChangeMessages(changes, "https://site.example");
+
+    expect(messages.length).toBeGreaterThan(1);
+    for (const message of messages) {
+      expect(message.length).toBeLessThanOrEqual(2000);
+      expect(message.startsWith("Your ranking") || message.startsWith("[See")).toBe(true);
+    }
+    expect(messages.join("\n\n").match(/Your ranking/g)).toHaveLength(10);
+    expect(messages.at(-1)).toContain("/stopinformingme");
   });
 });
 
@@ -165,54 +337,171 @@ describe("getRankChanges", () => {
     const bestResser = await typeName("BEST_RESSER");
     const changes = await getRankChanges(dbClient);
 
-    expect(
-      changes.map(({ discordUserId, typeName, oldRank, newRank }) => ({
-        discordUserId,
-        typeName,
-        oldRank,
-        newRank,
-      })),
-    ).toEqual([
+    expect(summarise(changes)).toEqual([
       {
         discordUserId: DISCORD_ALICE,
+        teamName: null,
         typeName: rollingYear,
         oldRank: 7,
         newRank: 11,
       },
       {
         discordUserId: DISCORD_ALICE,
+        teamName: null,
         typeName: bestResser,
         oldRank: null,
         newRank: 2,
       },
       {
         discordUserId: DISCORD_BOB,
+        teamName: null,
         typeName: bestResser,
         oldRank: 4,
         newRank: null,
       },
     ]);
     expect(changes[0]!.playerId).toBe(ALICE);
+    expect(changes[2]!.neighbours).toEqual([]);
+  });
+
+  test("includes up to two places either side in the latest rankings", async () => {
+    await addSubscription(DISCORD_ALICE);
+    await addSubscription(DISCORD_BOB);
+    await addBatch("ROLLING_YEAR", { [ALICE]: 5, [BOB]: 2 });
+    await addBatch("ROLLING_YEAR", {
+      [BOB]: 1,
+      [CHARLIE]: 2,
+      [ALICE]: 3,
+      [DAVID]: 4,
+      [EVE]: 5,
+    });
+
+    const changes = await getRankChanges(dbClient);
+    const neighboursOf = (id: string) =>
+      changes
+        .find((c) => c.discordUserId === id)!
+        .neighbours.map(({ name, rank, totalPoints }) => ({ name, rank, totalPoints }));
+
+    expect(neighboursOf(DISCORD_ALICE)).toEqual([
+      { name: "Bob", rank: 1, totalPoints: 99 },
+      { name: "Charlie", rank: 2, totalPoints: 98 },
+      { name: "Alice", rank: 3, totalPoints: 97 },
+      { name: "David", rank: 4, totalPoints: 96 },
+      { name: "Eve", rank: 5, totalPoints: 95 },
+    ]);
+    // Nobody above first place.
+    expect(neighboursOf(DISCORD_BOB).map((n) => n.name)).toEqual([
+      "Bob",
+      "Charlie",
+      "Alice",
+    ]);
+  });
+
+  test("ties do not widen the snippet", async () => {
+    await addSubscription(DISCORD_ALICE);
+    await addBatch("ROLLING_YEAR", { [ALICE]: 5 });
+    await addBatch("ROLLING_YEAR", {
+      [ALICE]: 1,
+      [BOB]: 1,
+      [CHARLIE]: 1,
+      [DAVID]: 1,
+      [EVE]: 1,
+    });
+
+    const [change] = await getRankChanges(dbClient);
+    // Alphabetical among ties: Alice, Bob, Charlie, David, Eve.
+    expect(change!.neighbours.map((n) => n.name)).toEqual([
+      "Alice",
+      "Bob",
+      "Charlie",
+    ]);
+  });
+
+  test("reports moves of teams the subscriber is currently in", async () => {
+    await addSubscription(DISCORD_ALICE);
+    await addSubscription(DISCORD_BOB);
+    // Alice left Gamma for Alpha, so Gamma's moves are not hers any more.
+    const gamma = await addTeam("test-notify-Gamma", [ALICE], {
+      leftDate: "2025-01-01",
+    });
+    const alpha = await addTeam("test-notify-Alpha", [ALICE], {
+      joinDate: "2025-01-01",
+    });
+    const beta = await addTeam("test-notify-Beta", [BOB, CHARLIE]);
+    await addTeamBatch("ROLLING_YEAR", { [alpha]: 3, [beta]: 1, [gamma]: 2 });
+    await addTeamBatch("ROLLING_YEAR", { [alpha]: 1, [beta]: 2, [gamma]: 3 });
+
+    const rollingYear = await typeName("ROLLING_YEAR");
+    const changes = await getRankChanges(dbClient);
+
+    expect(summarise(changes)).toEqual([
+      {
+        discordUserId: DISCORD_ALICE,
+        teamName: "test-notify-Alpha",
+        typeName: rollingYear,
+        oldRank: 3,
+        newRank: 1,
+      },
+      {
+        discordUserId: DISCORD_BOB,
+        teamName: "test-notify-Beta",
+        typeName: rollingYear,
+        oldRank: 1,
+        newRank: 2,
+      },
+    ]);
+    expect(changes[0]!.teamId).toBe(alpha);
+    expect(changes[0]!.neighbours.map((n) => n.name)).toEqual([
+      "test-notify-Alpha",
+      "test-notify-Beta",
+      "test-notify-Gamma",
+    ]);
+  });
+
+  test("lists player changes before team changes", async () => {
+    await addSubscription(DISCORD_ALICE);
+    const alpha = await addTeam("test-notify-Alpha", [ALICE]);
+    await addBatch("ROLLING_YEAR", { [ALICE]: 7 });
+    await addTeamBatch("ROLLING_YEAR", { [alpha]: 3 });
+    await addBatch("ROLLING_YEAR", { [ALICE]: 6 });
+    await addTeamBatch("ROLLING_YEAR", { [alpha]: 2 });
+
+    const changes = await getRankChanges(dbClient);
+    expect(changes.map((c) => c.teamName)).toEqual([null, "test-notify-Alpha"]);
+    // Covers the team batch, which was created after the player one.
+    const teamBatch = await dbClient
+      .selectFrom("team_ranking_snapshot_batch")
+      .select(sql<string>`max(created_at)::text`.as("createdAt"))
+      .executeTakeFirstOrThrow();
+    expect(changes.every((c) => c.notifiedUpTo === teamBatch.createdAt)).toBe(true);
   });
 
   test("reports nothing when there is no earlier batch to compare with", async () => {
     await addSubscription(DISCORD_ALICE);
+    const alpha = await addTeam("test-notify-Alpha", [ALICE]);
     await addBatch("ROLLING_YEAR", { [ALICE]: 7 });
+    await addTeamBatch("ROLLING_YEAR", { [alpha]: 3 });
 
     expect(await getRankChanges(dbClient)).toEqual([]);
   });
 
   test("ignores ranking types that are not displayed", async () => {
     await addSubscription(DISCORD_ALICE);
+    const alpha = await addTeam("test-notify-Alpha", [ALICE]);
     await addBatch("BEST_FOREVER", { [ALICE]: 7 });
     await addBatch("BEST_FOREVER", { [ALICE]: 8 });
+    await addTeamBatch("BEST_FOREVER", { [alpha]: 3 });
+    await addTeamBatch("BEST_FOREVER", { [alpha]: 4 });
 
     expect(await getRankChanges(dbClient)).toEqual([]);
   });
 
   test("ignores batches from before the subscription", async () => {
+    const alpha = await addTeam("test-notify-Alpha", [ALICE]);
     await addBatch("ROLLING_YEAR", { [ALICE]: 7 });
     await addBatch("ROLLING_YEAR", { [ALICE]: 8 });
+    await addTeamBatch("ROLLING_YEAR", { [alpha]: 3 });
+    await addTeamBatch("ROLLING_YEAR", { [alpha]: 4 });
     await dbClient
       .insertInto("ranking_subscription")
       .values({ discord_user_id: DISCORD_ALICE })
@@ -244,7 +533,11 @@ describe("notifyRankingSubscribers", () => {
       ([id]) => id === DISCORD_ALICE,
     )![1] as string;
     expect(aliceMessage).toContain(
-      `Your ranking in ${rollingYear} has gone down 4 from 7 to 11.\nYour ranking in ${bestResser} has gone down 1 from 2 to 3.`,
+      `Your ranking in ${rollingYear} has *fallen* 4 places to 11th.`,
+    );
+    expect(aliceMessage).toContain("> **11th Alice (89.00 pts)**");
+    expect(aliceMessage).toContain(
+      `Your ranking in ${bestResser} has *fallen* 1 place to 3rd.`,
     );
 
     expect(await notifyRankingSubscribers(dbClient)).toEqual({
@@ -252,6 +545,30 @@ describe("notifyRankingSubscribers", () => {
       failed: 0,
     });
     expect(send).toHaveBeenCalledTimes(2);
+  });
+
+  test("sends a DM when only a team moved, and does not repeat it", async () => {
+    const send = mockDiscord();
+    await addSubscription(DISCORD_ALICE);
+    const alpha = await addTeam("test-notify-Alpha", [ALICE]);
+    await addBatch("ROLLING_YEAR", { [ALICE]: 7 });
+    await addBatch("ROLLING_YEAR", { [ALICE]: 7 });
+    await addTeamBatch("ROLLING_YEAR", { [alpha]: 3 });
+    await addTeamBatch("ROLLING_YEAR", { [alpha]: 2 });
+
+    expect(await notifyRankingSubscribers(dbClient)).toEqual({
+      sent: 1,
+      failed: 0,
+    });
+    const message = send.mock.calls[0]![1] as string;
+    expect(message).not.toContain("Your ranking");
+    expect(message).toContain("**test-notify-Alpha**'s ranking in");
+    expect(message).toContain(`[See test-notify-Alpha](https://site.example/team/${alpha})`);
+
+    expect(await notifyRankingSubscribers(dbClient)).toEqual({
+      sent: 0,
+      failed: 0,
+    });
   });
 
   test("notifies again when a newer batch changes the rank", async () => {
@@ -266,7 +583,7 @@ describe("notifyRankingSubscribers", () => {
       sent: 1,
       failed: 0,
     });
-    expect(send.mock.calls[1]![1]).toContain("has gone up 2 from 11 to 9.");
+    expect(send.mock.calls[1]![1]).toContain("has *risen* 2 places to 9th.");
   });
 
   test("a failed DM does not stop the others and is retried next time", async () => {
