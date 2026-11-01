@@ -1,5 +1,5 @@
 
-\restrict uIVLspWjSq1UTYWrve15ok21Yiwtg61g4SaFHhIAhPj02QosubwF3kJ0IzNiNcE
+\restrict g9DwiLXv20PZddDBi5xeAZUlLGbN3bVfXNYr1Qr0TpS8bLSdMmahffJEyviRL4A
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -584,7 +584,7 @@ CREATE INDEX idx_player_achievement_tourney_id ON public.player_achievement USIN
 
 CREATE INDEX idx_player_achievement_unannounced ON public.player_achievement USING btree (player_id) WHERE (discord_message_id IS NULL);
 
-CREATE INDEX idx_player_identity_provider_external ON public.player_identity USING btree (identity_provider_id, external_id);
+CREATE INDEX idx_player_identity_player_id ON public.player_identity USING btree (player_id);
 
 CREATE INDEX idx_player_search_vector ON public.player USING gin (search_vector);
 
@@ -593,6 +593,8 @@ CREATE INDEX idx_ranking_snapshot_batch_type_code ON public.ranking_snapshot_bat
 CREATE INDEX idx_ranking_snapshot_event_player_id ON public.ranking_snapshot_event USING btree (player_id);
 
 CREATE INDEX idx_ranking_snapshot_event_tourney_id ON public.ranking_snapshot_event USING btree (tourney_id);
+
+CREATE INDEX idx_ranking_snapshot_player_id ON public.ranking_snapshot USING btree (player_id);
 
 CREATE INDEX idx_result_faction_code ON public.result USING btree (faction_code);
 
@@ -723,5 +725,5 @@ ALTER TABLE ONLY public.upcoming_event
 ALTER TABLE ONLY public.venue
     ADD CONSTRAINT venue_region_id_fkey FOREIGN KEY (region_id) REFERENCES public.region(id);
 
-\unrestrict uIVLspWjSq1UTYWrve15ok21Yiwtg61g4SaFHhIAhPj02QosubwF3kJ0IzNiNcE
+\unrestrict g9DwiLXv20PZddDBi5xeAZUlLGbN3bVfXNYr1Qr0TpS8bLSdMmahffJEyviRL4A
 

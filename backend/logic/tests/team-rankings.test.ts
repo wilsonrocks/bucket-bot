@@ -3,6 +3,7 @@ import { dbClient } from "../../db-client";
 import { generateTeamRankings } from "../rankings/generate-team-rankings";
 import { removeTeamMember } from "../team-memberships";
 import { addTestDataToDb } from "../test-helpers/add-test-data-to-db";
+import { addSmallEventToDb } from "../test-helpers/small-event";
 
 const TEAM_ALPHA = "test-team-Alpha";
 const TEAM_BETA = "test-team-Beta";
@@ -217,5 +218,22 @@ describe("generateTeamRankings", () => {
 
     // Charlie never counted for Alpha — only Alice(30) + Bob(39) = 69
     expect(alpha.total_points).toBe(69);
+  });
+
+  test("0-point results from events too small for points don't count as team events", async () => {
+    await generateTeamRankings(dbClient, "ROLLING_YEAR");
+    const before = (await getLatestBatchRankings()).rankings.find(
+      (r) => r.team_id === teamAlphaId,
+    )!;
+
+    // Alice (Alpha) plays the small event
+    await addSmallEventToDb(dbClient);
+    await generateTeamRankings(dbClient, "ROLLING_YEAR");
+    const after = (await getLatestBatchRankings()).rankings.find(
+      (r) => r.team_id === teamAlphaId,
+    )!;
+
+    expect(after.total_points).toBe(before.total_points);
+    expect(after.event_count).toBe(before.event_count);
   });
 });

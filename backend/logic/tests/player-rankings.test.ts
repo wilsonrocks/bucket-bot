@@ -4,6 +4,10 @@ import { dbClient } from "../../db-client";
 import { generateRankings } from "../rankings/generate-player-rankings";
 import { addTestDataToDb } from "../test-helpers/add-test-data-to-db";
 import { Faction } from "../fixtures";
+import {
+  addSmallEventToDb,
+  SMALL_EVENT_ONLY_PLAYER_NAME,
+} from "../test-helpers/small-event";
 
 beforeEach(async () => {
   await addTestDataToDb(dbClient);
@@ -394,5 +398,31 @@ describe("generating player rankings", () => {
       .select("tourney_id")
       .execute();
     expect(remaining.length).toBe(otherEventCount);
+  });
+
+  test("0-point results from events too small for points are ignored", async () => {
+    const { tourneyId } = await addSmallEventToDb(dbClient);
+
+    await generateRankings(dbClient, "ROLLING_YEAR");
+
+    const rankings = await dbClient
+      .selectFrom("ranking_snapshot")
+      .innerJoin("player", "ranking_snapshot.player_id", "player.id")
+      .selectAll()
+      .execute();
+
+    expect(
+      rankings.find((x) => x.name === SMALL_EVENT_ONLY_PLAYER_NAME),
+      "player whose only result scored 0 isn't ranked",
+    ).toBeUndefined();
+    expect(rankings.length).toBe(5);
+    expect(rankings.find((x) => x.name === "Alice")!.total_points).toBe(30);
+
+    const smallEventSnapshotEvents = await dbClient
+      .selectFrom("ranking_snapshot_event")
+      .where("tourney_id", "=", tourneyId)
+      .select("tourney_id")
+      .execute();
+    expect(smallEventSnapshotEvents).toEqual([]);
   });
 });

@@ -131,7 +131,10 @@ export const newLongshanksEvent: RouteHandler<typeof newLongshanksEventRoute, Ap
           maxPoints("Local", Math.max(...players.map((x) => x.roundsPlayed))),
         ).points[longshanksPlayer.rank - 1];
 
-        if (!points) throw new Error("Not enough players to award points/rankings");
+        // Events under the minimum size are still imported, with 0 points for everyone
+        if (points === undefined) {
+          throw new Error(`No points entry for place ${longshanksPlayer.rank} of ${players.length}`);
+        }
 
         await trx
           .insertInto("result")

@@ -32,6 +32,8 @@ export const generateFactionRankings = async (dbClient: Kysely<DB>) => {
           sql<number>`SUM(result.points)/COUNT(*)`.as("points_per_declaration"),
         ])
         .where(withinLastYaer)
+        // 0-point results (events under the minimum size) don't count towards rankings
+        .where("result.points", ">", 0)
         .groupBy("faction_code"),
     )
     .insertInto("faction_snapshot")

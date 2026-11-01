@@ -1,4 +1,5 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
+import { parseHTML } from "linkedom";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { dbClient } from "../../../db-client";
 import type { AppEnv } from "../../../hono-env";
@@ -12,13 +13,23 @@ import { newLongshanksEvent, newLongshanksEventRoute } from "./new-longshanks-ev
 
 const NEW_FRONTIER_ID = "25681";
 
+// New Frontier's standings cut down to the top `count` players, for events too
+// small to award points.
+function truncatedPlayersHtml(count: number): string {
+  const { document } = parseHTML(newFrontierPlayersHtml);
+  [...document.querySelectorAll("[class=player], [class='player drop']")]
+    .slice(count)
+    .forEach((el) => el.remove());
+  return document.toString();
+}
+
 // The importer fetches two Longshanks pages: the standings panel and the event
 // page. Serve the captured New Frontier HTML for each.
-function mockLongshanks() {
+function mockLongshanks(playersHtml = newFrontierPlayersHtml) {
   const fetchMock = vi.fn(async (input: string | URL | Request) => {
     const url = String(input);
     const html = url.includes("panel_standings.php")
-      ? newFrontierPlayersHtml
+      ? playersHtml
       : newFrontierTourneyHtml;
     return new Response(html, {
       status: 200,
@@ -85,6 +96,32 @@ describe("POST /longshanks-event/{id}", () => {
       .selectAll()
       .execute();
     expect(results).toHaveLength(players.length);
+  });
+
+  test("imports an event with fewer than 8 players, awarding 0 points", async () => {
+    const playersHtml = truncatedPlayersHtml(5);
+    expect(extractPlayersFromLongshanksHTML(playersHtml)).toHaveLength(5);
+
+    mockLongshanks(playersHtml);
+    const response = await importEvent(makeApp(), NEW_FRONTIER_ID);
+    expect(response.status).toBe(200);
+
+    const { id } = (await response.json()) as { id: number };
+
+    const tourney = await dbClient
+      .selectFrom("tourney")
+      .where("id", "=", id)
+      .selectAll()
+      .executeTakeFirstOrThrow();
+    expect(tourney.number_of_players).toBe(5);
+
+    const results = await dbClient
+      .selectFrom("result")
+      .where("tourney_id", "=", id)
+      .select("points")
+      .execute();
+    expect(results).toHaveLength(5);
+    expect(results.every((r) => r.points === 0)).toBe(true);
   });
 
   test("rejects an event that has already been imported", async () => {
