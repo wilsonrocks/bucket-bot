@@ -1,6 +1,7 @@
 import { fetchTourney } from "#/queries";
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { enumParam, optionalNumber } from "#/helpers/search-params";
+import { formatResultPoints } from "#/helpers/format-result-points";
 import { Link } from "#/components/link";
 import { Tabs } from "#/components/routed-tabs";
 import {
@@ -159,7 +160,7 @@ function RouteComponent() {
                       row.playerName
                     )}
                   </td>
-                  <td className="px-2 py-1.5">{row.points.toFixed(2)}</td>
+                  <td className="px-2 py-1.5">{formatResultPoints(row.points)}</td>
                   <td className="px-2 py-1.5">{row.factionName}</td>
                 </tr>
               ))}

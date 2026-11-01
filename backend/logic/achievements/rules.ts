@@ -29,6 +29,7 @@ const RESULTS = sql`
     coalesce(tourney.tier_code, 'EVENT') AS tier_code,
     result.place,
     result.faction_code,
+    result.points,
     result.place = max(result.place) OVER (PARTITION BY result.tourney_id)
       AS is_last,
     result.place = min(result.place) OVER (PARTITION BY result.tourney_id, result.faction_code)
@@ -61,6 +62,14 @@ function earliest(candidates: RawBuilder<unknown>): AchievementRule {
 /** First result matching `condition` (columns of RESULTS). */
 function firstResultWhere(condition: RawBuilder<unknown>): AchievementRule {
   return earliest(sql`SELECT * FROM (${RESULTS}) results WHERE ${condition}`);
+}
+
+/**
+ * First placing result matching `condition`. Events too small to award points
+ * (every result scores 0) still count for attendance, but not for placings.
+ */
+function firstPlacingWhere(condition: RawBuilder<unknown>): AchievementRule {
+  return firstResultWhere(sql`points > 0 AND ${condition}`);
 }
 
 const tier = (code: Tier) => sql`tier_code = ${code}`;
@@ -225,12 +234,12 @@ function factionRules(faction: Faction): Record<string, AchievementRule> {
     [`${faction}_FIRST_EVENT`]: nthEvent(1, faction),
     [`${faction}_FIVE_EVENTS`]: nthEvent(5, faction),
     [`${faction}_TEN_EVENTS`]: nthEvent(10, faction),
-    [`${faction}_BEST_IN_FACTION`]: firstResultWhere(
+    [`${faction}_BEST_IN_FACTION`]: firstPlacingWhere(
       sql`${declared} AND is_best_in_faction`,
     ),
     // Any tier.
-    [`${faction}_PODIUM`]: firstResultWhere(sql`${declared} AND place <= 3`),
-    [`${faction}_WINNER`]: firstResultWhere(sql`${declared} AND place = 1`),
+    [`${faction}_PODIUM`]: firstPlacingWhere(sql`${declared} AND place <= 3`),
+    [`${faction}_WINNER`]: firstPlacingWhere(sql`${declared} AND place = 1`),
   };
 }
 
@@ -254,20 +263,20 @@ export const ACHIEVEMENT_RULES: Record<string, AchievementRule> = {
 
   // Places are unique (tiebreakers), so exactly one player comes last. A
   // one-player event's winner isn't also given the spoon.
-  WOODEN_SPOON: firstResultWhere(sql`is_last AND place > 1`),
+  WOODEN_SPOON: firstPlacingWhere(sql`is_last AND place > 1`),
   // Highest placed player declaring each faction, even if they were the only one.
-  BEST_IN_FACTION: firstResultWhere(sql`is_best_in_faction`),
-  ASTBURYS_DREAM: firstResultWhere(
+  BEST_IN_FACTION: firstPlacingWhere(sql`is_best_in_faction`),
+  ASTBURYS_DREAM: firstPlacingWhere(
     sql`is_last AND place > 1 AND is_best_in_faction`,
   ),
 
   // PODIUM_EVENT / WIN_EVENT are EVENT tier only.
-  PODIUM_EVENT: firstResultWhere(sql`place <= 3 AND ${tier("EVENT")}`),
-  PODIUM_GT: firstResultWhere(sql`place <= 3 AND ${tier("GT")}`),
-  PODIUM_NATIONALS: firstResultWhere(sql`place <= 3 AND ${tier("NATIONALS")}`),
-  WIN_EVENT: firstResultWhere(sql`place = 1 AND ${tier("EVENT")}`),
-  WIN_GT: firstResultWhere(sql`place = 1 AND ${tier("GT")}`),
-  WIN_NATIONALS: firstResultWhere(sql`place = 1 AND ${tier("NATIONALS")}`),
+  PODIUM_EVENT: firstPlacingWhere(sql`place <= 3 AND ${tier("EVENT")}`),
+  PODIUM_GT: firstPlacingWhere(sql`place <= 3 AND ${tier("GT")}`),
+  PODIUM_NATIONALS: firstPlacingWhere(sql`place <= 3 AND ${tier("NATIONALS")}`),
+  WIN_EVENT: firstPlacingWhere(sql`place = 1 AND ${tier("EVENT")}`),
+  WIN_GT: firstPlacingWhere(sql`place = 1 AND ${tier("GT")}`),
+  WIN_NATIONALS: firstPlacingWhere(sql`place = 1 AND ${tier("NATIONALS")}`),
 
   DIFFERENT_FACTION: nthFaction(2),
   HALF_RAINBOW: nthFaction(4),

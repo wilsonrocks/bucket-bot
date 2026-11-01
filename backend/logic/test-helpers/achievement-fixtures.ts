@@ -98,6 +98,7 @@ export function makeAchievementFixtures(prefix: string) {
     tourneyId: number,
     place: number,
     faction: Faction | `${Faction}` = "GUILD",
+    points = 10,
   ) {
     await dbClient
       .insertInto("result")
@@ -105,7 +106,7 @@ export function makeAchievementFixtures(prefix: string) {
         tourney_id: tourneyId,
         player_identity_id: identityId,
         place,
-        points: 10,
+        points,
         faction_code: faction,
         rounds_played: 3,
       })

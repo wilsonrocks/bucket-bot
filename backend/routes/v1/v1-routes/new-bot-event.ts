@@ -155,7 +155,10 @@ export const newBotEventHandler: RouteHandler<typeof newBotEventRoute, AppEnv> =
           maxPoints("Local", apiData.rounds),
         ).points[entry.position - 1];
 
-        if (!points) throw new Error("Not enough players to award points/rankings");
+        // Events under the minimum size are still imported, with 0 points for everyone
+        if (points === undefined) {
+          throw new Error(`No points entry for place ${entry.position} of ${apiData.league.length}`);
+        }
 
         await trx
           .insertInto("result")

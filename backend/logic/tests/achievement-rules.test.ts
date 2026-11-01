@@ -446,6 +446,47 @@ describe("TO-ing", () => {
   });
 });
 
+describe("events too small to award points", () => {
+  // Every result at a <8 player event scores 0: it counts as attending, but
+  // not as placing.
+  async function smallEvent() {
+    const alice = await addPlayer("alice");
+    const bob = await addPlayer("bob");
+    const t = await addTourney("small", "2024-01-01");
+    await addResult(alice.identityId, t, 1, "GUILD", 0);
+    await addResult(bob.identityId, t, 2, "GUILD", 0);
+    return { alice, bob, t };
+  }
+
+  test.each([
+    "WIN_EVENT",
+    "PODIUM_EVENT",
+    "BEST_IN_FACTION",
+    "GUILD_BEST_IN_FACTION",
+    "GUILD_PODIUM",
+    "GUILD_WINNER",
+  ])("%s isn't awarded", async (ruleId) => {
+    const { alice } = await smallEvent();
+    expect(await awarded(ruleId, alice.playerId)).toEqual({});
+  });
+
+  test.each(["WOODEN_SPOON", "ASTBURYS_DREAM"])("%s isn't awarded", async (ruleId) => {
+    const { bob } = await smallEvent();
+    expect(await awarded(ruleId, bob.playerId)).toEqual({});
+  });
+
+  test.each(["FIRST_EVENT", "GUILD_FIRST_EVENT"])("%s is still awarded", async (ruleId) => {
+    const { alice, t } = await smallEvent();
+    expect(await awarded(ruleId, alice.playerId)).toEqual({ [alice.playerId]: t });
+  });
+
+  test("BEST_PAINTED is still awarded", async () => {
+    const { alice, t } = await smallEvent();
+    await addPaintingPlacing(alice.identityId, await addPaintingCategory(t), 1);
+    expect(await awarded("BEST_PAINTED", alice.playerId)).toEqual({ [alice.playerId]: t });
+  });
+});
+
 test("every seeded achievement has a rule", async () => {
   const rows = await dbClient.selectFrom("achievement").select("id").execute();
   expect(Object.keys(ACHIEVEMENT_RULES).sort()).toEqual(rows.map((r) => r.id).sort());

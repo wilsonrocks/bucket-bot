@@ -15,8 +15,7 @@ type LeagueEntry = {
 // Real entries from the captured payload, in finishing order. Milo Van Mesdag
 // genuinely has no profileId in this event: he's an entry the TO added for
 // someone without a BOT account. Ten players keeps us over calculatePoints'
-// 8-player threshold, below which every place scores 0 and the importer refuses
-// the event.
+// 8-player threshold, below which every place scores 0.
 const REAL_LEAGUE: LeagueEntry[] = [
   { profileId: "profile-mrSd9E1TXhgNHmC6oumn8z", name: "Ben Salmon", faction: "ten-thunders" },
   { profileId: "profile-09C2FC_tA0g4p9lhbQFz6i", name: "Reice Chaudhry", faction: "guild" },
@@ -317,6 +316,22 @@ describe("POST /bot-event/{id}", () => {
       .selectAll()
       .execute();
     expect(tourneys).toHaveLength(0);
+  });
+
+  test("imports an event with fewer than 8 players, awarding 0 points", async () => {
+    mockBotApi(botPayload({ league: REAL_LEAGUE.slice(0, 5) }));
+    const response = await importEvent(makeApp(), GT_BOT_ID);
+    expect(response.status).toBe(200);
+
+    const { id } = (await response.json()) as { id: number };
+
+    const results = await dbClient
+      .selectFrom("result")
+      .where("tourney_id", "=", id)
+      .select("points")
+      .execute();
+    expect(results).toHaveLength(5);
+    expect(results.every((r) => r.points === 0)).toBe(true);
   });
 
   test("rejects an event that has already been imported", async () => {

@@ -58,6 +58,8 @@ export const generateTeamRankings = async (
         `.as("rn"),
       ])
       .where((eb) => eb.and(rankingTypeWhereSql.map((fn) => fn(eb))))
+      // 0-point results (events under the minimum size) don't count towards rankings
+      .where("result.points", ">", 0)
       .where((eb) => eb("tourney.date", ">=", eb.ref("membership.join_date")))
       .where((eb) =>
         eb.or([

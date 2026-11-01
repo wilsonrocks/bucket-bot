@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, test } from "vitest";
 import { dbClient } from "../../db-client";
 import { generateFactionRankings } from "../rankings/generate-faction-rankings";
 import { addTestDataToDb } from "../test-helpers/add-test-data-to-db";
+import { addSmallEventToDb } from "../test-helpers/small-event";
 
 beforeEach(async () => {
   await addTestDataToDb(dbClient);
@@ -60,5 +61,21 @@ describe("Faction Rankings generation", () => {
         }),
       ]),
     );
+  });
+
+  test("0-point results from events too small for points aren't declarations", async () => {
+    await addSmallEventToDb(dbClient);
+    await generateFactionRankings(dbClient);
+
+    const snapshot = await dbClient
+      .selectFrom("faction_snapshot")
+      .selectAll()
+      .where("faction_code", "=", "RESSERS")
+      .executeTakeFirstOrThrow();
+
+    // Unchanged from the fixture data alone
+    expect(snapshot.declarations).toBe(3);
+    expect(snapshot.total_points).toBe(28);
+    expect(snapshot.points_per_declaration).toBeCloseTo(28 / 3);
   });
 });

@@ -10,6 +10,7 @@ import {
 } from '#/queries'
 import { createFileRoute, notFound } from '@tanstack/react-router'
 import { optionalFlag, optionalNumber, optionalString } from '#/helpers/search-params'
+import { formatResultPoints } from '#/helpers/format-result-points'
 import { Link } from '#/components/link'
 import { Tabs } from '#/components/routed-tabs'
 import { PaintingLightbox, positionLabel } from '#/components/painting-lightbox'
@@ -227,7 +228,7 @@ function RouteComponent() {
                       {t.tourneyName}
                     </Link>
                   </td>
-                  <td className="px-2 py-1.5 text-right">{t.points.toFixed(2)}</td>
+                  <td className="px-2 py-1.5 text-right">{formatResultPoints(t.points)}</td>
                   <td className="px-2 py-1.5">{t.place}</td>
                   <td className="px-2 py-1.5">{t.factionName}</td>
                   <td className="px-2 py-1.5">
