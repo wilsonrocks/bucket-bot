@@ -46,8 +46,15 @@ export const Route = createFileRoute("/")({
       fetchUpcomingEvents(),
     ]);
 
-    const latestTourney = tourneys[0]
-      ? await fetchTourney({ data: { id: tourneys[0].id } })
+    // pick at random among the most recent event(s), like the best painted card
+    const latestTime = tourneys[0] ? new Date(tourneys[0].date).getTime() : null;
+    const latestCandidates = tourneys.filter(
+      (t) => new Date(t.date).getTime() === latestTime,
+    );
+    const latestPick =
+      latestCandidates[Math.floor(Math.random() * latestCandidates.length)];
+    const latestTourney = latestPick
+      ? await fetchTourney({ data: { id: latestPick.id } })
       : null;
     const latestRegions = regionsOverTime.at(-1)?.regions ?? [];
 
