@@ -761,6 +761,60 @@ export const fetchRegionEvents = createServerFn()
     return rows.map((r) => ({ ...r, players: parseInt(r.players as string) }))
   })
 
+// Points scored by each team's members at events in each region, in the year up to
+// and including `until` (date arithmetic in SQL so 29 Feb can't produce a bad date). A result only counts for a team if the player was a member
+// on the event date — the same membership rule as `generateTeamRankings`. Region is
+// reached via the venue, as in `fetchRegionEvents`.
+export const fetchRegionTeamPoints = createServerFn()
+  .inputValidator((d: { until: string }) => d)
+  .handler(async ({ data: { until } }) => {
+    const rows = await db
+      .selectFrom('result')
+      .innerJoin('tourney', 'result.tourney_id', 'tourney.id')
+      .innerJoin('venue', 'tourney.venue_id', 'venue.id')
+      .innerJoin('region', 'venue.region_id', 'region.id')
+      .innerJoin('player_identity', 'result.player_identity_id', 'player_identity.id')
+      .innerJoin('membership', 'membership.player_id', 'player_identity.player_id')
+      .innerJoin('team', 'membership.team_id', 'team.id')
+      .where(sql<boolean>`${sql.ref('tourney.date')} >= ${until}::date - interval '1 year'`)
+      .where(sql<boolean>`${sql.ref('tourney.date')} <= ${until}::date`)
+      .where((eb) => eb('tourney.date', '>=', eb.ref('membership.join_date')))
+      .where((eb) =>
+        eb.or([
+          eb('membership.left_date', 'is', null),
+          eb('tourney.date', '<', eb.ref('membership.left_date')),
+        ]),
+      )
+      .select([
+        'region.geojson_name',
+        'team.id as teamId',
+        'team.name as teamName',
+        'team.image_key as imageKey',
+        'team.brand_colour as brandColour',
+        sql<number>`sum(${sql.ref('result.points')})`.as('points'),
+        sql<string>`count(distinct ${sql.ref('player_identity.player_id')})`.as('players'),
+        sql<string>`count(distinct ${sql.ref('tourney.id')})`.as('events'),
+      ])
+      .groupBy([
+        'region.geojson_name',
+        'team.id',
+        'team.name',
+        'team.image_key',
+        'team.brand_colour',
+      ])
+      .having(sql<boolean>`sum(${sql.ref('result.points')}) > 0`)
+      .orderBy('region.geojson_name')
+      .orderBy('points', 'desc')
+      .execute()
+
+    return rows.map((r) => ({
+      ...r,
+      points: Number(r.points),
+      players: Number(r.players),
+      events: Number(r.events),
+    }))
+  })
+
 // ── Painting ───────────────────────────────────────────────────────────────
 
 export const fetchAllPainting = createServerFn().handler(async () => {
