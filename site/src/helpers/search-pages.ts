@@ -15,7 +15,7 @@ const SEARCH_PAGES: Record<FileRouteTypes['fullPaths'], SearchPage | 'dynamic' |
   '/faction-rankings': { label: 'Faction Rankings', keywords: ['factions'] },
   '/teams': { label: 'Teams', keywords: ['clubs'] },
   '/team-rankings': { label: 'Team Rankings', keywords: ['clubs', 'leaderboard'] },
-  '/regions': { label: 'Regions', keywords: ['map', 'towns'] },
+  '/regions': { label: 'Regions', keywords: ['map', 'towns', 'teams'] },
   '/best-painted': { label: 'Best Painted', keywords: ['painting'] },
   '/how-it-works': { label: 'How It Works', keywords: ['points', 'scoring', 'faq'] },
   '/event/$id': 'dynamic',
