@@ -22,6 +22,16 @@ export type TeamRegionRow = {
 const NO_POINTS_FILL = "#d1d5db";
 const TILE_BG_FALLBACK = "#f3f4f6";
 const TILE = 80;
+// Letter-only tiles (teams without a logo) are smaller so the map reads as a
+// pattern of initials rather than a few huge letters.
+const LETTER_TILE = TILE / 2;
+
+/**
+ * A pattern's cell size: logo-sized if any team in it has a logo (cells in a shared
+ * tie tile must all be the same size), letter-sized only when none do.
+ */
+export const tileSizeFor = (teams: TeamRegionRow[]) =>
+  teams.some((t) => t.imageKey) ? TILE : LETTER_TILE;
 // Logos fill their tiles edge to edge, so region borders need a dark outline to
 // stay visible; the selected region gets a thicker accent outline on top.
 const OUTLINE = "#1f2937";
@@ -83,16 +93,18 @@ function TeamTile({
   team,
   x,
   y,
+  size,
 }: {
   team: TeamRegionRow;
   x: number;
   y: number;
+  size: number;
 }) {
   return (
     <g transform={`translate(${x} ${y})`}>
       <rect
-        width={TILE}
-        height={TILE}
+        width={size}
+        height={size}
         fill={team.brandColour ?? TILE_BG_FALLBACK}
       />
       {team.imageKey ? (
@@ -100,17 +112,17 @@ function TeamTile({
           href={`${import.meta.env.VITE_ASSETS_URL}/${team.imageKey}-w150.webp`}
           // Fills the whole tile so logos butt up against each other; the brand
           // colour only shows where a non-square logo doesn't reach the edges.
-          width={TILE}
-          height={TILE}
+          width={size}
+          height={size}
           preserveAspectRatio="xMidYMid meet"
         />
       ) : (
         <text
-          x={TILE / 2}
-          y={TILE / 2}
+          x={size / 2}
+          y={size / 2}
           textAnchor="middle"
           dominantBaseline="central"
-          fontSize={TILE * 0.5}
+          fontSize={size * 0.5}
           fontWeight={600}
           fill={team.brandColour ? "#fff" : "#111827"}
         >
@@ -127,6 +139,7 @@ function TeamTile({
  */
 function TeamTilePattern({ teams }: { teams: TeamRegionRow[] }) {
   const n = teams.length;
+  const size = tileSizeFor(teams);
   const cells = [];
   for (let row = 0; row < n; row++) {
     for (let col = 0; col < n; col++) {
@@ -134,8 +147,9 @@ function TeamTilePattern({ teams }: { teams: TeamRegionRow[] }) {
         <TeamTile
           key={`${row}-${col}`}
           team={teams[(row + col) % n]}
-          x={col * TILE}
-          y={row * TILE}
+          x={col * size}
+          y={row * size}
+          size={size}
         />,
       );
     }
@@ -144,8 +158,8 @@ function TeamTilePattern({ teams }: { teams: TeamRegionRow[] }) {
     <pattern
       id={teamTileId(teams.map((t) => t.teamId))}
       patternUnits="userSpaceOnUse"
-      width={n * TILE}
-      height={n * TILE}
+      width={n * size}
+      height={n * size}
     >
       {cells}
     </pattern>

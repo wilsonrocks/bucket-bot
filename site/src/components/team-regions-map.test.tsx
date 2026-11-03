@@ -6,6 +6,7 @@ import {
   groupByRegion,
   regionLeaders,
   teamTileId,
+  tileSizeFor,
   type TeamRegionRow,
 } from '#/components/team-regions-map'
 
@@ -37,6 +38,14 @@ const rows: TeamRegionRow[] = [
   row({ teamId: 2, teamName: 'Bravo', points: 55.5, players: 2, events: 1 }),
   row({ geojson_name: 'Wales', teamId: 1, teamName: 'Alpha', imageKey: 'teams/alpha', brandColour: '#123456', points: 10 }),
 ]
+
+test('tileSizeFor shrinks only when no team in the tile has a logo', () => {
+  const logo = row({ imageKey: 'teams/x' })
+  const letter = row({ imageKey: null })
+  expect(tileSizeFor([letter])).toBe(tileSizeFor([logo]) / 2)
+  expect(tileSizeFor([letter, logo])).toBe(tileSizeFor([logo]))
+  expect(tileSizeFor([letter, letter])).toBe(tileSizeFor([letter]))
+})
 
 test('groupByRegion sorts by points, breaking ties by team name', () => {
   const grouped = groupByRegion([
@@ -103,6 +112,8 @@ test('each leading team gets a pattern: logo if it has one, initial otherwise', 
   expect(alpha.querySelector('rect')!.getAttribute('fill')).toBe('#123456')
 
   const bravo = map.querySelector(`pattern#${teamTileId([2])}`)!
+  // Letter-only tiles are half the size of logo tiles.
+  expect(Number(bravo.getAttribute('width'))).toBe(Number(alpha.getAttribute('width')) / 2)
   expect(bravo.querySelector('image')).toBeNull()
   expect(bravo.querySelector('text')!.textContent).toBe('B')
 })
