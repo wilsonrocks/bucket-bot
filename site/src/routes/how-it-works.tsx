@@ -39,8 +39,8 @@ function RouteComponent() {
       </p>
       <p>
         If there are more than 16 players, the difference in points between places will be smaller. For example, in a
-        16-player event the person finishing 8th will be awarded 58.42 points, whereas in a 28-player event they will
-        be awarded 76.27 points. If there are fewer than 16 players, there will be a 1 point deduction for each player
+        16-player event the person finishing 8th will be awarded 55.67 points, whereas in a 28-player event they will
+        be awarded 75.37 points. If there are fewer than 16 players, there will be a 1 point deduction for each player
         less — so an 8-player event would be worth 92 points to the winner.
       </p>
       <p>
@@ -49,9 +49,9 @@ function RouteComponent() {
       </p>
       <ul className="list-disc pl-6">
         <li>1 Day Event with 4 Rounds – 110 points</li>
-        <li>2 Day Event with 5 Rounds – 120 points</li>
-        <li>2 Day GT Event (typically 6 rounds) – 130 points</li>
-        <li>UK Malifaux Nationals (typically 7 rounds) – 140 points</li>
+        <li>2 Day Event with 5 or more Rounds – 120 points</li>
+        <li>GT Event (typically 2 days, 6 rounds) – 120 points, whatever the number of rounds</li>
+        <li>UK Malifaux Nationals (typically 2 days, 6 rounds) – 130 points, whatever the number of rounds</li>
       </ul>
     </div>
   )
