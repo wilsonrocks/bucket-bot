@@ -1,10 +1,11 @@
 import { DiscordLookup } from '@/components/discord-lookup'
 import { toOrdinal } from '@/helpers/to-ordinal'
+import { eventOptions, filterByEvent } from '@/helpers/identity-event-filter'
 import { useGetUnmappedIdentities, usePostPlayerIdentityIdIgnore } from '@/api/hooks'
 import { RequireRankingReporter } from '@/components/RequireRankingReporter'
-import { Badge, Button, Card, Divider, Group, List, Stack, Text } from '@mantine/core'
+import { Badge, Button, Card, Divider, Group, List, Select, Stack, Text } from '@mantine/core'
 import { createFileRoute } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 export const Route = createFileRoute('/_app/identities')({
   component: () => <RequireRankingReporter><RouteComponent /></RequireRankingReporter>,
@@ -70,6 +71,13 @@ function IdentityCard({ identity }: { identity: NonNullable<ReturnType<typeof us
 
 function RouteComponent() {
   const unmappedIdentities = useGetUnmappedIdentities()
+  const [eventId, setEventId] = useState<string | null>(null)
+  const options = useMemo(() => eventOptions(unmappedIdentities.data ?? []), [unmappedIdentities.data])
+
+  // Once the last identity for the chosen event is mapped or ignored, the event
+  // drops out of the options — fall back to showing everything.
+  const selectedEventId = options.some((o) => o.value === eventId) ? eventId : null
+  const visibleIdentities = filterByEvent(unmappedIdentities.data ?? [], selectedEventId)
 
   if (!unmappedIdentities.data) {
     return <div>Loading...</div>
@@ -94,7 +102,19 @@ function RouteComponent() {
         </Text>
       </div>
 
-      {unmappedIdentities.data.map((identity) => (
+      <Select
+        label="Event"
+        placeholder="All events"
+        data={options}
+        value={selectedEventId}
+        onChange={setEventId}
+        searchable
+        clearable
+        nothingFoundMessage="No matching events"
+        maw={480}
+      />
+
+      {visibleIdentities.map((identity) => (
         <IdentityCard key={identity.player_identity_id} identity={identity} />
       ))}
     </Stack>
