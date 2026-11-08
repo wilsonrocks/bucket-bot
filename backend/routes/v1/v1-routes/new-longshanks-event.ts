@@ -128,7 +128,7 @@ export const newLongshanksEvent: RouteHandler<typeof newLongshanksEventRoute, Ap
 
         const points = calculatePoints(
           players.length,
-          maxPoints("Local", Math.max(...players.map((x) => x.roundsPlayed))),
+          maxPoints(tierCode, Math.max(...players.map((x) => x.roundsPlayed))),
         ).points[longshanksPlayer.rank - 1];
 
         // Events under the minimum size are still imported, with 0 points for everyone

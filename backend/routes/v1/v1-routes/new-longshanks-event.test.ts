@@ -8,6 +8,7 @@ import {
   newFrontierPlayersHtml,
   newFrontierTourneyHtml,
 } from "../../../logic/longshanks/html";
+import { calculatePoints } from "../../../logic/points";
 import { addTestDataToDb } from "../../../logic/test-helpers/add-test-data-to-db";
 import { newLongshanksEvent, newLongshanksEventRoute } from "./new-longshanks-event";
 
@@ -57,11 +58,15 @@ function makeApp() {
   return app;
 }
 
-function importEvent(app: ReturnType<typeof makeApp>, longshanksId: string) {
+function importEvent(
+  app: ReturnType<typeof makeApp>,
+  longshanksId: string,
+  body: { tierCode?: string } = {},
+) {
   return app.request(`/longshanks-event/${longshanksId}`, {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({}),
+    body: JSON.stringify(body),
   });
 }
 
@@ -96,6 +101,30 @@ describe("POST /longshanks-event/{id}", () => {
       .selectAll()
       .execute();
     expect(results).toHaveLength(players.length);
+  });
+
+  test.each([
+    { tierCode: "GT", max: 120 },
+    { tierCode: "NATIONALS", max: 130 },
+  ])("awards points using the $tierCode tier max of $max", async ({ tierCode, max }) => {
+    mockLongshanks();
+    const response = await importEvent(makeApp(), NEW_FRONTIER_ID, { tierCode });
+    expect(response.status).toBe(200);
+
+    const { id } = (await response.json()) as { id: number };
+
+    const players = extractPlayersFromLongshanksHTML(newFrontierPlayersHtml);
+    const results = await dbClient
+      .selectFrom("result")
+      .where("tourney_id", "=", id)
+      .select("points")
+      .orderBy("place")
+      .execute();
+    expect(results.map((r) => r.points)).toEqual(
+      calculatePoints(players.length, max).points,
+    );
+    expect(results[0]!.points).toBe(max - Math.max(16 - players.length, 0));
+    expect(results.at(-1)!.points).toBe(5);
   });
 
   test("imports an event with fewer than 8 players, awarding 0 points", async () => {
