@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { calculatePoints } from "./points";
+import { calculatePoints, maxPoints } from "./points";
 
 describe("mastersEligibility", () => {
   describe("ineligible if fewer than twelve players", () => {
@@ -116,5 +116,23 @@ describe("scaling points", () => {
         expect(output.points[i]).toBeCloseTo(answer[i] as number, 2);
       }
     });
+  });
+});
+
+describe("maxPoints", () => {
+  it("uses the tier for GT and Nationals regardless of rounds", () => {
+    expect(maxPoints("GT", 6)).toBe(130);
+    expect(maxPoints("NATIONALS", 7)).toBe(140);
+  });
+
+  it("scales EVENT-tier events by rounds", () => {
+    expect(maxPoints("EVENT", 3)).toBe(100);
+    expect(maxPoints("EVENT", 4)).toBe(110);
+    expect(maxPoints("EVENT", 5)).toBe(120);
+    expect(maxPoints("EVENT", 7)).toBe(120);
+  });
+
+  it("treats a missing tier as EVENT", () => {
+    expect(maxPoints(undefined, 3)).toBe(100);
   });
 });

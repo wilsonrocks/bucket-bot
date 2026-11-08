@@ -152,7 +152,7 @@ export const newBotEventHandler: RouteHandler<typeof newBotEventRoute, AppEnv> =
 
         const points = calculatePoints(
           apiData.league.length,
-          maxPoints("Local", apiData.rounds),
+          maxPoints(tierCode, apiData.rounds),
         ).points[entry.position - 1];
 
         // Events under the minimum size are still imported, with 0 points for everyone

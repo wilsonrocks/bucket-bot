@@ -46,14 +46,18 @@ export const calculatePoints = (
   };
 };
 
-export const maxPoints = (level: string, rounds: number): number => {
-  if (level === "GT") return 130;
-  if (level === "Nationals") return 140;
+/**
+ * @param tierCode - The tourney's tier_code (EVENT, GT, NATIONALS). Defaults to EVENT.
+ * @param rounds - The number of rounds played, used for EVENT-tier events.
+ */
+export const maxPoints = (tierCode: string | undefined, rounds: number): number => {
+  if (tierCode === "GT") return 130;
+  if (tierCode === "NATIONALS") return 140;
 
   if (rounds === 3) return 100;
   if (rounds === 4) return 110;
   if (rounds >= 5) return 120;
   throw new Error(
-    `issue calculating max points for event level ${level} and rounds ${rounds}`,
+    `issue calculating max points for tier ${tierCode} and rounds ${rounds}`,
   );
 };
