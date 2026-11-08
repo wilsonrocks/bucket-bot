@@ -8,6 +8,7 @@ import {
   getDiscordClient,
 } from "../../../logic/discord-client.js";
 import { getCommunityTotals } from "../../../logic/stats/community-totals.js";
+import { recalculateTourneyPoints } from "../../../logic/points";
 
 const ErrorSchema = z.object({ error: z.string() });
 
@@ -305,6 +306,12 @@ export const updateTourney: RouteHandler<
     .get("db")
     .transaction()
     .execute(async (trx) => {
+      const previous = await trx
+        .selectFrom("tourney")
+        .where("id", "=", body.id)
+        .select(["tier_code", "rounds"])
+        .executeTakeFirstOrThrow();
+
       await trx
         .updateTable("tourney")
         .set({
@@ -317,6 +324,14 @@ export const updateTourney: RouteHandler<
         })
         .where("id", "=", body.id)
         .execute();
+
+      // Max points depend on tier and rounds, so keep result points in step
+      if (
+        previous.tier_code !== body.tierCode ||
+        previous.rounds !== body.rounds
+      ) {
+        await recalculateTourneyPoints(trx, body.id);
+      }
 
       if (body.paintingCategories !== undefined) {
         // Get existing category IDs for this tourney

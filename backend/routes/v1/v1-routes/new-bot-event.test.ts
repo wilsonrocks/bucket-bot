@@ -4,6 +4,7 @@ import { dbClient } from "../../../db-client";
 import type { AppEnv } from "../../../hono-env";
 import { IdentityProvider } from "../../../logic/fixtures";
 import { addTestDataToDb } from "../../../logic/test-helpers/add-test-data-to-db";
+import { calculatePoints } from "../../../logic/points";
 import { newBotEventHandler, newBotEventRoute } from "./new-bot-event";
 
 type LeagueEntry = {
@@ -106,11 +107,15 @@ function makeApp() {
   return app;
 }
 
-function importEvent(app: ReturnType<typeof makeApp>, botEventId: string) {
+function importEvent(
+  app: ReturnType<typeof makeApp>,
+  botEventId: string,
+  body: { tierCode?: string } = {},
+) {
   return app.request(`/bot-event/${botEventId}`, {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({}),
+    body: JSON.stringify(body),
   });
 }
 
@@ -316,6 +321,30 @@ describe("POST /bot-event/{id}", () => {
       .selectAll()
       .execute();
     expect(tourneys).toHaveLength(0);
+  });
+
+  test.each([
+        { tierCode: "EVENT", max: 110 },
+    { tierCode: "GT", max: 120 },
+    { tierCode: "NATIONALS", max: 130 },
+  ])("awards points using the $tierCode tier max of $max", async ({ tierCode, max }) => {
+    // 4-round payload, 10 players: max is reduced by 16 - 10 = 6
+    mockBotApi(botPayload());
+    const response = await importEvent(makeApp(), GT_BOT_ID, { tierCode });
+    expect(response.status).toBe(200);
+
+    const { id } = (await response.json()) as { id: number };
+
+    const results = await dbClient
+      .selectFrom("result")
+      .where("tourney_id", "=", id)
+      .select("points")
+      .orderBy("place")
+      .execute();
+    const expected = calculatePoints(REAL_LEAGUE.length, max).points;
+    expect(results.map((r) => r.points)).toEqual(expected);
+    expect(results[0]!.points).toBe(max - 6);
+    expect(results.at(-1)!.points).toBe(5);
   });
 
   test("imports an event with fewer than 8 players, awarding 0 points", async () => {

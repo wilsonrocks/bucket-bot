@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { calculatePoints } from "./points";
+import { calculatePoints, maxPoints } from "./points";
 
 describe("mastersEligibility", () => {
   describe("ineligible if fewer than twelve players", () => {
@@ -23,7 +23,6 @@ describe("mastersEligibility", () => {
     });
   });
 });
-7;
 
 describe("fewer than eight players results in zero points", () => {
   it("7 players", () => {
@@ -116,5 +115,43 @@ describe("scaling points", () => {
         expect(output.points[i]).toBeCloseTo(answer[i] as number, 2);
       }
     });
+  });
+});
+
+describe("maxPoints", () => {
+  it.each([3, 4, 5, 6])("GT is a flat 120 for %i rounds", (rounds) => {
+    expect(maxPoints("GT", rounds)).toBe(120);
+  });
+
+  it.each([3, 4, 5, 6])("NATIONALS is a flat 130 for %i rounds", (rounds) => {
+    expect(maxPoints("NATIONALS", rounds)).toBe(130);
+  });
+
+  it.each([
+    ["EVENT", 3, 100],
+    ["EVENT", 4, 110],
+    ["EVENT", 5, 120],
+    ["EVENT", 6, 120],
+    [null, 3, 100],
+    [undefined, 5, 120],
+  ] as const)("%s with %i rounds is %i", (tierCode, rounds, expected) => {
+    expect(maxPoints(tierCode, rounds)).toBe(expected);
+  });
+
+  it("throws for an event with fewer than 3 rounds", () => {
+    expect(() => maxPoints("EVENT", 2)).toThrow();
+  });
+
+  describe("tier points run exactly from max down to 5", () => {
+    for (const tierCode of ["GT", "NATIONALS"]) {
+      for (let players = 8; players <= 64; players++) {
+        it(`${tierCode}, ${players} players`, () => {
+          const max = maxPoints(tierCode, 6);
+          const { points } = calculatePoints(players, max);
+          expect(points[0]).toBe(max - Math.max(16 - players, 0));
+          expect(points.at(-1)).toBe(5);
+        });
+      }
+    }
   });
 });
