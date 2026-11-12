@@ -85,7 +85,7 @@ export function ImageUploader({
             if (files[0]) handleFile(files[0])
           }}
           accept={IMAGE_MIME_TYPE}
-          maxSize={10 * 1024 * 1024}
+          maxSize={30 * 1024 * 1024}
           multiple={false}
           style={{
             cursor: 'pointer',

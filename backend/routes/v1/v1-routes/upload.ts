@@ -25,7 +25,7 @@ const s3 = new S3Client({
 
 // ── Route ──────────────────────────────────────────────────────────────────
 
-const MAX_BYTES = 10 * 1024 * 1024;
+const MAX_BYTES = 30 * 1024 * 1024;
 // Responsive width ladder. Keep in sync with ASSET_WIDTHS in site/src/components/image.tsx.
 const IMAGE_WIDTHS = [35, 150, 400, 800, 1200] as const;
 // Keys are content-hashed (sha256 of the upload), so a changed image always gets a
@@ -60,7 +60,7 @@ export const uploadHandler: RouteHandler<typeof uploadRoute, AppEnv> = async (c)
   // Check Content-Length before reading body
   const contentLength = Number(c.req.header("content-length") ?? 0);
   if (contentLength > MAX_BYTES) {
-    return c.json({ error: "File too large (max 10 MB)" }, 413);
+    return c.json({ error: "File too large (max 30 MB)" }, 413);
   }
 
   const { type } = c.req.valid("query");
