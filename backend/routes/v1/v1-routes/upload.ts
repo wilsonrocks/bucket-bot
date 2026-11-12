@@ -1,9 +1,8 @@
 import { createRoute, z, type RouteHandler } from "@hono/zod-openapi";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
-import sharp from "sharp";
 import crypto from "crypto";
 import type { AppEnv } from "../../../hono-env.js";
-import { makeOgpJpeg } from "../../../logic/images";
+import { IMAGE_WIDTHS, processUpload } from "../../../logic/images";
 
 // ── S3 singleton ───────────────────────────────────────────────────────────
 
@@ -26,8 +25,6 @@ const s3 = new S3Client({
 // ── Route ──────────────────────────────────────────────────────────────────
 
 const MAX_BYTES = 30 * 1024 * 1024;
-// Responsive width ladder. Keep in sync with ASSET_WIDTHS in site/src/components/image.tsx.
-const IMAGE_WIDTHS = [35, 150, 400, 800, 1200] as const;
 // Keys are content-hashed (sha256 of the upload), so a changed image always gets a
 // new URL — the variants are safe to cache immutably for the browser/CloudFront.
 const IMMUTABLE_CACHE_CONTROL = "public, max-age=31536000, immutable";
@@ -93,12 +90,9 @@ export const uploadHandler: RouteHandler<typeof uploadRoute, AppEnv> = async (c)
 
   // Variants are served as WebP (smaller for the same quality); the OGP card stays
   // JPEG for social/crawler compatibility; the original is kept untouched in its
-  // uploaded format as the regeneration source-of-truth.
-  const [resizedWebps, ogpJpeg, meta] = await Promise.all([
-    Promise.all(IMAGE_WIDTHS.map((w) => sharp(buffer).resize({ width: w }).webp({ quality: 80 }).toBuffer())),
-    makeOgpJpeg(buffer),
-    sharp(buffer).metadata(),
-  ]);
+  // uploaded format as the regeneration source-of-truth. All of them come from a
+  // single decode, built one after another — see processUpload.
+  const { width, height, webps: resizedWebps, ogpJpeg } = await processUpload(buffer);
 
   // CloudFront forwards the full path to S3, so /media/team/x.webp → S3 key media/team/x.webp
   await Promise.all([
@@ -125,18 +119,14 @@ export const uploadHandler: RouteHandler<typeof uploadRoute, AppEnv> = async (c)
     })),
   ]);
 
-  // Record the original's intrinsic dimensions so the site can reserve layout
-  // space and build a responsive srcset. Upsert: re-uploading the same file
+  // Record the original's intrinsic (upright) dimensions so the site can reserve
+  // layout space and build a responsive srcset. Upsert: re-uploading the same file
   // (same hash → same key) refreshes the dimensions.
-  if (meta.width && meta.height) {
-    await c.get("db")
-      .insertInto("image")
-      .values({ key: baseKey, width: meta.width, height: meta.height, original_ext: ext })
-      .onConflict((oc) =>
-        oc.column("key").doUpdateSet({ width: meta.width!, height: meta.height!, original_ext: ext })
-      )
-      .execute();
-  }
+  await c.get("db")
+    .insertInto("image")
+    .values({ key: baseKey, width, height, original_ext: ext })
+    .onConflict((oc) => oc.column("key").doUpdateSet({ width, height, original_ext: ext }))
+    .execute();
 
   return c.json({ key: baseKey }, 200);
 };
