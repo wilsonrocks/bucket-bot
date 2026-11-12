@@ -358,32 +358,39 @@ function RouteComponent() {
             color="green"
             loading={updateTourney.isPending}
             onClick={async () => {
-              let processedCategories
+              // Upload pending images one at a time: each upload is heavy for the
+              // server to process, and firing them all at once has taken it down.
+              // Each success is written back to the form straight away, so if a
+              // later one fails, saving again only re-sends what's left.
+              const categories = detailsForm.values.paintingCategories.map((cat) => ({
+                ...cat,
+                winners: cat.winners.map((winner) => ({ ...winner })),
+              }))
               try {
-                processedCategories = await Promise.all(
-                detailsForm.values.paintingCategories.map(async (cat) => ({
-                  id: cat.id,
-                  name: cat.name,
-                  winners: await Promise.all(
-                    cat.winners.map(async (winner, i) => {
-                      let imageKey = winner.imageKey
-                      if (winner._pendingFile) {
-                        imageKey = await uploadTeamImage(winner._pendingFile, 'painting')
-                      }
-                      return {
-                        playerIdentityId: Number(winner.playerIdentityId),
-                        position: i + 1,
-                        model: winner.model || null,
-                        description: winner.description || null,
-                        imageKey,
-                      }
-                    })
-                  )
-                }))
-              )
+                for (const [catIndex, cat] of categories.entries()) {
+                  for (const [winIndex, winner] of cat.winners.entries()) {
+                    if (!winner._pendingFile) continue
+                    winner.imageKey = await uploadTeamImage(winner._pendingFile, 'painting')
+                    winner._pendingFile = null
+                    const path = `paintingCategories.${catIndex}.winners.${winIndex}`
+                    detailsForm.setFieldValue(`${path}.imageKey`, winner.imageKey)
+                    detailsForm.setFieldValue(`${path}._pendingFile`, null)
+                  }
+                }
               } catch {
                 return
               }
+              const processedCategories = categories.map((cat) => ({
+                id: cat.id,
+                name: cat.name,
+                winners: cat.winners.map((winner, i) => ({
+                  playerIdentityId: Number(winner.playerIdentityId),
+                  position: i + 1,
+                  model: winner.model || null,
+                  description: winner.description || null,
+                  imageKey: winner.imageKey,
+                })),
+              }))
 
               updateTourney.mutate({
                 data: {

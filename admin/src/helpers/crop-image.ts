@@ -119,7 +119,23 @@ function canvasToBlob(
  */
 export const TARGET_UPLOAD_BYTES = 10 * 1024 * 1024
 
+/**
+ * Longest edge we'll send. The server holds several decoded copies of an upload
+ * at once while building variants, and decoded size goes with pixel count, not
+ * file size — a 48 MP phone photo is ~190 MB raw however well it compresses.
+ */
+export const MAX_UPLOAD_DIMENSION = 4000
+
 const ACCEPTED_TYPES = ['image/png', 'image/jpeg', 'image/webp']
+
+/** The scale (≤ 1) that brings the longest edge down to `maxDimension`. */
+export function scaleToFit(
+  width: number,
+  height: number,
+  maxDimension = MAX_UPLOAD_DIMENSION,
+): number {
+  return Math.min(1, maxDimension / Math.max(width, height, 1))
+}
 
 /** Encode the current image at `scale` of its full size. */
 export type Encoder = (
@@ -140,12 +156,13 @@ export async function encodeWithinLimit(
   encode: Encoder,
   preferredType: string,
   maxBytes: number,
+  startScale = 1,
 ): Promise<Blob> {
-  const first = await encode(1, preferredType, 0.92)
+  const first = await encode(startScale, preferredType, 0.92)
   if (first.size <= maxBytes) return first
 
   let lossy = preferredType === 'image/png' ? 'image/webp' : preferredType
-  let scale = 1
+  let scale = startScale
   for (let i = 0; i < MAX_SHRINK_ATTEMPTS; i++) {
     const blob = await encode(scale, lossy, LOSSY_QUALITY)
     // Browsers that can't encode WebP (older Safari) silently hand back a PNG.
@@ -191,20 +208,29 @@ function blobToFile(blob: Blob, originalName: string): File {
 }
 
 /**
- * Make sure `file` is something the upload endpoint will take: an accepted type
- * and under `maxBytes`. Files that already are pass through untouched; anything
- * else is re-encoded (and shrunk if need be) in the browser.
+ * Make sure `file` is something the upload endpoint will take, and that's kind to
+ * the server: an accepted type, under `maxBytes`, and no more than
+ * MAX_UPLOAD_DIMENSION on its longest edge. Files that already are pass through
+ * untouched; anything else is re-encoded (and shrunk if need be) in the browser.
  */
 export async function fitImageForUpload(
   file: File,
   maxBytes = TARGET_UPLOAD_BYTES,
 ): Promise<File> {
-  if (file.size <= maxBytes && ACCEPTED_TYPES.includes(file.type)) return file
   const image = await loadImage(file)
+  const startScale = scaleToFit(image.naturalWidth, image.naturalHeight)
+  if (
+    startScale === 1 &&
+    file.size <= maxBytes &&
+    ACCEPTED_TYPES.includes(file.type)
+  ) {
+    return file
+  }
   const blob = await encodeWithinLimit(
     canvasEncoder(image, image.naturalWidth, image.naturalHeight),
     getOutputType(file.type).type,
     maxBytes,
+    startScale,
   )
   return blobToFile(blob, file.name)
 }
@@ -262,6 +288,7 @@ export async function cropImageFile(
     canvasEncoder(out, out.width, out.height),
     getOutputType(file.type).type,
     maxBytes,
+    scaleToFit(out.width, out.height),
   )
   return blobToFile(blob, file.name)
 }

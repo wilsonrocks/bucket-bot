@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 import {
   computeRotatedBounds,
   encodeWithinLimit,
+  scaleToFit,
   getOutputType,
   percentCropToPixels,
   renameForExt,
@@ -186,5 +187,29 @@ describe('encodeWithinLimit', () => {
     await expect(
       encodeWithinLimit(encode, 'image/jpeg', 50),
     ).rejects.toThrow(/Could not shrink/)
+  })
+})
+
+describe('scaleToFit', () => {
+  it('leaves images within the limit at full size', () => {
+    expect(scaleToFit(4000, 3000)).toBe(1)
+    expect(scaleToFit(800, 600)).toBe(1)
+  })
+
+  it('scales the longest edge down to the limit', () => {
+    expect(scaleToFit(8000, 6000)).toBe(0.5)
+    expect(scaleToFit(6000, 8000)).toBe(0.5)
+    expect(scaleToFit(2000, 1000, 1000)).toBe(0.5)
+  })
+})
+
+describe('encodeWithinLimit start scale', () => {
+  it('starts from the given scale rather than full size', async () => {
+    const encode = vi.fn(
+      async (_scale: number, type: string) =>
+        new Blob([new Uint8Array(10)], { type }),
+    )
+    await encodeWithinLimit(encode, 'image/jpeg', 1000, 0.5)
+    expect(encode).toHaveBeenCalledWith(0.5, 'image/jpeg', 0.92)
   })
 })
