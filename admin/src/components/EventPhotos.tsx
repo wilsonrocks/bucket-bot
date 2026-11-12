@@ -96,7 +96,7 @@ export function EventPhotos({ tourneyId }: { tourneyId: number }) {
       <Dropzone
         onDrop={handleDrop}
         accept={IMAGE_MIME_TYPE}
-        maxSize={10 * 1024 * 1024}
+        maxSize={30 * 1024 * 1024}
         multiple
         loading={uploading > 0}
       >
@@ -104,7 +104,7 @@ export function EventPhotos({ tourneyId }: { tourneyId: number }) {
           <Stack align="center" gap={4}>
             <IconPhoto size={32} color="var(--mantine-color-dimmed)" />
             <Text size="sm" c="dimmed">
-              Drop photos here, or click to pick some (max 10 MB each)
+              Drop photos here, or click to pick some (max 30 MB each)
             </Text>
           </Stack>
         </Center>

@@ -1,6 +1,7 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import {
   computeRotatedBounds,
+  encodeWithinLimit,
   getOutputType,
   percentCropToPixels,
   renameForExt,
@@ -121,5 +122,69 @@ describe('renameForExt', () => {
 
   it('falls back to a name when there is nothing left', () => {
     expect(renameForExt('.png', 'jpg')).toBe('image.jpg')
+  })
+})
+
+describe('encodeWithinLimit', () => {
+  /**
+   * A stand-in for the canvas: bytes scale with pixel count (scale²), lossy
+   * formats are a fraction of PNG, and lower quality is a bit smaller still.
+   */
+  function fakeEncoder(
+    fullSizeBytes: number,
+    { webpSupported = true }: { webpSupported?: boolean } = {},
+  ) {
+    return vi.fn(async (scale: number, type: string, quality: number) => {
+      const actualType =
+        type === 'image/webp' && !webpSupported ? 'image/png' : type
+      const formatFactor = actualType === 'image/png' ? 1 : 0.3
+      const size = Math.round(
+        fullSizeBytes * scale * scale * formatFactor * quality,
+      )
+      return new Blob([new Uint8Array(size)], { type: actualType })
+    })
+  }
+
+  it('keeps the first encode when it already fits', async () => {
+    const encode = fakeEncoder(1000)
+    const blob = await encodeWithinLimit(encode, 'image/png', 5000)
+    expect(blob.type).toBe('image/png')
+    expect(encode).toHaveBeenCalledTimes(1)
+    expect(encode).toHaveBeenCalledWith(1, 'image/png', 0.92)
+  })
+
+  it('switches a too-big PNG to WebP at full size before shrinking', async () => {
+    const encode = fakeEncoder(30_000)
+    const blob = await encodeWithinLimit(encode, 'image/png', 10_000)
+    expect(blob.type).toBe('image/webp')
+    expect(blob.size).toBeLessThanOrEqual(10_000)
+    expect(encode).toHaveBeenLastCalledWith(1, 'image/webp', 0.85)
+  })
+
+  it('scales a JPEG down until it fits', async () => {
+    const encode = fakeEncoder(200_000)
+    const blob = await encodeWithinLimit(encode, 'image/jpeg', 10_000)
+    expect(blob.type).toBe('image/jpeg')
+    expect(blob.size).toBeLessThanOrEqual(10_000)
+    const [lastScale] = encode.mock.calls.at(-1)!
+    expect(lastScale).toBeLessThan(1)
+    expect(encode.mock.calls.length).toBeLessThanOrEqual(4)
+  })
+
+  it('falls back to JPEG when the browser cannot encode WebP', async () => {
+    const encode = fakeEncoder(30_000, { webpSupported: false })
+    const blob = await encodeWithinLimit(encode, 'image/png', 10_000)
+    expect(blob.type).toBe('image/jpeg')
+    expect(blob.size).toBeLessThanOrEqual(10_000)
+  })
+
+  it('gives up with a clear error rather than looping forever', async () => {
+    const encode = vi.fn(
+      async (_scale: number, type: string) =>
+        new Blob([new Uint8Array(100)], { type }),
+    )
+    await expect(
+      encodeWithinLimit(encode, 'image/jpeg', 50),
+    ).rejects.toThrow(/Could not shrink/)
   })
 })

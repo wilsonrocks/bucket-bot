@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { notifications } from '@mantine/notifications'
 import { customFetch } from './custom-instance'
+import { fitImageForUpload } from '@/helpers/crop-image'
 import {
   getGetAchievementsQueryKey,
   useGetAchievements as useGetAchievementsGenerated,
@@ -864,8 +865,17 @@ export const uploadTeamImage = async (
 ): Promise<string> => {
   const stored = localStorage.getItem('auth')
   const jwt = stored ? (JSON.parse(stored) as { jwt: string }).jwt : null
+  let fitted: File
+  try {
+    fitted = await fitImageForUpload(file)
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : 'Could not prepare that image'
+    notifications.show({ title: 'Error', message, color: 'red' })
+    throw error
+  }
   const formData = new FormData()
-  formData.append('file', file)
+  formData.append('file', fitted)
   const response = await fetch(
     `${import.meta.env.VITE_BACKEND_URL}/v1/upload?type=${encodeURIComponent(type)}`,
     {
