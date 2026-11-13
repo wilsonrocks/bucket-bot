@@ -31,4 +31,34 @@ describe('renderPageContent', () => {
     expect(html).not.toContain('<script>')
     expect(html).toContain('&lt;script&gt;')
   })
+
+  // The backend only checks an href's prefix, so the renderer's own escaping
+  // and attribute handling are what keep hostile values inert.
+  describe('hostile attributes', () => {
+    const linked = (attrs: object) => renderPageContent(doc(p(text('x', [{ type: 'link', attrs }]))))
+
+    test('escapes quotes in href', () => {
+      const html = linked({ href: 'https://a.example/" onmouseover="alert(1)' })
+      expect(html).toBe('<p><a href="https://a.example/&quot; onmouseover=&quot;alert(1)">x</a></p>')
+    })
+
+    test('escapes other link attributes', () => {
+      const html = linked({ href: '/', class: '" onclick="alert(1)', target: '"><script>alert(1)</script>' })
+      expect(html).toBe(
+        '<p><a target="&quot;&gt;&lt;script&gt;alert(1)&lt;/script&gt;" class="&quot; onclick=&quot;alert(1)" href="/">x</a></p>',
+      )
+    })
+
+    test('blanks javascript: hrefs', () => {
+      expect(linked({ href: 'javascript:alert(1)' })).toBe('<p><a href="">x</a></p>')
+    })
+
+    test('drops attributes the schema does not define', () => {
+      expect(linked({ href: '/', onclick: 'alert(1)' })).toBe('<p><a href="/">x</a></p>')
+      const html = renderPageContent(
+        doc({ type: 'paragraph', attrs: { style: 'x', onclick: 'y' }, content: [text('p')] }),
+      )
+      expect(html).toBe('<p>p</p>')
+    })
+  })
 })
