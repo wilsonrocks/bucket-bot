@@ -1034,6 +1034,7 @@ export type PostPostFactionRankings500 = {
 
 export type PostUploadParams = {
 type: string;
+filename?: string;
 };
 
 export type PostUpload200 = {

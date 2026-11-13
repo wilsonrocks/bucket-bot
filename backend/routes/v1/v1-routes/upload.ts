@@ -1,9 +1,8 @@
 import { createRoute, z, type RouteHandler } from "@hono/zod-openapi";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
-import sharp from "sharp";
 import crypto from "crypto";
 import type { AppEnv } from "../../../hono-env.js";
-import { makeOgpJpeg } from "../../../logic/images";
+import { IMAGE_WIDTHS, processUpload } from "../../../logic/images";
 
 // ── S3 singleton ───────────────────────────────────────────────────────────
 
@@ -26,8 +25,6 @@ const s3 = new S3Client({
 // ── Route ──────────────────────────────────────────────────────────────────
 
 const MAX_BYTES = 30 * 1024 * 1024;
-// Responsive width ladder. Keep in sync with ASSET_WIDTHS in site/src/components/image.tsx.
-const IMAGE_WIDTHS = [35, 150, 400, 800, 1200] as const;
 // Keys are content-hashed (sha256 of the upload), so a changed image always gets a
 // new URL — the variants are safe to cache immutably for the browser/CloudFront.
 const IMMUTABLE_CACHE_CONTROL = "public, max-age=31536000, immutable";
@@ -38,7 +35,12 @@ export const uploadRoute = createRoute({
   method: "post",
   path: "/upload",
   request: {
-    query: z.object({ type: z.string() }),
+    query: z.object({
+      type: z.string(),
+      // Only used for logging: the real name is inside the multipart body, which we
+      // don't read when rejecting an oversized upload.
+      filename: z.string().optional(),
+    }),
   },
   responses: {
     200: {
@@ -56,17 +58,27 @@ export const uploadRoute = createRoute({
   },
 });
 
+const formatBytes = (bytes: number) => `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+
 export const uploadHandler: RouteHandler<typeof uploadRoute, AppEnv> = async (c) => {
+  const started = Date.now();
+  const { type, filename } = c.req.valid("query");
+  const userId = (c.get("jwtPayload") as { id?: string } | undefined)?.id ?? "unknown";
+  const context = (name = filename) =>
+    `type=${type} filename=${JSON.stringify(name ?? "unknown")} user=${userId}`;
+
   // Check Content-Length before reading body
   const contentLength = Number(c.req.header("content-length") ?? 0);
   if (contentLength > MAX_BYTES) {
+    console.warn(
+      `Upload rejected (413): ${formatBytes(contentLength)} is over the ${formatBytes(MAX_BYTES)} limit; ${context()}`
+    );
     return c.json({ error: "File too large (max 30 MB)" }, 413);
   }
 
-  const { type } = c.req.valid("query");
-
   const ALLOWED_TYPES = ["team", "painting", "achievement", "event"];
   if (!ALLOWED_TYPES.includes(type)) {
+    console.warn(`Upload rejected (400): invalid upload type; ${context()}`);
     return c.json({ error: "Invalid upload type" }, 400);
   }
 
@@ -74,6 +86,7 @@ export const uploadHandler: RouteHandler<typeof uploadRoute, AppEnv> = async (c)
   const file = body["file"];
 
   if (!(file instanceof File)) {
+    console.warn(`Upload rejected (400): missing 'file' field; ${context()}`);
     return c.json({ error: "Missing or invalid 'file' field" }, 400);
   }
 
@@ -84,6 +97,9 @@ export const uploadHandler: RouteHandler<typeof uploadRoute, AppEnv> = async (c)
   };
   const ext = EXT_BY_TYPE[file.type];
   if (!ext) {
+    console.warn(
+      `Upload rejected (400): unsupported format ${JSON.stringify(file.type)}, ${formatBytes(file.size)}; ${context(file.name)}`
+    );
     return c.json({ error: "Only PNG, JPEG, and WebP are accepted" }, 400);
   }
 
@@ -93,12 +109,9 @@ export const uploadHandler: RouteHandler<typeof uploadRoute, AppEnv> = async (c)
 
   // Variants are served as WebP (smaller for the same quality); the OGP card stays
   // JPEG for social/crawler compatibility; the original is kept untouched in its
-  // uploaded format as the regeneration source-of-truth.
-  const [resizedWebps, ogpJpeg, meta] = await Promise.all([
-    Promise.all(IMAGE_WIDTHS.map((w) => sharp(buffer).resize({ width: w }).webp({ quality: 80 }).toBuffer())),
-    makeOgpJpeg(buffer),
-    sharp(buffer).metadata(),
-  ]);
+  // uploaded format as the regeneration source-of-truth. All of them come from a
+  // single decode, built one after another — see processUpload.
+  const { width, height, webps: resizedWebps, ogpJpeg } = await processUpload(buffer);
 
   // CloudFront forwards the full path to S3, so /media/team/x.webp → S3 key media/team/x.webp
   await Promise.all([
@@ -125,18 +138,17 @@ export const uploadHandler: RouteHandler<typeof uploadRoute, AppEnv> = async (c)
     })),
   ]);
 
-  // Record the original's intrinsic dimensions so the site can reserve layout
-  // space and build a responsive srcset. Upsert: re-uploading the same file
+  // Record the original's intrinsic (upright) dimensions so the site can reserve
+  // layout space and build a responsive srcset. Upsert: re-uploading the same file
   // (same hash → same key) refreshes the dimensions.
-  if (meta.width && meta.height) {
-    await c.get("db")
-      .insertInto("image")
-      .values({ key: baseKey, width: meta.width, height: meta.height, original_ext: ext })
-      .onConflict((oc) =>
-        oc.column("key").doUpdateSet({ width: meta.width!, height: meta.height!, original_ext: ext })
-      )
-      .execute();
-  }
+  await c.get("db")
+    .insertInto("image")
+    .values({ key: baseKey, width, height, original_ext: ext })
+    .onConflict((oc) => oc.column("key").doUpdateSet({ width, height, original_ext: ext }))
+    .execute();
 
+  console.log(
+    `Upload ok: ${baseKey} ${formatBytes(file.size)} ${width}x${height} in ${Date.now() - started}ms; ${context(file.name)}`
+  );
   return c.json({ key: baseKey }, 200);
 };
