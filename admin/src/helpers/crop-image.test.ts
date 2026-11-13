@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 import {
   computeRotatedBounds,
   encodeWithinLimit,
+  formatBytes,
   scaleToFit,
   getOutputType,
   percentCropToPixels,
@@ -211,5 +212,13 @@ describe('encodeWithinLimit start scale', () => {
     )
     await encodeWithinLimit(encode, 'image/jpeg', 1000, 0.5)
     expect(encode).toHaveBeenCalledWith(0.5, 'image/jpeg', 0.92)
+  })
+})
+
+describe('formatBytes', () => {
+  it('shows megabytes to one decimal place', () => {
+    expect(formatBytes(0)).toBe('0.0 MB')
+    expect(formatBytes(1024 * 1024)).toBe('1.0 MB')
+    expect(formatBytes(4.25 * 1024 * 1024)).toBe('4.3 MB')
   })
 })

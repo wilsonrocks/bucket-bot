@@ -202,6 +202,11 @@ function canvasEncoder(
   }
 }
 
+/** e.g. "4.2 MB" — for logs. */
+export function formatBytes(bytes: number): string {
+  return `${(bytes / 1024 / 1024).toFixed(1)} MB`
+}
+
 function blobToFile(blob: Blob, originalName: string): File {
   const { type, ext } = getOutputType(blob.type)
   return new File([blob], renameForExt(originalName, ext), { type })
@@ -289,6 +294,10 @@ export async function cropImageFile(
     getOutputType(file.type).type,
     maxBytes,
     scaleToFit(out.width, out.height),
+  )
+  console.info(
+    `Cropped "${file.name}": ${formatBytes(file.size)} ${file.type} ${image.naturalWidth}x${image.naturalHeight}` +
+      ` → ${formatBytes(blob.size)} ${blob.type} (crop ${out.width}x${out.height})`,
   )
   return blobToFile(blob, file.name)
 }

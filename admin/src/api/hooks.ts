@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { notifications } from '@mantine/notifications'
 import { customFetch } from './custom-instance'
-import { fitImageForUpload } from '@/helpers/crop-image'
+import { fitImageForUpload, formatBytes } from '@/helpers/crop-image'
 import {
   getGetAchievementsQueryKey,
   useGetAchievements as useGetAchievementsGenerated,
@@ -874,6 +874,11 @@ export const uploadTeamImage = async (
     notifications.show({ title: 'Error', message, color: 'red' })
     throw error
   }
+  console.info(
+    fitted === file
+      ? `Uploading "${file.name}": ${formatBytes(file.size)} ${file.type}, sent as-is`
+      : `Uploading "${file.name}": ${formatBytes(file.size)} ${file.type} → ${formatBytes(fitted.size)} ${fitted.type} after shrinking`,
+  )
   const formData = new FormData()
   formData.append('file', fitted)
   const response = await fetch(
