@@ -35,7 +35,12 @@ export const uploadRoute = createRoute({
   method: "post",
   path: "/upload",
   request: {
-    query: z.object({ type: z.string() }),
+    query: z.object({
+      type: z.string(),
+      // Only used for logging: the real name is inside the multipart body, which we
+      // don't read when rejecting an oversized upload.
+      filename: z.string().optional(),
+    }),
   },
   responses: {
     200: {
@@ -53,17 +58,27 @@ export const uploadRoute = createRoute({
   },
 });
 
+const formatBytes = (bytes: number) => `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+
 export const uploadHandler: RouteHandler<typeof uploadRoute, AppEnv> = async (c) => {
+  const started = Date.now();
+  const { type, filename } = c.req.valid("query");
+  const userId = (c.get("jwtPayload") as { id?: string } | undefined)?.id ?? "unknown";
+  const context = (name = filename) =>
+    `type=${type} filename=${JSON.stringify(name ?? "unknown")} user=${userId}`;
+
   // Check Content-Length before reading body
   const contentLength = Number(c.req.header("content-length") ?? 0);
   if (contentLength > MAX_BYTES) {
+    console.warn(
+      `Upload rejected (413): ${formatBytes(contentLength)} is over the ${formatBytes(MAX_BYTES)} limit; ${context()}`
+    );
     return c.json({ error: "File too large (max 30 MB)" }, 413);
   }
 
-  const { type } = c.req.valid("query");
-
   const ALLOWED_TYPES = ["team", "painting", "achievement", "event"];
   if (!ALLOWED_TYPES.includes(type)) {
+    console.warn(`Upload rejected (400): invalid upload type; ${context()}`);
     return c.json({ error: "Invalid upload type" }, 400);
   }
 
@@ -71,6 +86,7 @@ export const uploadHandler: RouteHandler<typeof uploadRoute, AppEnv> = async (c)
   const file = body["file"];
 
   if (!(file instanceof File)) {
+    console.warn(`Upload rejected (400): missing 'file' field; ${context()}`);
     return c.json({ error: "Missing or invalid 'file' field" }, 400);
   }
 
@@ -81,6 +97,9 @@ export const uploadHandler: RouteHandler<typeof uploadRoute, AppEnv> = async (c)
   };
   const ext = EXT_BY_TYPE[file.type];
   if (!ext) {
+    console.warn(
+      `Upload rejected (400): unsupported format ${JSON.stringify(file.type)}, ${formatBytes(file.size)}; ${context(file.name)}`
+    );
     return c.json({ error: "Only PNG, JPEG, and WebP are accepted" }, 400);
   }
 
@@ -128,5 +147,8 @@ export const uploadHandler: RouteHandler<typeof uploadRoute, AppEnv> = async (c)
     .onConflict((oc) => oc.column("key").doUpdateSet({ width, height, original_ext: ext }))
     .execute();
 
+  console.log(
+    `Upload ok: ${baseKey} ${formatBytes(file.size)} ${width}x${height} in ${Date.now() - started}ms; ${context(file.name)}`
+  );
   return c.json({ key: baseKey }, 200);
 };
