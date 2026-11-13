@@ -877,7 +877,7 @@ export const uploadTeamImage = async (
   const formData = new FormData()
   formData.append('file', fitted)
   const response = await fetch(
-    `${import.meta.env.VITE_BACKEND_URL}/v1/upload?type=${encodeURIComponent(type)}`,
+    `${import.meta.env.VITE_BACKEND_URL}/v1/upload?${new URLSearchParams({ type, filename: file.name })}`,
     {
       method: 'POST',
       headers: jwt ? { Authorization: `Bearer ${jwt}` } : {},
