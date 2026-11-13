@@ -15,6 +15,8 @@ interface ImageUploaderProps {
   label?: string
   /** Set false to hand the raw picked file straight through, with no crop step. */
   enableCrop?: boolean
+  /** Show a spinner and block new picks, e.g. while the image uploads. */
+  loading?: boolean
 }
 
 export function ImageUploader({
@@ -24,6 +26,7 @@ export function ImageUploader({
   preview,
   label,
   enableCrop = true,
+  loading = false,
 }: ImageUploaderProps) {
   const { hovered, ref } = useHover<HTMLDivElement>()
   const [editing, setEditing] = useState<File | null>(null)
@@ -45,7 +48,7 @@ export function ImageUploader({
     (value ? `${import.meta.env.VITE_ASSETS_URL}/${value}-w150.webp` : null)
 
   const handleFile = (file: File) => {
-    if (!file.type.startsWith('image/')) return
+    if (loading || !file.type.startsWith('image/')) return
     if (enableCrop) {
       setEditing(file)
     } else {
@@ -87,6 +90,7 @@ export function ImageUploader({
           accept={IMAGE_MIME_TYPE}
           maxSize={30 * 1024 * 1024}
           multiple={false}
+          loading={loading}
           style={{
             cursor: 'pointer',
             position: 'relative',
@@ -110,7 +114,7 @@ export function ImageUploader({
                       <Text size="xs" c="white">
                         Change
                       </Text>
-                      {enableCrop && previewFile && (
+                      {enableCrop && previewFile && !loading && (
                         <Button
                           size="compact-xs"
                           variant="white"

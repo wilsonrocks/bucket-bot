@@ -73,7 +73,10 @@ function RouteComponent() {
         model: string
         description: string
         imageKey: string | null
-        _pendingFile: File | null
+        /** Stable identity, so an in-flight upload finds its row after reordering. */
+        _key: string
+        /** Set while this winner's image is uploading; shown as the preview meanwhile. */
+        _uploadingFile: File | null
       }[]
     }[]
   }>({
@@ -112,7 +115,8 @@ function RouteComponent() {
           model: w.model ?? '',
           description: w.description ?? '',
           imageKey: w.imageKey ?? null,
-          _pendingFile: null,
+          _key: crypto.randomUUID(),
+          _uploadingFile: null,
         }))
       })))
     }
@@ -124,6 +128,41 @@ function RouteComponent() {
   const tiers = useGetTiers()
   const updateTourney = usePostTourney(id)
   const postToDiscord = usePostPostDiscordEventTourneyId()
+
+  /** Where the winner with this `_key` currently lives — rows can move or go mid-upload. */
+  const findWinner = (key: string) => {
+    for (const [catIndex, cat] of detailsForm.getValues().paintingCategories.entries()) {
+      const winIndex = cat.winners.findIndex((w) => w._key === key)
+      if (winIndex !== -1) {
+        return {
+          path: `paintingCategories.${catIndex}.winners.${winIndex}`,
+          winner: cat.winners[winIndex],
+        }
+      }
+    }
+    return null
+  }
+
+  // Images upload as soon as they're picked, so they go up one at a time as people
+  // work through the form and Save only has keys to send.
+  const uploadWinnerImage = async (key: string, file: File) => {
+    const before = findWinner(key)
+    if (!before) return
+    detailsForm.setFieldValue(`${before.path}._uploadingFile`, file)
+
+    let imageKey: string | null = null
+    try {
+      imageKey = await uploadTeamImage(file, 'painting')
+    } catch {
+      // uploadTeamImage has already shown an error notification.
+    }
+
+    const after = findWinner(key)
+    // Removed while uploading, or a newer pick for the same winner took over.
+    if (!after || after.winner._uploadingFile !== file) return
+    if (imageKey) detailsForm.setFieldValue(`${after.path}.imageKey`, imageKey)
+    detailsForm.setFieldValue(`${after.path}._uploadingFile`, null)
+  }
 
   if (
     !tourneyDetail.data ||
@@ -308,10 +347,9 @@ function RouteComponent() {
                     <Grid.Col span={{ base: 12, xs: 2 }}>
                       <ImageUploader
                         value={winner.imageKey}
-                        previewFile={winner._pendingFile}
-                        onChange={(file) => {
-                          detailsForm.setFieldValue(`paintingCategories.${catIndex}.winners.${winIndex}._pendingFile`, file)
-                        }}
+                        previewFile={winner._uploadingFile}
+                        loading={winner._uploadingFile !== null}
+                        onChange={(file) => uploadWinnerImage(winner._key, file)}
                       />
                     </Grid.Col>
                     <Grid.Col span={{ base: 12, xs: 1 }}>
@@ -333,7 +371,8 @@ function RouteComponent() {
                   model: '',
                   description: '',
                   imageKey: null,
-                  _pendingFile: null,
+                  _key: crypto.randomUUID(),
+                  _uploadingFile: null,
                 })}
               >
                 Add Winner
@@ -357,30 +396,11 @@ function RouteComponent() {
             ml="sm"
             color="green"
             loading={updateTourney.isPending}
-            onClick={async () => {
-              // Upload pending images one at a time: each upload is heavy for the
-              // server to process, and firing them all at once has taken it down.
-              // Each success is written back to the form straight away, so if a
-              // later one fails, saving again only re-sends what's left.
-              const categories = detailsForm.values.paintingCategories.map((cat) => ({
-                ...cat,
-                winners: cat.winners.map((winner) => ({ ...winner })),
-              }))
-              try {
-                for (const [catIndex, cat] of categories.entries()) {
-                  for (const [winIndex, winner] of cat.winners.entries()) {
-                    if (!winner._pendingFile) continue
-                    winner.imageKey = await uploadTeamImage(winner._pendingFile, 'painting')
-                    winner._pendingFile = null
-                    const path = `paintingCategories.${catIndex}.winners.${winIndex}`
-                    detailsForm.setFieldValue(`${path}.imageKey`, winner.imageKey)
-                    detailsForm.setFieldValue(`${path}._pendingFile`, null)
-                  }
-                }
-              } catch {
-                return
-              }
-              const processedCategories = categories.map((cat) => ({
+            disabled={detailsForm.values.paintingCategories.some((cat) =>
+              cat.winners.some((winner) => winner._uploadingFile !== null),
+            )}
+            onClick={() => {
+              const processedCategories = detailsForm.values.paintingCategories.map((cat) => ({
                 id: cat.id,
                 name: cat.name,
                 winners: cat.winners.map((winner, i) => ({
