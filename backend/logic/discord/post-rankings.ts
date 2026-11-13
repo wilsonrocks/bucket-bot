@@ -10,6 +10,12 @@ import {
 } from "../discord-client";
 import { mostRecentSnapshot } from "../most-recent-snapshot";
 import { getSiteUrl } from "../site-url";
+import {
+  formatBiggestMovers,
+  formatMover,
+  getBiggestMovers,
+  Mover,
+} from "./biggest-movers";
 
 const TOP_X_PLAYERS = 16;
 
@@ -31,6 +37,7 @@ export const postDiscordRankings = async (db: Kysely<DB>) => {
 
   let topPlayer;
   let newPlayers;
+  let rollingYearMovers: Mover[] = [];
 
   for (const { name, code: typeCode, description, hex_code } of rankingTypes) {
     const batch = await mostRecentSnapshot(db, typeCode);
@@ -78,8 +85,11 @@ export const postDiscordRankings = async (db: Kysely<DB>) => {
       .limit(TOP_X_PLAYERS)
       .execute();
 
+    const movers = await getBiggestMovers(db, batch.id);
+
     if (typeCode === "ROLLING_YEAR") {
       topPlayer = rankings[0];
+      rollingYearMovers = movers;
 
       newPlayers = await db
         .selectFrom("ranking_snapshot")
@@ -132,6 +142,11 @@ export const postDiscordRankings = async (db: Kysely<DB>) => {
       .setDescription(description)
       .addFields({ name: "Players", value: topPlayersText });
 
+    const moversText = formatBiggestMovers(movers);
+    if (moversText) {
+      embed.addFields({ name: "Biggest Movers", value: moversText });
+    }
+
     await channel.send({
       content: `***BEEP BOOP!***
 
@@ -168,6 +183,12 @@ There's only a maximum of ${TOP_X_PLAYERS} players shown here. But you can see t
         ? await Promise.all(newPlayers.map((p) => mentionUserInGuild(guild, p)))
         : [];
 
+      const resolvedMovers = await Promise.all(
+        rollingYearMovers.map(async (m) =>
+          formatMover(m, await mentionUserInGuild(guild, m)),
+        ),
+      );
+
       announceChannel.send(`***BEEP-BOOP*** ${MENTION_EVENT_ENTHUSIAST}
 
 New rankings are out! Please check all the channels for the different ranking types.
@@ -181,6 +202,14 @@ It's really exciting to see the community growing and new names joining the rank
 Shout out to the the following players who completed their first ranked M4E event:
 
 ${resolvedNewPlayers.join("\n")}`
+    : ""
+}
+
+${
+  resolvedMovers.length > 0
+    ? `Biggest climbers this week:
+
+${resolvedMovers.join("\n")}`
     : ""
 }`);
     }
