@@ -96,6 +96,7 @@ export type GetTourney200Item = {
 };
 
 export type PostTourneyBodyPaintingCategoriesItemWinnersItem = {
+  /** @exclusiveMinimum 0 */
   playerIdentityId: number;
   position: number;
   /** @nullable */

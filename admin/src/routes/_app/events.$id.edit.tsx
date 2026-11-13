@@ -400,6 +400,22 @@ function RouteComponent() {
               cat.winners.some((winner) => winner._uploadingFile !== null),
             )}
             onClick={() => {
+              // A winner with no player would be sent as player 0 and fail the
+              // foreign key, so flag them on the form instead.
+              let missingPlayer = false
+              for (const [catIndex, cat] of detailsForm.values.paintingCategories.entries()) {
+                for (const [winIndex, winner] of cat.winners.entries()) {
+                  if (!winner.playerIdentityId) {
+                    missingPlayer = true
+                    detailsForm.setFieldError(
+                      `paintingCategories.${catIndex}.winners.${winIndex}.playerIdentityId`,
+                      'Pick a player',
+                    )
+                  }
+                }
+              }
+              if (missingPlayer) return
+
               const processedCategories = detailsForm.values.paintingCategories.map((cat) => ({
                 id: cat.id,
                 name: cat.name,

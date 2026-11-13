@@ -269,7 +269,7 @@ const TourneyUpdateBodySchema = z.object({
     id: z.number().optional(),
     name: z.string(),
     winners: z.array(z.object({
-      playerIdentityId: z.number(),
+      playerIdentityId: z.number().int().positive(),
       position: z.number(),
       model: z.string().optional().nullable(),
       description: z.string().optional().nullable(),
