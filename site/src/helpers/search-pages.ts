@@ -17,11 +17,12 @@ const SEARCH_PAGES: Record<FileRouteTypes['fullPaths'], SearchPage | 'dynamic' |
   '/team-rankings': { label: 'Team Rankings', keywords: ['clubs', 'leaderboard'] },
   '/regions': { label: 'Regions', keywords: ['map', 'towns', 'teams'] },
   '/best-painted': { label: 'Best Painted', keywords: ['painting'] },
-  '/how-it-works': { label: 'How It Works', keywords: ['points', 'scoring', 'faq'] },
   '/event/$id': 'dynamic',
   '/player/$id': 'dynamic',
   '/team/$id': 'dynamic',
   '/upcoming-event/$id': 'dynamic',
+  // CMS pages
+  '/$': 'dynamic',
 }
 
 export type StaticPageMatch = { href: string; label: string }

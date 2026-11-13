@@ -1,9 +1,10 @@
-import { createServerFn } from '@tanstack/react-start'
+import { createServerFn, createServerOnlyFn } from '@tanstack/react-start'
 import { sql } from 'kysely'
 import { format, formatISO } from 'date-fns'
 import { db } from './db-client'
 import { achievementsEnabled } from '#/helpers/achievements'
 import { prefixTsquery } from '#/helpers/prefix-tsquery'
+import { renderPageContent } from '#/helpers/render-page-content'
 
 // ── Rankings ───────────────────────────────────────────────────────────────
 
@@ -1139,17 +1140,34 @@ export const searchSite = createServerFn()
         .orderBy('tourney.date', 'desc')
         .limit(SEARCH_LIMIT)
         .execute(),
+      // CMS pages: a handful of rows, so no stored vector or index. The description
+      // is searched too, as it's written to summarise the page.
+      livePages()
+        .select(['page.url', 'page_version.title'])
+        .where(
+          sql<boolean>`(to_tsvector('simple', page_version.title || ' ' || page_version.description) @@ ${tsquery}
+            OR page_version.title % ${text})`,
+        )
+        .orderBy(sql`to_tsvector('simple', page_version.title) @@ ${tsquery}`, 'desc')
+        .orderBy('page_version.title')
+        .limit(SEARCH_LIMIT)
+        .execute(),
     ])
-    const [players, events, upcomingEvents, teams, rankingTypes, paintings] = [
+    const [players, events, upcomingEvents, teams, rankingTypes, paintings, pages] = [
       rowsOrEmpty(settled[0], 'players'),
       rowsOrEmpty(settled[1], 'events'),
       rowsOrEmpty(settled[2], 'upcoming events'),
       rowsOrEmpty(settled[3], 'teams'),
       rowsOrEmpty(settled[4], 'ranking types'),
       rowsOrEmpty(settled[5], 'painting winners'),
+      rowsOrEmpty(settled[6], 'pages'),
     ] as const
 
     const groups: SearchGroup[] = [
+      {
+        heading: 'Pages',
+        results: pages.map((p) => ({ href: p.url, label: p.title })),
+      },
       {
         heading: 'Players',
         results: players.map((p) => ({ href: `/player/${p.id}`, label: p.name })),
@@ -1192,3 +1210,62 @@ export const searchSite = createServerFn()
     ]
     return groups.filter((g) => g.results.length > 0)
   })
+
+// ── CMS pages ──────────────────────────────────────────────────────────────
+
+/** Visible CMS pages joined to their latest (live) version. */
+export const livePages = createServerOnlyFn(() =>
+  db
+    .selectFrom('page')
+    .innerJoin('page_version', 'page_version.page_id', 'page.id')
+    .where('page.visible', '=', true)
+    .where(({ eb, selectFrom }) =>
+      eb(
+        'page_version.version',
+        '=',
+        selectFrom('page_version as pv').select((e) => e.fn.max('pv.version').as('max')).whereRef('pv.page_id', '=', 'page.id'),
+      ),
+    ),
+)
+
+export type CmsPageResult =
+  | { kind: 'page'; title: string; description: string; html: string }
+  | { kind: 'redirect'; to: string }
+  | null
+
+export const fetchCmsPage = createServerFn()
+  .inputValidator((d: { path: string }) => d)
+  .handler(async ({ data: { path } }): Promise<CmsPageResult> => {
+    const page = await livePages()
+      .select(['page_version.title', 'page_version.description', 'page_version.content'])
+      .where('page.url', '=', path)
+      .executeTakeFirst()
+    if (page) {
+      return { kind: 'page', title: page.title, description: page.description, html: renderPageContent(page.content) }
+    }
+
+    // A URL a visible page used to have: send visitors to where it lives now.
+    const moved = await db
+      .selectFrom('page_version')
+      .innerJoin('page', 'page.id', 'page_version.page_id')
+      .select('page.url')
+      .where('page_version.url', '=', path)
+      .where('page.visible', '=', true)
+      .orderBy('page_version.created_at', 'desc')
+      .limit(1)
+      .executeTakeFirst()
+    return moved ? { kind: 'redirect', to: moved.url } : null
+  })
+
+export type NavPage = { url: string; title: string }
+
+/** Visible CMS pages that belong in the site menu, in menu order. */
+export const navPages = createServerOnlyFn(
+  (): Promise<NavPage[]> =>
+    livePages()
+      .select(['page.url', 'page_version.title'])
+      .where('page.nav_order', 'is not', null)
+      .orderBy('page.nav_order')
+      .orderBy('page_version.title')
+      .execute(),
+)

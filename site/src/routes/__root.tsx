@@ -29,7 +29,7 @@ import { DEFAULT_OG_IMAGE, SITE_NAME, SITE_URL, jsonLd, seo } from "#/helpers/se
 import { ThemeProvider } from "#/theme/theme-provider";
 import { ThemeToggle } from "#/components/theme-toggle";
 import { NO_FLASH_SCRIPT } from "#/theme/theme";
-import { getThemeCookie } from "#/theme/theme-cookie";
+import { fetchRootData } from "#/root-data";
 
 const rootWebsiteJsonLd = jsonLd({
   "@context": "https://schema.org",
@@ -57,7 +57,7 @@ function assetOrigin(): string | null {
 }
 
 export const Route = createRootRoute({
-  loader: () => getThemeCookie(),
+  loader: () => fetchRootData(),
   head: () => {
     const base = seo({
       title: SITE_NAME,
@@ -91,7 +91,7 @@ export const Route = createRootRoute({
 });
 
 function RootDocument({ children }: { children: React.ReactNode }) {
-  const theme = Route.useLoaderData();
+  const { theme } = Route.useLoaderData();
   return (
     <html lang="en" className={theme === "dark" ? "dark" : undefined} suppressHydrationWarning>
       <head>
@@ -114,7 +114,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 }
 
 function SiteLayout() {
-  const theme = Route.useLoaderData();
+  const { theme, navPages } = Route.useLoaderData();
   const [navOpen, setNavOpen] = useState(false);
   const isInitialMount = useRef(true);
 
@@ -171,7 +171,7 @@ function SiteLayout() {
             navOpen ? "block" : "hidden"
           } fixed left-0 inset-y-0 top-[60px] z-20 w-[200px] border-r border-border bg-surface p-4 sm:static sm:left-auto sm:block sm:w-fit sm:top-0`}
         >
-          <SiteNavbar />
+          <SiteNavbar pages={navPages} />
         </aside>
         {navOpen && (
           <div

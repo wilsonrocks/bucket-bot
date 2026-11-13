@@ -5,6 +5,24 @@ import jsonWebToken from "jsonwebtoken";
 import type { AppEnv } from "../../hono-env.js";
 import { botChatRouter } from "./v1-routes/discord-bot-chat.js";
 import {
+  createPageHandler,
+  createPageRoute,
+  deletePageHandler,
+  deletePageRoute,
+  getPageHandler,
+  getPageRoute,
+  getPagesHandler,
+  getPagesRoute,
+  getPageVersionHandler,
+  getPageVersionRoute,
+  getPageVersionsHandler,
+  getPageVersionsRoute,
+  savePageVersionHandler,
+  savePageVersionRoute,
+  updatePageSettingsHandler,
+  updatePageSettingsRoute,
+} from "./v1-routes/pages";
+import {
   announceAchievementsHandler,
   announceAchievementsRoute,
   getAchievementsHandler,
@@ -401,6 +419,14 @@ v1Router.openapi(playerNameExistsRoute, playerNameExistsHandler);
 v1Router.openapi(postTeamRankingsRoute, postTeamRankingsHandler);
 v1Router.openapi(generateTeamRankingsRoute, generateTeamRankingsHandler);
 v1Router.openapi(updateFeatureFlagRoute, updateFeatureFlag);
+v1Router.openapi(getPagesRoute, getPagesHandler);
+v1Router.openapi(getPageRoute, getPageHandler);
+v1Router.openapi(getPageVersionsRoute, getPageVersionsHandler);
+v1Router.openapi(getPageVersionRoute, getPageVersionHandler);
+v1Router.openapi(createPageRoute, createPageHandler);
+v1Router.openapi(savePageVersionRoute, savePageVersionHandler);
+v1Router.openapi(updatePageSettingsRoute, updatePageSettingsHandler);
+v1Router.openapi(deletePageRoute, deletePageHandler);
 v1Router.openapi(pipelineJobStepsRoute, pipelineJobStepsHandler);
 v1Router.openapi(runPipelineRoute, runPipelineHandler);
 v1Router.openapi(retryPipelineStepsRoute, retryPipelineStepsHandler);

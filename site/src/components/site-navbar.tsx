@@ -1,7 +1,9 @@
 import { AppNavLink } from "./app-nav-link";
 import { SiteSearch } from "./site-search";
+import type { NavPage } from "#/queries";
 
-export const SiteNavbar = () => {
+/** `pages`: CMS pages that are in the menu, listed after the built-in sections. */
+export const SiteNavbar = ({ pages }: { pages: NavPage[] }) => {
   return (
     <div className="flex h-full flex-col gap-1 overflow-y-auto">
       <SiteSearch />
@@ -14,7 +16,9 @@ export const SiteNavbar = () => {
       <AppNavLink to="/team-rankings" label="Team Rankings" />
       <AppNavLink to="/regions" label="Regions" />
       <AppNavLink to="/best-painted" label="Best Painted" />
-      <AppNavLink to="/how-it-works" label="How It Works" />
+      {pages.map((page) => (
+        <AppNavLink key={page.url} to={page.url} label={page.title} />
+      ))}
       <hr className="my-2 border-border" />
     </div>
   );

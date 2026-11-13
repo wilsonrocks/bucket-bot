@@ -16,10 +16,10 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as RegionsRouteImport } from './routes/regions'
 import { Route as RankingsRouteImport } from './routes/rankings'
 import { Route as PlayersRouteImport } from './routes/players'
-import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as FactionRankingsRouteImport } from './routes/faction-rankings'
 import { Route as EventsRouteImport } from './routes/events'
 import { Route as BestPaintedRouteImport } from './routes/best-painted'
+import { Route as SplatRouteImport } from './routes/$'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as UpcomingEventIdRouteImport } from './routes/upcoming-event.$id'
 import { Route as TeamIdRouteImport } from './routes/team.$id'
@@ -61,11 +61,6 @@ const PlayersRoute = PlayersRouteImport.update({
   path: '/players',
   getParentRoute: () => rootRouteImport,
 } as any)
-const HowItWorksRoute = HowItWorksRouteImport.update({
-  id: '/how-it-works',
-  path: '/how-it-works',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const FactionRankingsRoute = FactionRankingsRouteImport.update({
   id: '/faction-rankings',
   path: '/faction-rankings',
@@ -79,6 +74,11 @@ const EventsRoute = EventsRouteImport.update({
 const BestPaintedRoute = BestPaintedRouteImport.update({
   id: '/best-painted',
   path: '/best-painted',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SplatRoute = SplatRouteImport.update({
+  id: '/$',
+  path: '/$',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -109,10 +109,10 @@ const EventIdRoute = EventIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/$': typeof SplatRoute
   '/best-painted': typeof BestPaintedRoute
   '/events': typeof EventsRoute
   '/faction-rankings': typeof FactionRankingsRoute
-  '/how-it-works': typeof HowItWorksRoute
   '/players': typeof PlayersRoute
   '/rankings': typeof RankingsRoute
   '/regions': typeof RegionsRoute
@@ -127,10 +127,10 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/$': typeof SplatRoute
   '/best-painted': typeof BestPaintedRoute
   '/events': typeof EventsRoute
   '/faction-rankings': typeof FactionRankingsRoute
-  '/how-it-works': typeof HowItWorksRoute
   '/players': typeof PlayersRoute
   '/rankings': typeof RankingsRoute
   '/regions': typeof RegionsRoute
@@ -146,10 +146,10 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/$': typeof SplatRoute
   '/best-painted': typeof BestPaintedRoute
   '/events': typeof EventsRoute
   '/faction-rankings': typeof FactionRankingsRoute
-  '/how-it-works': typeof HowItWorksRoute
   '/players': typeof PlayersRoute
   '/rankings': typeof RankingsRoute
   '/regions': typeof RegionsRoute
@@ -166,10 +166,10 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/$'
     | '/best-painted'
     | '/events'
     | '/faction-rankings'
-    | '/how-it-works'
     | '/players'
     | '/rankings'
     | '/regions'
@@ -184,10 +184,10 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/$'
     | '/best-painted'
     | '/events'
     | '/faction-rankings'
-    | '/how-it-works'
     | '/players'
     | '/rankings'
     | '/regions'
@@ -202,10 +202,10 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/$'
     | '/best-painted'
     | '/events'
     | '/faction-rankings'
-    | '/how-it-works'
     | '/players'
     | '/rankings'
     | '/regions'
@@ -221,10 +221,10 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  SplatRoute: typeof SplatRoute
   BestPaintedRoute: typeof BestPaintedRoute
   EventsRoute: typeof EventsRoute
   FactionRankingsRoute: typeof FactionRankingsRoute
-  HowItWorksRoute: typeof HowItWorksRoute
   PlayersRoute: typeof PlayersRoute
   RankingsRoute: typeof RankingsRoute
   RegionsRoute: typeof RegionsRoute
@@ -289,13 +289,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlayersRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/how-it-works': {
-      id: '/how-it-works'
-      path: '/how-it-works'
-      fullPath: '/how-it-works'
-      preLoaderRoute: typeof HowItWorksRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/faction-rankings': {
       id: '/faction-rankings'
       path: '/faction-rankings'
@@ -315,6 +308,13 @@ declare module '@tanstack/react-router' {
       path: '/best-painted'
       fullPath: '/best-painted'
       preLoaderRoute: typeof BestPaintedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$': {
+      id: '/$'
+      path: '/$'
+      fullPath: '/$'
+      preLoaderRoute: typeof SplatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -357,10 +357,10 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  SplatRoute: SplatRoute,
   BestPaintedRoute: BestPaintedRoute,
   EventsRoute: EventsRoute,
   FactionRankingsRoute: FactionRankingsRoute,
-  HowItWorksRoute: HowItWorksRoute,
   PlayersRoute: PlayersRoute,
   RankingsRoute: RankingsRoute,
   RegionsRoute: RegionsRoute,

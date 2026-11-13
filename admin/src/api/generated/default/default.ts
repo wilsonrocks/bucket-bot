@@ -24,6 +24,9 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  DeletePagesId200,
+  DeletePagesId403,
+  DeletePagesId404,
   DeletePlayerIdDiscordUser200,
   DeletePlayerIdDiscordUser400,
   DeletePlayerIdDiscordUser403,
@@ -51,6 +54,17 @@ import type {
   GetHasRole200,
   GetHasRole400,
   GetHasRole500,
+  GetPages200Item,
+  GetPages403,
+  GetPagesId200,
+  GetPagesId403,
+  GetPagesId404,
+  GetPagesIdVersions200Item,
+  GetPagesIdVersions403,
+  GetPagesIdVersions404,
+  GetPagesIdVersionsVersion200,
+  GetPagesIdVersionsVersion403,
+  GetPagesIdVersionsVersion404,
   GetPaintingAll200Item,
   GetPaintingRecent200,
   GetPaintingRecent404,
@@ -102,6 +116,11 @@ import type {
   PatchFeatureFlagsFlag403,
   PatchFeatureFlagsFlag404,
   PatchFeatureFlagsFlagBody,
+  PatchPagesId200,
+  PatchPagesId400,
+  PatchPagesId403,
+  PatchPagesId404,
+  PatchPagesIdBody,
   PatchTeamsTeamIdMembersMembershipId200,
   PatchTeamsTeamIdMembersMembershipId403,
   PatchTeamsTeamIdMembersMembershipId404,
@@ -141,6 +160,17 @@ import type {
   PostMatchPlayerToDiscordUser200,
   PostMatchPlayerToDiscordUser404,
   PostMatchPlayerToDiscordUserBody,
+  PostPages201,
+  PostPages400,
+  PostPages403,
+  PostPages409,
+  PostPagesBody,
+  PostPagesIdVersions201,
+  PostPagesIdVersions400,
+  PostPagesIdVersions403,
+  PostPagesIdVersions404,
+  PostPagesIdVersions409,
+  PostPagesIdVersionsBody,
   PostPlayerIdMatchDiscordUser200,
   PostPlayerIdMatchDiscordUser400,
   PostPlayerIdMatchDiscordUser403,
@@ -7089,7 +7119,847 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getPatchFeatureFlagsFlagMutationOptions(options), queryClient);
     }
-    export type getPipelineJobStepsResponse200 = {
+    export type getPagesResponse200 = {
+  data: GetPages200Item[]
+  status: 200
+}
+
+export type getPagesResponse403 = {
+  data: GetPages403
+  status: 403
+}
+
+export type getPagesResponseSuccess = (getPagesResponse200) & {
+  headers: Headers;
+};
+export type getPagesResponseError = (getPagesResponse403) & {
+  headers: Headers;
+};
+
+export type getPagesResponse = (getPagesResponseSuccess | getPagesResponseError)
+
+export const getGetPagesUrl = () => {
+
+
+  
+
+  return `/v1/pages`
+}
+
+export const getPages = async ( options?: RequestInit): Promise<getPagesResponse> => {
+  
+  return customFetch<getPagesResponse>(getGetPagesUrl(),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
+
+export const getGetPagesQueryKey = () => {
+    return [
+    `/v1/pages`
+    ] as const;
+    }
+
+    
+export const getGetPagesQueryOptions = <TData = Awaited<ReturnType<typeof getPages>>, TError = GetPages403>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPages>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPagesQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPages>>> = ({ signal }) => getPages({ signal, ...requestOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPages>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetPagesQueryResult = NonNullable<Awaited<ReturnType<typeof getPages>>>
+export type GetPagesQueryError = GetPages403
+
+
+export function useGetPages<TData = Awaited<ReturnType<typeof getPages>>, TError = GetPages403>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPages>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPages>>,
+          TError,
+          Awaited<ReturnType<typeof getPages>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPages<TData = Awaited<ReturnType<typeof getPages>>, TError = GetPages403>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPages>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPages>>,
+          TError,
+          Awaited<ReturnType<typeof getPages>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPages<TData = Awaited<ReturnType<typeof getPages>>, TError = GetPages403>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPages>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetPages<TData = Awaited<ReturnType<typeof getPages>>, TError = GetPages403>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPages>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetPagesQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+export type postPagesResponse201 = {
+  data: PostPages201
+  status: 201
+}
+
+export type postPagesResponse400 = {
+  data: PostPages400
+  status: 400
+}
+
+export type postPagesResponse403 = {
+  data: PostPages403
+  status: 403
+}
+
+export type postPagesResponse409 = {
+  data: PostPages409
+  status: 409
+}
+
+export type postPagesResponseSuccess = (postPagesResponse201) & {
+  headers: Headers;
+};
+export type postPagesResponseError = (postPagesResponse400 | postPagesResponse403 | postPagesResponse409) & {
+  headers: Headers;
+};
+
+export type postPagesResponse = (postPagesResponseSuccess | postPagesResponseError)
+
+export const getPostPagesUrl = () => {
+
+
+  
+
+  return `/v1/pages`
+}
+
+export const postPages = async (postPagesBody: PostPagesBody, options?: RequestInit): Promise<postPagesResponse> => {
+  
+  return customFetch<postPagesResponse>(getPostPagesUrl(),
+  {      
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      postPagesBody,)
+  }
+);}
+  
+
+
+
+export const getPostPagesMutationOptions = <TError = PostPages400 | PostPages403 | PostPages409,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postPages>>, TError,{data: PostPagesBody}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postPages>>, TError,{data: PostPagesBody}, TContext> => {
+
+const mutationKey = ['postPages'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postPages>>, {data: PostPagesBody}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postPages(data,requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostPagesMutationResult = NonNullable<Awaited<ReturnType<typeof postPages>>>
+    export type PostPagesMutationBody = PostPagesBody
+    export type PostPagesMutationError = PostPages400 | PostPages403 | PostPages409
+
+    export const usePostPages = <TError = PostPages400 | PostPages403 | PostPages409,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postPages>>, TError,{data: PostPagesBody}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postPages>>,
+        TError,
+        {data: PostPagesBody},
+        TContext
+      > => {
+      return useMutation(getPostPagesMutationOptions(options), queryClient);
+    }
+    export type getPagesIdResponse200 = {
+  data: GetPagesId200
+  status: 200
+}
+
+export type getPagesIdResponse403 = {
+  data: GetPagesId403
+  status: 403
+}
+
+export type getPagesIdResponse404 = {
+  data: GetPagesId404
+  status: 404
+}
+
+export type getPagesIdResponseSuccess = (getPagesIdResponse200) & {
+  headers: Headers;
+};
+export type getPagesIdResponseError = (getPagesIdResponse403 | getPagesIdResponse404) & {
+  headers: Headers;
+};
+
+export type getPagesIdResponse = (getPagesIdResponseSuccess | getPagesIdResponseError)
+
+export const getGetPagesIdUrl = (id: number,) => {
+
+
+  
+
+  return `/v1/pages/${id}`
+}
+
+export const getPagesId = async (id: number, options?: RequestInit): Promise<getPagesIdResponse> => {
+  
+  return customFetch<getPagesIdResponse>(getGetPagesIdUrl(id),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
+
+export const getGetPagesIdQueryKey = (id: number,) => {
+    return [
+    `/v1/pages/${id}`
+    ] as const;
+    }
+
+    
+export const getGetPagesIdQueryOptions = <TData = Awaited<ReturnType<typeof getPagesId>>, TError = GetPagesId403 | GetPagesId404>(id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPagesId>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPagesIdQueryKey(id);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPagesId>>> = ({ signal }) => getPagesId(id, { signal, ...requestOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPagesId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetPagesIdQueryResult = NonNullable<Awaited<ReturnType<typeof getPagesId>>>
+export type GetPagesIdQueryError = GetPagesId403 | GetPagesId404
+
+
+export function useGetPagesId<TData = Awaited<ReturnType<typeof getPagesId>>, TError = GetPagesId403 | GetPagesId404>(
+ id: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPagesId>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPagesId>>,
+          TError,
+          Awaited<ReturnType<typeof getPagesId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPagesId<TData = Awaited<ReturnType<typeof getPagesId>>, TError = GetPagesId403 | GetPagesId404>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPagesId>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPagesId>>,
+          TError,
+          Awaited<ReturnType<typeof getPagesId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPagesId<TData = Awaited<ReturnType<typeof getPagesId>>, TError = GetPagesId403 | GetPagesId404>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPagesId>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetPagesId<TData = Awaited<ReturnType<typeof getPagesId>>, TError = GetPagesId403 | GetPagesId404>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPagesId>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetPagesIdQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+export type patchPagesIdResponse200 = {
+  data: PatchPagesId200
+  status: 200
+}
+
+export type patchPagesIdResponse400 = {
+  data: PatchPagesId400
+  status: 400
+}
+
+export type patchPagesIdResponse403 = {
+  data: PatchPagesId403
+  status: 403
+}
+
+export type patchPagesIdResponse404 = {
+  data: PatchPagesId404
+  status: 404
+}
+
+export type patchPagesIdResponseSuccess = (patchPagesIdResponse200) & {
+  headers: Headers;
+};
+export type patchPagesIdResponseError = (patchPagesIdResponse400 | patchPagesIdResponse403 | patchPagesIdResponse404) & {
+  headers: Headers;
+};
+
+export type patchPagesIdResponse = (patchPagesIdResponseSuccess | patchPagesIdResponseError)
+
+export const getPatchPagesIdUrl = (id: number,) => {
+
+
+  
+
+  return `/v1/pages/${id}`
+}
+
+export const patchPagesId = async (id: number,
+    patchPagesIdBody: PatchPagesIdBody, options?: RequestInit): Promise<patchPagesIdResponse> => {
+  
+  return customFetch<patchPagesIdResponse>(getPatchPagesIdUrl(id),
+  {      
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      patchPagesIdBody,)
+  }
+);}
+  
+
+
+
+export const getPatchPagesIdMutationOptions = <TError = PatchPagesId400 | PatchPagesId403 | PatchPagesId404,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchPagesId>>, TError,{id: number;data: PatchPagesIdBody}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof patchPagesId>>, TError,{id: number;data: PatchPagesIdBody}, TContext> => {
+
+const mutationKey = ['patchPagesId'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof patchPagesId>>, {id: number;data: PatchPagesIdBody}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  patchPagesId(id,data,requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PatchPagesIdMutationResult = NonNullable<Awaited<ReturnType<typeof patchPagesId>>>
+    export type PatchPagesIdMutationBody = PatchPagesIdBody
+    export type PatchPagesIdMutationError = PatchPagesId400 | PatchPagesId403 | PatchPagesId404
+
+    export const usePatchPagesId = <TError = PatchPagesId400 | PatchPagesId403 | PatchPagesId404,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof patchPagesId>>, TError,{id: number;data: PatchPagesIdBody}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof patchPagesId>>,
+        TError,
+        {id: number;data: PatchPagesIdBody},
+        TContext
+      > => {
+      return useMutation(getPatchPagesIdMutationOptions(options), queryClient);
+    }
+    export type deletePagesIdResponse200 = {
+  data: DeletePagesId200
+  status: 200
+}
+
+export type deletePagesIdResponse403 = {
+  data: DeletePagesId403
+  status: 403
+}
+
+export type deletePagesIdResponse404 = {
+  data: DeletePagesId404
+  status: 404
+}
+
+export type deletePagesIdResponseSuccess = (deletePagesIdResponse200) & {
+  headers: Headers;
+};
+export type deletePagesIdResponseError = (deletePagesIdResponse403 | deletePagesIdResponse404) & {
+  headers: Headers;
+};
+
+export type deletePagesIdResponse = (deletePagesIdResponseSuccess | deletePagesIdResponseError)
+
+export const getDeletePagesIdUrl = (id: number,) => {
+
+
+  
+
+  return `/v1/pages/${id}`
+}
+
+export const deletePagesId = async (id: number, options?: RequestInit): Promise<deletePagesIdResponse> => {
+  
+  return customFetch<deletePagesIdResponse>(getDeletePagesIdUrl(id),
+  {      
+    ...options,
+    method: 'DELETE'
+    
+    
+  }
+);}
+  
+
+
+
+export const getDeletePagesIdMutationOptions = <TError = DeletePagesId403 | DeletePagesId404,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deletePagesId>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deletePagesId>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['deletePagesId'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deletePagesId>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  deletePagesId(id,requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeletePagesIdMutationResult = NonNullable<Awaited<ReturnType<typeof deletePagesId>>>
+    
+    export type DeletePagesIdMutationError = DeletePagesId403 | DeletePagesId404
+
+    export const useDeletePagesId = <TError = DeletePagesId403 | DeletePagesId404,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deletePagesId>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deletePagesId>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getDeletePagesIdMutationOptions(options), queryClient);
+    }
+    export type getPagesIdVersionsResponse200 = {
+  data: GetPagesIdVersions200Item[]
+  status: 200
+}
+
+export type getPagesIdVersionsResponse403 = {
+  data: GetPagesIdVersions403
+  status: 403
+}
+
+export type getPagesIdVersionsResponse404 = {
+  data: GetPagesIdVersions404
+  status: 404
+}
+
+export type getPagesIdVersionsResponseSuccess = (getPagesIdVersionsResponse200) & {
+  headers: Headers;
+};
+export type getPagesIdVersionsResponseError = (getPagesIdVersionsResponse403 | getPagesIdVersionsResponse404) & {
+  headers: Headers;
+};
+
+export type getPagesIdVersionsResponse = (getPagesIdVersionsResponseSuccess | getPagesIdVersionsResponseError)
+
+export const getGetPagesIdVersionsUrl = (id: number,) => {
+
+
+  
+
+  return `/v1/pages/${id}/versions`
+}
+
+export const getPagesIdVersions = async (id: number, options?: RequestInit): Promise<getPagesIdVersionsResponse> => {
+  
+  return customFetch<getPagesIdVersionsResponse>(getGetPagesIdVersionsUrl(id),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
+
+export const getGetPagesIdVersionsQueryKey = (id: number,) => {
+    return [
+    `/v1/pages/${id}/versions`
+    ] as const;
+    }
+
+    
+export const getGetPagesIdVersionsQueryOptions = <TData = Awaited<ReturnType<typeof getPagesIdVersions>>, TError = GetPagesIdVersions403 | GetPagesIdVersions404>(id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPagesIdVersions>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPagesIdVersionsQueryKey(id);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPagesIdVersions>>> = ({ signal }) => getPagesIdVersions(id, { signal, ...requestOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPagesIdVersions>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetPagesIdVersionsQueryResult = NonNullable<Awaited<ReturnType<typeof getPagesIdVersions>>>
+export type GetPagesIdVersionsQueryError = GetPagesIdVersions403 | GetPagesIdVersions404
+
+
+export function useGetPagesIdVersions<TData = Awaited<ReturnType<typeof getPagesIdVersions>>, TError = GetPagesIdVersions403 | GetPagesIdVersions404>(
+ id: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPagesIdVersions>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPagesIdVersions>>,
+          TError,
+          Awaited<ReturnType<typeof getPagesIdVersions>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPagesIdVersions<TData = Awaited<ReturnType<typeof getPagesIdVersions>>, TError = GetPagesIdVersions403 | GetPagesIdVersions404>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPagesIdVersions>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPagesIdVersions>>,
+          TError,
+          Awaited<ReturnType<typeof getPagesIdVersions>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPagesIdVersions<TData = Awaited<ReturnType<typeof getPagesIdVersions>>, TError = GetPagesIdVersions403 | GetPagesIdVersions404>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPagesIdVersions>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetPagesIdVersions<TData = Awaited<ReturnType<typeof getPagesIdVersions>>, TError = GetPagesIdVersions403 | GetPagesIdVersions404>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPagesIdVersions>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetPagesIdVersionsQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+export type postPagesIdVersionsResponse201 = {
+  data: PostPagesIdVersions201
+  status: 201
+}
+
+export type postPagesIdVersionsResponse400 = {
+  data: PostPagesIdVersions400
+  status: 400
+}
+
+export type postPagesIdVersionsResponse403 = {
+  data: PostPagesIdVersions403
+  status: 403
+}
+
+export type postPagesIdVersionsResponse404 = {
+  data: PostPagesIdVersions404
+  status: 404
+}
+
+export type postPagesIdVersionsResponse409 = {
+  data: PostPagesIdVersions409
+  status: 409
+}
+
+export type postPagesIdVersionsResponseSuccess = (postPagesIdVersionsResponse201) & {
+  headers: Headers;
+};
+export type postPagesIdVersionsResponseError = (postPagesIdVersionsResponse400 | postPagesIdVersionsResponse403 | postPagesIdVersionsResponse404 | postPagesIdVersionsResponse409) & {
+  headers: Headers;
+};
+
+export type postPagesIdVersionsResponse = (postPagesIdVersionsResponseSuccess | postPagesIdVersionsResponseError)
+
+export const getPostPagesIdVersionsUrl = (id: number,) => {
+
+
+  
+
+  return `/v1/pages/${id}/versions`
+}
+
+export const postPagesIdVersions = async (id: number,
+    postPagesIdVersionsBody: PostPagesIdVersionsBody, options?: RequestInit): Promise<postPagesIdVersionsResponse> => {
+  
+  return customFetch<postPagesIdVersionsResponse>(getPostPagesIdVersionsUrl(id),
+  {      
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      postPagesIdVersionsBody,)
+  }
+);}
+  
+
+
+
+export const getPostPagesIdVersionsMutationOptions = <TError = PostPagesIdVersions400 | PostPagesIdVersions403 | PostPagesIdVersions404 | PostPagesIdVersions409,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postPagesIdVersions>>, TError,{id: number;data: PostPagesIdVersionsBody}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postPagesIdVersions>>, TError,{id: number;data: PostPagesIdVersionsBody}, TContext> => {
+
+const mutationKey = ['postPagesIdVersions'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postPagesIdVersions>>, {id: number;data: PostPagesIdVersionsBody}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  postPagesIdVersions(id,data,requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostPagesIdVersionsMutationResult = NonNullable<Awaited<ReturnType<typeof postPagesIdVersions>>>
+    export type PostPagesIdVersionsMutationBody = PostPagesIdVersionsBody
+    export type PostPagesIdVersionsMutationError = PostPagesIdVersions400 | PostPagesIdVersions403 | PostPagesIdVersions404 | PostPagesIdVersions409
+
+    export const usePostPagesIdVersions = <TError = PostPagesIdVersions400 | PostPagesIdVersions403 | PostPagesIdVersions404 | PostPagesIdVersions409,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postPagesIdVersions>>, TError,{id: number;data: PostPagesIdVersionsBody}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postPagesIdVersions>>,
+        TError,
+        {id: number;data: PostPagesIdVersionsBody},
+        TContext
+      > => {
+      return useMutation(getPostPagesIdVersionsMutationOptions(options), queryClient);
+    }
+    export type getPagesIdVersionsVersionResponse200 = {
+  data: GetPagesIdVersionsVersion200
+  status: 200
+}
+
+export type getPagesIdVersionsVersionResponse403 = {
+  data: GetPagesIdVersionsVersion403
+  status: 403
+}
+
+export type getPagesIdVersionsVersionResponse404 = {
+  data: GetPagesIdVersionsVersion404
+  status: 404
+}
+
+export type getPagesIdVersionsVersionResponseSuccess = (getPagesIdVersionsVersionResponse200) & {
+  headers: Headers;
+};
+export type getPagesIdVersionsVersionResponseError = (getPagesIdVersionsVersionResponse403 | getPagesIdVersionsVersionResponse404) & {
+  headers: Headers;
+};
+
+export type getPagesIdVersionsVersionResponse = (getPagesIdVersionsVersionResponseSuccess | getPagesIdVersionsVersionResponseError)
+
+export const getGetPagesIdVersionsVersionUrl = (id: number,
+    version: number,) => {
+
+
+  
+
+  return `/v1/pages/${id}/versions/${version}`
+}
+
+export const getPagesIdVersionsVersion = async (id: number,
+    version: number, options?: RequestInit): Promise<getPagesIdVersionsVersionResponse> => {
+  
+  return customFetch<getPagesIdVersionsVersionResponse>(getGetPagesIdVersionsVersionUrl(id,version),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
+
+export const getGetPagesIdVersionsVersionQueryKey = (id: number,
+    version: number,) => {
+    return [
+    `/v1/pages/${id}/versions/${version}`
+    ] as const;
+    }
+
+    
+export const getGetPagesIdVersionsVersionQueryOptions = <TData = Awaited<ReturnType<typeof getPagesIdVersionsVersion>>, TError = GetPagesIdVersionsVersion403 | GetPagesIdVersionsVersion404>(id: number,
+    version: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPagesIdVersionsVersion>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPagesIdVersionsVersionQueryKey(id,version);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPagesIdVersionsVersion>>> = ({ signal }) => getPagesIdVersionsVersion(id,version, { signal, ...requestOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(id && version), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPagesIdVersionsVersion>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetPagesIdVersionsVersionQueryResult = NonNullable<Awaited<ReturnType<typeof getPagesIdVersionsVersion>>>
+export type GetPagesIdVersionsVersionQueryError = GetPagesIdVersionsVersion403 | GetPagesIdVersionsVersion404
+
+
+export function useGetPagesIdVersionsVersion<TData = Awaited<ReturnType<typeof getPagesIdVersionsVersion>>, TError = GetPagesIdVersionsVersion403 | GetPagesIdVersionsVersion404>(
+ id: number,
+    version: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPagesIdVersionsVersion>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPagesIdVersionsVersion>>,
+          TError,
+          Awaited<ReturnType<typeof getPagesIdVersionsVersion>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPagesIdVersionsVersion<TData = Awaited<ReturnType<typeof getPagesIdVersionsVersion>>, TError = GetPagesIdVersionsVersion403 | GetPagesIdVersionsVersion404>(
+ id: number,
+    version: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPagesIdVersionsVersion>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPagesIdVersionsVersion>>,
+          TError,
+          Awaited<ReturnType<typeof getPagesIdVersionsVersion>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPagesIdVersionsVersion<TData = Awaited<ReturnType<typeof getPagesIdVersionsVersion>>, TError = GetPagesIdVersionsVersion403 | GetPagesIdVersionsVersion404>(
+ id: number,
+    version: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPagesIdVersionsVersion>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetPagesIdVersionsVersion<TData = Awaited<ReturnType<typeof getPagesIdVersionsVersion>>, TError = GetPagesIdVersionsVersion403 | GetPagesIdVersionsVersion404>(
+ id: number,
+    version: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPagesIdVersionsVersion>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetPagesIdVersionsVersionQueryOptions(id,version,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+export type getPipelineJobStepsResponse200 = {
   data: GetPipelineJobSteps200Item[]
   status: 200
 }

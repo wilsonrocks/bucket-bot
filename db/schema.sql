@@ -1,5 +1,5 @@
 
-\restrict g9DwiLXv20PZddDBi5xeAZUlLGbN3bVfXNYr1Qr0TpS8bLSdMmahffJEyviRL4A
+\restrict LDazs5q58VZHTURFGiNKmC0Dr0nyfKePF6ypKGZykekIoVg5heVBlfQ04Kz3cJs
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -131,6 +131,37 @@ CREATE TABLE public.membership (
     left_date date,
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
     is_captain boolean DEFAULT false NOT NULL
+);
+
+    AS integer
+    NO MINVALUE
+    NO MAXVALUE
+
+CREATE TABLE public.page (
+    id integer NOT NULL,
+    url text NOT NULL,
+    visible boolean DEFAULT true NOT NULL,
+    nav_order integer,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+    AS integer
+    NO MINVALUE
+    NO MAXVALUE
+
+CREATE TABLE public.page_version (
+    id integer NOT NULL,
+    page_id integer NOT NULL,
+    version integer NOT NULL,
+    url text NOT NULL,
+    title text NOT NULL,
+    description text NOT NULL,
+    content jsonb NOT NULL,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    created_by text,
+    CONSTRAINT page_version_title_check CHECK ((length(title) > 0)),
+    CONSTRAINT page_version_url_check CHECK ((url ~ '^(/[a-z0-9]+(-[a-z0-9]+)*)+$'::text)),
+    CONSTRAINT page_version_version_check CHECK ((version > 0))
 );
 
     AS integer
@@ -457,6 +488,18 @@ ALTER TABLE ONLY public.membership
 ALTER TABLE ONLY public.membership
     ADD CONSTRAINT membership_pkey PRIMARY KEY (id);
 
+ALTER TABLE ONLY public.page
+    ADD CONSTRAINT page_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY public.page
+    ADD CONSTRAINT page_url_key UNIQUE (url);
+
+ALTER TABLE ONLY public.page_version
+    ADD CONSTRAINT page_version_page_id_version_key UNIQUE (page_id, version);
+
+ALTER TABLE ONLY public.page_version
+    ADD CONSTRAINT page_version_pkey PRIMARY KEY (id);
+
 ALTER TABLE ONLY public.painting_category
     ADD CONSTRAINT painting_category_pkey PRIMARY KEY (id);
 
@@ -570,6 +613,8 @@ CREATE INDEX idx_membership_player_id ON public.membership USING btree (player_i
 
 CREATE INDEX idx_membership_team_id ON public.membership USING btree (team_id);
 
+CREATE INDEX idx_page_version_url ON public.page_version USING btree (url);
+
 CREATE INDEX idx_painting_category_tourney_id ON public.painting_category USING btree (tourney_id);
 
 CREATE INDEX idx_painting_winner_category_id ON public.painting_winner USING btree (category_id);
@@ -646,6 +691,9 @@ ALTER TABLE ONLY public.membership
 
 ALTER TABLE ONLY public.membership
     ADD CONSTRAINT membership_team_id_fkey FOREIGN KEY (team_id) REFERENCES public.team(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY public.page_version
+    ADD CONSTRAINT page_version_page_id_fkey FOREIGN KEY (page_id) REFERENCES public.page(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY public.painting_category
     ADD CONSTRAINT painting_category_tourney_id_fkey FOREIGN KEY (tourney_id) REFERENCES public.tourney(id) ON DELETE CASCADE;
@@ -725,5 +773,5 @@ ALTER TABLE ONLY public.upcoming_event
 ALTER TABLE ONLY public.venue
     ADD CONSTRAINT venue_region_id_fkey FOREIGN KEY (region_id) REFERENCES public.region(id);
 
-\unrestrict g9DwiLXv20PZddDBi5xeAZUlLGbN3bVfXNYr1Qr0TpS8bLSdMmahffJEyviRL4A
+\unrestrict LDazs5q58VZHTURFGiNKmC0Dr0nyfKePF6ypKGZykekIoVg5heVBlfQ04Kz3cJs
 

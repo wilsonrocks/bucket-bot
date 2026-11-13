@@ -6,7 +6,7 @@ const hrefs = (text: string) => matchStaticPages(text).map((m) => m.href)
 describe('matchStaticPages', () => {
   it('matches label word prefixes', () => {
     expect(hrefs('fac')).toEqual(['/faction-rankings'])
-    expect(hrefs('How')).toEqual(['/how-it-works'])
+    expect(hrefs('Best')).toEqual(['/best-painted'])
   })
 
   it('requires every word to match', () => {
@@ -16,7 +16,7 @@ describe('matchStaticPages', () => {
 
   it('matches keywords', () => {
     expect(hrefs('painting')).toEqual(['/best-painted'])
-    expect(hrefs('scoring')).toEqual(['/how-it-works'])
+    expect(hrefs('map')).toEqual(['/regions'])
   })
 
   it('never returns dynamic or excluded routes', () => {

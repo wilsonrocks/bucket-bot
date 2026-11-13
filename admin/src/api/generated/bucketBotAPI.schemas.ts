@@ -1189,6 +1189,201 @@ export type PatchFeatureFlagsFlag404 = {
   error: string;
 };
 
+export type GetPages200Item = {
+  id: number;
+  url: string;
+  visible: boolean;
+  /** @nullable */
+  nav_order: number | null;
+  title: string;
+  version: number;
+  updated_at: string;
+};
+
+export type GetPages403 = {
+  error: string;
+};
+
+export type PostPagesBodyContent = {[key: string]: unknown | null};
+
+export type PostPagesBody = {
+  url: string;
+  /**
+   * @minLength 1
+   * @maxLength 200
+   */
+  title: string;
+  /** @maxLength 300 */
+  description: string;
+  content: PostPagesBodyContent;
+  visible?: boolean;
+  /** @nullable */
+  nav_order?: number | null;
+};
+
+export type PostPages201 = {
+  id: number;
+};
+
+export type PostPages400 = {
+  error: string;
+};
+
+export type PostPages403 = {
+  error: string;
+};
+
+export type PostPages409 = {
+  error: string;
+};
+
+export type GetPagesId200LatestContent = {[key: string]: unknown | null};
+
+export type GetPagesId200Latest = {
+  version: number;
+  url: string;
+  title: string;
+  created_at: string;
+  /** @nullable */
+  created_by: string | null;
+  /** @nullable */
+  author_name: string | null;
+  description: string;
+  content: GetPagesId200LatestContent;
+};
+
+export type GetPagesId200 = {
+  id: number;
+  visible: boolean;
+  /** @nullable */
+  nav_order: number | null;
+  latest: GetPagesId200Latest;
+};
+
+export type GetPagesId403 = {
+  error: string;
+};
+
+export type GetPagesId404 = {
+  error: string;
+};
+
+export type PatchPagesIdBody = {
+  visible?: boolean;
+  /** @nullable */
+  nav_order?: number | null;
+};
+
+export type PatchPagesId200 = {
+  id: number;
+  visible: boolean;
+  /** @nullable */
+  nav_order: number | null;
+};
+
+export type PatchPagesId400 = {
+  error: string;
+};
+
+export type PatchPagesId403 = {
+  error: string;
+};
+
+export type PatchPagesId404 = {
+  error: string;
+};
+
+export type DeletePagesId200 = {
+  success: boolean;
+};
+
+export type DeletePagesId403 = {
+  error: string;
+};
+
+export type DeletePagesId404 = {
+  error: string;
+};
+
+export type GetPagesIdVersions200Item = {
+  version: number;
+  url: string;
+  title: string;
+  created_at: string;
+  /** @nullable */
+  created_by: string | null;
+  /** @nullable */
+  author_name: string | null;
+};
+
+export type GetPagesIdVersions403 = {
+  error: string;
+};
+
+export type GetPagesIdVersions404 = {
+  error: string;
+};
+
+export type PostPagesIdVersionsBodyContent = {[key: string]: unknown | null};
+
+export type PostPagesIdVersionsBody = {
+  url: string;
+  /**
+   * @minLength 1
+   * @maxLength 200
+   */
+  title: string;
+  /** @maxLength 300 */
+  description: string;
+  content: PostPagesIdVersionsBodyContent;
+  /** @exclusiveMinimum 0 */
+  base_version: number;
+};
+
+export type PostPagesIdVersions201 = {
+  version: number;
+};
+
+export type PostPagesIdVersions400 = {
+  error: string;
+};
+
+export type PostPagesIdVersions403 = {
+  error: string;
+};
+
+export type PostPagesIdVersions404 = {
+  error: string;
+};
+
+export type PostPagesIdVersions409 = {
+  error: string;
+  latest_version?: number;
+};
+
+export type GetPagesIdVersionsVersion200Content = {[key: string]: unknown | null};
+
+export type GetPagesIdVersionsVersion200 = {
+  version: number;
+  url: string;
+  title: string;
+  created_at: string;
+  /** @nullable */
+  created_by: string | null;
+  /** @nullable */
+  author_name: string | null;
+  description: string;
+  content: GetPagesIdVersionsVersion200Content;
+};
+
+export type GetPagesIdVersionsVersion403 = {
+  error: string;
+};
+
+export type GetPagesIdVersionsVersion404 = {
+  error: string;
+};
+
 export type GetPipelineJobStepsParams = {
 /**
  * @maximum 1000
