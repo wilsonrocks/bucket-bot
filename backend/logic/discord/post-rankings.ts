@@ -16,6 +16,7 @@ import {
   getBiggestMovers,
   Mover,
 } from "./biggest-movers";
+import { pickTopDogTitle } from "./top-dog-titles";
 
 const TOP_X_PLAYERS = 16;
 
@@ -193,7 +194,7 @@ There's only a maximum of ${TOP_X_PLAYERS} players shown here. But you can see t
 
 New rankings are out! Please check all the channels for the different ranking types.
 
-${topPlayerMention ? `Well done to ${topPlayerMention} for being the current Top Dog. Please try to beat them.` : ""}
+${topPlayerMention ? `Well done to ${topPlayerMention} for being the current ${pickTopDogTitle()}. Please try to beat them.` : ""}
 
 ${
   resolvedNewPlayers.length > 0
