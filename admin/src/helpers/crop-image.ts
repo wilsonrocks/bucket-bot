@@ -97,15 +97,147 @@ function drawRotated(
   return canvas
 }
 
-function canvasToBlob(canvas: HTMLCanvasElement, type: string): Promise<Blob> {
+function canvasToBlob(
+  canvas: HTMLCanvasElement,
+  type: string,
+  quality = 0.92,
+): Promise<Blob> {
   return new Promise((resolve, reject) =>
     canvas.toBlob(
       (blob) =>
         blob ? resolve(blob) : reject(new Error('Could not encode the image')),
       type,
-      0.92,
+      quality,
     ),
   )
+}
+
+/**
+ * What we aim to send. The backend accepts up to 30 MB, but canvas re-encodes can
+ * balloon (a photo saved as PNG easily triples), and nothing downstream needs more
+ * than a few thousand pixels — the largest served variant is 1200px wide.
+ */
+export const TARGET_UPLOAD_BYTES = 10 * 1024 * 1024
+
+/**
+ * Longest edge we'll send. The server holds several decoded copies of an upload
+ * at once while building variants, and decoded size goes with pixel count, not
+ * file size — a 48 MP phone photo is ~190 MB raw however well it compresses.
+ */
+export const MAX_UPLOAD_DIMENSION = 4000
+
+const ACCEPTED_TYPES = ['image/png', 'image/jpeg', 'image/webp']
+
+/** The scale (≤ 1) that brings the longest edge down to `maxDimension`. */
+export function scaleToFit(
+  width: number,
+  height: number,
+  maxDimension = MAX_UPLOAD_DIMENSION,
+): number {
+  return Math.min(1, maxDimension / Math.max(width, height, 1))
+}
+
+/** Encode the current image at `scale` of its full size. */
+export type Encoder = (
+  scale: number,
+  type: string,
+  quality: number,
+) => Promise<Blob>
+
+const LOSSY_QUALITY = 0.85
+const MAX_SHRINK_ATTEMPTS = 8
+
+/**
+ * Encode via `encode`, backing off until the result fits in `maxBytes`: first the
+ * normal encode, then a lossy format (PNG → WebP, keeping transparency), then
+ * progressively smaller dimensions, sized from how far over the last attempt was.
+ */
+export async function encodeWithinLimit(
+  encode: Encoder,
+  preferredType: string,
+  maxBytes: number,
+  startScale = 1,
+): Promise<Blob> {
+  const first = await encode(startScale, preferredType, 0.92)
+  if (first.size <= maxBytes) return first
+
+  let lossy = preferredType === 'image/png' ? 'image/webp' : preferredType
+  let scale = startScale
+  for (let i = 0; i < MAX_SHRINK_ATTEMPTS; i++) {
+    const blob = await encode(scale, lossy, LOSSY_QUALITY)
+    // Browsers that can't encode WebP (older Safari) silently hand back a PNG.
+    if (blob.type !== lossy && lossy !== 'image/jpeg') {
+      lossy = 'image/jpeg'
+      continue
+    }
+    if (blob.size <= maxBytes) return blob
+    // Bytes scale roughly with pixel count, i.e. with scale². Aim a little under,
+    // and always shrink by at least 10% so we can't stall.
+    scale *= Math.min(0.9, Math.sqrt(maxBytes / blob.size) * 0.95)
+  }
+  throw new Error(
+    `Could not shrink that image under ${Math.round(maxBytes / 1024 / 1024)} MB`,
+  )
+}
+
+function canvasEncoder(
+  source: CanvasImageSource,
+  width: number,
+  height: number,
+): Encoder {
+  return (scale, type, quality) => {
+    const canvas = document.createElement('canvas')
+    canvas.width = Math.max(1, Math.round(width * scale))
+    canvas.height = Math.max(1, Math.round(height * scale))
+    const ctx = canvas.getContext('2d')
+    if (!ctx) throw new Error('Canvas is not available in this browser')
+    // JPEG has no alpha; without a backdrop transparent pixels come out black.
+    if (type === 'image/jpeg') {
+      ctx.fillStyle = '#fff'
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
+    }
+    ctx.imageSmoothingQuality = 'high'
+    ctx.drawImage(source, 0, 0, canvas.width, canvas.height)
+    return canvasToBlob(canvas, type, quality)
+  }
+}
+
+/** e.g. "4.2 MB" — for logs. */
+export function formatBytes(bytes: number): string {
+  return `${(bytes / 1024 / 1024).toFixed(1)} MB`
+}
+
+function blobToFile(blob: Blob, originalName: string): File {
+  const { type, ext } = getOutputType(blob.type)
+  return new File([blob], renameForExt(originalName, ext), { type })
+}
+
+/**
+ * Make sure `file` is something the upload endpoint will take, and that's kind to
+ * the server: an accepted type, under `maxBytes`, and no more than
+ * MAX_UPLOAD_DIMENSION on its longest edge. Files that already are pass through
+ * untouched; anything else is re-encoded (and shrunk if need be) in the browser.
+ */
+export async function fitImageForUpload(
+  file: File,
+  maxBytes = TARGET_UPLOAD_BYTES,
+): Promise<File> {
+  const image = await loadImage(file)
+  const startScale = scaleToFit(image.naturalWidth, image.naturalHeight)
+  if (
+    startScale === 1 &&
+    file.size <= maxBytes &&
+    ACCEPTED_TYPES.includes(file.type)
+  ) {
+    return file
+  }
+  const blob = await encodeWithinLimit(
+    canvasEncoder(image, image.naturalWidth, image.naturalHeight),
+    getOutputType(file.type).type,
+    maxBytes,
+    startScale,
+  )
+  return blobToFile(blob, file.name)
 }
 
 /**
@@ -142,6 +274,7 @@ export async function cropImageFile(
   file: File,
   crop: CropArea,
   rotation: number,
+  maxBytes = TARGET_UPLOAD_BYTES,
 ): Promise<File> {
   const image = await loadImage(file)
   const rotated = drawRotated(image, rotation)
@@ -154,8 +287,17 @@ export async function cropImageFile(
 
   outCtx.drawImage(rotated, Math.round(-crop.x), Math.round(-crop.y))
 
-  const { type, ext } = getOutputType(file.type)
-  const blob = await canvasToBlob(out, type)
-
-  return new File([blob], renameForExt(file.name, ext), { type })
+  // Always re-encode, even for an untouched full-frame crop: drawing through the
+  // canvas bakes in EXIF orientation, which the backend's sharp pipeline ignores.
+  const blob = await encodeWithinLimit(
+    canvasEncoder(out, out.width, out.height),
+    getOutputType(file.type).type,
+    maxBytes,
+    scaleToFit(out.width, out.height),
+  )
+  console.info(
+    `Cropped "${file.name}": ${formatBytes(file.size)} ${file.type} ${image.naturalWidth}x${image.naturalHeight}` +
+      ` → ${formatBytes(blob.size)} ${blob.type} (crop ${out.width}x${out.height})`,
+  )
+  return blobToFile(blob, file.name)
 }

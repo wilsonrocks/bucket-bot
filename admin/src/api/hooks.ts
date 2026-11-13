@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { notifications } from '@mantine/notifications'
 import { customFetch } from './custom-instance'
+import { fitImageForUpload, formatBytes } from '@/helpers/crop-image'
 import {
   getGetAchievementsQueryKey,
   useGetAchievements as useGetAchievementsGenerated,
@@ -864,10 +865,24 @@ export const uploadTeamImage = async (
 ): Promise<string> => {
   const stored = localStorage.getItem('auth')
   const jwt = stored ? (JSON.parse(stored) as { jwt: string }).jwt : null
+  let fitted: File
+  try {
+    fitted = await fitImageForUpload(file)
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : 'Could not prepare that image'
+    notifications.show({ title: 'Error', message, color: 'red' })
+    throw error
+  }
+  console.info(
+    fitted === file
+      ? `Uploading "${file.name}": ${formatBytes(file.size)} ${file.type}, sent as-is`
+      : `Uploading "${file.name}": ${formatBytes(file.size)} ${file.type} → ${formatBytes(fitted.size)} ${fitted.type} after shrinking`,
+  )
   const formData = new FormData()
-  formData.append('file', file)
+  formData.append('file', fitted)
   const response = await fetch(
-    `${import.meta.env.VITE_BACKEND_URL}/v1/upload?type=${encodeURIComponent(type)}`,
+    `${import.meta.env.VITE_BACKEND_URL}/v1/upload?${new URLSearchParams({ type, filename: file.name })}`,
     {
       method: 'POST',
       headers: jwt ? { Authorization: `Bearer ${jwt}` } : {},
