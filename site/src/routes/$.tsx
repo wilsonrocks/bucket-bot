@@ -26,7 +26,7 @@ export const Route = createFileRoute('/$')({
 function RouteComponent() {
   const { title, html } = Route.useLoaderData()
   return (
-    <article className="flex flex-col gap-4">
+    <article className="flex max-w-3xl flex-col gap-4">
       <h1 className="text-2xl font-bold text-foreground">{title}</h1>
       {/* Rendered server-side from backend-validated ProseMirror JSON; the renderer escapes text. */}
       <div className="cms-content" dangerouslySetInnerHTML={{ __html: html }} />
