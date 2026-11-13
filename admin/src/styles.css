@@ -13,3 +13,15 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
 }
+
+/* Tailwind's preflight strips list markers and Mantine's typography styles
+   don't set them back, so bring them back inside the rich-text editor. */
+.ProseMirror ul {
+  list-style-type: disc;
+}
+.ProseMirror ul ul {
+  list-style-type: circle;
+}
+.ProseMirror ol {
+  list-style-type: decimal;
+}
