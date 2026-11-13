@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { SitemapStream, streamToPromise } from "sitemap";
 import { db } from "#/db-client";
 import { SITE_URL } from "#/helpers/seo";
+import { livePages } from "#/queries";
 
 type Freq = "weekly" | "monthly" | "yearly";
 type Entry = {
@@ -12,7 +13,7 @@ type Entry = {
 };
 
 // New entity pages also belong in the site search: searchSite in #/queries
-// (database-backed pages) and #/helpers/search-pages (static pages).
+// (database-backed pages, including CMS pages) and #/helpers/search-pages (static pages).
 const STATIC_ENTRIES: Entry[] = [
   { url: "/best-painted", priority: 1.0, changefreq: "weekly" },
   { url: "/", priority: 0.9, changefreq: "weekly" },
@@ -20,7 +21,6 @@ const STATIC_ENTRIES: Entry[] = [
   { url: "/team-rankings", priority: 0.8, changefreq: "weekly" },
   { url: "/faction-rankings", priority: 0.8, changefreq: "weekly" },
   { url: "/regions", priority: 0.8, changefreq: "weekly" },
-  { url: "/how-it-works", priority: 0.5, changefreq: "yearly" },
   { url: "/events", priority: 0.3, changefreq: "weekly" },
   { url: "/upcoming-events", priority: 0.4, changefreq: "weekly" },
   { url: "/teams", priority: 0.3, changefreq: "weekly" },
@@ -36,7 +36,7 @@ export const Route = createFileRoute("/sitemap.xml")({
   server: {
     handlers: {
       GET: async () => {
-        const [players, teams, tourneys, upcomingEvents] = await Promise.all([
+        const [players, teams, tourneys, upcomingEvents, cmsPages] = await Promise.all([
           db.selectFrom("player").select(["id", "created_at"]).execute(),
           db.selectFrom("team").select(["id", "created_at"]).execute(),
           db.selectFrom("tourney").select(["id", "date"]).execute(),
@@ -45,6 +45,7 @@ export const Route = createFileRoute("/sitemap.xml")({
             .select(["id", "starts_at"])
             .where("starts_at", ">=", new Date())
             .execute(),
+          livePages().select(["page.url", "page_version.created_at"]).execute(),
         ]);
 
         const dynamicEntries: Entry[] = [
@@ -71,6 +72,12 @@ export const Route = createFileRoute("/sitemap.xml")({
             priority: 0.5,
             changefreq: "weekly",
             lastmod: toIso(e.starts_at),
+          })),
+          ...cmsPages.map((p): Entry => ({
+            url: p.url,
+            priority: 0.5,
+            changefreq: "monthly",
+            lastmod: toIso(p.created_at),
           })),
         ];
 

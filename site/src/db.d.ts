@@ -9,6 +9,18 @@ export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
   ? ColumnType<S, I | undefined, U>
   : ColumnType<T, T | undefined, T>;
 
+export type Json = JsonValue;
+
+export type JsonArray = JsonValue[];
+
+export type JsonObject = {
+  [x: string]: JsonValue | undefined;
+};
+
+export type JsonPrimitive = boolean | number | string | null;
+
+export type JsonValue = JsonArray | JsonObject | JsonPrimitive;
+
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
 export interface Achievement {
@@ -121,6 +133,26 @@ export interface Membership {
   left_date: Timestamp | null;
   player_id: number | null;
   team_id: number | null;
+}
+
+export interface Page {
+  created_at: Generated<Timestamp>;
+  id: Generated<number>;
+  nav_order: number | null;
+  url: string;
+  visible: Generated<boolean>;
+}
+
+export interface PageVersion {
+  content: Json;
+  created_at: Generated<Timestamp>;
+  created_by: string | null;
+  description: string;
+  id: Generated<number>;
+  page_id: number;
+  title: string;
+  url: string;
+  version: number;
 }
 
 export interface PaintingCategory {
@@ -356,6 +388,8 @@ export interface DB {
   identity_provider: IdentityProvider;
   image: Image;
   membership: Membership;
+  page: Page;
+  page_version: PageVersion;
   painting_category: PaintingCategory;
   painting_winner: PaintingWinner;
   pipeline_job_step: PipelineJobStep;

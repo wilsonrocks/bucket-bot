@@ -17,6 +17,7 @@ import reportWebVitals from './reportWebVitals.ts'
 import '@mantine/core/styles.css'
 import '@mantine/charts/styles.css'
 import '@mantine/notifications/styles.css'
+import '@mantine/tiptap/styles.css'
 
 // Create a new router instance
 

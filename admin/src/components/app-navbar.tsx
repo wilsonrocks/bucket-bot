@@ -12,9 +12,11 @@ import { Route as TeamsRoute } from '@/routes/_app/teams/'
 import { Route as VenuesRoute } from '@/routes/_app/venues'
 import { Route as FeatureFlagsRoute } from '@/routes/_app/feature-flags'
 import { Route as AchievementsRoute } from '@/routes/_app/achievements'
+import { Route as PagesRoute } from '@/routes/_app/pages/'
 
 import { Anchor, Badge, Divider, Group, ScrollArea, Stack, Text } from '@mantine/core'
 import { AppNavLink } from './app-nav-link'
+
 export const AppNavbar = () => {
   const unmappedIdentities = useGetUnmappedIdentities()
   const { rankingReporter, canEditAchievements } = usePermissions()
@@ -58,6 +60,7 @@ export const AppNavbar = () => {
         {rankingReporter && (
           <>
             <AppNavLink to={VenuesRoute.to} label="Venues" />
+            <AppNavLink to={PagesRoute.to} label="Pages" />
             <AppNavLink to={FeatureFlagsRoute.to} label="Feature Flags" />
             <AppNavLink to={BotChat.to} label="B(UK)et Bot Chat" />
           </>

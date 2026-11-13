@@ -21,11 +21,14 @@ import { Route as AppAchievementsRouteImport } from './routes/_app/achievements'
 import { Route as AppTeamsIndexRouteImport } from './routes/_app/teams/index'
 import { Route as AppRankingsIndexRouteImport } from './routes/_app/rankings/index'
 import { Route as AppPlayersIndexRouteImport } from './routes/_app/players/index'
+import { Route as AppPagesIndexRouteImport } from './routes/_app/pages/index'
 import { Route as AppImportIndexRouteImport } from './routes/_app/import/index'
 import { Route as AppEventsIndexRouteImport } from './routes/_app/events/index'
 import { Route as AppTeamsIdRouteImport } from './routes/_app/teams/$id'
 import { Route as AppRankingsRunsRouteImport } from './routes/_app/rankings/runs'
 import { Route as AppPlayersIdRouteImport } from './routes/_app/players/$id'
+import { Route as AppPagesNewRouteImport } from './routes/_app/pages/new'
+import { Route as AppPagesIdRouteImport } from './routes/_app/pages/$id'
 import { Route as AppImportImportLongshanksRouteImport } from './routes/_app/import/import-longshanks'
 import { Route as AppImportImportBotRouteImport } from './routes/_app/import/import-bot'
 import { Route as AppEventsUpcomingRouteImport } from './routes/_app/events/upcoming'
@@ -90,6 +93,11 @@ const AppPlayersIndexRoute = AppPlayersIndexRouteImport.update({
   path: '/players/',
   getParentRoute: () => AppRouteRoute,
 } as any)
+const AppPagesIndexRoute = AppPagesIndexRouteImport.update({
+  id: '/pages/',
+  path: '/pages/',
+  getParentRoute: () => AppRouteRoute,
+} as any)
 const AppImportIndexRoute = AppImportIndexRouteImport.update({
   id: '/import/',
   path: '/import/',
@@ -113,6 +121,16 @@ const AppRankingsRunsRoute = AppRankingsRunsRouteImport.update({
 const AppPlayersIdRoute = AppPlayersIdRouteImport.update({
   id: '/players/$id',
   path: '/players/$id',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppPagesNewRoute = AppPagesNewRouteImport.update({
+  id: '/pages/new',
+  path: '/pages/new',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppPagesIdRoute = AppPagesIdRouteImport.update({
+  id: '/pages/$id',
+  path: '/pages/$id',
   getParentRoute: () => AppRouteRoute,
 } as any)
 const AppImportImportLongshanksRoute =
@@ -149,11 +167,14 @@ export interface FileRoutesByFullPath {
   '/events/upcoming': typeof AppEventsUpcomingRoute
   '/import/import-bot': typeof AppImportImportBotRoute
   '/import/import-longshanks': typeof AppImportImportLongshanksRoute
+  '/pages/$id': typeof AppPagesIdRoute
+  '/pages/new': typeof AppPagesNewRoute
   '/players/$id': typeof AppPlayersIdRoute
   '/rankings/runs': typeof AppRankingsRunsRoute
   '/teams/$id': typeof AppTeamsIdRoute
   '/events': typeof AppEventsIndexRoute
   '/import': typeof AppImportIndexRoute
+  '/pages': typeof AppPagesIndexRoute
   '/players': typeof AppPlayersIndexRoute
   '/rankings': typeof AppRankingsIndexRoute
   '/teams': typeof AppTeamsIndexRoute
@@ -171,11 +192,14 @@ export interface FileRoutesByTo {
   '/events/upcoming': typeof AppEventsUpcomingRoute
   '/import/import-bot': typeof AppImportImportBotRoute
   '/import/import-longshanks': typeof AppImportImportLongshanksRoute
+  '/pages/$id': typeof AppPagesIdRoute
+  '/pages/new': typeof AppPagesNewRoute
   '/players/$id': typeof AppPlayersIdRoute
   '/rankings/runs': typeof AppRankingsRunsRoute
   '/teams/$id': typeof AppTeamsIdRoute
   '/events': typeof AppEventsIndexRoute
   '/import': typeof AppImportIndexRoute
+  '/pages': typeof AppPagesIndexRoute
   '/players': typeof AppPlayersIndexRoute
   '/rankings': typeof AppRankingsIndexRoute
   '/teams': typeof AppTeamsIndexRoute
@@ -195,11 +219,14 @@ export interface FileRoutesById {
   '/_app/events/upcoming': typeof AppEventsUpcomingRoute
   '/_app/import/import-bot': typeof AppImportImportBotRoute
   '/_app/import/import-longshanks': typeof AppImportImportLongshanksRoute
+  '/_app/pages/$id': typeof AppPagesIdRoute
+  '/_app/pages/new': typeof AppPagesNewRoute
   '/_app/players/$id': typeof AppPlayersIdRoute
   '/_app/rankings/runs': typeof AppRankingsRunsRoute
   '/_app/teams/$id': typeof AppTeamsIdRoute
   '/_app/events/': typeof AppEventsIndexRoute
   '/_app/import/': typeof AppImportIndexRoute
+  '/_app/pages/': typeof AppPagesIndexRoute
   '/_app/players/': typeof AppPlayersIndexRoute
   '/_app/rankings/': typeof AppRankingsIndexRoute
   '/_app/teams/': typeof AppTeamsIndexRoute
@@ -219,11 +246,14 @@ export interface FileRouteTypes {
     | '/events/upcoming'
     | '/import/import-bot'
     | '/import/import-longshanks'
+    | '/pages/$id'
+    | '/pages/new'
     | '/players/$id'
     | '/rankings/runs'
     | '/teams/$id'
     | '/events'
     | '/import'
+    | '/pages'
     | '/players'
     | '/rankings'
     | '/teams'
@@ -241,11 +271,14 @@ export interface FileRouteTypes {
     | '/events/upcoming'
     | '/import/import-bot'
     | '/import/import-longshanks'
+    | '/pages/$id'
+    | '/pages/new'
     | '/players/$id'
     | '/rankings/runs'
     | '/teams/$id'
     | '/events'
     | '/import'
+    | '/pages'
     | '/players'
     | '/rankings'
     | '/teams'
@@ -264,11 +297,14 @@ export interface FileRouteTypes {
     | '/_app/events/upcoming'
     | '/_app/import/import-bot'
     | '/_app/import/import-longshanks'
+    | '/_app/pages/$id'
+    | '/_app/pages/new'
     | '/_app/players/$id'
     | '/_app/rankings/runs'
     | '/_app/teams/$id'
     | '/_app/events/'
     | '/_app/import/'
+    | '/_app/pages/'
     | '/_app/players/'
     | '/_app/rankings/'
     | '/_app/teams/'
@@ -368,6 +404,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppPlayersIndexRouteImport
       parentRoute: typeof AppRouteRoute
     }
+    '/_app/pages/': {
+      id: '/_app/pages/'
+      path: '/pages'
+      fullPath: '/pages'
+      preLoaderRoute: typeof AppPagesIndexRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
     '/_app/import/': {
       id: '/_app/import/'
       path: '/import'
@@ -401,6 +444,20 @@ declare module '@tanstack/react-router' {
       path: '/players/$id'
       fullPath: '/players/$id'
       preLoaderRoute: typeof AppPlayersIdRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/pages/new': {
+      id: '/_app/pages/new'
+      path: '/pages/new'
+      fullPath: '/pages/new'
+      preLoaderRoute: typeof AppPagesNewRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/pages/$id': {
+      id: '/_app/pages/$id'
+      path: '/pages/$id'
+      fullPath: '/pages/$id'
+      preLoaderRoute: typeof AppPagesIdRouteImport
       parentRoute: typeof AppRouteRoute
     }
     '/_app/import/import-longshanks': {
@@ -443,11 +500,14 @@ interface AppRouteRouteChildren {
   AppEventsUpcomingRoute: typeof AppEventsUpcomingRoute
   AppImportImportBotRoute: typeof AppImportImportBotRoute
   AppImportImportLongshanksRoute: typeof AppImportImportLongshanksRoute
+  AppPagesIdRoute: typeof AppPagesIdRoute
+  AppPagesNewRoute: typeof AppPagesNewRoute
   AppPlayersIdRoute: typeof AppPlayersIdRoute
   AppRankingsRunsRoute: typeof AppRankingsRunsRoute
   AppTeamsIdRoute: typeof AppTeamsIdRoute
   AppEventsIndexRoute: typeof AppEventsIndexRoute
   AppImportIndexRoute: typeof AppImportIndexRoute
+  AppPagesIndexRoute: typeof AppPagesIndexRoute
   AppPlayersIndexRoute: typeof AppPlayersIndexRoute
   AppRankingsIndexRoute: typeof AppRankingsIndexRoute
   AppTeamsIndexRoute: typeof AppTeamsIndexRoute
@@ -463,11 +523,14 @@ const AppRouteRouteChildren: AppRouteRouteChildren = {
   AppEventsUpcomingRoute: AppEventsUpcomingRoute,
   AppImportImportBotRoute: AppImportImportBotRoute,
   AppImportImportLongshanksRoute: AppImportImportLongshanksRoute,
+  AppPagesIdRoute: AppPagesIdRoute,
+  AppPagesNewRoute: AppPagesNewRoute,
   AppPlayersIdRoute: AppPlayersIdRoute,
   AppRankingsRunsRoute: AppRankingsRunsRoute,
   AppTeamsIdRoute: AppTeamsIdRoute,
   AppEventsIndexRoute: AppEventsIndexRoute,
   AppImportIndexRoute: AppImportIndexRoute,
+  AppPagesIndexRoute: AppPagesIndexRoute,
   AppPlayersIndexRoute: AppPlayersIndexRoute,
   AppRankingsIndexRoute: AppRankingsIndexRoute,
   AppTeamsIndexRoute: AppTeamsIndexRoute,

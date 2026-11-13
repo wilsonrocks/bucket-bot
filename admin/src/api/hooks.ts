@@ -82,9 +82,24 @@ import {
   useGetPaintingAll as useGetPaintingAllGenerated,
   useGetPaintingRecent as useGetPaintingRecentGenerated,
   useGetStatsCommunity as useGetStatsCommunityGenerated,
+  getGetPagesQueryKey,
+  getGetPagesIdQueryKey,
+  getGetPagesIdVersionsQueryKey,
+  useGetPages as useGetPagesGenerated,
+  useGetPagesId as useGetPagesIdGenerated,
+  useGetPagesIdVersions as useGetPagesIdVersionsGenerated,
+  useGetPagesIdVersionsVersion as useGetPagesIdVersionsVersionGenerated,
+  usePostPages as usePostPagesGenerated,
+  usePostPagesIdVersions as usePostPagesIdVersionsGenerated,
+  usePatchPagesId as usePatchPagesIdGenerated,
+  useDeletePagesId as useDeletePagesIdGenerated,
 } from './generated/default/default'
 
 import type {
+  GetPages200Item,
+  GetPagesId200,
+  GetPagesIdVersions200Item,
+  GetPagesIdVersionsVersion200,
   GetSearchDiscordUsersParams,
   GetSearchPlayersParams,
   GetPaintingAll200Item,
@@ -93,6 +108,10 @@ import type {
 } from './generated/bucketBotAPI.schemas'
 
 export type {
+  GetPages200Item,
+  GetPagesId200,
+  GetPagesIdVersions200Item,
+  GetPagesIdVersionsVersion200,
   GetPaintingAll200Item,
   GetPaintingRecent200,
   GetStatsCommunity200,
@@ -1017,4 +1036,62 @@ export const usePostAchievementsAnnounceNext = () => {
       },
     },
   })
+}
+
+// ── CMS pages ──────────────────────────────────────────────────────────────
+
+function ok<TRes extends { status: number }>(res: TRes): Extract<TRes, { status: 200 }> extends { data: infer D } ? D : never {
+  if (res.status !== 200) throw new Error(`unexpected status ${res.status}`)
+  return (res as unknown as { data: never }).data
+}
+
+function invalidatePage(queryClient: ReturnType<typeof useQueryClient>, id?: number) {
+  queryClient.invalidateQueries({ queryKey: getGetPagesQueryKey() })
+  if (id !== undefined) {
+    queryClient.invalidateQueries({ queryKey: getGetPagesIdQueryKey(id) })
+    queryClient.invalidateQueries({ queryKey: getGetPagesIdVersionsQueryKey(id) })
+  }
+}
+
+export const useGetPages = () =>
+  useGetPagesGenerated({ query: { select: ok } })
+
+export const useGetPage = (id: number) =>
+  useGetPagesIdGenerated(id, {
+    // Don't refetch while someone is mid-edit: the form is seeded from this data.
+    query: { select: ok, refetchOnWindowFocus: false },
+  })
+
+export const useGetPageVersions = (id: number) =>
+  useGetPagesIdVersionsGenerated(id, {
+    query: { select: ok },
+  })
+
+export const useGetPageVersion = (id: number, version: number | null) =>
+  useGetPagesIdVersionsVersionGenerated(id, version ?? 0, {
+    query: {
+      enabled: version !== null,
+      select: ok,
+    },
+  })
+
+export const useCreatePage = () => {
+  const queryClient = useQueryClient()
+  return usePostPagesGenerated({ mutation: { onSuccess: () => invalidatePage(queryClient) } })
+}
+
+export const useSavePageVersion = (id: number) => {
+  const queryClient = useQueryClient()
+  // Only on success: refetching after a failed (e.g. stale) save would remount the editor and lose the edits.
+  return usePostPagesIdVersionsGenerated({ mutation: { onSuccess: () => invalidatePage(queryClient, id) } })
+}
+
+export const useUpdatePageSettings = (id: number) => {
+  const queryClient = useQueryClient()
+  return usePatchPagesIdGenerated({ mutation: { onSuccess: () => invalidatePage(queryClient, id) } })
+}
+
+export const useDeletePage = () => {
+  const queryClient = useQueryClient()
+  return useDeletePagesIdGenerated({ mutation: { onSuccess: () => invalidatePage(queryClient) } })
 }
