@@ -334,13 +334,17 @@ export interface Tourney {
   longshanks_id: string | null;
   name: string;
   number_of_players: number;
-  organiser_discord_id: string | null;
   rounds: Generated<number>;
   search_vector: Generated<string | null>;
   submitted: Generated<boolean | null>;
   tier_code: Generated<string | null>;
   venue: string | null;
   venue_id: number | null;
+}
+
+export interface TourneyOrganiser {
+  discord_user_id: string;
+  tourney_id: number;
 }
 
 export interface TourneyPhoto {
@@ -359,11 +363,15 @@ export interface UpcomingEvent {
   id: Generated<number>;
   location: string | null;
   name: string;
-  organiser_discord_id: string | null;
   region_id: number | null;
   search_vector: Generated<string | null>;
   starts_at: Timestamp;
   venue_id: number | null;
+}
+
+export interface UpcomingEventOrganiser {
+  discord_user_id: string;
+  upcoming_event_id: number;
 }
 
 export interface Venue {
@@ -411,7 +419,9 @@ export interface DB {
   team_ranking_snapshot_batch: TeamRankingSnapshotBatch;
   tier: Tier;
   tourney: Tourney;
+  tourney_organiser: TourneyOrganiser;
   tourney_photo: TourneyPhoto;
   upcoming_event: UpcomingEvent;
+  upcoming_event_organiser: UpcomingEventOrganiser;
   venue: Venue;
 }

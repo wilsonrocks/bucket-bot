@@ -1,6 +1,7 @@
 import { fetchUpcomingEvent } from "#/queries";
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { format } from "date-fns";
+import { Fragment } from "react";
 import { Link } from "#/components/link";
 import { SITE_NAME, absoluteUrl, jsonLd, seo } from "#/helpers/seo";
 import type { SportsEvent, WithContext } from "schema-dts";
@@ -73,25 +74,30 @@ function RouteComponent() {
         {format(new Date(event.startsAt), "d MMMM yyyy")}
         {venue ? ` · ${venue}` : ""}
       </p>
-      {event.organiserName && (
+      {event.organisers.length > 0 && (
         <p className="mb-4 text-sm text-muted-foreground">
           Organised by{" "}
-          {event.organiserPlayerId != null ? (
-            <Link
-              to="/player/$id"
-              params={{ id: event.organiserPlayerId }}
-              search={{
-                tab: undefined,
-                typeCode: undefined,
-                painting: undefined,
-                achievement: undefined,
-              }}
-            >
-              {event.organiserName}
-            </Link>
-          ) : (
-            event.organiserName
-          )}
+          {event.organisers.map((organiser, i) => (
+            <Fragment key={`${organiser.playerId}-${organiser.name}`}>
+              {i > 0 && (i === event.organisers.length - 1 ? " and " : ", ")}
+              {organiser.playerId != null ? (
+                <Link
+                  to="/player/$id"
+                  params={{ id: organiser.playerId }}
+                  search={{
+                    tab: undefined,
+                    typeCode: undefined,
+                    painting: undefined,
+                    achievement: undefined,
+                  }}
+                >
+                  {organiser.name}
+                </Link>
+              ) : (
+                organiser.name
+              )}
+            </Fragment>
+          ))}
         </p>
       )}
       <Link to="/upcoming-events">← All upcoming events</Link>

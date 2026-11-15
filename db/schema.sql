@@ -1,5 +1,5 @@
 
-\restrict LDazs5q58VZHTURFGiNKmC0Dr0nyfKePF6ypKGZykekIoVg5heVBlfQ04Kz3cJs
+\restrict 4JxHcjNhd8jjh16vc4OQ51adMqnppUcnvdsnc3VL7WnH5XhrEBXe9VXTwo0YUtB
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -393,7 +393,6 @@ CREATE TABLE public.tourney (
     tier_code text DEFAULT 'EVENT'::text,
     rounds integer DEFAULT 3 NOT NULL,
     days integer DEFAULT 1 NOT NULL,
-    organiser_discord_id text,
     bot_id text,
     search_vector tsvector GENERATED ALWAYS AS (to_tsvector('simple'::regconfig, ((COALESCE(name, ''::text) || ' '::text) || COALESCE(venue, ''::text)))) STORED
 );
@@ -401,6 +400,11 @@ CREATE TABLE public.tourney (
     AS integer
     NO MINVALUE
     NO MAXVALUE
+
+CREATE TABLE public.tourney_organiser (
+    tourney_id integer NOT NULL,
+    discord_user_id text NOT NULL
+);
 
 CREATE TABLE public.tourney_photo (
     id integer NOT NULL,
@@ -422,7 +426,6 @@ CREATE TABLE public.upcoming_event (
     starts_at timestamp with time zone NOT NULL,
     venue_id integer,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
-    organiser_discord_id text,
     location text,
     geom public.geometry(Point,4326),
     region_id integer,
@@ -432,6 +435,11 @@ CREATE TABLE public.upcoming_event (
     AS integer
     NO MINVALUE
     NO MAXVALUE
+
+CREATE TABLE public.upcoming_event_organiser (
+    upcoming_event_id integer NOT NULL,
+    discord_user_id text NOT NULL
+);
 
 CREATE TABLE public.venue (
     id integer NOT NULL,
@@ -575,6 +583,9 @@ ALTER TABLE ONLY public.tourney
 ALTER TABLE ONLY public.tourney
     ADD CONSTRAINT tourney_longshanks_id_key UNIQUE (longshanks_id);
 
+ALTER TABLE ONLY public.tourney_organiser
+    ADD CONSTRAINT tourney_organiser_pkey PRIMARY KEY (tourney_id, discord_user_id);
+
 ALTER TABLE ONLY public.tourney_photo
     ADD CONSTRAINT tourney_photo_pkey PRIMARY KEY (id);
 
@@ -592,6 +603,9 @@ ALTER TABLE ONLY public.venue
 
 ALTER TABLE ONLY public.upcoming_event
     ADD CONSTRAINT upcoming_event_google_event_id_key UNIQUE (google_event_id);
+
+ALTER TABLE ONLY public.upcoming_event_organiser
+    ADD CONSTRAINT upcoming_event_organiser_pkey PRIMARY KEY (upcoming_event_id, discord_user_id);
 
 ALTER TABLE ONLY public.upcoming_event
     ADD CONSTRAINT upcoming_event_pkey PRIMARY KEY (id);
@@ -652,6 +666,8 @@ CREATE INDEX idx_team_ranking_snapshot_batch_type_code ON public.team_ranking_sn
 CREATE INDEX idx_team_search_vector ON public.team USING gin (search_vector);
 
 CREATE INDEX idx_team_venue_id ON public.team USING btree (venue_id);
+
+CREATE INDEX idx_tourney_organiser_discord_user_id ON public.tourney_organiser USING btree (discord_user_id);
 
 CREATE INDEX idx_tourney_photo_tourney_id ON public.tourney_photo USING btree (tourney_id, sort_order);
 
@@ -755,6 +771,12 @@ ALTER TABLE ONLY public.team_ranking_snapshot
 ALTER TABLE ONLY public.team
     ADD CONSTRAINT team_venue_id_fkey FOREIGN KEY (venue_id) REFERENCES public.venue(id);
 
+ALTER TABLE ONLY public.tourney_organiser
+    ADD CONSTRAINT tourney_organiser_discord_user_id_fkey FOREIGN KEY (discord_user_id) REFERENCES public.discord_user(discord_user_id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY public.tourney_organiser
+    ADD CONSTRAINT tourney_organiser_tourney_id_fkey FOREIGN KEY (tourney_id) REFERENCES public.tourney(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY public.tourney_photo
     ADD CONSTRAINT tourney_photo_tourney_id_fkey FOREIGN KEY (tourney_id) REFERENCES public.tourney(id) ON DELETE CASCADE;
 
@@ -763,6 +785,12 @@ ALTER TABLE ONLY public.tourney
 
 ALTER TABLE ONLY public.tourney
     ADD CONSTRAINT tourney_venue_id_fkey FOREIGN KEY (venue_id) REFERENCES public.venue(id);
+
+ALTER TABLE ONLY public.upcoming_event_organiser
+    ADD CONSTRAINT upcoming_event_organiser_discord_user_id_fkey FOREIGN KEY (discord_user_id) REFERENCES public.discord_user(discord_user_id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY public.upcoming_event_organiser
+    ADD CONSTRAINT upcoming_event_organiser_upcoming_event_id_fkey FOREIGN KEY (upcoming_event_id) REFERENCES public.upcoming_event(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY public.upcoming_event
     ADD CONSTRAINT upcoming_event_region_id_fkey FOREIGN KEY (region_id) REFERENCES public.region(id);
@@ -773,5 +801,5 @@ ALTER TABLE ONLY public.upcoming_event
 ALTER TABLE ONLY public.venue
     ADD CONSTRAINT venue_region_id_fkey FOREIGN KEY (region_id) REFERENCES public.region(id);
 
-\unrestrict LDazs5q58VZHTURFGiNKmC0Dr0nyfKePF6ypKGZykekIoVg5heVBlfQ04Kz3cJs
+\unrestrict 4JxHcjNhd8jjh16vc4OQ51adMqnppUcnvdsnc3VL7WnH5XhrEBXe9VXTwo0YUtB
 

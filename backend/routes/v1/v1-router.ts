@@ -228,8 +228,8 @@ import {
 import {
   getUpcomingEventsHandler,
   getUpcomingEventsRoute,
-  setUpcomingEventOrganiserHandler,
-  setUpcomingEventOrganiserRoute,
+  setUpcomingEventOrganisersHandler,
+  setUpcomingEventOrganisersRoute,
   setUpcomingEventVenueHandler,
   setUpcomingEventVenueRoute,
   syncUpcomingEventsHandler,
@@ -436,5 +436,5 @@ v1Router.openapi(syncAchievementsRoute, syncAchievementsHandler);
 v1Router.openapi(announceAchievementsRoute, announceAchievementsHandler);
 v1Router.openapi(updateAchievementRoute, updateAchievementHandler);
 v1Router.openapi(setUpcomingEventVenueRoute, setUpcomingEventVenueHandler);
-v1Router.openapi(setUpcomingEventOrganiserRoute, setUpcomingEventOrganiserHandler);
+v1Router.openapi(setUpcomingEventOrganisersRoute, setUpcomingEventOrganisersHandler);
 v1Router.openapi(syncUpcomingEventsRoute, syncUpcomingEventsHandler);

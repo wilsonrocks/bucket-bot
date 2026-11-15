@@ -242,10 +242,10 @@ import type {
   PutTourneyIdPhotosOrder400,
   PutTourneyIdPhotosOrder403,
   PutTourneyIdPhotosOrderBody,
-  PutUpcomingEventsIdOrganiser200,
-  PutUpcomingEventsIdOrganiser403,
-  PutUpcomingEventsIdOrganiser404,
-  PutUpcomingEventsIdOrganiserBody,
+  PutUpcomingEventsIdOrganisers200,
+  PutUpcomingEventsIdOrganisers403,
+  PutUpcomingEventsIdOrganisers404,
+  PutUpcomingEventsIdOrganisersBody,
   PutUpcomingEventsIdVenue200,
   PutUpcomingEventsIdVenue403,
   PutUpcomingEventsIdVenue404,
@@ -8778,59 +8778,59 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getPutUpcomingEventsIdVenueMutationOptions(options), queryClient);
     }
-    export type putUpcomingEventsIdOrganiserResponse200 = {
-  data: PutUpcomingEventsIdOrganiser200
+    export type putUpcomingEventsIdOrganisersResponse200 = {
+  data: PutUpcomingEventsIdOrganisers200
   status: 200
 }
 
-export type putUpcomingEventsIdOrganiserResponse403 = {
-  data: PutUpcomingEventsIdOrganiser403
+export type putUpcomingEventsIdOrganisersResponse403 = {
+  data: PutUpcomingEventsIdOrganisers403
   status: 403
 }
 
-export type putUpcomingEventsIdOrganiserResponse404 = {
-  data: PutUpcomingEventsIdOrganiser404
+export type putUpcomingEventsIdOrganisersResponse404 = {
+  data: PutUpcomingEventsIdOrganisers404
   status: 404
 }
 
-export type putUpcomingEventsIdOrganiserResponseSuccess = (putUpcomingEventsIdOrganiserResponse200) & {
+export type putUpcomingEventsIdOrganisersResponseSuccess = (putUpcomingEventsIdOrganisersResponse200) & {
   headers: Headers;
 };
-export type putUpcomingEventsIdOrganiserResponseError = (putUpcomingEventsIdOrganiserResponse403 | putUpcomingEventsIdOrganiserResponse404) & {
+export type putUpcomingEventsIdOrganisersResponseError = (putUpcomingEventsIdOrganisersResponse403 | putUpcomingEventsIdOrganisersResponse404) & {
   headers: Headers;
 };
 
-export type putUpcomingEventsIdOrganiserResponse = (putUpcomingEventsIdOrganiserResponseSuccess | putUpcomingEventsIdOrganiserResponseError)
+export type putUpcomingEventsIdOrganisersResponse = (putUpcomingEventsIdOrganisersResponseSuccess | putUpcomingEventsIdOrganisersResponseError)
 
-export const getPutUpcomingEventsIdOrganiserUrl = (id: string,) => {
+export const getPutUpcomingEventsIdOrganisersUrl = (id: string,) => {
 
 
   
 
-  return `/v1/upcoming-events/${id}/organiser`
+  return `/v1/upcoming-events/${id}/organisers`
 }
 
-export const putUpcomingEventsIdOrganiser = async (id: string,
-    putUpcomingEventsIdOrganiserBody: PutUpcomingEventsIdOrganiserBody, options?: RequestInit): Promise<putUpcomingEventsIdOrganiserResponse> => {
+export const putUpcomingEventsIdOrganisers = async (id: string,
+    putUpcomingEventsIdOrganisersBody: PutUpcomingEventsIdOrganisersBody, options?: RequestInit): Promise<putUpcomingEventsIdOrganisersResponse> => {
   
-  return customFetch<putUpcomingEventsIdOrganiserResponse>(getPutUpcomingEventsIdOrganiserUrl(id),
+  return customFetch<putUpcomingEventsIdOrganisersResponse>(getPutUpcomingEventsIdOrganisersUrl(id),
   {      
     ...options,
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(
-      putUpcomingEventsIdOrganiserBody,)
+      putUpcomingEventsIdOrganisersBody,)
   }
 );}
   
 
 
 
-export const getPutUpcomingEventsIdOrganiserMutationOptions = <TError = PutUpcomingEventsIdOrganiser403 | PutUpcomingEventsIdOrganiser404,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putUpcomingEventsIdOrganiser>>, TError,{id: string;data: PutUpcomingEventsIdOrganiserBody}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof putUpcomingEventsIdOrganiser>>, TError,{id: string;data: PutUpcomingEventsIdOrganiserBody}, TContext> => {
+export const getPutUpcomingEventsIdOrganisersMutationOptions = <TError = PutUpcomingEventsIdOrganisers403 | PutUpcomingEventsIdOrganisers404,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putUpcomingEventsIdOrganisers>>, TError,{id: string;data: PutUpcomingEventsIdOrganisersBody}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof putUpcomingEventsIdOrganisers>>, TError,{id: string;data: PutUpcomingEventsIdOrganisersBody}, TContext> => {
 
-const mutationKey = ['putUpcomingEventsIdOrganiser'];
+const mutationKey = ['putUpcomingEventsIdOrganisers'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -8840,10 +8840,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putUpcomingEventsIdOrganiser>>, {id: string;data: PutUpcomingEventsIdOrganiserBody}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putUpcomingEventsIdOrganisers>>, {id: string;data: PutUpcomingEventsIdOrganisersBody}> = (props) => {
           const {id,data} = props ?? {};
 
-          return  putUpcomingEventsIdOrganiser(id,data,requestOptions)
+          return  putUpcomingEventsIdOrganisers(id,data,requestOptions)
         }
 
 
@@ -8853,19 +8853,19 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type PutUpcomingEventsIdOrganiserMutationResult = NonNullable<Awaited<ReturnType<typeof putUpcomingEventsIdOrganiser>>>
-    export type PutUpcomingEventsIdOrganiserMutationBody = PutUpcomingEventsIdOrganiserBody
-    export type PutUpcomingEventsIdOrganiserMutationError = PutUpcomingEventsIdOrganiser403 | PutUpcomingEventsIdOrganiser404
+    export type PutUpcomingEventsIdOrganisersMutationResult = NonNullable<Awaited<ReturnType<typeof putUpcomingEventsIdOrganisers>>>
+    export type PutUpcomingEventsIdOrganisersMutationBody = PutUpcomingEventsIdOrganisersBody
+    export type PutUpcomingEventsIdOrganisersMutationError = PutUpcomingEventsIdOrganisers403 | PutUpcomingEventsIdOrganisers404
 
-    export const usePutUpcomingEventsIdOrganiser = <TError = PutUpcomingEventsIdOrganiser403 | PutUpcomingEventsIdOrganiser404,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putUpcomingEventsIdOrganiser>>, TError,{id: string;data: PutUpcomingEventsIdOrganiserBody}, TContext>, request?: SecondParameter<typeof customFetch>}
+    export const usePutUpcomingEventsIdOrganisers = <TError = PutUpcomingEventsIdOrganisers403 | PutUpcomingEventsIdOrganisers404,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putUpcomingEventsIdOrganisers>>, TError,{id: string;data: PutUpcomingEventsIdOrganisersBody}, TContext>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof putUpcomingEventsIdOrganiser>>,
+        Awaited<ReturnType<typeof putUpcomingEventsIdOrganisers>>,
         TError,
-        {id: string;data: PutUpcomingEventsIdOrganiserBody},
+        {id: string;data: PutUpcomingEventsIdOrganisersBody},
         TContext
       > => {
-      return useMutation(getPutUpcomingEventsIdOrganiserMutationOptions(options), queryClient);
+      return useMutation(getPutUpcomingEventsIdOrganisersMutationOptions(options), queryClient);
     }
     export type postSyncUpcomingEventsResponse200 = {
   data: PostSyncUpcomingEvents200

@@ -9,6 +9,7 @@ import {
 } from "../../../logic/discord-client.js";
 import { getCommunityTotals } from "../../../logic/stats/community-totals.js";
 import { recalculateTourneyPoints } from "../../../logic/points";
+import { organiserShoutOut } from "../../../logic/discord/organiser-shout-out";
 
 const ErrorSchema = z.object({ error: z.string() });
 
@@ -133,6 +134,13 @@ export const detailTourney: RouteHandler<
     .selectFrom("tourney")
     .where("tourney.id", "=", Number(id))
     .selectAll()
+    .select(
+      sql<string[]>`ARRAY(
+        SELECT discord_user_id FROM tourney_organiser
+        WHERE tourney_id = tourney.id
+        ORDER BY discord_user_id
+      )`.as("organiser_discord_ids"),
+    )
     .executeTakeFirstOrThrow();
 
   const paintingCategoriesPromise = db
@@ -259,7 +267,8 @@ export const getTourneysForPlayerHandler: RouteHandler<
 
 const TourneyUpdateBodySchema = z.object({
   id: z.number(),
-  organiserDiscordId: z.string().optional(),
+  /** Replaces the event's organisers when present. */
+  organiserDiscordIds: z.array(z.string()).optional(),
   venueId: z.number().optional(),
   name: z.string(),
   rounds: z.number().int().min(1),
@@ -316,7 +325,6 @@ export const updateTourney: RouteHandler<
         .updateTable("tourney")
         .set({
           name: body.name,
-          organiser_discord_id: body.organiserDiscordId ?? null,
           venue_id: body.venueId ?? null,
           rounds: body.rounds,
           days: body.days,
@@ -324,6 +332,25 @@ export const updateTourney: RouteHandler<
         })
         .where("id", "=", body.id)
         .execute();
+
+      if (body.organiserDiscordIds !== undefined) {
+        await trx
+          .deleteFrom("tourney_organiser")
+          .where("tourney_id", "=", body.id)
+          .execute();
+        const organisers = [...new Set(body.organiserDiscordIds)];
+        if (organisers.length > 0) {
+          await trx
+            .insertInto("tourney_organiser")
+            .values(
+              organisers.map((discord_user_id) => ({
+                tourney_id: body.id,
+                discord_user_id,
+              })),
+            )
+            .execute();
+        }
+      }
 
       // Max points depend on tier and rounds, so keep result points in step
       if (
@@ -445,7 +472,11 @@ export const postEventSummaryToDiscord: RouteHandler<
       "tourney.name as tourneyName",
       "venue.name as venueName",
       "venue.town as venueTown",
-      "tourney.organiser_discord_id as organiserDiscordId",
+      sql<string[]>`ARRAY(
+        SELECT discord_user_id FROM tourney_organiser
+        WHERE tourney_id = tourney.id
+        ORDER BY discord_user_id
+      )`.as("organiserDiscordIds"),
       "tourney.date as tourneyDate",
     ])
     .executeTakeFirstOrThrow();
@@ -545,7 +576,7 @@ export const postEventSummaryToDiscord: RouteHandler<
   const introEmbed = new EmbedBuilder()
     .setTitle(`${tourneyData.tourneyName}`)
     .setDescription(
-      `I have eaten the data for the **${tourneyData.tourneyName}** event in ${tourneyData.venueTown} on ${formatDate(tourneyData.tourneyDate, "EEEE, d MMMM yyyy")}.\n\nI can confirm that it was delicious!\n\nShout out to <@${tourneyData.organiserDiscordId}> for organising it! ❤️`,
+      `I have eaten the data for the **${tourneyData.tourneyName}** event in ${tourneyData.venueTown} on ${formatDate(tourneyData.tourneyDate, "EEEE, d MMMM yyyy")}.\n\nI can confirm that it was delicious!${organiserShoutOut(tourneyData.organiserDiscordIds)}`,
     )
     .addFields({
       name: "Results",

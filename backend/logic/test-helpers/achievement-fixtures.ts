@@ -32,9 +32,9 @@ export function makeAchievementFixtures(prefix: string) {
     date: string,
     tier: "EVENT" | "GT" | "NATIONALS" = "EVENT",
     venueId: number | null = null,
-    organiserDiscordId: string | null = null,
+    organiserDiscordIds: string[] = [],
   ) {
-    return (
+    const id = (
       await dbClient
         .insertInto("tourney")
         .values({
@@ -43,11 +43,17 @@ export function makeAchievementFixtures(prefix: string) {
           number_of_players: 8,
           tier_code: tier,
           venue_id: venueId,
-          organiser_discord_id: organiserDiscordId,
         })
         .returning("id")
         .executeTakeFirstOrThrow()
     ).id;
+    if (organiserDiscordIds.length > 0) {
+      await dbClient
+        .insertInto("tourney_organiser")
+        .values(organiserDiscordIds.map((discord_user_id) => ({ tourney_id: id, discord_user_id })))
+        .execute();
+    }
+    return id;
   }
 
   async function addVenue(name: string) {

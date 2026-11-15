@@ -53,7 +53,7 @@ import {
   useGetUnmappedIdentities as useGetUnmappedIdentitiesGenerated,
   useGetUpcomingEvents as useGetUpcomingEventsGenerated,
   usePutUpcomingEventsIdVenue as usePutUpcomingEventsIdVenueGenerated,
-  usePutUpcomingEventsIdOrganiser as usePutUpcomingEventsIdOrganiserGenerated,
+  usePutUpcomingEventsIdOrganisers as usePutUpcomingEventsIdOrganisersGenerated,
   usePostSyncUpcomingEvents as usePostSyncUpcomingEventsGenerated,
   useGetVenues as useGetVenuesGenerated,
   usePatchTeamsTeamIdMembersMembershipId as usePatchTeamsTeamIdMembersMembershipIdGenerated,
@@ -526,9 +526,9 @@ export const usePutUpcomingEventVenue = () => {
   })
 }
 
-export const usePutUpcomingEventOrganiser = () => {
+export const usePutUpcomingEventOrganisers = () => {
   const queryClient = useQueryClient()
-  return usePutUpcomingEventsIdOrganiserGenerated({
+  return usePutUpcomingEventsIdOrganisersGenerated({
     mutation: {
       onSuccess: () => {
         queryClient.invalidateQueries({

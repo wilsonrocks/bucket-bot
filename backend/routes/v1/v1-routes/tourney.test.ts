@@ -22,7 +22,12 @@ function makeApp() {
 
 function update(
   tourneyId: number,
-  changes: { tierCode: string; rounds: number; name?: string },
+  changes: {
+    tierCode: string;
+    rounds: number;
+    name?: string;
+    organiserDiscordIds?: string[];
+  },
 ) {
   return makeApp().request("/tourney", {
     method: "POST",
@@ -33,6 +38,7 @@ function update(
       days: 2,
       rounds: changes.rounds,
       tierCode: changes.tierCode,
+      organiserDiscordIds: changes.organiserDiscordIds,
     }),
   });
 }
@@ -102,6 +108,10 @@ beforeEach(async () => {
     .execute();
   await dbClient.deleteFrom("tourney").where("name", "=", "Tier Test Event").execute();
   await dbClient
+    .deleteFrom("discord_user")
+    .where("discord_user_id", "like", "TIER-TEST-%")
+    .execute();
+  await dbClient
     .deleteFrom("player_identity")
     .where("external_id", "like", "TIER-TEST-%")
     .execute();
@@ -145,5 +155,54 @@ describe("POST /tourney", () => {
 
     await update(tourneyId, { tierCode: "EVENT", rounds: 5, name: "Tier Test Event" });
     expect((await pointsByPlace(tourneyId)).every((p) => p === 1)).toBe(true);
+  });
+});
+
+describe("POST /tourney organisers", () => {
+  const ALICE = "TIER-TEST-alice";
+  const BOB = "TIER-TEST-bob";
+
+  async function organisers(): Promise<string[]> {
+    const rows = await dbClient
+      .selectFrom("tourney_organiser")
+      .where("tourney_id", "=", tourneyId)
+      .select("discord_user_id")
+      .orderBy("discord_user_id")
+      .execute();
+    return rows.map((r) => r.discord_user_id);
+  }
+
+  beforeEach(async () => {
+    await dbClient
+      .insertInto("discord_user")
+      .values([{ discord_user_id: ALICE }, { discord_user_id: BOB }])
+      .execute();
+  });
+
+  test("replaces the organisers with the given list", async () => {
+    await update(tourneyId, { tierCode: "EVENT", rounds: 5, organiserDiscordIds: [ALICE, BOB] });
+    expect(await organisers()).toEqual([ALICE, BOB]);
+
+    await update(tourneyId, { tierCode: "EVENT", rounds: 5, organiserDiscordIds: [BOB] });
+    expect(await organisers()).toEqual([BOB]);
+
+    await update(tourneyId, { tierCode: "EVENT", rounds: 5, organiserDiscordIds: [] });
+    expect(await organisers()).toEqual([]);
+  });
+
+  test("ignores duplicate ids", async () => {
+    const response = await update(tourneyId, {
+      tierCode: "EVENT",
+      rounds: 5,
+      organiserDiscordIds: [ALICE, ALICE],
+    });
+    expect(response.status).toBe(200);
+    expect(await organisers()).toEqual([ALICE]);
+  });
+
+  test("leaves organisers alone when the list is omitted", async () => {
+    await update(tourneyId, { tierCode: "EVENT", rounds: 5, organiserDiscordIds: [ALICE] });
+    await update(tourneyId, { tierCode: "EVENT", rounds: 5 });
+    expect(await organisers()).toEqual([ALICE]);
   });
 });
