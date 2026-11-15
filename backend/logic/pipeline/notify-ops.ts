@@ -33,9 +33,13 @@ export async function postPipelineSummary(
     return r.error ? `${base}: ${r.error.split("\n")[0]}` : base;
   });
 
+  // Which deployment ran this (e.g. "dev" / "prod"), so dev runs posting to
+  // the shared ops channel aren't mistaken for production.
+  const env = process.env.DEPLOY_ENV || "unknown env";
+
   const embed = new EmbedBuilder()
     .setTitle(
-      `${allGood ? "✅" : "❌"} Rankings pipeline (${trigger}) — ${allGood ? "all steps succeeded" : `${problems.length} step(s) need attention`}`,
+      `${allGood ? "✅" : "❌"} [${env}] Rankings pipeline (${trigger}) — ${allGood ? "all steps succeeded" : `${problems.length} step(s) need attention`}`,
     )
     .setColor(allGood ? 0x2ecc71 : 0xe74c3c)
     .setDescription(lines.join("\n"))
@@ -43,14 +47,17 @@ export async function postPipelineSummary(
 
   try {
     const channel = await (await getDiscordClient()).channels.fetch(channelId);
-    if (!channel || !(channel instanceof TextChannel) || !channel.isSendable) {
+    if (!channel || !(channel instanceof TextChannel) || !channel.isSendable()) {
       console.error(`DISCORD_OPS_CHANNEL_ID ${channelId} is not a sendable text channel`);
       return;
     }
-    // Ping the ranking reporters when something needs attention.
+    // Ping the ranking reporters when something needs attention — but only
+    // from prod; dev failures shouldn't wake anyone up. Deliberately separate
+    // from MENTION_FOR_REAL, which governs pinging players.
+    const ping = !allGood && process.env.DEPLOY_ENV === "prod";
     await channel.send(
-      allGood
-        ? { embeds: [embed] }
+      !ping
+        ? { embeds: [embed], allowedMentions: { parse: [] } }
         : {
             content: `<@&${RANKING_REPORTER_ROLE_ID}> a rankings pipeline step needs attention`,
             embeds: [embed],
