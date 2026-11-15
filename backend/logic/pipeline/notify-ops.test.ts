@@ -1,11 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const send = vi.fn();
+let sendable = true;
 
 vi.mock("discord.js", async (importOriginal) => {
   const actual = await importOriginal<typeof import("discord.js")>();
   class TextChannel {
-    isSendable = true;
+    isSendable = () => sendable;
     send = send;
   }
   return { ...actual, TextChannel };
@@ -30,6 +31,7 @@ const bad: RunStepResult = { runId: "r", stepKey: "post-player", status: "failed
 describe("postPipelineSummary", () => {
   beforeEach(() => {
     send.mockReset();
+    sendable = true;
     vi.stubEnv("DISCORD_OPS_CHANNEL_ID", "ops-channel");
   });
   afterEach(() => vi.unstubAllEnvs());
@@ -69,5 +71,14 @@ describe("postPipelineSummary", () => {
     vi.stubEnv("DEPLOY_ENV", "prod");
     await postPipelineSummary([ok], "scheduled");
     expect(sent().content).toBeUndefined();
+  });
+
+  it("does not send to a channel the bot can't send in", async () => {
+    sendable = false;
+    const err = vi.spyOn(console, "error").mockImplementation(() => {});
+    await postPipelineSummary([ok], "scheduled");
+    expect(send).not.toHaveBeenCalled();
+    expect(err).toHaveBeenCalledWith(expect.stringContaining("not a sendable text channel"));
+    err.mockRestore();
   });
 });

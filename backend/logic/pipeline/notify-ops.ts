@@ -47,7 +47,7 @@ export async function postPipelineSummary(
 
   try {
     const channel = await (await getDiscordClient()).channels.fetch(channelId);
-    if (!channel || !(channel instanceof TextChannel) || !channel.isSendable) {
+    if (!channel || !(channel instanceof TextChannel) || !channel.isSendable()) {
       console.error(`DISCORD_OPS_CHANNEL_ID ${channelId} is not a sendable text channel`);
       return;
     }
