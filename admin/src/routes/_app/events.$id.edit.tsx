@@ -259,6 +259,10 @@ function RouteComponent() {
                 <Grid.Col span={{ base: 12, sm: 4 }}>
                   <Select
                     label="Venue"
+                    placeholder="Search venues..."
+                    searchable
+                    clearable
+                    nothingFoundMessage="No matching venues"
                     data={venues.data.map((venue) => ({
                       value: venue.id.toString(),
                       label: `${venue.name} - ${venue.town}` as string,
