@@ -4,6 +4,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { format } from "date-fns";
 import { SITE_NAME, seo } from "#/helpers/seo";
 import { SortableTh, useTableSort } from "#/components/sortable-table";
+import { OrganiserList } from "#/components/organiser-list";
 
 export const Route = createFileRoute("/events")({
   staticData: { title: "Past Events" },
@@ -32,6 +33,7 @@ function RouteComponent() {
     name: { value: (t) => t.name },
     date: { value: (t) => t.date, natural: "desc" },
     players: { value: (t) => t.players, natural: "desc" },
+    organiser: { value: (t) => t.organisers[0]?.name ?? null },
     tier: {
       value: (t) =>
         t.tier_code && t.tier_code !== "EVENT"
@@ -47,10 +49,11 @@ function RouteComponent() {
           <SortableTh {...getSortProps("date")}>Date</SortableTh>
           <SortableTh {...getSortProps("players")}>Players</SortableTh>
           <SortableTh {...getSortProps("tier")}>Tier</SortableTh>
+          <SortableTh {...getSortProps("organiser")}>Organiser</SortableTh>
         </tr>
       </thead>
       <tbody>
-        {rows.map(({ id, name, date, players, tier_code }) => (
+        {rows.map(({ id, name, date, players, tier_code, organisers }) => (
           <tr key={id} className="border-b border-border">
             <td className="px-2 py-1.5">
               <Link
@@ -68,6 +71,13 @@ function RouteComponent() {
             <td className="px-2 py-1.5">
               {tier_code && tier_code !== "EVENT" ? (
                 (tierNameByCode.get(tier_code) ?? tier_code)
+              ) : (
+                <span className="text-muted-foreground">—</span>
+              )}
+            </td>
+            <td className="px-2 py-1.5">
+              {organisers.length > 0 ? (
+                <OrganiserList organisers={organisers} />
               ) : (
                 <span className="text-muted-foreground">—</span>
               )}
