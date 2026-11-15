@@ -11,10 +11,12 @@ import {
   Box,
   Button,
   ColorInput,
+  ColorSwatch,
   Grid,
   Group,
   Paper,
   Table,
+  Text,
   Textarea,
   TextInput,
 } from '@mantine/core'
@@ -110,7 +112,16 @@ function RouteComponent() {
                   </Link>
                 </Table.Td>
                 <Table.Td>{team.description ?? ''}</Table.Td>
-                <Table.Td>{team.brand_colour ?? ''}</Table.Td>
+                <Table.Td>
+                  {team.brand_colour && (
+                    <Group gap="xs" wrap="nowrap">
+                      <ColorSwatch color={team.brand_colour} size={18} />
+                      <Text size="sm" ff="monospace">
+                        {team.brand_colour}
+                      </Text>
+                    </Group>
+                  )}
+                </Table.Td>
                 <Table.Td w="fit-content">
                   {(rankingReporter || isTeamCaptain(team.id)) && (
                     <Group gap="xs" wrap="nowrap">
