@@ -115,7 +115,7 @@ export type PostTourneyBodyPaintingCategoriesItem = {
 
 export type PostTourneyBody = {
   id: number;
-  organiserDiscordId?: string;
+  organiserDiscordIds?: string[];
   venueId?: number;
   name: string;
   /** @minimum 1 */
@@ -1432,8 +1432,7 @@ export type GetUpcomingEvents200Item = {
   venue_id: number | null;
   /** @nullable */
   venue_name: string | null;
-  /** @nullable */
-  organiser_discord_id: string | null;
+  organiser_discord_ids: string[];
   /** @nullable */
   location: string | null;
   [key: string]: unknown | null;
@@ -1532,20 +1531,19 @@ export type PutUpcomingEventsIdVenue404 = {
   error: string;
 };
 
-export type PutUpcomingEventsIdOrganiserBody = {
-  /** @nullable */
-  organiser_discord_id: string | null;
+export type PutUpcomingEventsIdOrganisersBody = {
+  organiser_discord_ids: string[];
 };
 
-export type PutUpcomingEventsIdOrganiser200 = {
+export type PutUpcomingEventsIdOrganisers200 = {
   success: boolean;
 };
 
-export type PutUpcomingEventsIdOrganiser403 = {
+export type PutUpcomingEventsIdOrganisers403 = {
   error: string;
 };
 
-export type PutUpcomingEventsIdOrganiser404 = {
+export type PutUpcomingEventsIdOrganisers404 = {
   error: string;
 };
 

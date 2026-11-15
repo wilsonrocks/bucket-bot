@@ -1,4 +1,5 @@
 import { createRoute, z, type RouteHandler } from "@hono/zod-openapi";
+import { sql } from "kysely";
 import type { AppEnv } from "../../../hono-env.js";
 import { isRankingReporter } from "../permissions.js";
 import { syncUpcomingEvents } from "../../../logic/calendar/sync-upcoming-events.js";
@@ -10,7 +11,7 @@ const UpcomingEventSchema = z
     starts_at: z.string(),
     venue_id: z.number().nullable(),
     venue_name: z.string().nullable(),
-    organiser_discord_id: z.string().nullable(),
+    organiser_discord_ids: z.array(z.string()),
     location: z.string().nullable(),
   })
   .passthrough();
@@ -44,7 +45,11 @@ export const getUpcomingEventsHandler: RouteHandler<
       "upcoming_event.starts_at",
       "upcoming_event.venue_id",
       "venue.name as venue_name",
-      "upcoming_event.organiser_discord_id",
+      sql<string[]>`ARRAY(
+        SELECT discord_user_id FROM upcoming_event_organiser
+        WHERE upcoming_event_id = upcoming_event.id
+        ORDER BY discord_user_id
+      )`.as("organiser_discord_ids"),
       "upcoming_event.location",
     ])
     .where("upcoming_event.starts_at", ">=", new Date())
@@ -112,20 +117,20 @@ export const setUpcomingEventVenueHandler: RouteHandler<
   return c.json({ success: true as const }, 200);
 };
 
-// ── PUT /upcoming-events/{id}/organiser (ranking reporter only) ─────────────
+// ── PUT /upcoming-events/{id}/organisers (ranking reporter only) ────────────
 
-const SetOrganiserParamsSchema = z.object({ id: z.string() });
-const SetOrganiserBodySchema = z.object({
-  organiser_discord_id: z.string().nullable(),
+const SetOrganisersParamsSchema = z.object({ id: z.string() });
+const SetOrganisersBodySchema = z.object({
+  organiser_discord_ids: z.array(z.string()),
 });
 
-export const setUpcomingEventOrganiserRoute = createRoute({
+export const setUpcomingEventOrganisersRoute = createRoute({
   method: "put",
-  path: "/upcoming-events/{id}/organiser",
+  path: "/upcoming-events/{id}/organisers",
   request: {
-    params: SetOrganiserParamsSchema,
+    params: SetOrganisersParamsSchema,
     body: {
-      content: { "application/json": { schema: SetOrganiserBodySchema } },
+      content: { "application/json": { schema: SetOrganisersBodySchema } },
     },
   },
   responses: {
@@ -133,7 +138,7 @@ export const setUpcomingEventOrganiserRoute = createRoute({
       content: {
         "application/json": { schema: z.object({ success: z.literal(true) }) },
       },
-      description: "Organiser updated",
+      description: "Organisers updated",
     },
     403: {
       content: { "application/json": { schema: ErrorSchema } },
@@ -146,29 +151,52 @@ export const setUpcomingEventOrganiserRoute = createRoute({
   },
 });
 
-export const setUpcomingEventOrganiserHandler: RouteHandler<
-  typeof setUpcomingEventOrganiserRoute,
+export const setUpcomingEventOrganisersHandler: RouteHandler<
+  typeof setUpcomingEventOrganisersRoute,
   AppEnv
 > = async (c) => {
   const { id: userId } = c.get("jwtPayload") as { id: string };
 
-  // Only ranking reporters can assign who the organiser (TO) is.
+  // Only ranking reporters can assign who the organisers (TOs) are.
   if (!(await isRankingReporter(userId))) {
     return c.json({ error: "Forbidden" }, 403);
   }
 
   const id = Number(c.req.valid("param").id);
-  const { organiser_discord_id } = c.req.valid("json");
+  const { organiser_discord_ids } = c.req.valid("json");
 
-  const updated = await c
+  const found = await c
     .get("db")
-    .updateTable("upcoming_event")
-    .set({ organiser_discord_id })
-    .where("id", "=", id)
-    .returning("id")
-    .executeTakeFirst();
+    .transaction()
+    .execute(async (trx) => {
+      const event = await trx
+        .selectFrom("upcoming_event")
+        .select("id")
+        .where("id", "=", id)
+        .forUpdate()
+        .executeTakeFirst();
+      if (!event) return false;
 
-  if (!updated) {
+      await trx
+        .deleteFrom("upcoming_event_organiser")
+        .where("upcoming_event_id", "=", id)
+        .execute();
+      const unique = [...new Set(organiser_discord_ids)];
+      if (unique.length > 0) {
+        await trx
+          .insertInto("upcoming_event_organiser")
+          .values(
+            unique.map((discord_user_id) => ({
+              upcoming_event_id: id,
+              discord_user_id,
+            })),
+          )
+          .execute();
+      }
+      return true;
+    });
+
+  if (!found) {
     return c.json({ error: "Event not found" }, 404);
   }
 

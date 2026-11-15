@@ -3,13 +3,13 @@ import {
   useGetUpcomingEvents,
   useGetVenues,
   usePostSyncUpcomingEvents,
-  usePutUpcomingEventOrganiser,
+  usePutUpcomingEventOrganisers,
   usePutUpcomingEventVenue,
 } from '@/api/hooks'
 import { RequireRankingReporter } from '@/components/RequireRankingReporter'
 import { SortableTh, useTableSort } from '@/components/sortable-table'
 import { usePermissions } from '@/hooks/usePermissions'
-import { Button, Group, Select, Table, Text } from '@mantine/core'
+import { Button, Group, MultiSelect, Select, Table, Text } from '@mantine/core'
 import { createFileRoute } from '@tanstack/react-router'
 import { format, parseISO } from 'date-fns'
 
@@ -28,7 +28,7 @@ function RouteComponent() {
   const { data: venues } = useGetVenues()
   const { data: discordUsers } = useGetAllDiscordUsers()
   const setVenue = usePutUpcomingEventVenue()
-  const setOrganiser = usePutUpcomingEventOrganiser()
+  const setOrganisers = usePutUpcomingEventOrganisers()
   const syncEvents = usePostSyncUpcomingEvents()
 
   const venueOptions = (venues ?? []).map((v) => ({
@@ -73,7 +73,7 @@ function RouteComponent() {
             <SortableTh {...getSortProps('event')}>Event</SortableTh>
             <SortableTh {...getSortProps('date')}>Date</SortableTh>
             <SortableTh {...getSortProps('location')}>Location</SortableTh>
-            <Table.Th>Organiser</Table.Th>
+            <Table.Th>Organisers</Table.Th>
             <Table.Th>Venue</Table.Th>
           </Table.Tr>
         </Table.Thead>
@@ -87,17 +87,19 @@ function RouteComponent() {
                 </Table.Td>
                 <Table.Td>{event.location ?? '—'}</Table.Td>
                 <Table.Td>
-                  <Select
-                    placeholder="No organiser"
+                  <MultiSelect
+                    placeholder={
+                      event.organiser_discord_ids.length ? undefined : 'No organisers'
+                    }
                     data={organiserOptions}
                     searchable
                     clearable
                     disabled={!rankingReporter}
-                    value={event.organiser_discord_id ?? null}
+                    value={event.organiser_discord_ids}
                     onChange={(value) =>
-                      setOrganiser.mutate({
+                      setOrganisers.mutate({
                         id: String(event.id),
-                        data: { organiser_discord_id: value },
+                        data: { organiser_discord_ids: value },
                       })
                     }
                   />

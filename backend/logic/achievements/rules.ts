@@ -209,7 +209,7 @@ function nthBestPainted(n: number): AchievementRule {
 
 /**
  * The nth event a player organised (any tier), matching the tourney's
- * organiser to the player's Discord id.
+ * organisers to the player's Discord id.
  */
 function nthOrganised(n: number): AchievementRule {
   return earliest(sql`
@@ -218,7 +218,8 @@ function nthOrganised(n: number): AchievementRule {
       SELECT player.id AS player_id, tourney.id AS tourney_id, tourney.date,
         row_number() OVER (PARTITION BY player.id ORDER BY tourney.date, tourney.id) AS n
       FROM tourney
-      JOIN player ON player.discord_id = tourney.organiser_discord_id
+      JOIN tourney_organiser ON tourney_organiser.tourney_id = tourney.id
+      JOIN player ON player.discord_id = tourney_organiser.discord_user_id
     ) numbered
     WHERE n = ${n}
   `);

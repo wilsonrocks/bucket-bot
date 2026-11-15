@@ -981,33 +981,49 @@ export const fetchAllUpcomingEvents = createServerFn().handler(async () => {
 export const fetchUpcomingEvent = createServerFn()
   .inputValidator((d: { id: number }) => d)
   .handler(async ({ data: { id } }) => {
-    const row = await db
-      .selectFrom('upcoming_event')
-      .leftJoin('venue', 'upcoming_event.venue_id', 'venue.id')
-      .leftJoin(
-        'discord_user',
-        'discord_user.discord_user_id',
-        'upcoming_event.organiser_discord_id',
-      )
-      .leftJoin(
-        'player',
-        'player.discord_id',
-        'upcoming_event.organiser_discord_id',
-      )
-      .select([
-        'upcoming_event.id as id',
-        'upcoming_event.name as name',
-        'upcoming_event.starts_at as startsAt',
-        'upcoming_event.location as location',
-        'venue.name as venueName',
-        'venue.town as venueTown',
-        'player.id as organiserPlayerId',
-        'player.name as organiserPlayerName',
-        'discord_user.discord_display_name as organiserDisplayName',
-        'discord_user.discord_username as organiserUsername',
-      ])
-      .where('upcoming_event.id', '=', id)
-      .executeTakeFirstOrThrow()
+    const [row, organiserRows] = await Promise.all([
+      db
+        .selectFrom('upcoming_event')
+        .leftJoin('venue', 'upcoming_event.venue_id', 'venue.id')
+        .select([
+          'upcoming_event.id as id',
+          'upcoming_event.name as name',
+          'upcoming_event.starts_at as startsAt',
+          'upcoming_event.location as location',
+          'venue.name as venueName',
+          'venue.town as venueTown',
+        ])
+        .where('upcoming_event.id', '=', id)
+        .executeTakeFirstOrThrow(),
+      db
+        .selectFrom('upcoming_event_organiser')
+        .innerJoin(
+          'discord_user',
+          'discord_user.discord_user_id',
+          'upcoming_event_organiser.discord_user_id',
+        )
+        .leftJoin(
+          'player',
+          'player.discord_id',
+          'upcoming_event_organiser.discord_user_id',
+        )
+        .select([
+          'player.id as playerId',
+          'player.name as playerName',
+          'discord_user.discord_display_name as displayName',
+          'discord_user.discord_username as username',
+        ])
+        .where('upcoming_event_organiser.upcoming_event_id', '=', id)
+        .execute(),
+    ])
+
+    const organisers = organiserRows
+      .map((o) => ({
+        playerId: o.playerId ?? null,
+        name: o.playerName ?? o.displayName ?? o.username ?? null,
+      }))
+      .filter((o): o is { playerId: number | null; name: string } => o.name != null)
+      .sort((a, b) => a.name.localeCompare(b.name))
 
     return {
       id: row.id,
@@ -1016,12 +1032,7 @@ export const fetchUpcomingEvent = createServerFn()
       location: row.location ?? null,
       venueName: row.venueName ?? null,
       venueTown: row.venueTown ?? null,
-      organiserPlayerId: row.organiserPlayerId ?? null,
-      organiserName:
-        row.organiserPlayerName ??
-        row.organiserDisplayName ??
-        row.organiserUsername ??
-        null,
+      organisers,
     }
   })
 

@@ -425,7 +425,7 @@ describe("TO-ing", () => {
     const tiers = ["GT", "EVENT", "NATIONALS"] as const;
     const tourneys: number[] = [];
     for (let i = 0; i < 10; i++) {
-      const t = await addTourney(`t${i}`, `2024-01-${String(i + 10)}`, tiers[i % 3], null, alice.discordId);
+      const t = await addTourney(`t${i}`, `2024-01-${String(i + 10)}`, tiers[i % 3], null, [alice.discordId]);
       tourneys.push(t);
       // Playing in an event isn't organising it.
       await addResult(bob.identityId, t, 1);
@@ -439,10 +439,20 @@ describe("TO-ing", () => {
   test("not awarded before reaching the count", async () => {
     const alice = await addDiscordPlayer("alice");
     for (let i = 0; i < 4; i++) {
-      await addTourney(`t${i}`, `2024-01-1${i}`, "EVENT", null, alice.discordId);
+      await addTourney(`t${i}`, `2024-01-1${i}`, "EVENT", null, [alice.discordId]);
     }
     expect(await awarded("SECOND_TO", alice.playerId)).not.toEqual({});
     expect(await awarded("FIVE_TO", alice.playerId)).toEqual({});
+  });
+
+  test("every co-organiser of an event gets credit for it", async () => {
+    const alice = await addDiscordPlayer("alice");
+    const bob = await addDiscordPlayer("bob");
+    const t = await addTourney("t", "2024-01-10", "EVENT", null, [alice.discordId, bob.discordId]);
+    expect(await awarded("FIRST_TO", alice.playerId, bob.playerId)).toEqual({
+      [alice.playerId]: t,
+      [bob.playerId]: t,
+    });
   });
 });
 

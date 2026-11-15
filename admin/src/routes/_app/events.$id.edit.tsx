@@ -3,7 +3,7 @@ import { Link } from '@/components/link'
 
 type TourneyFields = {
   name: string
-  organiser_discord_id: string | null
+  organiser_discord_ids: string[]
   venue_id: number | null
   rounds: number | null
   days: number | null
@@ -28,6 +28,7 @@ import {
   Button,
   Grid,
   Group,
+  MultiSelect,
   NumberInput,
   Paper,
   Select,
@@ -59,7 +60,7 @@ function RouteComponent() {
 
   const detailsForm = useForm<{
     eventName: string
-    organiserDiscordId: string
+    organiserDiscordIds: string[]
     venueId: string
     rounds: number | null
     days: number | null
@@ -82,7 +83,7 @@ function RouteComponent() {
   }>({
     initialValues: {
       eventName: '',
-      organiserDiscordId: '',
+      organiserDiscordIds: [],
       venueId: '',
       rounds: 3,
       days: 1,
@@ -98,7 +99,7 @@ function RouteComponent() {
       const tourney = tourneyDetail.data.tourney as TourneyFields
       detailsForm.setValues({
         eventName: tourney.name,
-        organiserDiscordId: tourney.organiser_discord_id || '',
+        organiserDiscordIds: tourney.organiser_discord_ids,
         venueId: tourney.venue_id?.toString() || '',
         rounds: tourney.rounds ?? null,
         days: tourney.days ?? null,
@@ -219,7 +220,7 @@ function RouteComponent() {
               onSubmit={detailsForm.onSubmit((values) => {
                 const payload = {
                   id,
-                  organiserDiscordId: values.organiserDiscordId,
+                  organiserDiscordIds: values.organiserDiscordIds,
                   venueId: values.venueId ? Number(values.venueId) : undefined,
                   name: values.eventName,
                   rounds: values.rounds ?? 3,
@@ -240,9 +241,10 @@ function RouteComponent() {
                   />
                 </Grid.Col>
                 <Grid.Col span={{ base: 12, sm: 4 }}>
-                  <Select
+                  <MultiSelect
                     searchable
-                    label="Organiser"
+                    clearable
+                    label="Organisers"
                     data={discordUsers.data.map((user) => ({
                       value: String(user.discord_user_id),
                       label: (
@@ -252,7 +254,7 @@ function RouteComponent() {
                         user.discord_user_id
                       ) as string,
                     }))}
-                    {...detailsForm.getInputProps('organiserDiscordId')}
+                    {...detailsForm.getInputProps('organiserDiscordIds')}
                   />
                 </Grid.Col>
 
@@ -435,7 +437,7 @@ function RouteComponent() {
               updateTourney.mutate({
                 data: {
                   id,
-                  organiserDiscordId: detailsForm.values.organiserDiscordId,
+                  organiserDiscordIds: detailsForm.values.organiserDiscordIds,
                   venueId: detailsForm.values.venueId ? Number(detailsForm.values.venueId) : undefined,
                   name: detailsForm.values.eventName,
                   rounds: detailsForm.values.rounds ?? 3,
