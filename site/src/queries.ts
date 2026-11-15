@@ -371,6 +371,52 @@ export const fetchPlayerAchievements = createServerFn()
 
 // ── Events ─────────────────────────────────────────────────────────────────
 
+type OrganiserRow = {
+  playerId: number | null
+  playerName: string | null
+  displayName: string | null
+  username: string | null
+}
+
+export type Organiser = { playerId: number | null; name: string }
+
+// Prefer the linked player's name, then their Discord name; sorted for stable display.
+function toOrganisers(rows: OrganiserRow[]): Organiser[] {
+  return rows
+    .map((o) => ({
+      playerId: o.playerId ?? null,
+      name: o.playerName ?? o.displayName ?? o.username ?? null,
+    }))
+    .filter((o): o is Organiser => o.name != null)
+    .sort((a, b) => a.name.localeCompare(b.name))
+}
+
+async function fetchTourneyOrganisers(tourneyIds: number[]): Promise<Map<number, Organiser[]>> {
+  const byTourney = new Map<number, Organiser[]>()
+  if (tourneyIds.length === 0) return byTourney
+  const rows = await db
+    .selectFrom('tourney_organiser')
+    .innerJoin('discord_user', 'discord_user.discord_user_id', 'tourney_organiser.discord_user_id')
+    .leftJoin('player', 'player.discord_id', 'tourney_organiser.discord_user_id')
+    .select([
+      'tourney_organiser.tourney_id as tourneyId',
+      'player.id as playerId',
+      'player.name as playerName',
+      'discord_user.discord_display_name as displayName',
+      'discord_user.discord_username as username',
+    ])
+    .where('tourney_organiser.tourney_id', 'in', tourneyIds)
+    .execute()
+  const grouped = new Map<number, OrganiserRow[]>()
+  for (const row of rows) {
+    const list = grouped.get(row.tourneyId) ?? []
+    list.push(row)
+    grouped.set(row.tourneyId, list)
+  }
+  for (const [id, list] of grouped) byTourney.set(id, toOrganisers(list))
+  return byTourney
+}
+
 export const fetchTourneys = createServerFn().handler(async () => {
   const results = await db
     .selectFrom('tourney')
@@ -386,7 +432,12 @@ export const fetchTourneys = createServerFn().handler(async () => {
     .groupBy(['tourney.id'])
     .orderBy('tourney.date', 'desc')
     .execute()
-  return results.map((e) => ({ ...e, players: parseInt(e.players as string) }))
+  const organisers = await fetchTourneyOrganisers(results.map((e) => e.id))
+  return results.map((e) => ({
+    ...e,
+    players: parseInt(e.players as string),
+    organisers: organisers.get(e.id) ?? [],
+  }))
 })
 
 export const fetchTiers = createServerFn().handler(async () => {
@@ -396,7 +447,7 @@ export const fetchTiers = createServerFn().handler(async () => {
 export const fetchTourney = createServerFn()
   .inputValidator((d: { id: number }) => d)
   .handler(async ({ data: { id } }) => {
-    const [players, tourney, paintingCategoryRows, photos] = await Promise.all([
+    const [players, tourney, paintingCategoryRows, photos, organisers] = await Promise.all([
       db
         .selectFrom('tourney')
         .innerJoin('result', 'tourney.id', 'result.tourney_id')
@@ -454,6 +505,7 @@ export const fetchTourney = createServerFn()
         .orderBy('tourney_photo.sort_order')
         .orderBy('tourney_photo.id')
         .execute(),
+      fetchTourneyOrganisers([id]).then((m) => m.get(id) ?? []),
     ])
 
     const paintingCategories = (paintingCategoryRows as any[]).reduce((acc: any[], row: any) => {
@@ -479,7 +531,7 @@ export const fetchTourney = createServerFn()
       return acc
     }, [])
 
-    return { players, tourney, paintingCategories, photos }
+    return { players, tourney, paintingCategories, photos, organisers }
   })
 
 // ── Teams ──────────────────────────────────────────────────────────────────
@@ -1017,13 +1069,7 @@ export const fetchUpcomingEvent = createServerFn()
         .execute(),
     ])
 
-    const organisers = organiserRows
-      .map((o) => ({
-        playerId: o.playerId ?? null,
-        name: o.playerName ?? o.displayName ?? o.username ?? null,
-      }))
-      .filter((o): o is { playerId: number | null; name: string } => o.name != null)
-      .sort((a, b) => a.name.localeCompare(b.name))
+    const organisers = toOrganisers(organiserRows)
 
     return {
       id: row.id,

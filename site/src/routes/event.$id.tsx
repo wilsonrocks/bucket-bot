@@ -12,6 +12,7 @@ import { Image } from "#/components/image";
 import { PhotoLightbox } from "#/components/photo-lightbox";
 import { SITE_NAME, SITE_URL, absoluteUrl, jsonLd, seo } from "#/helpers/seo";
 import { SortableTh, useTableSort } from "#/components/sortable-table";
+import { OrganiserList } from "#/components/organiser-list";
 import type { SportsEvent, WithContext } from "schema-dts";
 
 export const Route = createFileRoute("/event/$id")({
@@ -38,11 +39,10 @@ export const Route = createFileRoute("/event/$id")({
     const winnerName = players[0]?.playerName;
 
     const description =
-      t.name + t.venue
-        ? ` at ${t.venue},`
-        : "" +
-          ` a ${t.rounds} round Malifaux tournament attended by ${players.length} players.` +
-          (winnerName ? ` Won by ${winnerName}.` : "");
+      t.name +
+      (t.venue ? ` at ${t.venue},` : "") +
+      ` a ${t.rounds} round Malifaux tournament attended by ${players.length} players.` +
+      (winnerName ? ` Won by ${winnerName}.` : "");
 
     const firstPaintedImage = (loaderData.paintingCategories as any[])
       .flatMap((c: any) => c.winners ?? [])
@@ -61,6 +61,15 @@ export const Route = createFileRoute("/event/$id")({
       ...(t.venue
         ? { location: { "@type": "Place", name: t.venue } }
         : { location: { "@type": "Place", name: "United Kingdom" } }),
+      ...(loaderData.organisers.length > 0
+        ? {
+            organizer: loaderData.organisers.map((o) => ({
+              "@type": "Person" as const,
+              name: o.name,
+              ...(o.playerId ? { url: `${SITE_URL}/player/${o.playerId}` } : {}),
+            })),
+          }
+        : {}),
       competitor: players.slice(0, 5).map((p) => ({
         "@type": "Person",
         name: p.playerName,
@@ -83,7 +92,7 @@ export const Route = createFileRoute("/event/$id")({
 });
 
 function RouteComponent() {
-  const { players, tourney, paintingCategories, photos } =
+  const { players, tourney, paintingCategories, photos, organisers } =
     Route.useLoaderData();
   const { painting: activePaintingId, photo: activePhotoId } =
     Route.useSearch();
@@ -115,7 +124,14 @@ function RouteComponent() {
 
   return (
     <div>
-      <h1 className="mb-4 text-2xl font-bold">{t.name}</h1>
+      <h1 className={`${organisers.length > 0 ? "mb-2" : "mb-4"} text-2xl font-bold`}>
+        {t.name}
+      </h1>
+      {organisers.length > 0 && (
+        <p className="mb-4 text-sm text-muted-foreground">
+          Organised by <OrganiserList organisers={organisers} />
+        </p>
+      )}
       <Tabs defaultValue="results">
         <Tabs.List mb="md">
           <Tabs.Tab value="results">Results</Tabs.Tab>
