@@ -27,6 +27,12 @@ export interface SeoInput {
    */
   imageShape?: "wide" | "square" | "portrait";
   type?: "website" | "article" | "profile";
+  /**
+   * og:url, when the shared link differs from the canonical page (e.g. a
+   * `?card=` deep link with its own preview). Facebook and LinkedIn fetch the
+   * preview from og:url, so it must be the URL that was shared.
+   */
+  sharePath?: string;
 }
 
 export interface SeoOutput {
@@ -41,8 +47,10 @@ export function seo({
   image,
   imageShape = "wide",
   type = "website",
+  sharePath,
 }: SeoInput): SeoOutput {
   const url = `${SITE_URL}${path}`;
+  const ogUrl = `${SITE_URL}${sharePath ?? path}`;
   const ogImage = image ?? DEFAULT_OG_IMAGE;
   const ogImageType = imageMimeType(ogImage);
   const size = !image
@@ -61,7 +69,7 @@ export function seo({
       { property: "og:title", content: title },
       { property: "og:description", content: description },
       { property: "og:type", content: type },
-      { property: "og:url", content: url },
+      { property: "og:url", content: ogUrl },
       { property: "og:image", content: ogImage },
       { property: "og:image:secure_url", content: ogImage },
       { property: "og:image:type", content: ogImageType },

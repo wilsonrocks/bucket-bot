@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
-import { ChevronLeft, ChevronRight, Download } from 'lucide-react'
-import { ShareButton } from '#/components/share-button'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ShareButton, ShareImageButton, shareFileName } from '#/components/share-button'
 import { useMediaQuery } from '#/helpers/use-media-query'
 
 /**
@@ -126,27 +126,22 @@ export function Deck<C extends DeckCard>(props: DeckProps<C>) {
         <div className="flex flex-wrap items-center justify-center gap-2">
           {card ? (
             <>
+              {imageUrl && (
+                <ShareImageButton
+                  imageUrl={imageUrl}
+                  fileName={shareFileName(playerName, 'malifaux buried', year, card.key)}
+                  title={`${cardTitle(card)} — my Malifaux Buried ${year}`}
+                />
+              )}
               <ShareButton
                 url={deckUrl(card.key)}
                 title={`${playerName}'s Malifaux Buried ${year}`}
                 text={`${cardTitle(card)} — my Malifaux Buried ${year}`}
-                imageUrl={imageUrl}
-                label="Share card"
+                label="Share link"
               />
-              {imageUrl && (
-                <a
-                  href={imageUrl}
-                  target="_blank"
-                  rel="noopener"
-                  download
-                  className="inline-flex items-center gap-1.5 rounded border border-border px-2 py-1 text-sm hover:bg-muted"
-                >
-                  <Download size={14} aria-hidden /> Image
-                </a>
-              )}
             </>
           ) : (
-            <ShareButton url={deckUrl()} title={`${playerName}'s Malifaux Buried ${year}`} text={`My Malifaux Buried ${year}`} />
+            <ShareButton url={deckUrl()} title={`${playerName}'s Malifaux Buried ${year}`} text={`My Malifaux Buried ${year}`} label="Share link" />
           )}
         </div>
 

@@ -90,7 +90,7 @@ describe('Deck on mobile (slideshow)', () => {
   test('deep links open on that card, with a share button', () => {
     render(<Harness initial="EVENTS_WON" />)
     expect(screen.getByText('event won.')).toBeTruthy()
-    expect(screen.getByRole('button', { name: 'Share card' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Share link' })).toBeTruthy()
   })
 })
 

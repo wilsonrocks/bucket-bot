@@ -36,6 +36,16 @@ describe('seo', () => {
     expect(meta(out, 'og:image:type')?.content).toBe('image/png')
   })
 
+  test('og:url is the shared link while the canonical stays the page', () => {
+    const out = seo({ title: 't', path: '/x', sharePath: '/x?card=A' })
+    expect(meta(out, 'og:url')?.content).toBe('https://malifaux.uk/x?card=A')
+    expect(out.links).toEqual([{ rel: 'canonical', href: 'https://malifaux.uk/x' }])
+  })
+
+  test('og:url defaults to the canonical', () => {
+    expect(meta(seo({ title: 't', path: '/x' }), 'og:url')?.content).toBe('https://malifaux.uk/x')
+  })
+
   test('the default image keeps the large card', () => {
     const out = seo({ title: 't', path: '/x' })
     expect(meta(out, 'twitter:card')?.content).toBe('summary_large_image')

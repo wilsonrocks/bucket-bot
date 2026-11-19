@@ -44,6 +44,7 @@ export const Route = createFileRoute('/player_/$id/buried/$year')({
       image: sharedImage ?? summaryImage,
       imageShape: sharedImage ? 'portrait' : 'wide',
       type: 'profile',
+      ...(shared ? { sharePath: `${path}?card=${encodeURIComponent(shared.key)}` } : {}),
     })
   },
   component: RouteComponent,
@@ -70,7 +71,9 @@ function RouteComponent() {
           <Link to="/player/$id" params={{ id }} search={{ typeCode: undefined, tab: undefined, painting: undefined, achievement: undefined }}>
             {playerName}
           </Link>
-          's year at the table. Tap, swipe or use the arrow keys to flip.
+          's year at the table.{' '}
+          <span className="md:hidden">Swipe or tap to flip.</span>
+          <span className="hidden md:inline">Click the deck or use the arrow keys to flip.</span>
         </p>
       </header>
       <Deck
