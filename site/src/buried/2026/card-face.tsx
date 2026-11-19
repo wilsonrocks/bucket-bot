@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { Children, isValidElement, type ReactNode } from 'react'
 import { toOrdinal } from '#/helpers/to-ordinal'
 import { textOn } from '#/helpers/text-on'
 import type { BuriedEvent, Card, SummaryCard } from './cards'
@@ -39,10 +39,30 @@ function Face({
         className="flex flex-1 flex-col justify-center rounded-[2.5cqw] border-[0.4cqw] px-[6cqw] py-[5cqw]"
         style={{ borderColor: accent }}
       >
-        {children}
+        {reveal(children)}
       </div>
     </div>
   )
+}
+
+// Each piece of writing fades in after the last; a pause before and after the
+// stat itself (a <Big>, or anything marked data-stat) gives it a beat.
+const REVEAL_STEP = 0.25
+const STAT_PAUSE = 0.5
+
+function reveal(children: ReactNode) {
+  let delay = 0.1
+  return Children.toArray(children).map((child, i) => {
+    const stat = isValidElement<{ 'data-stat'?: boolean }>(child) && (child.type === Big || child.props['data-stat'] === true)
+    if (stat && i > 0) delay += STAT_PAUSE
+    const piece = (
+      <div key={i} className="buried-fade" style={{ animationDelay: `${delay}s` }}>
+        {child}
+      </div>
+    )
+    delay += REVEAL_STEP + (stat ? STAT_PAUSE : 0)
+    return piece
+  })
 }
 
 const Eyebrow = ({ children, color = MUTED }: { children: ReactNode; color?: string }) => (
@@ -302,7 +322,7 @@ function CardPicture({ card, year }: { card: Card; year: number }) {
           <Eyebrow>
             {card.playerName}'s {year}
           </Eyebrow>
-          <dl className="mt-[2cqw] grid grid-cols-2 gap-x-[4cqw] gap-y-[4cqw]">
+          <dl data-stat className="mt-[2cqw] grid grid-cols-2 gap-x-[4cqw] gap-y-[4cqw]">
             {summaryStats(card).map(([label, value]) => (
               <div key={label} className="flex flex-col-reverse">
                 <dt className="text-[3.2cqw]" style={{ color: MUTED }}>

@@ -272,7 +272,7 @@ function Table<C extends DeckCard>({ cards, index, move, go, settle, restart, re
         <div
           key={move.id}
           aria-hidden
-          onAnimationEnd={settle}
+          onAnimationEnd={(e) => e.target === e.currentTarget && settle()}
           className={`pointer-events-none absolute top-0 left-0 aspect-[4/5] w-[calc(50%-1rem)] [transform-style:preserve-3d] ${
             dealing ? 'buried-deal' : 'buried-return'
           }`}
@@ -349,7 +349,7 @@ function Slideshow<C extends DeckCard>({ cards, index, move, go, settle, renderF
     >
       <CardShape
         key={index}
-        onAnimationEnd={settle}
+        onAnimationEnd={(e) => e.target === e.currentTarget && settle()}
         className={`shadow-2xl ${move ? (move.to > move.from ? 'buried-slide-next' : 'buried-slide-prev') : ''}`}
         role="group"
         aria-roledescription="card"

@@ -130,3 +130,24 @@ body {
 .buried-slide-prev {
   animation: buried-slide-prev 0.35s ease-out both;
 }
+
+/* Card writing fades in a piece at a time (delays set per piece). Not while
+   the card is in the air: it fades in once it lands. */
+@keyframes buried-fade {
+  from {
+    opacity: 0;
+  }
+}
+.buried-fade {
+  animation: buried-fade 0.2s ease-out both;
+}
+.buried-deal .buried-fade,
+.buried-return .buried-fade {
+  animation: none;
+  opacity: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .buried-fade {
+    animation: none;
+  }
+}

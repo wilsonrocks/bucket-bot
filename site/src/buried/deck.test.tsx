@@ -121,6 +121,14 @@ describe('Deck on desktop (draw and discard piles)', () => {
     expect(screen.getByText(`${cards.length - 1} to flip`)).toBeTruthy()
   })
 
+  test("the writing's fades finishing don't count as the card landing", () => {
+    const { container } = render(<Harness />)
+    fireEvent.click(screen.getByRole('button', { name: 'Flip the first card' }))
+    const flying = container.querySelector('.buried-deal')!
+    land(flying.querySelector('.buried-fade')!)
+    expect(container.querySelector('.buried-deal')).toBeTruthy()
+  })
+
   test('going back returns the top card to the draw pile', () => {
     const { container } = render(<Harness initial="RANKING" />)
     fireEvent.keyDown(window, { key: 'ArrowLeft' })
@@ -171,6 +179,14 @@ describe('CardFace', () => {
   test('every card is a Fate Deck card, with matching indices in two corners', () => {
     const { getAllByRole } = render(<CardFace card={cards.find((c) => c.key === 'EVENTS_WON') as Card} year={2026} />)
     expect(getAllByRole('img', { name: '1 of Rams' })).toHaveLength(2)
+  })
+
+  test('writing fades in a piece at a time, with a pause before the stat', () => {
+    const { container } = render(<CardFace card={cards.find((c) => c.key === 'EVENTS_WON') as Card} year={2026} />)
+    const delays = [...container.querySelectorAll<HTMLElement>('.buried-fade')].map((el) => parseFloat(el.style.animationDelay))
+    expect(delays).toEqual([...delays].sort((x, y) => x - y))
+    // eyebrow → stat waits longer than stat's line → event list
+    expect(delays[1]! - delays[0]!).toBeGreaterThan(delays[3]! - delays[2]!)
   })
 
   test('the summary is the Red Joker', () => {
