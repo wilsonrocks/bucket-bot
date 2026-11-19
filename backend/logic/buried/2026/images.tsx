@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import type { CardData } from "./build-cards";
 import type { BuriedEvent } from "./cards";
-import { fateOf, SUITS, suitIcon, type Fate } from "./fate";
+import { cornerSuits, fateOf, SUITS, suitIcon, type Fate } from "./fate";
 
 /**
  * Satori layouts for the 2026 share images. Satori supports a flexbox subset
@@ -180,16 +180,17 @@ function CornerIndex({ fate, style }: { fate: Fate; style: Record<string, string
         ...style,
       }}
     >
+      <div style={{ display: "flex", fontFamily: "Cinzel", fontWeight: 900, fontSize: VALUE_SIZE[Math.min(`${fate.value ?? "J"}`.length, 3) - 1], lineHeight: 1 }}>{`${fate.value ?? "J"}`}</div>
       {fate.value !== undefined ? (
-        <div style={{ display: "flex", fontFamily: "Cinzel", fontWeight: 900, fontSize: VALUE_SIZE[Math.min(`${fate.value}`.length, 3) - 1], lineHeight: 1 }}>{`${fate.value}`}</div>
+        cornerSuits(fate.suit).map((s) => <img key={s} src={suitIcon(s)} width={60} height={60} style={{ marginTop: 8 }} />)
       ) : (
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", fontFamily: "Cinzel", fontWeight: 900, fontSize: 22, lineHeight: 1 }}>
-          {"JOKER".split("").map((l, i) => (
-            <div key={i} style={{ display: "flex" }}>{l}</div>
+        // The Red Joker carries every suit; the Black Joker none.
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, marginTop: 8 }}>
+          {cornerSuits(fate.suit).map((s) => (
+            <img key={s} src={suitIcon(s)} width={48} height={48} />
           ))}
         </div>
       )}
-      <img src={suitIcon(fate.suit)} width={60} height={60} style={{ marginTop: 8 }} />
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import fixture from './fixture.json'
-import { fateOf } from './fate'
+import { cornerSuits, FATE_SUITS, fateOf } from './fate'
 import { parseCards } from './parse-cards'
 
 const cards = parseCards(fixture)
@@ -27,6 +27,12 @@ describe('fateOf', () => {
   it('does not cap big numbers', () => {
     const big = card('BIGGEST_EVENT') as Extract<(typeof cards)[number], { key: 'BIGGEST_EVENT' }>
     expect(fateOf(big).value).toBe(big.event.players)
+  })
+
+  it('the Red Joker carries every suit, the Black Joker none', () => {
+    expect(cornerSuits('RED_JOKER')).toEqual(FATE_SUITS)
+    expect(cornerSuits('BLACK_JOKER')).toEqual([])
+    expect(cornerSuits('TOMES')).toEqual(['TOMES'])
   })
 
   it('the summary is the Red Joker', () => {

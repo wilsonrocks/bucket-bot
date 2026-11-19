@@ -193,6 +193,9 @@ describe('CardFace', () => {
 
   test('the summary is the Red Joker', () => {
     const { getAllByRole } = render(<CardFace card={cards.find((c) => c.key === 'SUMMARY') as Card} year={2026} />)
-    expect(getAllByRole('img', { name: 'Red Joker' })).toHaveLength(2)
+    const corners = getAllByRole('img', { name: 'Red Joker' })
+    expect(corners).toHaveLength(2)
+    expect(corners[0]!.textContent).toBe('J')
+    expect(corners[0]!.querySelectorAll('img')).toHaveLength(4)
   })
 })

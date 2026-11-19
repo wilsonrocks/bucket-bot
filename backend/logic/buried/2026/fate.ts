@@ -4,19 +4,23 @@ import type { CardData } from "./build-cards";
 
 /**
  * Every card in the deck is a card from the Fate Deck: a suit and a value,
- * or the Red Joker. The value is the big number on the card itself (3 wins
+ * or a Joker. The value is the big number on the card itself (3 wins
  * is the 3 of Rams, ranked #42 is the 42), so it can go past 13. Mirrors site/src/buried/2026/fate.ts —
  * keep them in step.
  */
 
-export type Suit = "RAMS" | "CROWS" | "MASKS" | "TOMES" | "RED_JOKER";
+export type FateSuit = "RAMS" | "CROWS" | "MASKS" | "TOMES";
+/** Jokers have no suit of their own: the Red Joker carries all four, the Black Joker none. */
+export type Joker = "RED_JOKER" | "BLACK_JOKER";
+export type Suit = FateSuit | Joker;
 
-const SUIT_FILES: Record<Suit, string> = {
+export const FATE_SUITS: FateSuit[] = ["RAMS", "CROWS", "MASKS", "TOMES"];
+
+const SUIT_FILES: Record<FateSuit, string> = {
   RAMS: "ram.svg",
   CROWS: "crow.svg",
   MASKS: "mask.svg",
   TOMES: "tome.svg",
-  RED_JOKER: "joker.svg",
 };
 
 export const SUITS: Record<Suit, { name: string; colour: string }> = {
@@ -25,12 +29,17 @@ export const SUITS: Record<Suit, { name: string; colour: string }> = {
   MASKS: { name: "Masks", colour: "#5b2a86" },
   TOMES: { name: "Tomes", colour: "#1f4e79" },
   RED_JOKER: { name: "Red Joker", colour: "#9e1b1b" },
+  BLACK_JOKER: { name: "Black Joker", colour: "#15110e" },
 };
 
-const icons = new Map<Suit, string>();
+/** The suit icons shown in a card's corner. */
+export const cornerSuits = (suit: Suit): FateSuit[] =>
+  suit === "RED_JOKER" ? FATE_SUITS : suit === "BLACK_JOKER" ? [] : [suit];
+
+const icons = new Map<FateSuit, string>();
 
 /** The suit's icon as a data: URI satori can draw. */
-export function suitIcon(suit: Suit): string {
+export function suitIcon(suit: FateSuit): string {
   let uri = icons.get(suit);
   if (!uri) {
     const svg = readFileSync(join(__dirname, "suits", SUIT_FILES[suit]));
@@ -42,7 +51,7 @@ export function suitIcon(suit: Suit): string {
 
 export interface Fate {
   suit: Suit;
-  /** The card's headline number; absent for the Joker. */
+  /** The card's headline number; absent for a Joker. */
   value?: number;
 }
 

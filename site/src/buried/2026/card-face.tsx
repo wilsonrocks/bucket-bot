@@ -2,7 +2,7 @@ import { Children, isValidElement, type ReactNode } from 'react'
 import { toOrdinal } from '#/helpers/to-ordinal'
 import { textOn } from '#/helpers/text-on'
 import type { BuriedEvent, Card, SummaryCard } from './cards'
-import { fateOf, SUITS, type Fate } from './fate'
+import { cornerSuits, fateOf, SUIT_ICONS, SUITS, type Fate } from './fate'
 
 /**
  * The face of each 2026 card. All copy lives here (and, for the share
@@ -150,12 +150,19 @@ function CornerIndex({ fate, className }: { fate: Fate; className: string }) {
       aria-label={label}
       title={label}
     >
+      <span className={`font-serif leading-none font-black ${VALUE_SIZE[Math.min(String(fate.value ?? 'J').length, 3) - 1]}`}>
+        {fate.value ?? 'J'}
+      </span>
       {fate.value !== undefined ? (
-        <span className={`font-serif leading-none font-black ${VALUE_SIZE[Math.min(String(fate.value).length, 3) - 1]}`}>{fate.value}</span>
+        cornerSuits(fate.suit).map((s) => <img key={s} src={SUIT_ICONS[s]} alt="" className="w-[6cqw]" />)
       ) : (
-        <span className="font-serif text-[2.4cqw] leading-none font-black tracking-tight [writing-mode:vertical-rl]">JOKER</span>
+        // The Red Joker carries every suit; the Black Joker none.
+        <span className="flex flex-col items-center gap-[0.6cqw]">
+          {cornerSuits(fate.suit).map((s) => (
+            <img key={s} src={SUIT_ICONS[s]} alt="" className="w-[4.5cqw]" />
+          ))}
+        </span>
       )}
-      <img src={suit.icon} alt="" className="w-[6cqw]" />
     </div>
   )
 }

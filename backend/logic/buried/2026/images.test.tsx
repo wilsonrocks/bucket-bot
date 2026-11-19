@@ -1,7 +1,7 @@
 import sharp from "sharp";
 import { describe, expect, test } from "vitest";
 import { renderPng } from "../render";
-import { fateOf, SUITS, suitIcon } from "./fate";
+import { cornerSuits, FATE_SUITS, fateOf, suitIcon } from "./fate";
 import type { CardData } from "./build-cards";
 import { CARD_HEIGHT, CARD_WIDTH, CardImage, OG_HEIGHT, OG_WIDTH, ordinal, SummaryOgImage, textOn } from "./images";
 
@@ -51,9 +51,14 @@ describe("rendering", () => {
 
 describe("fate", () => {
   test("every suit has an icon on disk", () => {
-    for (const suit of Object.keys(SUITS) as (keyof typeof SUITS)[]) {
+    for (const suit of FATE_SUITS) {
       expect(suitIcon(suit)).toMatch(/^data:image\/svg\+xml;base64,/);
     }
+  });
+  test("the Red Joker carries every suit, the Black Joker none", () => {
+    expect(cornerSuits("RED_JOKER")).toEqual(FATE_SUITS);
+    expect(cornerSuits("BLACK_JOKER")).toEqual([]);
+    expect(cornerSuits("MASKS")).toEqual(["MASKS"]);
   });
   test("matches the site's mapping", () => {
     expect(fateOf({ key: "RANKING", finalRank: 1, bestRank: 1, bestRankDate: "2026-01-01", totalPlayers: 9 })).toEqual({ suit: "RAMS", value: 1 });
