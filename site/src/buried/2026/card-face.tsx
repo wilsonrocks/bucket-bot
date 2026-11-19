@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { toOrdinal } from '#/helpers/to-ordinal'
 import { textOn } from '#/helpers/text-on'
 import type { BuriedEvent, Card, SummaryCard } from './cards'
+import { fateOf, SUITS, type Fate } from './fate'
 
 /**
  * The face of each 2026 card. All copy lives here (and, for the share
@@ -10,6 +11,8 @@ import type { BuriedEvent, Card, SummaryCard } from './cards'
  */
 
 const INK = '#15110e'
+/** The card stock round the picture, where the corner indices sit. */
+export const STOCK = '#f4ecd8'
 const BONE = '#f1e9d8'
 const GOLD = '#c9a227'
 const MUTED = '#a89f8e'
@@ -31,9 +34,9 @@ function Face({
   children: ReactNode
 }) {
   return (
-    <div className="flex h-full w-full p-[3.5cqw]" style={{ background: bg, color: fg }}>
+    <div className="flex h-full w-full rounded-[3cqw] p-[3cqw]" style={{ background: bg, color: fg }}>
       <div
-        className="flex flex-1 flex-col justify-center rounded-[3.5cqw] border-[0.4cqw] px-[6cqw] py-[5cqw]"
+        className="flex flex-1 flex-col justify-center rounded-[2.5cqw] border-[0.4cqw] px-[6cqw] py-[5cqw]"
         style={{ borderColor: accent }}
       >
         {children}
@@ -90,7 +93,45 @@ export function summaryStats(card: SummaryCard): [string, string][] {
   return stats.slice(0, 6)
 }
 
+/**
+ * A playing card from the Fate Deck: value and suit in two opposite corners
+ * of the card stock, and the card's own design as the picture in the middle.
+ */
 export function CardFace({ card, year }: { card: Card; year: number }) {
+  const fate = fateOf(card)
+  return (
+    <div className="relative h-full w-full" style={{ background: STOCK }}>
+      <CornerIndex fate={fate} className="top-[2.4cqw] left-[1.6cqw]" />
+      <CornerIndex fate={fate} className="right-[1.6cqw] bottom-[2.4cqw] rotate-180" />
+      <div className="@container absolute inset-x-[10.5cqw] inset-y-[3cqw]">
+        <CardPicture card={card} year={year} />
+      </div>
+    </div>
+  )
+}
+
+function CornerIndex({ fate, className }: { fate: Fate; className: string }) {
+  const suit = SUITS[fate.suit]
+  const label = fate.value === undefined ? suit.name : `${fate.value} of ${suit.name}`
+  return (
+    <div
+      className={`absolute flex w-[7.5cqw] flex-col items-center gap-[0.6cqw] ${className}`}
+      style={{ color: suit.colour }}
+      role="img"
+      aria-label={label}
+      title={label}
+    >
+      {fate.value !== undefined ? (
+        <span className="font-serif text-[6.5cqw] leading-none font-black">{fate.value}</span>
+      ) : (
+        <span className="font-serif text-[2.4cqw] leading-none font-black tracking-tight [writing-mode:vertical-rl]">JOKER</span>
+      )}
+      <img src={suit.icon} alt="" className="w-[6cqw]" />
+    </div>
+  )
+}
+
+function CardPicture({ card, year }: { card: Card; year: number }) {
   switch (card.key) {
     case 'INTRO':
       return (

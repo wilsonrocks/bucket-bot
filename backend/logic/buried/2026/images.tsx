@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import type { CardData } from "./build-cards";
 import type { BuriedEvent } from "./cards";
+import { fateOf, SUITS, suitIcon, type Fate } from "./fate";
 
 /**
  * Satori layouts for the 2026 share images. Satori supports a flexbox subset
@@ -18,6 +19,14 @@ const BONE = "#f1e9d8";
 const GOLD = "#c9a227";
 const MUTED = "#a89f8e";
 const BLOOD = "#9e1b1b";
+/** The card stock round the picture, where the corner indices sit. */
+const STOCK = "#f4ecd8";
+
+// The picture panel inside the card stock; corner indices sit in the side margins.
+const MARGIN_X = 116;
+const MARGIN_Y = 40;
+const PANEL_WIDTH = CARD_WIDTH - MARGIN_X * 2;
+const PANEL_HEIGHT = CARD_HEIGHT - MARGIN_Y * 2;
 
 export interface ImageContext {
   year: number;
@@ -65,30 +74,31 @@ function Frame({
   return (
     <div
       style={{
-        width: CARD_WIDTH,
-        height: CARD_HEIGHT,
+        width: PANEL_WIDTH,
+        height: PANEL_HEIGHT,
         boxSizing: "border-box",
         display: "flex",
         background: bg,
         color: fg,
-        padding: 40,
+        padding: 26,
+        borderRadius: 28,
         fontFamily: "Inter",
       }}
     >
       <div
         style={{
-          width: CARD_WIDTH - 80,
-          height: CARD_HEIGHT - 80,
+          width: PANEL_WIDTH - 52,
+          height: PANEL_HEIGHT - 52,
           boxSizing: "border-box",
           display: "flex",
           flexDirection: "column",
           border: `4px solid ${accent}`,
-          borderRadius: 40,
-          padding: "56px 64px",
+          borderRadius: 22,
+          padding: "44px 48px",
         }}
       >
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div style={{ display: "flex", fontFamily: "Cinzel", fontWeight: 900, fontSize: 36, letterSpacing: 6, color: accent }}>
+          <div style={{ display: "flex", fontFamily: "Cinzel", fontWeight: 900, fontSize: 30, letterSpacing: 5, color: accent }}>
             {`MALIFAUX BURIED ${ctx.year}`}
           </div>
           {ctx.logo ? <img src={ctx.logo} width={96} height={96} style={{ objectFit: "contain" }} /> : null}
@@ -104,7 +114,7 @@ function Frame({
 }
 
 const Eyebrow = ({ children, color = MUTED }: { children: string; color?: string }) => (
-  <div style={{ display: "flex", fontSize: 40, textTransform: "uppercase", letterSpacing: 4, color, marginBottom: 16 }}>
+  <div style={{ display: "flex", fontSize: 34, textTransform: "uppercase", letterSpacing: 3, color, marginBottom: 16 }}>
     {children}
   </div>
 );
@@ -123,7 +133,7 @@ function EventList({ events, max = 5, showPlace = false }: { events: BuriedEvent
     <div style={{ display: "flex", flexDirection: "column", marginTop: 40 }}>
       {shown.map((e) => (
         <div key={`${e.id}`} style={{ display: "flex", justifyContent: "space-between", fontSize: 36, padding: "12px 0", borderBottom: `2px solid ${MUTED}40` }}>
-          <div style={{ display: "flex", maxWidth: 720, overflow: "hidden" }}>{e.name}</div>
+          <div style={{ display: "flex", maxWidth: 560, overflow: "hidden" }}>{e.name}</div>
           <div style={{ display: "flex", color: GOLD, fontWeight: 700 }}>
             {showPlace && e.place !== undefined ? ordinal(e.place) : `${e.players}p`}
           </div>
@@ -136,7 +146,52 @@ function EventList({ events, max = 5, showPlace = false }: { events: BuriedEvent
   );
 }
 
+/**
+ * A playing card from the Fate Deck: value and suit in two opposite corners
+ * of the card stock, and the card's own design as the picture in the middle.
+ */
 export function CardImage({ card, ctx }: { card: CardData; ctx: ImageContext }) {
+  const fate = fateOf(card);
+  return (
+    <div style={{ width: CARD_WIDTH, height: CARD_HEIGHT, display: "flex", position: "relative", background: STOCK }}>
+      <CornerIndex fate={fate} style={{ top: 34, left: 22 }} />
+      <CornerIndex fate={fate} style={{ bottom: 34, right: 22, transform: "rotate(180deg)" }} />
+      <div style={{ position: "absolute", top: MARGIN_Y, left: MARGIN_X, display: "flex" }}>
+        <CardPicture card={card} ctx={ctx} />
+      </div>
+    </div>
+  );
+}
+
+function CornerIndex({ fate, style }: { fate: Fate; style: Record<string, string | number> }) {
+  const suit = SUITS[fate.suit];
+  return (
+    <div
+      style={{
+        position: "absolute",
+        width: 72,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        color: suit.colour,
+        ...style,
+      }}
+    >
+      {fate.value !== undefined ? (
+        <div style={{ display: "flex", fontFamily: "Cinzel", fontWeight: 900, fontSize: 68, lineHeight: 1 }}>{`${fate.value}`}</div>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", fontFamily: "Cinzel", fontWeight: 900, fontSize: 22, lineHeight: 1 }}>
+          {"JOKER".split("").map((l, i) => (
+            <div key={i} style={{ display: "flex" }}>{l}</div>
+          ))}
+        </div>
+      )}
+      <img src={suitIcon(fate.suit)} width={60} height={60} style={{ marginTop: 8 }} />
+    </div>
+  );
+}
+
+function CardPicture({ card, ctx }: { card: CardData; ctx: ImageContext }) {
   switch (card.key) {
     case "INTRO":
       return (
@@ -164,11 +219,11 @@ export function CardImage({ card, ctx }: { card: CardData; ctx: ImageContext }) 
       return (
         <Frame ctx={ctx}>
           <Eyebrow>Spread your bets</Eyebrow>
-          <Big size={180}>{`${card.factions.length} factions`}</Big>
+          <Big size={140}>{`${card.factions.length} factions`}</Big>
           <div style={{ display: "flex", flexDirection: "column", marginTop: 48 }}>
             {card.factions.slice(0, 6).map((f) => (
               <div key={f.faction.code} style={{ display: "flex", alignItems: "center", marginBottom: 20 }}>
-                <div style={{ display: "flex", width: 340, fontSize: 32, fontWeight: 700 }}>{f.faction.name}</div>
+                <div style={{ display: "flex", width: 300, fontSize: 30, fontWeight: 700 }}>{f.faction.name}</div>
                 <div style={{ display: "flex", flex: 1, marginLeft: 16 }}>
                   <div style={{ display: "flex", height: 48, borderRadius: 12, background: f.faction.hexCode, width: `${(f.events / max) * 100}%` }} />
                 </div>
@@ -232,7 +287,7 @@ export function CardImage({ card, ctx }: { card: CardData; ctx: ImageContext }) 
           <Eyebrow>Brush with greatness</Eyebrow>
           {ctx.paintingPhoto ? (
             <div style={{ display: "flex", justifyContent: "center", marginBottom: 32 }}>
-              <img src={ctx.paintingPhoto} height={520} style={{ borderRadius: 24, objectFit: "cover", maxWidth: 880 }} />
+              <img src={ctx.paintingPhoto} height={480} style={{ borderRadius: 24, objectFit: "cover", maxWidth: 700 }} />
             </div>
           ) : null}
           <Big size={ctx.paintingPhoto ? 140 : 260}>{`${card.awards.length}`}</Big>

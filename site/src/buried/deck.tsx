@@ -224,7 +224,7 @@ function Table<C extends DeckCard>({ cards, index, move, go, settle, renderFace,
       <div className="relative aspect-[4/5]">
         {discardTop >= 0 ? (
           <>
-            <PileLayers count={discardTop} back={<div className="h-full w-full bg-[#15110e]" />} />
+            <PileLayers count={discardTop} back={<div className="h-full w-full border border-black/10 bg-[#f4ecd8]" />} />
             <CardShape
               key={discardTop}
               className="shadow-xl"
@@ -352,11 +352,14 @@ function Slideshow<C extends DeckCard>({ cards, index, move, go, settle, renderF
 
 function CardBack({ year, playerName, imageKey }: { year: number; playerName: string; imageKey: string | null }) {
   return (
-    <div className="flex h-full w-full p-[3.5cqw]" style={{ background: '#15110e', color: '#f1e9d8' }}>
+    // Card stock rim round the printed back, like the faces.
+    <div className="flex h-full w-full p-[3cqw]" style={{ background: '#f4ecd8' }}>
       <div
-        className="flex flex-1 flex-col items-center justify-center gap-[4cqw] rounded-[3.5cqw] border-[0.4cqw] text-center"
+        className="flex flex-1 flex-col items-center justify-center gap-[4cqw] rounded-[3cqw] border-[0.4cqw] text-center"
         style={{
           borderColor: '#c9a227',
+          backgroundColor: '#15110e',
+          color: '#f1e9d8',
           backgroundImage:
             'repeating-linear-gradient(45deg, #c9a22714 0 2px, transparent 2px 22px), repeating-linear-gradient(-45deg, #c9a22714 0 2px, transparent 2px 22px)',
         }}

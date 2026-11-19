@@ -1,6 +1,7 @@
 import sharp from "sharp";
 import { describe, expect, test } from "vitest";
 import { renderPng } from "../render";
+import { fateOf, SUITS, suitIcon } from "./fate";
 import type { CardData } from "./build-cards";
 import { CARD_HEIGHT, CARD_WIDTH, CardImage, OG_HEIGHT, OG_WIDTH, ordinal, SummaryOgImage, textOn } from "./images";
 
@@ -46,4 +47,16 @@ describe("rendering", () => {
     const png = await renderPng(<SummaryOgImage card={summary} ctx={ctx} />, OG_WIDTH, OG_HEIGHT);
     expect(await sharp(png).metadata()).toMatchObject({ width: 1200, height: 630 });
   }, 30_000);
+});
+
+describe("fate", () => {
+  test("every suit has an icon on disk", () => {
+    for (const suit of Object.keys(SUITS) as (keyof typeof SUITS)[]) {
+      expect(suitIcon(suit)).toMatch(/^data:image\/svg\+xml;base64,/);
+    }
+  });
+  test("matches the site's mapping", () => {
+    expect(fateOf({ key: "RANKING", finalRank: 1, bestRank: 1, bestRankDate: "2026-01-01", totalPlayers: 9 })).toEqual({ suit: "RAMS", value: 13 });
+    expect(fateOf({ key: "INTRO", playerName: "A", eventsPlayed: 30, gamesPlayed: 90, percentile: 99 })).toEqual({ suit: "CROWS", value: 13 });
+  });
 });

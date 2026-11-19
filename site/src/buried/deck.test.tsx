@@ -148,6 +148,17 @@ describe('CardFace', () => {
   test('faction cards use the faction colour', () => {
     const card = cards.find((c) => c.key === 'MOST_PLAYED_FACTION') as Card
     const { container } = render(<CardFace card={card} year={2026} />)
-    expect((container.firstChild as HTMLElement).style.background).toBe('rgb(0, 137, 200)')
+    const panels = [...container.querySelectorAll<HTMLElement>('[style]')].map((el) => el.style.background)
+    expect(panels).toContain('rgb(0, 137, 200)')
+  })
+
+  test('every card is a Fate Deck card, with matching indices in two corners', () => {
+    const { getAllByRole } = render(<CardFace card={cards.find((c) => c.key === 'EVENTS_WON') as Card} year={2026} />)
+    expect(getAllByRole('img', { name: '1 of Rams' })).toHaveLength(2)
+  })
+
+  test('the summary is the Red Joker', () => {
+    const { getAllByRole } = render(<CardFace card={cards.find((c) => c.key === 'SUMMARY') as Card} year={2026} />)
+    expect(getAllByRole('img', { name: 'Red Joker' })).toHaveLength(2)
   })
 })
