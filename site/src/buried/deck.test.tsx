@@ -181,12 +181,14 @@ describe('CardFace', () => {
     expect(getAllByRole('img', { name: '1 of Rams' })).toHaveLength(2)
   })
 
-  test('writing fades in a piece at a time, with a pause before the stat', () => {
+  test('the words fade in one at a time, and the number last after a pause', () => {
     const { container } = render(<CardFace card={cards.find((c) => c.key === 'EVENTS_WON') as Card} year={2026} />)
-    const delays = [...container.querySelectorAll<HTMLElement>('.buried-fade')].map((el) => parseFloat(el.style.animationDelay))
-    expect(delays).toEqual([...delays].sort((x, y) => x - y))
-    // eyebrow → stat waits longer than stat's line → event list
-    expect(delays[1]! - delays[0]!).toBeGreaterThan(delays[3]! - delays[2]!)
+    const pieces = [...container.querySelectorAll<HTMLElement>('.buried-fade')]
+    const delayOf = (el: HTMLElement) => parseFloat(el.style.animationDelay)
+    const number = pieces.find((el) => el.textContent === '1')!
+    const words = pieces.filter((el) => el !== number).map(delayOf)
+    expect(words).toEqual([...words].sort((x, y) => x - y))
+    expect(delayOf(number) - Math.max(...words)).toBeGreaterThan(words[1]! - words[0]!)
   })
 
   test('the summary is the Red Joker', () => {
