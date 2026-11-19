@@ -20,9 +20,9 @@ import {
   Stack,
   Switch,
   Text,
-  TextInput,
   Title,
 } from '@mantine/core'
+import { DatePickerInput } from '@mantine/dates'
 import { modals } from '@mantine/modals'
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
@@ -61,7 +61,7 @@ function BuriedYearPanel({ year }: { year: GetBuriedYears200Item }) {
   const dmTest = usePostBuriedYearsYearDmTest()
   const dmAll = usePostBuriedYearsYearDmAll()
   const [uploading, setUploading] = useState(false)
-  const [cutoff, setCutoff] = useState(year.cutoff_date)
+  const [cutoff, setCutoff] = useState<string | null>(year.cutoff_date)
 
   const yearParam = String(year.year)
   const running = year.generation.state === 'running'
@@ -110,18 +110,23 @@ function BuriedYearPanel({ year }: { year: GetBuriedYears200Item }) {
 
           <Stack gap="xs" style={{ flex: 1 }}>
             <Group align="flex-end">
-              <TextInput
+              <DatePickerInput
                 label="Cutoff (exclusive)"
                 description="Events from 1 Jan up to, not including, this date"
                 value={cutoff}
-                onChange={(e) => setCutoff(e.currentTarget.value)}
-                w={260}
+                onChange={setCutoff}
+                valueFormat="D MMMM YYYY"
+                minDate={`${year.year}-01-02`}
+                maxDate={`${year.year + 1}-01-01`}
+                defaultDate={cutoff ?? `${year.year}-12-01`}
+                w={300}
               />
               <Button
                 variant="default"
-                disabled={cutoff === year.cutoff_date}
+                disabled={!cutoff || cutoff === year.cutoff_date}
                 loading={update.isPending}
                 onClick={() =>
+                  cutoff &&
                   update.mutate({ year: yearParam, data: { cutoff_date: cutoff } })
                 }
               >
