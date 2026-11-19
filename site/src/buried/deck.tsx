@@ -402,7 +402,7 @@ function CardBack({ year, playerName, imageKey }: { year: number; playerName: st
           Malifaux Buried
         </p>
         <p className="text-[5cqw] font-bold">{year}</p>
-        <p className="text-[3.6cqw] opacity-80">{playerName}'s year, face down. Flip to begin.</p>
+        <p className="text-[4.4cqw] opacity-80">{playerName}'s year, face down. Flip to begin.</p>
       </div>
     </div>
   )

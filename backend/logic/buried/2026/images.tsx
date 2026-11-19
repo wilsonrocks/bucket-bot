@@ -98,13 +98,13 @@ function Frame({
         }}
       >
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div style={{ display: "flex", fontFamily: "Cinzel", fontWeight: 900, fontSize: 30, letterSpacing: 5, color: accent }}>
+          <div style={{ display: "flex", fontFamily: "Cinzel", fontWeight: 900, fontSize: 34, letterSpacing: 5, color: accent }}>
             {`MALIFAUX BURIED ${ctx.year}`}
           </div>
           {ctx.logo ? <img src={ctx.logo} width={96} height={96} style={{ objectFit: "contain" }} /> : null}
         </div>
         <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>{children}</div>
-        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 32, opacity: 0.8 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 36, opacity: 0.8 }}>
           <div style={{ display: "flex", fontWeight: 700 }}>{ctx.playerName}</div>
           <div style={{ display: "flex" }}>malifaux.uk</div>
         </div>
@@ -114,7 +114,7 @@ function Frame({
 }
 
 const Eyebrow = ({ children, color = MUTED }: { children: string; color?: string }) => (
-  <div style={{ display: "flex", fontSize: 34, textTransform: "uppercase", letterSpacing: 3, color, marginBottom: 16 }}>
+  <div style={{ display: "flex", fontSize: 38, textTransform: "uppercase", letterSpacing: 3, color, marginBottom: 16 }}>
     {children}
   </div>
 );
@@ -132,7 +132,7 @@ function EventList({ events, max = 5, showPlace = false }: { events: BuriedEvent
   return (
     <div style={{ display: "flex", flexDirection: "column", marginTop: 40 }}>
       {shown.map((e) => (
-        <div key={`${e.id}`} style={{ display: "flex", justifyContent: "space-between", fontSize: 36, padding: "12px 0", borderBottom: `2px solid ${MUTED}40` }}>
+        <div key={`${e.id}`} style={{ display: "flex", justifyContent: "space-between", fontSize: 42, padding: "12px 0", borderBottom: `2px solid ${MUTED}40` }}>
           <div style={{ display: "flex", maxWidth: 560, overflow: "hidden" }}>{e.name}</div>
           <div style={{ display: "flex", color: GOLD, fontWeight: 700 }}>
             {showPlace && e.place !== undefined ? ordinal(e.place) : `${e.players}p`}
@@ -140,7 +140,7 @@ function EventList({ events, max = 5, showPlace = false }: { events: BuriedEvent
         </div>
       ))}
       {events.length > max ? (
-        <div style={{ display: "flex", fontSize: 32, color: MUTED, marginTop: 12 }}>{`+ ${events.length - max} more`}</div>
+        <div style={{ display: "flex", fontSize: 38, color: MUTED, marginTop: 12 }}>{`+ ${events.length - max} more`}</div>
       ) : null}
     </div>
   );
@@ -227,11 +227,11 @@ function CardPicture({ card, ctx }: { card: CardData; ctx: ImageContext }) {
           <div style={{ display: "flex", flexDirection: "column", marginTop: 48 }}>
             {card.factions.slice(0, 6).map((f) => (
               <div key={f.faction.code} style={{ display: "flex", alignItems: "center", marginBottom: 20 }}>
-                <div style={{ display: "flex", width: 300, fontSize: 30, fontWeight: 700 }}>{f.faction.name}</div>
+                <div style={{ display: "flex", width: 300, fontSize: 36, fontWeight: 700 }}>{f.faction.name}</div>
                 <div style={{ display: "flex", flex: 1, marginLeft: 16 }}>
                   <div style={{ display: "flex", height: 48, borderRadius: 12, background: f.faction.hexCode, width: `${(f.events / max) * 100}%` }} />
                 </div>
-                <div style={{ display: "flex", width: 140, justifyContent: "flex-end", fontSize: 32 }}>
+                <div style={{ display: "flex", width: 140, justifyContent: "flex-end", fontSize: 38 }}>
                   {f.factionRank !== undefined ? `#${f.factionRank}` : `${f.events}`}
                 </div>
               </div>
@@ -246,7 +246,7 @@ function CardPicture({ card, ctx }: { card: CardData; ctx: ImageContext }) {
           <Eyebrow>Have models, will travel</Eyebrow>
           <Big>{`${card.venues.length}`}</Big>
           <Line>{`${card.venues.length === 1 ? "venue" : "venues"} across ${plural(card.regions, "region")}.`}</Line>
-          <Line size={40}>{card.venues.slice(0, 4).map((v) => v.town).join(" · ")}</Line>
+          <Line size={44}>{card.venues.slice(0, 4).map((v) => v.town).join(" · ")}</Line>
         </Frame>
       );
     case "BIGGEST_EVENT":
@@ -304,7 +304,7 @@ function CardPicture({ card, ctx }: { card: CardData; ctx: ImageContext }) {
           <Eyebrow>Behind the table</Eyebrow>
           <Big>{`${card.events.length}`}</Big>
           <Line>{`${card.events.length === 1 ? "event" : "events"} organised for ${plural(card.playersHosted, "player")}.`}</Line>
-          <Line size={40}>Thank you. Seriously.</Line>
+          <Line size={44}>Thank you. Seriously.</Line>
         </Frame>
       );
     case "ACHIEVEMENTS":
@@ -313,7 +313,7 @@ function CardPicture({ card, ctx }: { card: CardData; ctx: ImageContext }) {
           <Eyebrow>Unlocked</Eyebrow>
           <Big>{`${card.achievements.length}`}</Big>
           <Line>{card.achievements.length === 1 ? "achievement earned." : "achievements earned."}</Line>
-          <Line size={36}>{card.achievements.slice(0, 5).map((a) => a.name).join(" · ")}</Line>
+          <Line size={42}>{card.achievements.slice(0, 5).map((a) => a.name).join(" · ")}</Line>
         </Frame>
       );
     case "SUMMARY": {
@@ -326,12 +326,12 @@ function CardPicture({ card, ctx }: { card: CardData; ctx: ImageContext }) {
             {stats.map(([label, value]) => (
               <div key={label} style={{ display: "flex", flexDirection: "column", width: "50%", marginBottom: 40 }}>
                 <div style={{ display: "flex", fontSize: 110, fontWeight: 900, lineHeight: 1 }}>{value}</div>
-                <div style={{ display: "flex", fontSize: 34, color: MUTED, marginTop: 8 }}>{label}</div>
+                <div style={{ display: "flex", fontSize: 40, color: MUTED, marginTop: 8 }}>{label}</div>
               </div>
             ))}
           </div>
           {card.topFaction ? (
-            <div style={{ display: "flex", alignItems: "center", fontSize: 40, fontWeight: 700 }}>
+            <div style={{ display: "flex", alignItems: "center", fontSize: 46, fontWeight: 700 }}>
               <div style={{ display: "flex", width: 40, height: 40, borderRadius: 20, background: card.topFaction.hexCode, marginRight: 20 }} />
               {card.topFaction.name}
             </div>
@@ -364,7 +364,7 @@ export function SummaryOgImage({ card, ctx }: { card: Extract<CardData, { key: "
     <div style={{ width: OG_WIDTH, height: OG_HEIGHT, boxSizing: "border-box", display: "flex", background: INK, color: BONE, fontFamily: "Inter", padding: 28 }}>
       <div style={{ width: OG_WIDTH - 56, height: OG_HEIGHT - 56, boxSizing: "border-box", display: "flex", flexDirection: "column", border: `4px solid ${accent}`, borderRadius: 28, padding: "40px 52px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div style={{ display: "flex", fontFamily: "Cinzel", fontWeight: 900, fontSize: 30, letterSpacing: 5, color: GOLD }}>
+          <div style={{ display: "flex", fontFamily: "Cinzel", fontWeight: 900, fontSize: 34, letterSpacing: 5, color: GOLD }}>
             {`MALIFAUX BURIED ${ctx.year}`}
           </div>
           {ctx.logo ? <img src={ctx.logo} width={72} height={72} style={{ objectFit: "contain" }} /> : null}
@@ -374,7 +374,7 @@ export function SummaryOgImage({ card, ctx }: { card: Extract<CardData, { key: "
           {stats.map(([label, value]) => (
             <div key={label} style={{ display: "flex", flexDirection: "column", flex: 1 }}>
               <div style={{ display: "flex", fontSize: 96, fontWeight: 900, lineHeight: 1 }}>{value}</div>
-              <div style={{ display: "flex", fontSize: 28, color: MUTED, marginTop: 6 }}>{label}</div>
+              <div style={{ display: "flex", fontSize: 32, color: MUTED, marginTop: 6 }}>{label}</div>
             </div>
           ))}
         </div>

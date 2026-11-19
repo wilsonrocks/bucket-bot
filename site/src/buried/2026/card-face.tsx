@@ -72,7 +72,7 @@ function reveal(children: ReactNode) {
 }
 
 const Eyebrow = ({ children, color = MUTED }: { children: ReactNode; color?: string }) => (
-  <p className="mb-[1.5cqw] text-[3.6cqw] tracking-[0.12em] uppercase" style={{ color }}>
+  <p className="mb-[1.5cqw] text-[4.4cqw] tracking-[0.12em] uppercase" style={{ color }}>
     {children}
   </p>
 )
@@ -82,12 +82,12 @@ const Big = ({ children, size = 'text-[24cqw]' }: { children: ReactNode; size?: 
 )
 
 const Line = ({ children, small = false }: { children: ReactNode; small?: boolean }) => (
-  <p className={`mt-[2cqw] font-bold leading-tight ${small ? 'text-[4cqw]' : 'text-[4.8cqw]'}`}>{children}</p>
+  <p className={`mt-[2cqw] font-bold leading-tight ${small ? 'text-[4.8cqw]' : 'text-[5.6cqw]'}`}>{children}</p>
 )
 
 function EventList({ events, showPlace = false, max = 5 }: { events: BuriedEvent[]; showPlace?: boolean; max?: number }) {
   return (
-    <ul className="mt-[3.5cqw] text-[3.4cqw]">
+    <ul className="mt-[3.5cqw] text-[4.4cqw]">
       {events.slice(0, max).map((e) => (
         <li key={e.id} className="flex justify-between gap-[2cqw] border-b py-[1cqw]" style={{ borderColor: `${MUTED}40` }}>
           <span className="truncate">{e.name}</span>
@@ -205,7 +205,7 @@ function CardPicture({ card, year }: { card: Card; year: number }) {
         <Face>
           <Eyebrow>Spread your bets</Eyebrow>
           <Big size="text-[16cqw]">{card.factions.length} factions</Big>
-          <ul className="mt-[4cqw] space-y-[1.8cqw] text-[3.2cqw]">
+          <ul className="mt-[4cqw] space-y-[1.8cqw] text-[4.2cqw]">
             {card.factions.slice(0, 6).map((f) => (
               <li key={f.faction.code} className="flex items-center gap-[2cqw]">
                 <span className="w-[32%] truncate font-bold">{f.faction.name}</span>
@@ -222,7 +222,7 @@ function CardPicture({ card, year }: { card: Card; year: number }) {
             ))}
           </ul>
           {card.factions.some((f) => f.factionRank !== undefined) && (
-            <p className="mt-[3cqw] text-[2.8cqw]" style={{ color: MUTED }}>
+            <p className="mt-[3cqw] text-[3.6cqw]" style={{ color: MUTED }}>
               # = your rank in that faction's Best-of ranking.
             </p>
           )}
@@ -296,7 +296,7 @@ function CardPicture({ card, year }: { card: Card; year: number }) {
           )}
           <Big size={photo ? 'text-[13cqw]' : 'text-[24cqw]'}>{card.awards.length}</Big>
           <Line>{card.awards.length === 1 ? 'painting award.' : 'painting awards.'}</Line>
-          <ul className="mt-[2cqw] text-[3cqw]" style={{ color: MUTED }}>
+          <ul className="mt-[2cqw] text-[4cqw]" style={{ color: MUTED }}>
             {card.awards.slice(0, 3).map((a, i) => (
               <li key={i} className="truncate">
                 {toOrdinal(a.position)} {a.category} · {a.event.name}
@@ -338,7 +338,7 @@ function CardPicture({ card, year }: { card: Card; year: number }) {
           <dl data-stat className="mt-[2cqw] grid grid-cols-2 gap-x-[4cqw] gap-y-[4cqw]">
             {summaryStats(card).map(([label, value]) => (
               <div key={label} className="flex flex-col-reverse">
-                <dt className="text-[3.2cqw]" style={{ color: MUTED }}>
+                <dt className="text-[4.4cqw]" style={{ color: MUTED }}>
                   {label}
                 </dt>
                 <dd className="text-[11cqw] leading-none font-black">{value}</dd>
@@ -346,7 +346,7 @@ function CardPicture({ card, year }: { card: Card; year: number }) {
             ))}
           </dl>
           {card.topFaction && (
-            <p className="mt-[5cqw] flex items-center gap-[2cqw] text-[4cqw] font-bold">
+            <p className="mt-[5cqw] flex items-center gap-[2cqw] text-[5cqw] font-bold">
               <span className="inline-block size-[4cqw] rounded-full" style={{ background: card.topFaction.hexCode }} />
               {card.topFaction.name}
             </p>
