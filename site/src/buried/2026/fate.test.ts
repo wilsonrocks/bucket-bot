@@ -7,33 +7,26 @@ const cards = parseCards(fixture)
 const card = (key: string) => cards.find((c) => c.key === key)!
 
 describe('fateOf', () => {
-  it('gives every card a value from 1 to 13, except the Joker', () => {
+  it('the value is the big number on the card', () => {
     for (const c of cards) {
       const fate = fateOf(c)
-      if (fate.suit === 'RED_JOKER') {
-        expect(fate.value).toBeUndefined()
-      } else {
-        expect(fate.value).toBeGreaterThanOrEqual(1)
-        expect(fate.value).toBeLessThanOrEqual(13)
-      }
+      if (fate.suit === 'RED_JOKER') expect(fate.value).toBeUndefined()
+      else expect(fate.value).toBeGreaterThanOrEqual(0)
     }
-  })
-
-  it('uses the headline number as the value', () => {
-    expect(fateOf(card('INTRO'))).toEqual({ suit: 'CROWS', value: 8 })
+    const intro = card('INTRO') as Extract<(typeof cards)[number], { key: 'INTRO' }>
+    expect(fateOf(intro)).toEqual({ suit: 'CROWS', value: intro.gamesPlayed })
     expect(fateOf(card('PAINTING'))).toEqual({ suit: 'TOMES', value: 2 })
   })
 
-  it('a better rank is a higher card', () => {
+  it('a rank is its own number', () => {
     const ranking = card('RANKING') as Extract<(typeof cards)[number], { key: 'RANKING' }>
-    expect(fateOf({ ...ranking, finalRank: 1 }).value).toBe(13)
-    expect(fateOf({ ...ranking, finalRank: 7 }).value).toBe(7)
-    expect(fateOf({ ...ranking, finalRank: 40 }).value).toBe(1)
+    expect(fateOf({ ...ranking, finalRank: 1 }).value).toBe(1)
+    expect(fateOf({ ...ranking, finalRank: 42 }).value).toBe(42)
   })
 
-  it('caps big numbers at 13', () => {
-    const intro = card('INTRO') as Extract<(typeof cards)[number], { key: 'INTRO' }>
-    expect(fateOf({ ...intro, eventsPlayed: 30 }).value).toBe(13)
+  it('does not cap big numbers', () => {
+    const big = card('BIGGEST_EVENT') as Extract<(typeof cards)[number], { key: 'BIGGEST_EVENT' }>
+    expect(fateOf(big).value).toBe(big.event.players)
   })
 
   it('the summary is the Red Joker', () => {

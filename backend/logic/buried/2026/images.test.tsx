@@ -56,7 +56,7 @@ describe("fate", () => {
     }
   });
   test("matches the site's mapping", () => {
-    expect(fateOf({ key: "RANKING", finalRank: 1, bestRank: 1, bestRankDate: "2026-01-01", totalPlayers: 9 })).toEqual({ suit: "RAMS", value: 13 });
-    expect(fateOf({ key: "INTRO", playerName: "A", eventsPlayed: 30, gamesPlayed: 90, percentile: 99 })).toEqual({ suit: "CROWS", value: 13 });
+    expect(fateOf({ key: "RANKING", finalRank: 1, bestRank: 1, bestRankDate: "2026-01-01", totalPlayers: 9 })).toEqual({ suit: "RAMS", value: 1 });
+    expect(fateOf({ key: "INTRO", playerName: "A", eventsPlayed: 30, gamesPlayed: 90, percentile: 99 })).toEqual({ suit: "CROWS", value: 90 });
   });
 });

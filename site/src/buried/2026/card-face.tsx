@@ -110,6 +110,9 @@ export function CardFace({ card, year }: { card: Card; year: number }) {
   )
 }
 
+// Corner values shrink as they get longer, to stay inside the corner.
+const VALUE_SIZE = ['text-[6.5cqw]', 'text-[5cqw]', 'text-[3.6cqw]']
+
 function CornerIndex({ fate, className }: { fate: Fate; className: string }) {
   const suit = SUITS[fate.suit]
   const label = fate.value === undefined ? suit.name : `${fate.value} of ${suit.name}`
@@ -122,7 +125,7 @@ function CornerIndex({ fate, className }: { fate: Fate; className: string }) {
       title={label}
     >
       {fate.value !== undefined ? (
-        <span className="font-serif text-[6.5cqw] leading-none font-black">{fate.value}</span>
+        <span className={`font-serif leading-none font-black ${VALUE_SIZE[Math.min(String(fate.value).length, 3) - 1]}`}>{fate.value}</span>
       ) : (
         <span className="font-serif text-[2.4cqw] leading-none font-black tracking-tight [writing-mode:vertical-rl]">JOKER</span>
       )}

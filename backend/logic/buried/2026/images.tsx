@@ -163,6 +163,9 @@ export function CardImage({ card, ctx }: { card: CardData; ctx: ImageContext }) 
   );
 }
 
+// Corner values shrink as they get longer, to stay inside the corner.
+const VALUE_SIZE = [68, 54, 40];
+
 function CornerIndex({ fate, style }: { fate: Fate; style: Record<string, string | number> }) {
   const suit = SUITS[fate.suit];
   return (
@@ -178,7 +181,7 @@ function CornerIndex({ fate, style }: { fate: Fate; style: Record<string, string
       }}
     >
       {fate.value !== undefined ? (
-        <div style={{ display: "flex", fontFamily: "Cinzel", fontWeight: 900, fontSize: 68, lineHeight: 1 }}>{`${fate.value}`}</div>
+        <div style={{ display: "flex", fontFamily: "Cinzel", fontWeight: 900, fontSize: VALUE_SIZE[Math.min(`${fate.value}`.length, 3) - 1], lineHeight: 1 }}>{`${fate.value}`}</div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", fontFamily: "Cinzel", fontWeight: 900, fontSize: 22, lineHeight: 1 }}>
           {"JOKER".split("").map((l, i) => (
