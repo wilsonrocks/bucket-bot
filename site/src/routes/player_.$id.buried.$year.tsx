@@ -2,7 +2,7 @@ import { createFileRoute, notFound } from '@tanstack/react-router'
 import { useCallback } from 'react'
 import { fetchBuried } from '#/queries'
 import { optionalString } from '#/helpers/search-params'
-import { SITE_NAME, absoluteUrl, seo } from '#/helpers/seo'
+import { SITE_NAME, seo } from '#/helpers/seo'
 import { Link } from '#/components/link'
 import { Deck } from '#/buried/deck'
 import { buriedEdition } from '#/buried'
@@ -50,7 +50,7 @@ export const Route = createFileRoute('/player_/$id/buried/$year')({
 })
 
 function RouteComponent() {
-  const { playerName, cards, cardBackImageKey } = Route.useLoaderData()
+  const { playerName, cards, cardBackImageKey, url } = Route.useLoaderData()
   const { id, year } = Route.useParams()
   const { card } = Route.useSearch()
   const navigate = Route.useNavigate()
@@ -77,7 +77,7 @@ function RouteComponent() {
         cards={cards}
         year={year}
         playerName={playerName}
-        url={absoluteUrl(`/player/${id}/buried/${year}`)}
+        url={url}
         cardBackImageKey={cardBackImageKey}
         activeKey={card}
         onChange={onChange}

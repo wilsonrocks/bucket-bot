@@ -1353,7 +1353,9 @@ export const fetchBuried = createServerFn()
     if (!row) return null
     const cards = parse(row.cards)
     if (cards.length === 0) return null
-    return { ...row, cards }
+    // SITE_URL is http://localhost:3001 locally, so shared links point at the site you're on.
+    const siteUrl = process.env.SITE_URL || 'https://malifaux.uk'
+    return { ...row, cards, url: `${siteUrl}/player/${playerId}/buried/${year}` }
   })
 
 /** Years with a published Buried deck for this player, newest first. */
