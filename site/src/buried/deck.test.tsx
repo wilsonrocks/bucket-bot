@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { useState } from 'react'
-import { afterEach, describe, expect, test } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import fixture from './2026/fixture.json'
 import { CardFace, cardTitle } from './2026/card-face'
 import type { Card } from './2026/cards'
@@ -9,6 +9,19 @@ import { parseCards } from './2026/parse-cards'
 import { Deck, indexOfKey } from './deck'
 
 afterEach(cleanup)
+
+/** jsdom has no matchMedia; pretend to be a phone or a desktop. */
+function screenIs(kind: 'mobile' | 'desktop', { reducedMotion = false } = {}) {
+  vi.stubGlobal('matchMedia', (query: string) => ({
+    matches: query.includes('min-width') ? kind === 'desktop' : query.includes('reduce') ? reducedMotion : false,
+    addEventListener: () => {},
+    removeEventListener: () => {},
+  }))
+}
+afterEach(() => vi.unstubAllGlobals())
+
+/** jsdom has no AnimationEvent, so React listens for the webkit-prefixed name instead. */
+const land = (el: Element) => fireEvent(el, new Event('webkitAnimationEnd', { bubbles: true }))
 
 const cards = parseCards(fixture)
 
@@ -42,7 +55,9 @@ describe('indexOfKey', () => {
   })
 })
 
-describe('Deck', () => {
+describe('Deck on mobile (slideshow)', () => {
+  beforeEach(() => screenIs('mobile'))
+
   test('starts face down, and flipping deals the cards in order', () => {
     render(<Harness />)
     expect(screen.getByRole('group', { name: 'Card back' })).toBeTruthy()
@@ -76,6 +91,51 @@ describe('Deck', () => {
     render(<Harness initial="EVENTS_WON" />)
     expect(screen.getByText('event won.')).toBeTruthy()
     expect(screen.getByRole('button', { name: 'Share card' })).toBeTruthy()
+  })
+})
+
+describe('Deck on desktop (draw and discard piles)', () => {
+  beforeEach(() => screenIs('desktop'))
+
+  test('flipping the draw pile deals its top card onto the discard pile', () => {
+    const { container } = render(<Harness />)
+    expect(screen.getByText('Flip a card to begin.')).toBeTruthy()
+    expect(screen.getByText(`${cards.length} to flip`)).toBeTruthy()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Flip the first card' }))
+    expect(current()).toBe('INTRO')
+    // Mid-flight: the card is in the air, not yet on the discard pile.
+    const flying = container.querySelector('.buried-deal')!
+    expect(flying).toBeTruthy()
+    expect(screen.getByText('Flip a card to begin.')).toBeTruthy()
+
+    land(flying)
+    expect(container.querySelector('.buried-deal')).toBeNull()
+    expect(screen.getByRole('group', { name: /^1 of 12: My year in games/ })).toBeTruthy()
+    expect(screen.getByText(`${cards.length - 1} to flip`)).toBeTruthy()
+  })
+
+  test('going back returns the top card to the draw pile', () => {
+    const { container } = render(<Harness initial="RANKING" />)
+    fireEvent.keyDown(window, { key: 'ArrowLeft' })
+    expect(current()).toBe('EVENTS_WON')
+    const flying = container.querySelector('.buried-return')!
+    expect(flying).toBeTruthy()
+    land(flying)
+    expect(screen.getByRole('group', { name: /won/ })).toBeTruthy()
+  })
+
+  test('the last card empties the draw pile', () => {
+    render(<Harness initial="SUMMARY" />)
+    expect(screen.getByText("That's the whole deck.")).toBeTruthy()
+  })
+
+  test('reduced motion skips the flight', () => {
+    screenIs('desktop', { reducedMotion: true })
+    const { container } = render(<Harness />)
+    fireEvent.click(screen.getByRole('button', { name: 'Flip the first card' }))
+    expect(container.querySelector('.buried-deal')).toBeNull()
+    expect(screen.getByRole('group', { name: /^1 of 12/ })).toBeTruthy()
   })
 })
 

@@ -79,28 +79,54 @@ body {
   & a { @apply text-blue-600 hover:underline dark:text-blue-400; }
 }
 
-/* Malifaux Buried: each card turns over as it's dealt. */
-@keyframes buried-flip-forward {
-  from {
-    transform: rotateY(-90deg);
+/*
+ * Malifaux Buried. Desktop: a card lifts off the draw pile, turns over in the
+ * air and lands face up on the discard pile one card-width + gap (2rem) to the
+ * right; going back plays it in reverse. Mobile: cards slide in. The deck
+ * skips these entirely for prefers-reduced-motion (in JS, so the animationend
+ * it waits on never goes missing).
+ */
+@keyframes buried-deal {
+  0% {
+    transform: translate3d(0, 0, 0) rotateY(0deg);
   }
-  to {
-    transform: rotateY(0);
+  45% {
+    transform: translate3d(calc(45% + 1rem), -7%, 160px) rotateY(-80deg) rotateZ(-3deg);
+  }
+  100% {
+    transform: translate3d(calc(100% + 2rem), 0, 0) rotateY(-180deg);
   }
 }
-@keyframes buried-flip-back {
+.buried-deal {
+  animation: buried-deal 0.7s cubic-bezier(0.3, 0.6, 0.25, 1) both;
+}
+.buried-return {
+  animation: buried-deal 0.6s cubic-bezier(0.3, 0.6, 0.25, 1) reverse both;
+}
+
+@keyframes buried-slide-next {
   from {
-    transform: rotateY(90deg);
+    transform: translateX(45%) rotate(4deg);
+    opacity: 0;
   }
   to {
-    transform: rotateY(0);
+    transform: none;
+    opacity: 1;
   }
 }
-@media (prefers-reduced-motion: no-preference) {
-  .buried-flip-forward {
-    animation: buried-flip-forward 0.45s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+@keyframes buried-slide-prev {
+  from {
+    transform: translateX(-45%) rotate(-4deg);
+    opacity: 0;
   }
-  .buried-flip-back {
-    animation: buried-flip-back 0.45s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+  to {
+    transform: none;
+    opacity: 1;
   }
+}
+.buried-slide-next {
+  animation: buried-slide-next 0.35s ease-out both;
+}
+.buried-slide-prev {
+  animation: buried-slide-prev 0.35s ease-out both;
 }
