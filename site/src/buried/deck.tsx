@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, RotateCcw } from 'lucide-react'
 import { ShareButton, ShareImageButton, shareFileName } from '#/components/share-button'
 import { useMediaQuery } from '#/helpers/use-media-query'
 
@@ -72,6 +72,11 @@ export function Deck<C extends DeckCard>(props: DeckProps<C>) {
     [cards, index, onChange, reducedMotion],
   )
   const settle = useCallback(() => setMove(null), [])
+  // Straight back to the card back: no flight, since the whole discard pile moves at once.
+  const restart = useCallback(() => {
+    setMove(null)
+    onChange(undefined)
+  }, [onChange])
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -107,9 +112,9 @@ export function Deck<C extends DeckCard>(props: DeckProps<C>) {
       </div>
 
       {isDesktop ? (
-        <Table {...props} index={index} move={move} go={go} settle={settle} />
+        <Table {...props} index={index} move={move} go={go} settle={settle} restart={restart} />
       ) : (
-        <Slideshow {...props} index={index} move={move} go={go} settle={settle} />
+        <Slideshow {...props} index={index} move={move} go={go} settle={settle} restart={restart} />
       )}
 
       <div className="flex w-full items-center justify-between gap-2">
@@ -145,15 +150,25 @@ export function Deck<C extends DeckCard>(props: DeckProps<C>) {
           )}
         </div>
 
-        <button
-          type="button"
-          onClick={() => go(index + 1)}
-          disabled={index === cards.length - 1}
-          className="rounded-full border border-border p-2 hover:bg-muted disabled:opacity-30"
-          aria-label="Next card"
-        >
-          <ChevronRight size={18} aria-hidden />
-        </button>
+        {index === cards.length - 1 ? (
+          <button
+            type="button"
+            onClick={restart}
+            className="rounded-full border border-border p-2 hover:bg-muted"
+            aria-label="Start again"
+          >
+            <RotateCcw size={18} aria-hidden />
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() => go(index + 1)}
+            className="rounded-full border border-border p-2 hover:bg-muted"
+            aria-label="Next card"
+          >
+            <ChevronRight size={18} aria-hidden />
+          </button>
+        )}
       </div>
     </div>
   )
@@ -164,6 +179,7 @@ interface LayoutProps<C extends DeckCard> extends DeckProps<C> {
   move: Move | null
   go: (to: number) => void
   settle: () => void
+  restart: () => void
 }
 
 const cardLabel = <C extends DeckCard>(cards: C[], i: number, cardTitle: (c: C) => string) =>
@@ -180,7 +196,7 @@ function CardShape({ children, className = '', ...rest }: { children?: ReactNode
 
 // ── Desktop: draw pile → discard pile ──────────────────────────────────────
 
-function Table<C extends DeckCard>({ cards, index, move, go, settle, renderFace, cardTitle, year, playerName, cardBackImageKey }: LayoutProps<C>) {
+function Table<C extends DeckCard>({ cards, index, move, go, settle, restart, renderFace, cardTitle, year, playerName, cardBackImageKey }: LayoutProps<C>) {
   const dealing = move && move.to > move.from ? move : null
   const returning = move && move.to < move.from ? move : null
 
@@ -208,7 +224,14 @@ function Table<C extends DeckCard>({ cards, index, move, go, settle, renderFace,
             </CardShape>
           </button>
         ) : (
-          <EmptySlot>That's the whole deck.</EmptySlot>
+          <button
+            type="button"
+            onClick={restart}
+            className="absolute inset-0 flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border p-6 text-center text-sm text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-4"
+          >
+            <RotateCcw size={28} aria-hidden />
+            Start again
+          </button>
         )}
         <p className="absolute -bottom-6 w-full text-center text-xs text-muted-foreground">
           {drawCount > 0 ? `${drawCount} to flip` : ''}
@@ -229,6 +252,15 @@ function Table<C extends DeckCard>({ cards, index, move, go, settle, renderFace,
             >
               {renderFace(cards[discardTop]!)}
             </CardShape>
+            {/* Clicking the discard pile puts its top card back on the draw pile. */}
+            {!move && (
+              <button
+                type="button"
+                onClick={() => go(index - 1)}
+                aria-label="Put the card back"
+                className="absolute inset-0 cursor-pointer rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-4"
+              />
+            )}
           </>
         ) : (
           <EmptySlot>Flip a card to begin.</EmptySlot>

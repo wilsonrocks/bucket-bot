@@ -73,7 +73,7 @@ function RouteComponent() {
           </Link>
           's year at the table.{' '}
           <span className="md:hidden">Swipe or tap to flip.</span>
-          <span className="hidden md:inline">Click the deck or use the arrow keys to flip.</span>
+          <span className="hidden md:inline">Click the deck to flip, or the discard pile to go back. Arrow keys work too.</span>
         </p>
       </header>
       <Deck

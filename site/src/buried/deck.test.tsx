@@ -87,6 +87,12 @@ describe('Deck on mobile (slideshow)', () => {
     expect(current()).toBe('PAINTING')
   })
 
+  test('the last card offers a restart', () => {
+    render(<Harness initial="SUMMARY" />)
+    fireEvent.click(screen.getByRole('button', { name: 'Start again' }))
+    expect(current()).toBe('BACK')
+  })
+
   test('deep links open on that card, with a share button', () => {
     render(<Harness initial="EVENTS_WON" />)
     expect(screen.getByText('event won.')).toBeTruthy()
@@ -125,9 +131,19 @@ describe('Deck on desktop (draw and discard piles)', () => {
     expect(screen.getByRole('group', { name: /won/ })).toBeTruthy()
   })
 
-  test('the last card empties the draw pile', () => {
+  test('the last card empties the draw pile, which then starts again', () => {
     render(<Harness initial="SUMMARY" />)
-    expect(screen.getByText("That's the whole deck.")).toBeTruthy()
+    const [pile] = screen.getAllByRole('button', { name: 'Start again' })
+    fireEvent.click(pile!)
+    expect(current()).toBe('BACK')
+    expect(screen.getByText('Flip a card to begin.')).toBeTruthy()
+  })
+
+  test('clicking the discard pile puts its top card back', () => {
+    const { container } = render(<Harness initial="RANKING" />)
+    fireEvent.click(screen.getByRole('button', { name: 'Put the card back' }))
+    expect(current()).toBe('EVENTS_WON')
+    expect(container.querySelector('.buried-return')).toBeTruthy()
   })
 
   test('reduced motion skips the flight', () => {
