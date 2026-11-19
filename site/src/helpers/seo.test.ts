@@ -28,6 +28,14 @@ describe('seo', () => {
     expect(meta(out, 'og:image:type')?.content).toBe('image/webp')
   })
 
+  test('a portrait image is declared as 1080x1350 with a large card', () => {
+    const out = seo({ title: 't', path: '/x', image: 'https://a/card.png', imageShape: 'portrait' })
+    expect(meta(out, 'og:image:width')?.content).toBe('1080')
+    expect(meta(out, 'og:image:height')?.content).toBe('1350')
+    expect(meta(out, 'twitter:card')?.content).toBe('summary_large_image')
+    expect(meta(out, 'og:image:type')?.content).toBe('image/png')
+  })
+
   test('the default image keeps the large card', () => {
     const out = seo({ title: 't', path: '/x' })
     expect(meta(out, 'twitter:card')?.content).toBe('summary_large_image')

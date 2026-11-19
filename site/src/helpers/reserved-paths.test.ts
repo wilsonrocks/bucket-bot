@@ -5,13 +5,20 @@ import { RESERVED_FIRST_SEGMENTS, validatePageUrl } from '../../../backend/logic
 
 const routesDir = fileURLToPath(new URL('../routes', import.meta.url))
 
-/** First URL segment of each file-based route: `team.$id.tsx` → `team`, `sitemap[.]xml.ts` → `sitemap.xml`. */
+/**
+ * First URL segment of each file-based route: `team.$id.tsx` → `team`,
+ * `sitemap[.]xml.ts` → `sitemap.xml`, `player_.$id.buried.$year.tsx` → `player`
+ * (a trailing `_` only un-nests the route; it isn't part of the URL).
+ */
 function routeFirstSegments(): Set<string> {
   const segments = new Set<string>()
   for (const entry of readdirSync(routesDir, { withFileTypes: true })) {
     const name = entry.isFile() ? entry.name.replace(/\.(tsx?|jsx?)$/, '') : entry.name
     if (name.includes('.test')) continue
-    const first = name.split(/(?<!\[)\.(?!\])/)[0]!.replace(/\[(.)\]/g, '$1')
+    const first = name
+      .split(/(?<!\[)\.(?!\])/)[0]!
+      .replace(/\[(.)\]/g, '$1')
+      .replace(/(?<=.)_$/, '')
     // Skip the root, index, pathless (_foo) and the CMS splat route itself.
     if (first === '' || first === 'index' || first.startsWith('_') || first.startsWith('$')) continue
     segments.add(first)

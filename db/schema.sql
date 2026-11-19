@@ -1,5 +1,5 @@
 
-\restrict 4JxHcjNhd8jjh16vc4OQ51adMqnppUcnvdsnc3VL7WnH5XhrEBXe9VXTwo0YUtB
+\restrict CsNXcPJzASrRcmWBdVEmegjmdmEnn6K3bgPG6eYMNsU5fFyqTMKDJZEkEAwZIik
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -39,6 +39,24 @@ CREATE TABLE public.achievement (
     created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
     description text NOT NULL,
     group_name text NOT NULL
+);
+
+CREATE TABLE public.buried_player (
+    player_id integer NOT NULL,
+    year integer NOT NULL,
+    cards jsonb NOT NULL,
+    summary_image_key text,
+    generated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    dm_sent_at timestamp without time zone,
+    CONSTRAINT buried_player_cards_check CHECK ((jsonb_typeof(cards) = 'array'::text))
+);
+
+CREATE TABLE public.buried_year (
+    year integer NOT NULL,
+    cutoff_date date NOT NULL,
+    card_back_image_key text,
+    published_at timestamp without time zone,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
 CREATE TABLE public.discord_user (
@@ -457,6 +475,12 @@ CREATE TABLE public.venue (
 ALTER TABLE ONLY public.achievement
     ADD CONSTRAINT achievement_pkey PRIMARY KEY (id);
 
+ALTER TABLE ONLY public.buried_player
+    ADD CONSTRAINT buried_player_pkey PRIMARY KEY (player_id, year);
+
+ALTER TABLE ONLY public.buried_year
+    ADD CONSTRAINT buried_year_pkey PRIMARY KEY (year);
+
 ALTER TABLE ONLY public.discord_user
     ADD CONSTRAINT discord_user_pkey PRIMARY KEY (discord_user_id);
 
@@ -615,6 +639,8 @@ ALTER TABLE ONLY public.venue
 
 CREATE INDEX flyway_schema_history_s_idx ON public.flyway_schema_history USING btree (success);
 
+CREATE INDEX idx_buried_player_year ON public.buried_player USING btree (year);
+
 CREATE INDEX idx_discord_user_display_name_trgm ON public.discord_user USING gin (discord_display_name public.gin_trgm_ops);
 
 CREATE INDEX idx_discord_user_nickname_trgm ON public.discord_user USING gin (discord_nickname public.gin_trgm_ops);
@@ -686,6 +712,12 @@ CREATE INDEX pipeline_job_step_started_at_idx ON public.pipeline_job_step USING 
 CREATE UNIQUE INDEX player_identity_provider_external_id_key ON public.player_identity USING btree (identity_provider_id, external_id);
 
 CREATE UNIQUE INDEX unique_display_order_true ON public.ranking_snapshot_type USING btree (display_order) WHERE (display = true);
+
+ALTER TABLE ONLY public.buried_player
+    ADD CONSTRAINT buried_player_player_id_fkey FOREIGN KEY (player_id) REFERENCES public.player(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY public.buried_player
+    ADD CONSTRAINT buried_player_year_fkey FOREIGN KEY (year) REFERENCES public.buried_year(year) ON DELETE CASCADE;
 
 ALTER TABLE ONLY public.faction_snapshot
     ADD CONSTRAINT faction_snapshot_batch_id_fkey FOREIGN KEY (batch_id) REFERENCES public.faction_snapshot_batch(id) ON DELETE CASCADE;
@@ -801,5 +833,5 @@ ALTER TABLE ONLY public.upcoming_event
 ALTER TABLE ONLY public.venue
     ADD CONSTRAINT venue_region_id_fkey FOREIGN KEY (region_id) REFERENCES public.region(id);
 
-\unrestrict 4JxHcjNhd8jjh16vc4OQ51adMqnppUcnvdsnc3VL7WnH5XhrEBXe9VXTwo0YUtB
+\unrestrict CsNXcPJzASrRcmWBdVEmegjmdmEnn6K3bgPG6eYMNsU5fFyqTMKDJZEkEAwZIik
 

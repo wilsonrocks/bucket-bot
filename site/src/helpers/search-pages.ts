@@ -19,6 +19,8 @@ const SEARCH_PAGES: Record<FileRouteTypes['fullPaths'], SearchPage | 'dynamic' |
   '/best-painted': { label: 'Best Painted', keywords: ['painting'] },
   '/event/$id': 'dynamic',
   '/player/$id': 'dynamic',
+  // Reached from the player page (and the Discord DM), not search.
+  '/player/$id/buried/$year': 'excluded',
   '/team/$id': 'dynamic',
   '/upcoming-event/$id': 'dynamic',
   // CMS pages

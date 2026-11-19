@@ -7,6 +7,7 @@ import {
   fetchPlayerPaintingWins,
   fetchPlayerAchievements,
   fetchRankingTypes,
+  fetchPlayerBuriedYears,
 } from '#/queries'
 import { createFileRoute, notFound } from '@tanstack/react-router'
 import { optionalFlag, optionalNumber, optionalString } from '#/helpers/search-params'
@@ -49,7 +50,7 @@ export const Route = createFileRoute('/player/$id')({
   // state, and including them would refetch the whole page on every tab switch.
   loaderDeps: ({ search: { typeCode } }) => ({ typeCode: typeCode ?? 'ROLLING_YEAR' }),
   loader: async ({ params, deps: { typeCode } }) => {
-    const [player, rankingTypes, rankingsData, tourneys, countingEvents, teams, paintingWins, achievements] = await Promise.all([
+    const [player, rankingTypes, rankingsData, tourneys, countingEvents, teams, paintingWins, achievements, buriedYears] = await Promise.all([
       fetchPlayer({ data: { id: params.id } }),
       fetchRankingTypes(),
       fetchPlayerRankingHistory({ data: { playerId: params.id, typeCode } }),
@@ -58,9 +59,10 @@ export const Route = createFileRoute('/player/$id')({
       fetchPlayerTeams({ data: { playerId: params.id } }),
       fetchPlayerPaintingWins({ data: { playerId: params.id } }),
       fetchPlayerAchievements({ data: { playerId: params.id } }),
+      fetchPlayerBuriedYears({ data: { playerId: params.id } }),
     ])
     if (!player) throw notFound()
-    return { player, rankingTypes, rankingsData, tourneys, countingEvents, teams, paintingWins, achievements }
+    return { player, rankingTypes, rankingsData, tourneys, countingEvents, teams, paintingWins, achievements, buriedYears }
   },
   head: ({ loaderData, params, match }) => {
     if (!loaderData) return {}
@@ -143,7 +145,7 @@ function findEarnedAchievement<T extends { id: string; achievedOn: string | null
 }
 
 function RouteComponent() {
-  const { player, rankingTypes, rankingsData, tourneys, countingEvents, teams, paintingWins, achievements } = Route.useLoaderData()
+  const { player, rankingTypes, rankingsData, tourneys, countingEvents, teams, paintingWins, achievements, buriedYears } = Route.useLoaderData()
   const { typeCode = 'ROLLING_YEAR', painting: activePaintingId, achievement: activeAchievementId, earnedOnly: hideUnearned } = Route.useSearch()
   const navigate = Route.useNavigate()
   const wins = paintingWins ?? []
@@ -190,6 +192,20 @@ function RouteComponent() {
   return (
     <div>
       <h2 className="mb-4 text-xl font-semibold">{player.name}</h2>
+      {buriedYears[0] !== undefined && (
+        <Link
+          to="/player/$id/buried/$year"
+          params={{ id: player.id, year: buriedYears[0] }}
+          search={{}}
+          className="mb-4 flex items-center gap-3 rounded-lg border border-border bg-surface px-4 py-3 hover:bg-muted hover:no-underline"
+        >
+          <span className="text-2xl" aria-hidden>🪦</span>
+          <span>
+            <span className="block font-semibold text-foreground">{player.name}'s {buriedYears[0]}, Buried</span>
+            <span className="block text-sm text-muted-foreground">A year at the table, shuffled into a deck of cards. Flip through it →</span>
+          </span>
+        </Link>
+      )}
       <Tabs defaultValue="events">
         <Tabs.List>
           <Tabs.Tab value="events">Events</Tabs.Tab>

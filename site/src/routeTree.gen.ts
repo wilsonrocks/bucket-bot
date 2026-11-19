@@ -25,6 +25,7 @@ import { Route as UpcomingEventIdRouteImport } from './routes/upcoming-event.$id
 import { Route as TeamIdRouteImport } from './routes/team.$id'
 import { Route as PlayerIdRouteImport } from './routes/player.$id'
 import { Route as EventIdRouteImport } from './routes/event.$id'
+import { Route as PlayerIdBuriedYearRouteImport } from './routes/player_.$id.buried.$year'
 
 const UpcomingEventsRoute = UpcomingEventsRouteImport.update({
   id: '/upcoming-events',
@@ -106,6 +107,11 @@ const EventIdRoute = EventIdRouteImport.update({
   path: '/event/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlayerIdBuriedYearRoute = PlayerIdBuriedYearRouteImport.update({
+  id: '/player_/$id/buried/$year',
+  path: '/player/$id/buried/$year',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -124,6 +130,7 @@ export interface FileRoutesByFullPath {
   '/player/$id': typeof PlayerIdRoute
   '/team/$id': typeof TeamIdRoute
   '/upcoming-event/$id': typeof UpcomingEventIdRoute
+  '/player/$id/buried/$year': typeof PlayerIdBuriedYearRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -142,6 +149,7 @@ export interface FileRoutesByTo {
   '/player/$id': typeof PlayerIdRoute
   '/team/$id': typeof TeamIdRoute
   '/upcoming-event/$id': typeof UpcomingEventIdRoute
+  '/player/$id/buried/$year': typeof PlayerIdBuriedYearRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -161,6 +169,7 @@ export interface FileRoutesById {
   '/player/$id': typeof PlayerIdRoute
   '/team/$id': typeof TeamIdRoute
   '/upcoming-event/$id': typeof UpcomingEventIdRoute
+  '/player_/$id/buried/$year': typeof PlayerIdBuriedYearRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -181,6 +190,7 @@ export interface FileRouteTypes {
     | '/player/$id'
     | '/team/$id'
     | '/upcoming-event/$id'
+    | '/player/$id/buried/$year'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -199,6 +209,7 @@ export interface FileRouteTypes {
     | '/player/$id'
     | '/team/$id'
     | '/upcoming-event/$id'
+    | '/player/$id/buried/$year'
   id:
     | '__root__'
     | '/'
@@ -217,6 +228,7 @@ export interface FileRouteTypes {
     | '/player/$id'
     | '/team/$id'
     | '/upcoming-event/$id'
+    | '/player_/$id/buried/$year'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -236,6 +248,7 @@ export interface RootRouteChildren {
   PlayerIdRoute: typeof PlayerIdRoute
   TeamIdRoute: typeof TeamIdRoute
   UpcomingEventIdRoute: typeof UpcomingEventIdRoute
+  PlayerIdBuriedYearRoute: typeof PlayerIdBuriedYearRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -352,6 +365,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EventIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/player_/$id/buried/$year': {
+      id: '/player_/$id/buried/$year'
+      path: '/player/$id/buried/$year'
+      fullPath: '/player/$id/buried/$year'
+      preLoaderRoute: typeof PlayerIdBuriedYearRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -372,6 +392,7 @@ const rootRouteChildren: RootRouteChildren = {
   PlayerIdRoute: PlayerIdRoute,
   TeamIdRoute: TeamIdRoute,
   UpcomingEventIdRoute: UpcomingEventIdRoute,
+  PlayerIdBuriedYearRoute: PlayerIdBuriedYearRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

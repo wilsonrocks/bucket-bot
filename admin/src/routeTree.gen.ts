@@ -16,6 +16,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppVenuesRouteImport } from './routes/_app/venues'
 import { Route as AppIdentitiesRouteImport } from './routes/_app/identities'
 import { Route as AppFeatureFlagsRouteImport } from './routes/_app/feature-flags'
+import { Route as AppBuriedRouteImport } from './routes/_app/buried'
 import { Route as AppBotChatRouteImport } from './routes/_app/bot-chat'
 import { Route as AppAchievementsRouteImport } from './routes/_app/achievements'
 import { Route as AppTeamsIndexRouteImport } from './routes/_app/teams/index'
@@ -66,6 +67,11 @@ const AppIdentitiesRoute = AppIdentitiesRouteImport.update({
 const AppFeatureFlagsRoute = AppFeatureFlagsRouteImport.update({
   id: '/feature-flags',
   path: '/feature-flags',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppBuriedRoute = AppBuriedRouteImport.update({
+  id: '/buried',
+  path: '/buried',
   getParentRoute: () => AppRouteRoute,
 } as any)
 const AppBotChatRoute = AppBotChatRouteImport.update({
@@ -161,6 +167,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/achievements': typeof AppAchievementsRoute
   '/bot-chat': typeof AppBotChatRoute
+  '/buried': typeof AppBuriedRoute
   '/feature-flags': typeof AppFeatureFlagsRoute
   '/identities': typeof AppIdentitiesRoute
   '/venues': typeof AppVenuesRoute
@@ -186,6 +193,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/achievements': typeof AppAchievementsRoute
   '/bot-chat': typeof AppBotChatRoute
+  '/buried': typeof AppBuriedRoute
   '/feature-flags': typeof AppFeatureFlagsRoute
   '/identities': typeof AppIdentitiesRoute
   '/venues': typeof AppVenuesRoute
@@ -213,6 +221,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/_app/achievements': typeof AppAchievementsRoute
   '/_app/bot-chat': typeof AppBotChatRoute
+  '/_app/buried': typeof AppBuriedRoute
   '/_app/feature-flags': typeof AppFeatureFlagsRoute
   '/_app/identities': typeof AppIdentitiesRoute
   '/_app/venues': typeof AppVenuesRoute
@@ -240,6 +249,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/achievements'
     | '/bot-chat'
+    | '/buried'
     | '/feature-flags'
     | '/identities'
     | '/venues'
@@ -265,6 +275,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/achievements'
     | '/bot-chat'
+    | '/buried'
     | '/feature-flags'
     | '/identities'
     | '/venues'
@@ -291,6 +302,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/_app/achievements'
     | '/_app/bot-chat'
+    | '/_app/buried'
     | '/_app/feature-flags'
     | '/_app/identities'
     | '/_app/venues'
@@ -367,6 +379,13 @@ declare module '@tanstack/react-router' {
       path: '/feature-flags'
       fullPath: '/feature-flags'
       preLoaderRoute: typeof AppFeatureFlagsRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/buried': {
+      id: '/_app/buried'
+      path: '/buried'
+      fullPath: '/buried'
+      preLoaderRoute: typeof AppBuriedRouteImport
       parentRoute: typeof AppRouteRoute
     }
     '/_app/bot-chat': {
@@ -494,6 +513,7 @@ declare module '@tanstack/react-router' {
 interface AppRouteRouteChildren {
   AppAchievementsRoute: typeof AppAchievementsRoute
   AppBotChatRoute: typeof AppBotChatRoute
+  AppBuriedRoute: typeof AppBuriedRoute
   AppFeatureFlagsRoute: typeof AppFeatureFlagsRoute
   AppIdentitiesRoute: typeof AppIdentitiesRoute
   AppVenuesRoute: typeof AppVenuesRoute
@@ -517,6 +537,7 @@ interface AppRouteRouteChildren {
 const AppRouteRouteChildren: AppRouteRouteChildren = {
   AppAchievementsRoute: AppAchievementsRoute,
   AppBotChatRoute: AppBotChatRoute,
+  AppBuriedRoute: AppBuriedRoute,
   AppFeatureFlagsRoute: AppFeatureFlagsRoute,
   AppIdentitiesRoute: AppIdentitiesRoute,
   AppVenuesRoute: AppVenuesRoute,

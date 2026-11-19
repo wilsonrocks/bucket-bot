@@ -180,6 +180,18 @@ import {
 } from "./v1-routes/team-memberships";
 import { uploadHandler, uploadRoute } from "./v1-routes/upload";
 import {
+  buriedDmAllHandler,
+  buriedDmAllRoute,
+  buriedTestDmHandler,
+  buriedTestDmRoute,
+  generateBuriedHandler,
+  generateBuriedRoute,
+  getBuriedYearsHandler,
+  getBuriedYearsRoute,
+  updateBuriedYearHandler,
+  updateBuriedYearRoute,
+} from "./v1-routes/buried";
+import {
   addTourneyPhotosHandler,
   addTourneyPhotosRoute,
   deleteTourneyPhotoHandler,
@@ -408,6 +420,11 @@ v1Router.openapi(generateFactionRankingsRoute, generateFactionRankingsHandler);
 v1Router.openapi(generateRegionSnapshotRoute, generateRegionSnapshotHandler);
 v1Router.openapi(postFactionRankingsRoute, postFactionRankingsHandler);
 v1Router.openapi(uploadRoute, uploadHandler);
+v1Router.openapi(getBuriedYearsRoute, getBuriedYearsHandler);
+v1Router.openapi(updateBuriedYearRoute, updateBuriedYearHandler);
+v1Router.openapi(generateBuriedRoute, generateBuriedHandler);
+v1Router.openapi(buriedTestDmRoute, buriedTestDmHandler);
+v1Router.openapi(buriedDmAllRoute, buriedDmAllHandler);
 v1Router.openapi(createTeamRoute, createTeamHandler);
 v1Router.openapi(updateTeamRoute, updateTeamHandler);
 v1Router.openapi(deleteTeamRoute, deleteTeamHandler);

@@ -23,8 +23,9 @@ export interface SeoInput {
   /**
    * "wide" images are pre-cropped to 1200x630; "square" ones (e.g. Discord
    * avatars) get a small-thumbnail card instead so unfurls don't stretch them.
+   * "portrait" images are 1080x1350 (Malifaux Buried share cards).
    */
-  imageShape?: "wide" | "square";
+  imageShape?: "wide" | "square" | "portrait";
   type?: "website" | "article" | "profile";
 }
 
@@ -44,7 +45,13 @@ export function seo({
   const url = `${SITE_URL}${path}`;
   const ogImage = image ?? DEFAULT_OG_IMAGE;
   const ogImageType = imageMimeType(ogImage);
-  const isWide = !!image && imageShape === "wide";
+  const size = !image
+    ? null
+    : imageShape === "wide"
+      ? { width: "1200", height: "630" }
+      : imageShape === "portrait"
+        ? { width: "1080", height: "1350" }
+        : null;
 
   return {
     meta: [
@@ -58,15 +65,15 @@ export function seo({
       { property: "og:image", content: ogImage },
       { property: "og:image:secure_url", content: ogImage },
       { property: "og:image:type", content: ogImageType },
-      ...(isWide
+      ...(size
         ? [
-            { property: "og:image:width", content: "1200" },
-            { property: "og:image:height", content: "630" },
+            { property: "og:image:width", content: size.width },
+            { property: "og:image:height", content: size.height },
           ]
         : []),
       {
         name: "twitter:card",
-        content: image && !isWide ? "summary" : "summary_large_image",
+        content: image && !size ? "summary" : "summary_large_image",
       },
       { name: "twitter:title", content: title },
       { name: "twitter:description", content: description },

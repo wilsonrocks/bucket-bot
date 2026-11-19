@@ -35,6 +35,23 @@ export interface Achievement {
   name: string;
 }
 
+export interface BuriedPlayer {
+  cards: Json;
+  dm_sent_at: Timestamp | null;
+  generated_at: Generated<Timestamp>;
+  player_id: number;
+  summary_image_key: string | null;
+  year: number;
+}
+
+export interface BuriedYear {
+  card_back_image_key: string | null;
+  created_at: Generated<Timestamp>;
+  cutoff_date: Timestamp;
+  published_at: Timestamp | null;
+  year: number;
+}
+
 export interface DiscordUser {
   created_at: Generated<Timestamp | null>;
   discord_avatar_url: string | null;
@@ -385,6 +402,8 @@ export interface Venue {
 
 export interface DB {
   achievement: Achievement;
+  buried_player: BuriedPlayer;
+  buried_year: BuriedYear;
   discord_user: DiscordUser;
   faction: Faction;
   faction_snapshot: FactionSnapshot;

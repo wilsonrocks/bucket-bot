@@ -3,6 +3,12 @@ import { notifications } from '@mantine/notifications'
 import { customFetch } from './custom-instance'
 import { fitImageForUpload, formatBytes } from '@/helpers/crop-image'
 import {
+  getGetBuriedYearsQueryKey,
+  useGetBuriedYears as useGetBuriedYearsGenerated,
+  usePutBuriedYearsYear as usePutBuriedYearsYearGenerated,
+  usePostBuriedYearsYearGenerate as usePostBuriedYearsYearGenerateGenerated,
+  usePostBuriedYearsYearDmTest as usePostBuriedYearsYearDmTestGenerated,
+  usePostBuriedYearsYearDmAll as usePostBuriedYearsYearDmAllGenerated,
   getGetAchievementsQueryKey,
   useGetAchievements as useGetAchievementsGenerated,
   usePutAchievementsId as usePutAchievementsIdGenerated,
@@ -1095,3 +1101,43 @@ export const useDeletePage = () => {
   const queryClient = useQueryClient()
   return useDeletePagesIdGenerated({ mutation: { onSuccess: () => invalidatePage(queryClient) } })
 }
+
+// ── Malifaux Buried ────────────────────────────────────────────────────────
+
+/** Polls every 3s while any year is generating, so the status updates itself. */
+export const useGetBuriedYears = () =>
+  useGetBuriedYearsGenerated({
+    query: {
+      // A 403 throws in customFetch, so only 200s get here.
+      select: (res) => (res.status === 200 ? res.data : []),
+      refetchInterval: (query) => {
+        const res = query.state.data
+        const years = res && res.status === 200 ? res.data : []
+        return years.some((y) => y.generation.state === 'running') ? 3000 : false
+      },
+    },
+  })
+
+const useInvalidateBuriedYears = () => {
+  const queryClient = useQueryClient()
+  return () =>
+    queryClient.invalidateQueries({ queryKey: getGetBuriedYearsQueryKey() })
+}
+
+export const usePutBuriedYearsYear = () =>
+  usePutBuriedYearsYearGenerated({
+    mutation: { onSuccess: useInvalidateBuriedYears() },
+  })
+
+export const usePostBuriedYearsYearGenerate = () =>
+  usePostBuriedYearsYearGenerateGenerated({
+    mutation: { onSuccess: useInvalidateBuriedYears() },
+  })
+
+export const usePostBuriedYearsYearDmTest = () =>
+  usePostBuriedYearsYearDmTestGenerated()
+
+export const usePostBuriedYearsYearDmAll = () =>
+  usePostBuriedYearsYearDmAllGenerated({
+    mutation: { onSuccess: useInvalidateBuriedYears() },
+  })

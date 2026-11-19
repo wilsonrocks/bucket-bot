@@ -1049,6 +1049,133 @@ export type PostUpload413 = {
   error: string;
 };
 
+export type GetBuriedYears200ItemGenerationState = typeof GetBuriedYears200ItemGenerationState[keyof typeof GetBuriedYears200ItemGenerationState];
+
+
+export const GetBuriedYears200ItemGenerationState = {
+  idle: 'idle',
+  running: 'running',
+  done: 'done',
+  failed: 'failed',
+} as const;
+
+export type GetBuriedYears200ItemGenerationResult = {
+  players: number;
+  cards: number;
+  removed: number;
+};
+
+export type GetBuriedYears200ItemGeneration = {
+  state: GetBuriedYears200ItemGenerationState;
+  startedAt?: string;
+  finishedAt?: string;
+  error?: string;
+  result?: GetBuriedYears200ItemGenerationResult;
+};
+
+export type GetBuriedYears200Item = {
+  year: number;
+  cutoff_date: string;
+  /** @nullable */
+  card_back_image_key: string | null;
+  /** @nullable */
+  published_at: string | null;
+  has_generator: boolean;
+  player_count: number;
+  dm_sent_count: number;
+  dm_pending_count: number;
+  /** @nullable */
+  last_generated_at: string | null;
+  generation: GetBuriedYears200ItemGeneration;
+};
+
+export type GetBuriedYears403 = {
+  error: string;
+};
+
+export type PutBuriedYearsYearBody = {
+  /** @nullable */
+  card_back_image_key?: string | null;
+  /** @pattern ^\d{4}-\d{2}-\d{2}$ */
+  cutoff_date?: string;
+  published?: boolean;
+};
+
+export type PutBuriedYearsYear200 = {
+  message: string;
+};
+
+export type PutBuriedYearsYear403 = {
+  error: string;
+};
+
+export type PutBuriedYearsYear404 = {
+  error: string;
+};
+
+export type PostBuriedYearsYearGenerate202State = typeof PostBuriedYearsYearGenerate202State[keyof typeof PostBuriedYearsYearGenerate202State];
+
+
+export const PostBuriedYearsYearGenerate202State = {
+  idle: 'idle',
+  running: 'running',
+  done: 'done',
+  failed: 'failed',
+} as const;
+
+export type PostBuriedYearsYearGenerate202Result = {
+  players: number;
+  cards: number;
+  removed: number;
+};
+
+export type PostBuriedYearsYearGenerate202 = {
+  state: PostBuriedYearsYearGenerate202State;
+  startedAt?: string;
+  finishedAt?: string;
+  error?: string;
+  result?: PostBuriedYearsYearGenerate202Result;
+};
+
+export type PostBuriedYearsYearGenerate403 = {
+  error: string;
+};
+
+export type PostBuriedYearsYearGenerate404 = {
+  error: string;
+};
+
+export type PostBuriedYearsYearGenerate409 = {
+  error: string;
+};
+
+export type PostBuriedYearsYearDmTest200 = {
+  /** @nullable */
+  playerId: number | null;
+};
+
+export type PostBuriedYearsYearDmTest403 = {
+  error: string;
+};
+
+export type PostBuriedYearsYearDmAll200 = {
+  sent: number;
+  failed: number;
+  skipped: number;
+};
+
+export type PostBuriedYearsYearDmAll400 = {
+  error: string;
+};
+
+export type PostBuriedYearsYearDmAll403 = {
+  error: string;
+};
+
+export type PostBuriedYearsYearDmAll404 = {
+  error: string;
+};
+
 export type PostCreateTeamBody = {
   name: string;
   description?: string;

@@ -64,6 +64,23 @@ resource "aws_cloudfront_response_headers_policy" "assets_immutable" {
       override = true
     }
   }
+
+  # Lets the site fetch() an image to hand to the Web Share API (Malifaux
+  # Buried's "share this card"). Public, immutable media, so any origin is fine.
+  cors_config {
+    access_control_allow_credentials = false
+    origin_override                  = true
+
+    access_control_allow_headers {
+      items = ["*"]
+    }
+    access_control_allow_methods {
+      items = ["GET", "HEAD"]
+    }
+    access_control_allow_origins {
+      items = ["*"]
+    }
+  }
 }
 
 resource "aws_cloudfront_distribution" "frontend" {

@@ -1,0 +1,52 @@
+[
+  { "key": "INTRO", "playerName": "Alice Example", "eventsPlayed": 8, "gamesPlayed": 36, "percentile": 90, "imageKey": "buried/2026/1/aaaaaaaaaaaa-INTRO.png" },
+  { "key": "MOST_PLAYED_FACTION", "faction": { "code": "ARCANISTS", "name": "Arcanists", "hexCode": "#0089c8" }, "events": 3, "share": 0.375 },
+  {
+    "key": "FACTIONS",
+    "factions": [
+      { "faction": { "code": "ARCANISTS", "name": "Arcanists", "hexCode": "#0089c8" }, "events": 3, "bestPlace": 1, "factionRank": 6 },
+      { "faction": { "code": "OUTCASTS", "name": "Outcasts", "hexCode": "#cdae1c" }, "events": 1 }
+    ]
+  },
+  {
+    "key": "VENUES",
+    "venues": [
+      { "name": "Battlefield Hobbies", "town": "Daventry", "events": 2 },
+      { "name": "Firestorm Games", "town": "Cardiff", "events": 1 }
+    ],
+    "regions": 2
+  },
+  { "key": "BIGGEST_EVENT", "event": { "id": 40, "name": "UK Nationals 2026", "date": "2026-11-07", "players": 56, "place": 2 } },
+  {
+    "key": "PODIUMS",
+    "events": [
+      { "id": 21, "name": "Haul of Eggs 12", "date": "2026-03-28", "players": 20, "place": 3 },
+      { "id": 30, "name": "The Lost Lands", "date": "2026-06-14", "players": 18, "place": 1 }
+    ]
+  },
+  { "key": "EVENTS_WON", "events": [{ "id": 30, "name": "The Lost Lands", "date": "2026-06-14", "players": 18, "place": 1 }] },
+  { "key": "RANKING", "finalRank": 7, "bestRank": 3, "bestRankDate": "2026-06-15", "totalPlayers": 98 },
+  {
+    "key": "PAINTING",
+    "awards": [
+      { "event": { "id": 21, "name": "Haul of Eggs 12" }, "category": "Best Painted", "position": 1, "model": "Seamus", "paintingImageKey": "painting/abc123" },
+      { "event": { "id": 30, "name": "The Lost Lands" }, "category": "Best Crew", "position": 2 }
+    ]
+  },
+  { "key": "ORGANISED", "events": [{ "id": 12, "name": "Winter Fate", "date": "2026-02-01", "players": 14 }], "playersHosted": 14 },
+  { "key": "ACHIEVEMENTS", "achievements": [{ "id": "FIRST_BLOOD", "name": "First Blood" }, { "id": "GLOBETROTTER", "name": "Globetrotter", "achievementImageKey": "achievement/xyz" }] },
+  {
+    "key": "SUMMARY",
+    "playerName": "Alice Example",
+    "eventsPlayed": 8,
+    "gamesPlayed": 36,
+    "wins": 1,
+    "podiums": 2,
+    "paintingAwards": 2,
+    "eventsOrganised": 1,
+    "venues": 2,
+    "topFaction": { "code": "ARCANISTS", "name": "Arcanists", "hexCode": "#0089c8" },
+    "finalRank": 7,
+    "imageKey": "buried/2026/1/bbbbbbbbbbbb-SUMMARY.png"
+  }
+]

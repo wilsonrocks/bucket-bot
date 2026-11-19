@@ -36,7 +36,7 @@ export const Route = createFileRoute("/sitemap.xml")({
   server: {
     handlers: {
       GET: async () => {
-        const [players, teams, tourneys, upcomingEvents, cmsPages] = await Promise.all([
+        const [players, teams, tourneys, upcomingEvents, cmsPages, buriedDecks] = await Promise.all([
           db.selectFrom("player").select(["id", "created_at"]).execute(),
           db.selectFrom("team").select(["id", "created_at"]).execute(),
           db.selectFrom("tourney").select(["id", "date"]).execute(),
@@ -46,6 +46,12 @@ export const Route = createFileRoute("/sitemap.xml")({
             .where("starts_at", ">=", new Date())
             .execute(),
           livePages().select(["page.url", "page_version.created_at"]).execute(),
+          db
+            .selectFrom("buried_player")
+            .innerJoin("buried_year", "buried_year.year", "buried_player.year")
+            .where("buried_year.published_at", "is not", null)
+            .select(["buried_player.player_id", "buried_player.year", "buried_player.generated_at"])
+            .execute(),
         ]);
 
         const dynamicEntries: Entry[] = [
@@ -72,6 +78,12 @@ export const Route = createFileRoute("/sitemap.xml")({
             priority: 0.5,
             changefreq: "weekly",
             lastmod: toIso(e.starts_at),
+          })),
+          ...buriedDecks.map((b): Entry => ({
+            url: `/player/${b.player_id}/buried/${b.year}`,
+            priority: 0.3,
+            changefreq: "yearly",
+            lastmod: toIso(b.generated_at),
           })),
           ...cmsPages.map((p): Entry => ({
             url: p.url,

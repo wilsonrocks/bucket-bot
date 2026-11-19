@@ -48,6 +48,8 @@ import type {
   GetAchievements200Item,
   GetAllDiscordUsers200Item,
   GetBotChatChannels200Item,
+  GetBuriedYears200Item,
+  GetBuriedYears403,
   GetFactionRankings200Item,
   GetFactionsOverTime200Item,
   GetFeatureFlags200Item,
@@ -142,6 +144,16 @@ import type {
   PostBotEventId400,
   PostBotEventId502,
   PostBotEventIdBody,
+  PostBuriedYearsYearDmAll200,
+  PostBuriedYearsYearDmAll400,
+  PostBuriedYearsYearDmAll403,
+  PostBuriedYearsYearDmAll404,
+  PostBuriedYearsYearDmTest200,
+  PostBuriedYearsYearDmTest403,
+  PostBuriedYearsYearGenerate202,
+  PostBuriedYearsYearGenerate403,
+  PostBuriedYearsYearGenerate404,
+  PostBuriedYearsYearGenerate409,
   PostCreateTeam201,
   PostCreateTeam403,
   PostCreateTeamBody,
@@ -229,6 +241,10 @@ import type {
   PutAchievementsId403,
   PutAchievementsId404,
   PutAchievementsIdBody,
+  PutBuriedYearsYear200,
+  PutBuriedYearsYear403,
+  PutBuriedYearsYear404,
+  PutBuriedYearsYearBody,
   PutPlayerId200,
   PutPlayerId400,
   PutPlayerId403,
@@ -6382,6 +6398,472 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getPostUploadMutationOptions(options), queryClient);
+    }
+    export type getBuriedYearsResponse200 = {
+  data: GetBuriedYears200Item[]
+  status: 200
+}
+
+export type getBuriedYearsResponse403 = {
+  data: GetBuriedYears403
+  status: 403
+}
+
+export type getBuriedYearsResponseSuccess = (getBuriedYearsResponse200) & {
+  headers: Headers;
+};
+export type getBuriedYearsResponseError = (getBuriedYearsResponse403) & {
+  headers: Headers;
+};
+
+export type getBuriedYearsResponse = (getBuriedYearsResponseSuccess | getBuriedYearsResponseError)
+
+export const getGetBuriedYearsUrl = () => {
+
+
+  
+
+  return `/v1/buried/years`
+}
+
+export const getBuriedYears = async ( options?: RequestInit): Promise<getBuriedYearsResponse> => {
+  
+  return customFetch<getBuriedYearsResponse>(getGetBuriedYearsUrl(),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+  
+
+
+
+
+export const getGetBuriedYearsQueryKey = () => {
+    return [
+    `/v1/buried/years`
+    ] as const;
+    }
+
+    
+export const getGetBuriedYearsQueryOptions = <TData = Awaited<ReturnType<typeof getBuriedYears>>, TError = GetBuriedYears403>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getBuriedYears>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetBuriedYearsQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getBuriedYears>>> = ({ signal }) => getBuriedYears({ signal, ...requestOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getBuriedYears>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetBuriedYearsQueryResult = NonNullable<Awaited<ReturnType<typeof getBuriedYears>>>
+export type GetBuriedYearsQueryError = GetBuriedYears403
+
+
+export function useGetBuriedYears<TData = Awaited<ReturnType<typeof getBuriedYears>>, TError = GetBuriedYears403>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getBuriedYears>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getBuriedYears>>,
+          TError,
+          Awaited<ReturnType<typeof getBuriedYears>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetBuriedYears<TData = Awaited<ReturnType<typeof getBuriedYears>>, TError = GetBuriedYears403>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getBuriedYears>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getBuriedYears>>,
+          TError,
+          Awaited<ReturnType<typeof getBuriedYears>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetBuriedYears<TData = Awaited<ReturnType<typeof getBuriedYears>>, TError = GetBuriedYears403>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getBuriedYears>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetBuriedYears<TData = Awaited<ReturnType<typeof getBuriedYears>>, TError = GetBuriedYears403>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getBuriedYears>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetBuriedYearsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+export type putBuriedYearsYearResponse200 = {
+  data: PutBuriedYearsYear200
+  status: 200
+}
+
+export type putBuriedYearsYearResponse403 = {
+  data: PutBuriedYearsYear403
+  status: 403
+}
+
+export type putBuriedYearsYearResponse404 = {
+  data: PutBuriedYearsYear404
+  status: 404
+}
+
+export type putBuriedYearsYearResponseSuccess = (putBuriedYearsYearResponse200) & {
+  headers: Headers;
+};
+export type putBuriedYearsYearResponseError = (putBuriedYearsYearResponse403 | putBuriedYearsYearResponse404) & {
+  headers: Headers;
+};
+
+export type putBuriedYearsYearResponse = (putBuriedYearsYearResponseSuccess | putBuriedYearsYearResponseError)
+
+export const getPutBuriedYearsYearUrl = (year: string,) => {
+
+
+  
+
+  return `/v1/buried/years/${year}`
+}
+
+export const putBuriedYearsYear = async (year: string,
+    putBuriedYearsYearBody: PutBuriedYearsYearBody, options?: RequestInit): Promise<putBuriedYearsYearResponse> => {
+  
+  return customFetch<putBuriedYearsYearResponse>(getPutBuriedYearsYearUrl(year),
+  {      
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      putBuriedYearsYearBody,)
+  }
+);}
+  
+
+
+
+export const getPutBuriedYearsYearMutationOptions = <TError = PutBuriedYearsYear403 | PutBuriedYearsYear404,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putBuriedYearsYear>>, TError,{year: string;data: PutBuriedYearsYearBody}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof putBuriedYearsYear>>, TError,{year: string;data: PutBuriedYearsYearBody}, TContext> => {
+
+const mutationKey = ['putBuriedYearsYear'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putBuriedYearsYear>>, {year: string;data: PutBuriedYearsYearBody}> = (props) => {
+          const {year,data} = props ?? {};
+
+          return  putBuriedYearsYear(year,data,requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PutBuriedYearsYearMutationResult = NonNullable<Awaited<ReturnType<typeof putBuriedYearsYear>>>
+    export type PutBuriedYearsYearMutationBody = PutBuriedYearsYearBody
+    export type PutBuriedYearsYearMutationError = PutBuriedYearsYear403 | PutBuriedYearsYear404
+
+    export const usePutBuriedYearsYear = <TError = PutBuriedYearsYear403 | PutBuriedYearsYear404,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putBuriedYearsYear>>, TError,{year: string;data: PutBuriedYearsYearBody}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof putBuriedYearsYear>>,
+        TError,
+        {year: string;data: PutBuriedYearsYearBody},
+        TContext
+      > => {
+      return useMutation(getPutBuriedYearsYearMutationOptions(options), queryClient);
+    }
+    export type postBuriedYearsYearGenerateResponse202 = {
+  data: PostBuriedYearsYearGenerate202
+  status: 202
+}
+
+export type postBuriedYearsYearGenerateResponse403 = {
+  data: PostBuriedYearsYearGenerate403
+  status: 403
+}
+
+export type postBuriedYearsYearGenerateResponse404 = {
+  data: PostBuriedYearsYearGenerate404
+  status: 404
+}
+
+export type postBuriedYearsYearGenerateResponse409 = {
+  data: PostBuriedYearsYearGenerate409
+  status: 409
+}
+
+export type postBuriedYearsYearGenerateResponseSuccess = (postBuriedYearsYearGenerateResponse202) & {
+  headers: Headers;
+};
+export type postBuriedYearsYearGenerateResponseError = (postBuriedYearsYearGenerateResponse403 | postBuriedYearsYearGenerateResponse404 | postBuriedYearsYearGenerateResponse409) & {
+  headers: Headers;
+};
+
+export type postBuriedYearsYearGenerateResponse = (postBuriedYearsYearGenerateResponseSuccess | postBuriedYearsYearGenerateResponseError)
+
+export const getPostBuriedYearsYearGenerateUrl = (year: string,) => {
+
+
+  
+
+  return `/v1/buried/years/${year}/generate`
+}
+
+export const postBuriedYearsYearGenerate = async (year: string, options?: RequestInit): Promise<postBuriedYearsYearGenerateResponse> => {
+  
+  return customFetch<postBuriedYearsYearGenerateResponse>(getPostBuriedYearsYearGenerateUrl(year),
+  {      
+    ...options,
+    method: 'POST'
+    
+    
+  }
+);}
+  
+
+
+
+export const getPostBuriedYearsYearGenerateMutationOptions = <TError = PostBuriedYearsYearGenerate403 | PostBuriedYearsYearGenerate404 | PostBuriedYearsYearGenerate409,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postBuriedYearsYearGenerate>>, TError,{year: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postBuriedYearsYearGenerate>>, TError,{year: string}, TContext> => {
+
+const mutationKey = ['postBuriedYearsYearGenerate'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postBuriedYearsYearGenerate>>, {year: string}> = (props) => {
+          const {year} = props ?? {};
+
+          return  postBuriedYearsYearGenerate(year,requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostBuriedYearsYearGenerateMutationResult = NonNullable<Awaited<ReturnType<typeof postBuriedYearsYearGenerate>>>
+    
+    export type PostBuriedYearsYearGenerateMutationError = PostBuriedYearsYearGenerate403 | PostBuriedYearsYearGenerate404 | PostBuriedYearsYearGenerate409
+
+    export const usePostBuriedYearsYearGenerate = <TError = PostBuriedYearsYearGenerate403 | PostBuriedYearsYearGenerate404 | PostBuriedYearsYearGenerate409,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postBuriedYearsYearGenerate>>, TError,{year: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postBuriedYearsYearGenerate>>,
+        TError,
+        {year: string},
+        TContext
+      > => {
+      return useMutation(getPostBuriedYearsYearGenerateMutationOptions(options), queryClient);
+    }
+    export type postBuriedYearsYearDmTestResponse200 = {
+  data: PostBuriedYearsYearDmTest200
+  status: 200
+}
+
+export type postBuriedYearsYearDmTestResponse403 = {
+  data: PostBuriedYearsYearDmTest403
+  status: 403
+}
+
+export type postBuriedYearsYearDmTestResponseSuccess = (postBuriedYearsYearDmTestResponse200) & {
+  headers: Headers;
+};
+export type postBuriedYearsYearDmTestResponseError = (postBuriedYearsYearDmTestResponse403) & {
+  headers: Headers;
+};
+
+export type postBuriedYearsYearDmTestResponse = (postBuriedYearsYearDmTestResponseSuccess | postBuriedYearsYearDmTestResponseError)
+
+export const getPostBuriedYearsYearDmTestUrl = (year: string,) => {
+
+
+  
+
+  return `/v1/buried/years/${year}/dm-test`
+}
+
+export const postBuriedYearsYearDmTest = async (year: string, options?: RequestInit): Promise<postBuriedYearsYearDmTestResponse> => {
+  
+  return customFetch<postBuriedYearsYearDmTestResponse>(getPostBuriedYearsYearDmTestUrl(year),
+  {      
+    ...options,
+    method: 'POST'
+    
+    
+  }
+);}
+  
+
+
+
+export const getPostBuriedYearsYearDmTestMutationOptions = <TError = PostBuriedYearsYearDmTest403,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postBuriedYearsYearDmTest>>, TError,{year: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postBuriedYearsYearDmTest>>, TError,{year: string}, TContext> => {
+
+const mutationKey = ['postBuriedYearsYearDmTest'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postBuriedYearsYearDmTest>>, {year: string}> = (props) => {
+          const {year} = props ?? {};
+
+          return  postBuriedYearsYearDmTest(year,requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostBuriedYearsYearDmTestMutationResult = NonNullable<Awaited<ReturnType<typeof postBuriedYearsYearDmTest>>>
+    
+    export type PostBuriedYearsYearDmTestMutationError = PostBuriedYearsYearDmTest403
+
+    export const usePostBuriedYearsYearDmTest = <TError = PostBuriedYearsYearDmTest403,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postBuriedYearsYearDmTest>>, TError,{year: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postBuriedYearsYearDmTest>>,
+        TError,
+        {year: string},
+        TContext
+      > => {
+      return useMutation(getPostBuriedYearsYearDmTestMutationOptions(options), queryClient);
+    }
+    export type postBuriedYearsYearDmAllResponse200 = {
+  data: PostBuriedYearsYearDmAll200
+  status: 200
+}
+
+export type postBuriedYearsYearDmAllResponse400 = {
+  data: PostBuriedYearsYearDmAll400
+  status: 400
+}
+
+export type postBuriedYearsYearDmAllResponse403 = {
+  data: PostBuriedYearsYearDmAll403
+  status: 403
+}
+
+export type postBuriedYearsYearDmAllResponse404 = {
+  data: PostBuriedYearsYearDmAll404
+  status: 404
+}
+
+export type postBuriedYearsYearDmAllResponseSuccess = (postBuriedYearsYearDmAllResponse200) & {
+  headers: Headers;
+};
+export type postBuriedYearsYearDmAllResponseError = (postBuriedYearsYearDmAllResponse400 | postBuriedYearsYearDmAllResponse403 | postBuriedYearsYearDmAllResponse404) & {
+  headers: Headers;
+};
+
+export type postBuriedYearsYearDmAllResponse = (postBuriedYearsYearDmAllResponseSuccess | postBuriedYearsYearDmAllResponseError)
+
+export const getPostBuriedYearsYearDmAllUrl = (year: string,) => {
+
+
+  
+
+  return `/v1/buried/years/${year}/dm-all`
+}
+
+export const postBuriedYearsYearDmAll = async (year: string, options?: RequestInit): Promise<postBuriedYearsYearDmAllResponse> => {
+  
+  return customFetch<postBuriedYearsYearDmAllResponse>(getPostBuriedYearsYearDmAllUrl(year),
+  {      
+    ...options,
+    method: 'POST'
+    
+    
+  }
+);}
+  
+
+
+
+export const getPostBuriedYearsYearDmAllMutationOptions = <TError = PostBuriedYearsYearDmAll400 | PostBuriedYearsYearDmAll403 | PostBuriedYearsYearDmAll404,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postBuriedYearsYearDmAll>>, TError,{year: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof postBuriedYearsYearDmAll>>, TError,{year: string}, TContext> => {
+
+const mutationKey = ['postBuriedYearsYearDmAll'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postBuriedYearsYearDmAll>>, {year: string}> = (props) => {
+          const {year} = props ?? {};
+
+          return  postBuriedYearsYearDmAll(year,requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostBuriedYearsYearDmAllMutationResult = NonNullable<Awaited<ReturnType<typeof postBuriedYearsYearDmAll>>>
+    
+    export type PostBuriedYearsYearDmAllMutationError = PostBuriedYearsYearDmAll400 | PostBuriedYearsYearDmAll403 | PostBuriedYearsYearDmAll404
+
+    export const usePostBuriedYearsYearDmAll = <TError = PostBuriedYearsYearDmAll400 | PostBuriedYearsYearDmAll403 | PostBuriedYearsYearDmAll404,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postBuriedYearsYearDmAll>>, TError,{year: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postBuriedYearsYearDmAll>>,
+        TError,
+        {year: string},
+        TContext
+      > => {
+      return useMutation(getPostBuriedYearsYearDmAllMutationOptions(options), queryClient);
     }
     export type postCreateTeamResponse201 = {
   data: PostCreateTeam201

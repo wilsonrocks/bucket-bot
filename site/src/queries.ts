@@ -5,6 +5,7 @@ import { db } from './db-client'
 import { achievementsEnabled } from '#/helpers/achievements'
 import { prefixTsquery } from '#/helpers/prefix-tsquery'
 import { renderPageContent } from '#/helpers/render-page-content'
+import { buriedParser } from '#/buried/parsers'
 
 // ── Rankings ───────────────────────────────────────────────────────────────
 
@@ -1326,3 +1327,46 @@ export const navPages = createServerOnlyFn(
       .orderBy('page_version.title')
       .execute(),
 )
+
+// ── Malifaux Buried ────────────────────────────────────────────────────────
+
+/** A player's published Buried deck, with malformed cards already dropped. */
+export const fetchBuried = createServerFn()
+  .inputValidator((d: { playerId: number; year: number }) => d)
+  .handler(async ({ data: { playerId, year } }) => {
+    const parse = buriedParser(year)
+    if (!parse || !Number.isInteger(playerId)) return null
+    const row = await db
+      .selectFrom('buried_player')
+      .innerJoin('buried_year', 'buried_year.year', 'buried_player.year')
+      .innerJoin('player', 'player.id', 'buried_player.player_id')
+      .where('buried_player.player_id', '=', playerId)
+      .where('buried_player.year', '=', year)
+      .where('buried_year.published_at', 'is not', null)
+      .select([
+        'player.name as playerName',
+        'buried_player.cards',
+        'buried_player.summary_image_key as summaryImageKey',
+        'buried_year.card_back_image_key as cardBackImageKey',
+      ])
+      .executeTakeFirst()
+    if (!row) return null
+    const cards = parse(row.cards)
+    if (cards.length === 0) return null
+    return { ...row, cards }
+  })
+
+/** Years with a published Buried deck for this player, newest first. */
+export const fetchPlayerBuriedYears = createServerFn()
+  .inputValidator((d: { playerId: number }) => d)
+  .handler(async ({ data: { playerId } }) => {
+    const rows = await db
+      .selectFrom('buried_player')
+      .innerJoin('buried_year', 'buried_year.year', 'buried_player.year')
+      .where('buried_player.player_id', '=', playerId)
+      .where('buried_year.published_at', 'is not', null)
+      .select('buried_player.year')
+      .orderBy('buried_player.year', 'desc')
+      .execute()
+    return rows.map((r) => r.year)
+  })

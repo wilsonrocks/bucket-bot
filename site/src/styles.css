@@ -78,3 +78,29 @@ body {
   & hr { @apply border-border; }
   & a { @apply text-blue-600 hover:underline dark:text-blue-400; }
 }
+
+/* Malifaux Buried: each card turns over as it's dealt. */
+@keyframes buried-flip-forward {
+  from {
+    transform: rotateY(-90deg);
+  }
+  to {
+    transform: rotateY(0);
+  }
+}
+@keyframes buried-flip-back {
+  from {
+    transform: rotateY(90deg);
+  }
+  to {
+    transform: rotateY(0);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .buried-flip-forward {
+    animation: buried-flip-forward 0.45s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+  }
+  .buried-flip-back {
+    animation: buried-flip-back 0.45s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+  }
+}

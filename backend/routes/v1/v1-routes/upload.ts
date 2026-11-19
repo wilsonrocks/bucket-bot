@@ -76,7 +76,7 @@ export const uploadHandler: RouteHandler<typeof uploadRoute, AppEnv> = async (c)
     return c.json({ error: "File too large (max 30 MB)" }, 413);
   }
 
-  const ALLOWED_TYPES = ["team", "painting", "achievement", "event"];
+  const ALLOWED_TYPES = ["team", "painting", "achievement", "event", "buried"];
   if (!ALLOWED_TYPES.includes(type)) {
     console.warn(`Upload rejected (400): invalid upload type; ${context()}`);
     return c.json({ error: "Invalid upload type" }, 400);

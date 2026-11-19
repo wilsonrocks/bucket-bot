@@ -13,6 +13,7 @@ import { Route as VenuesRoute } from '@/routes/_app/venues'
 import { Route as FeatureFlagsRoute } from '@/routes/_app/feature-flags'
 import { Route as AchievementsRoute } from '@/routes/_app/achievements'
 import { Route as PagesRoute } from '@/routes/_app/pages/'
+import { Route as BuriedRoute } from '@/routes/_app/buried'
 
 import { Anchor, Badge, Divider, Group, ScrollArea, Stack, Text } from '@mantine/core'
 import { AppNavLink } from './app-nav-link'
@@ -61,6 +62,7 @@ export const AppNavbar = () => {
           <>
             <AppNavLink to={VenuesRoute.to} label="Venues" />
             <AppNavLink to={PagesRoute.to} label="Pages" />
+            <AppNavLink to={BuriedRoute.to} label="Malifaux Buried" />
             <AppNavLink to={FeatureFlagsRoute.to} label="Feature Flags" />
             <AppNavLink to={BotChat.to} label="B(UK)et Bot Chat" />
           </>
