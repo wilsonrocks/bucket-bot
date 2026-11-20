@@ -29,7 +29,7 @@
   {
     "key": "PAINTING",
     "awards": [
-      { "event": { "id": 21, "name": "Haul of Eggs 12" }, "category": "Best Painted", "position": 1, "model": "Seamus", "paintingImageKey": "painting/abc123" },
+      { "event": { "id": 21, "name": "Haul of Eggs 12" }, "category": "Best Painted", "position": 1, "model": "Seamus", "paintingImageKey": "painting/f957fa7346b0ec40" },
       { "event": { "id": 30, "name": "The Lost Lands" }, "category": "Best Crew", "position": 2 }
     ]
   },
