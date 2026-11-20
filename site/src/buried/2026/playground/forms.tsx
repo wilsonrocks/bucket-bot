@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import type { BuriedEvent, Card, CardKey } from '../cards'
+import type { BuriedEvent, Card, CardKey, PaintingAward } from '../cards'
 import { EventFields, FACTIONS, FactionField, type FormProps, ListField, NumberField, patcher, TextField } from './fields'
 
 /** The fields for each card key. Typed per key, so a new card won't compile without a form. */
@@ -14,6 +14,26 @@ function EventList({ label, events, onChange }: { label: string; events: BuriedE
     <ListField label={label} items={events} onChange={onChange} blank={blankEvent}>
       {(event, set) => <EventFields value={event} onChange={set} />}
     </ListField>
+  )
+}
+
+function AwardFields({ value, onChange }: FormProps<PaintingAward>) {
+  const set = patcher(value, onChange)
+  const setEvent = patcher(value.event, (event) => set({ event }))
+  return (
+    <>
+      <TextField label="Event name" value={value.event.name} onChange={(name) => setEvent({ name })} />
+      <NumberField label="Event id" value={value.event.id} onChange={(id) => setEvent({ id })} />
+      <TextField label="Category" value={value.category} onChange={(category) => set({ category })} />
+      <NumberField label="Position" value={value.position} onChange={(position) => set({ position })} />
+      <TextField label="Model" optional value={value.model} onChange={(model) => set({ model })} />
+      <TextField
+        label="Painting image key"
+        optional
+        value={value.paintingImageKey}
+        onChange={(paintingImageKey) => set({ paintingImageKey })}
+      />
+    </>
   )
 }
 
@@ -124,28 +144,12 @@ export const FORMS: Forms = {
         onChange={(awards) => set({ awards })}
         blank={() => ({ event: { id: 1, name: 'New event' }, category: 'Best Painted', position: 1 })}
       >
-        {(row, onRow) => {
-          const setRow = patcher(row, onRow)
-          const setEvent = patcher(row.event, (event) => setRow({ event }))
-          return (
-            <>
-              <TextField label="Event name" value={row.event.name} onChange={(name) => setEvent({ name })} />
-              <NumberField label="Event id" value={row.event.id} onChange={(id) => setEvent({ id })} />
-              <TextField label="Category" value={row.category} onChange={(category) => setRow({ category })} />
-              <NumberField label="Position" value={row.position} onChange={(position) => setRow({ position })} />
-              <TextField label="Model" optional value={row.model} onChange={(model) => setRow({ model })} />
-              <TextField
-                label="Painting image key"
-                optional
-                value={row.paintingImageKey}
-                onChange={(paintingImageKey) => setRow({ paintingImageKey })}
-              />
-            </>
-          )
-        }}
+        {(row, onRow) => <AwardFields value={row} onChange={onRow} />}
       </ListField>
     )
   },
+
+  PAINTING_AWARD: ({ value, onChange }) => <AwardFields value={value.award} onChange={(award) => onChange({ ...value, award })} />,
 
   ORGANISED: ({ value, onChange }) => {
     const set = patcher(value, onChange)

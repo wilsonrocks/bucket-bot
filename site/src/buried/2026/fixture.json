@@ -26,6 +26,8 @@
   },
   { "key": "EVENTS_WON", "events": [{ "id": 30, "name": "The Lost Lands", "date": "2026-06-14", "players": 18, "place": 1 }] },
   { "key": "RANKING", "finalRank": 7, "bestRank": 3, "bestRankDate": "2026-06-15", "totalPlayers": 98 },
+  { "key": "PAINTING_AWARD", "award": { "event": { "id": 21, "name": "Haul of Eggs 12" }, "category": "Best Painted", "position": 1, "model": "Seamus", "paintingImageKey": "painting/f957fa7346b0ec40" } },
+  { "key": "PAINTING_AWARD", "award": { "event": { "id": 30, "name": "The Lost Lands" }, "category": "Best Crew", "position": 2 } },
   {
     "key": "PAINTING",
     "awards": [

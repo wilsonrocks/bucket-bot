@@ -43,6 +43,18 @@ describe("rendering", () => {
     expect(await sharp(png).metadata()).toMatchObject({ format: "png", width: 1080, height: 1350 });
   }, 30_000);
 
+  test("a painting award renders, with or without a photo", async () => {
+    const card: CardData = {
+      key: "PAINTING_AWARD",
+      award: { event: { id: 1, name: "Haul of Eggs" }, category: "Best Painted", position: 1, model: "Seamus" },
+    };
+    const png = await renderPng(<CardImage card={card} ctx={ctx} />, CARD_WIDTH, CARD_HEIGHT);
+    expect(await sharp(png).metadata()).toMatchObject({ width: 1080, height: 1350 });
+    const photo = `data:image/png;base64,${(await sharp({ create: { width: 8, height: 8, channels: 3, background: "#888" } }).png().toBuffer()).toString("base64")}`;
+    const withPhoto = await renderPng(<CardImage card={card} ctx={{ ...ctx, paintingPhoto: photo }} />, CARD_WIDTH, CARD_HEIGHT);
+    expect(withPhoto.equals(png)).toBe(false);
+  }, 30_000);
+
   test("the link preview renders to 1200×630", async () => {
     const png = await renderPng(<SummaryOgImage card={summary} ctx={ctx} />, OG_WIDTH, OG_HEIGHT);
     expect(await sharp(png).metadata()).toMatchObject({ width: 1200, height: 630 });
@@ -62,6 +74,7 @@ describe("fate", () => {
   });
   test("matches the site's mapping", () => {
     expect(fateOf({ key: "RANKING", finalRank: 1, bestRank: 1, bestRankDate: "2026-01-01", totalPlayers: 9 })).toEqual({ suit: "RAMS", value: 1 });
+    expect(fateOf({ key: "PAINTING_AWARD", award: { event: { id: 1, name: "E" }, category: "Best Painted", position: 2 } })).toEqual({ suit: "TOMES", value: 2 });
     expect(fateOf({ key: "INTRO", playerName: "A", eventsPlayed: 30, gamesPlayed: 90, percentile: 99 })).toEqual({ suit: "CROWS", value: 90 });
   });
 });

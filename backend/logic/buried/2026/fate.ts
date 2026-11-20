@@ -68,6 +68,7 @@ export function fateOf(card: CardData): Fate {
     case "EVENTS_WON": return { suit: "RAMS", value: value(card.events.length) };
     case "RANKING": return { suit: "RAMS", value: value(card.finalRank) };
     case "PAINTING": return { suit: "TOMES", value: value(card.awards.length) };
+    case "PAINTING_AWARD": return { suit: "TOMES", value: value(card.award.position) };
     case "ORGANISED": return { suit: "TOMES", value: value(card.events.length) };
     case "ACHIEVEMENTS": return { suit: "TOMES", value: value(card.achievements.length) };
     case "SUMMARY": return { suit: "RED_JOKER" };

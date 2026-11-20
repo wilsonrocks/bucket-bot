@@ -1,4 +1,4 @@
-import type { BuriedEvent, BuriedFaction, Card } from "./cards";
+import type { BuriedEvent, BuriedFaction, Card, PaintingAward } from "./cards";
 import type { PlayerRow, ResultRow, YearData } from "./queries";
 
 /** A card before its share image has been rendered. */
@@ -146,16 +146,18 @@ export function buildCards(input: PlayerInputs): CardData[] {
   }
 
   if (paintings.length > 0) {
-    cards.push({
-      key: "PAINTING",
-      awards: paintings.map((p) => ({
+    const awards = paintings.map(
+      (p): PaintingAward => ({
         event: { id: p.eventId, name: p.eventName },
         category: p.category,
         position: p.position,
         ...(p.model ? { model: p.model } : {}),
         ...(p.imageKey ? { paintingImageKey: p.imageKey } : {}),
-      })),
-    });
+      }),
+    );
+    // A card for each placing, then the overview of them all.
+    for (const award of awards) cards.push({ key: "PAINTING_AWARD", award });
+    cards.push({ key: "PAINTING", awards });
   }
 
   if (organised.length > 0) {

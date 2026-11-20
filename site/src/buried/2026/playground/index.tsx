@@ -6,8 +6,8 @@ import { parseCards } from '../parse-cards'
 import { CardForm } from './forms'
 import { Preview } from './preview'
 
-/** One card per key, from the fixture shared with the backend; each key starts from its fixture. */
-const FIXTURES = parseCards(fixture)
+/** One card per kind, from the fixture shared with the backend (the first, where a kind repeats). */
+const FIXTURES: Card[] = parseCards(fixture).filter((c, i, all) => all.findIndex((d) => d.key === c.key) === i)
 
 export function Playground({ year, cardKey, onKeyChange }: PlaygroundProps) {
   const initial = FIXTURES.find((c) => c.key === cardKey) ?? FIXTURES[0]!

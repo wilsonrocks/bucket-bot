@@ -307,6 +307,25 @@ function CardPicture({ card, year }: { card: Card; year: number }) {
       )
     }
 
+    case 'PAINTING_AWARD': {
+      const { award } = card
+      return (
+        <Face>
+          <Eyebrow>Brush with greatness</Eyebrow>
+          {award.paintingImageKey && (
+            <img
+              src={`${ASSETS_URL}/${award.paintingImageKey}-w800.webp`}
+              alt={award.model ?? `${award.category} at ${award.event.name}`}
+              className="mb-[3cqw] max-h-[52cqw] self-start rounded-[2cqw] object-cover"
+            />
+          )}
+          <Big size={award.paintingImageKey ? 'text-[13cqw]' : 'text-[24cqw]'}>{toOrdinal(award.position)}</Big>
+          <Line>{award.category}.</Line>
+          <Line small>{award.model ? `${award.model} · ${award.event.name}` : award.event.name}</Line>
+        </Face>
+      )
+    }
+
     case 'ORGANISED':
       return (
         <Face>
@@ -368,6 +387,7 @@ export function cardTitle(card: Card): string {
     case 'EVENTS_WON': return `${plural(card.events.length, 'event')} won`
     case 'RANKING': return `Ranked #${card.finalRank}`
     case 'PAINTING': return plural(card.awards.length, 'painting award')
+    case 'PAINTING_AWARD': return `${toOrdinal(card.award.position)} ${card.award.category} at ${card.award.event.name}`
     case 'ORGANISED': return `${plural(card.events.length, 'event')} organised`
     case 'ACHIEVEMENTS': return plural(card.achievements.length, 'achievement')
     case 'SUMMARY': return 'My year, Buried'

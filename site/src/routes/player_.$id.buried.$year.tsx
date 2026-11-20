@@ -1,10 +1,10 @@
 import { createFileRoute, notFound } from '@tanstack/react-router'
 import { useCallback } from 'react'
 import { fetchBuried } from '#/queries'
-import { optionalString } from '#/helpers/search-params'
+import { optionalNumber } from '#/helpers/search-params'
 import { SITE_NAME, seo } from '#/helpers/seo'
 import { Link } from '#/components/link'
-import { Deck } from '#/buried/deck'
+import { Deck, indexOfCard } from '#/buried/deck'
 import { buriedEdition } from '#/buried'
 
 const ASSETS_URL = import.meta.env.VITE_ASSETS_URL
@@ -15,9 +15,10 @@ export const Route = createFileRoute('/player_/$id/buried/$year')({
     parse: (raw: Record<string, string>) => ({ id: Number(raw.id), year: Number(raw.year) }),
     stringify: (p: { id: number; year: number }) => ({ id: String(p.id), year: String(p.year) }),
   },
-  validateSearch: (search: Record<string, unknown>): { card?: string } => {
-    const card = optionalString(search.card)
-    return card ? { card } : {}
+  // ?card=N is the card's 1-based place in the deck.
+  validateSearch: (search: Record<string, unknown>): { card?: number } => {
+    const card = optionalNumber(search.card)
+    return card !== undefined && Number.isInteger(card) && card >= 1 ? { card } : {}
   },
   // `card` is client state (which card is face-up), not a loader dep.
   loader: async ({ params }) => {
@@ -31,7 +32,7 @@ export const Route = createFileRoute('/player_/$id/buried/$year')({
     const { playerName, cards, summaryImageKey } = loaderData
     const edition = buriedEdition(params.year)
     const path = `/player/${params.id}/buried/${params.year}`
-    const shared = match.search.card ? cards.find((c) => c.key === match.search.card) : undefined
+    const shared = cards[indexOfCard(cards, match.search.card)]
 
     const sharedImage = shared?.imageKey ? `${ASSETS_URL}/${shared.imageKey}` : undefined
     const summaryImage = summaryImageKey ? `${ASSETS_URL}/${summaryImageKey}` : undefined
@@ -44,7 +45,7 @@ export const Route = createFileRoute('/player_/$id/buried/$year')({
       image: sharedImage ?? summaryImage,
       imageShape: sharedImage ? 'portrait' : 'wide',
       type: 'profile',
-      ...(shared ? { sharePath: `${path}?card=${encodeURIComponent(shared.key)}` } : {}),
+      ...(shared ? { sharePath: `${path}?card=${match.search.card}` } : {}),
     })
   },
   component: RouteComponent,
@@ -58,8 +59,8 @@ function RouteComponent() {
   const edition = buriedEdition(year)!
 
   const onChange = useCallback(
-    (key: string | undefined) =>
-      navigate({ search: key ? { card: key } : {}, replace: true, resetScroll: false }),
+    (index: number) =>
+      navigate({ search: index >= 0 ? { card: index + 1 } : {}, replace: true, resetScroll: false }),
     [navigate],
   )
 
@@ -82,7 +83,7 @@ function RouteComponent() {
         playerName={playerName}
         url={url}
         cardBackImageKey={cardBackImageKey}
-        activeKey={card}
+        activeIndex={indexOfCard(cards, card)}
         onChange={onChange}
         renderFace={(c) => edition.renderFace(c, year)}
         cardTitle={edition.cardTitle}

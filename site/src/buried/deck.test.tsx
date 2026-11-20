@@ -6,7 +6,7 @@ import fixture from './2026/fixture.json'
 import { CardFace, cardTitle } from './2026/card-face'
 import type { Card } from './2026/cards'
 import { parseCards } from './2026/parse-cards'
-import { Deck, indexOfKey } from './deck'
+import { Deck, indexOfCard } from './deck'
 
 afterEach(cleanup)
 
@@ -25,19 +25,21 @@ const land = (el: Element) => fireEvent(el, new Event('webkitAnimationEnd', { bu
 
 const cards = parseCards(fixture)
 
+/** Starts on the first card of kind `initial`, if given; shows the face-up card's kind and 1-based place. */
 function Harness({ initial }: { initial?: string }) {
-  const [key, setKey] = useState<string | undefined>(initial)
+  const [index, setIndex] = useState(initial ? cards.findIndex((c) => c.key === initial) : -1)
   return (
     <>
-      <output data-testid="key">{key ?? 'BACK'}</output>
+      <output data-testid="key">{cards[index]?.key ?? 'BACK'}</output>
+      <output data-testid="place">{index + 1}</output>
       <Deck
         cards={cards}
         year={2026}
         playerName="Alice Example"
         url="https://malifaux.uk/player/1/buried/2026"
         cardBackImageKey={null}
-        activeKey={key}
-        onChange={setKey}
+        activeIndex={index}
+        onChange={setIndex}
         renderFace={(c) => <CardFace card={c} year={2026} />}
         cardTitle={cardTitle}
       />
@@ -47,11 +49,14 @@ function Harness({ initial }: { initial?: string }) {
 
 const current = () => screen.getByTestId('key').textContent
 
-describe('indexOfKey', () => {
-  test('undefined and unknown keys are the card back', () => {
-    expect(indexOfKey(cards, undefined)).toBe(-1)
-    expect(indexOfKey(cards, 'NOPE')).toBe(-1)
-    expect(indexOfKey(cards, 'RANKING')).toBe(cards.findIndex((c) => c.key === 'RANKING'))
+describe('indexOfCard', () => {
+  test('?card=N is the Nth card', () => {
+    expect(indexOfCard(cards, 1)).toBe(0)
+    expect(indexOfCard(cards, cards.length)).toBe(cards.length - 1)
+  })
+
+  test('missing, junk and out-of-range numbers are the card back', () => {
+    for (const n of [undefined, 0, -1, 1.5, NaN, cards.length + 1]) expect(indexOfCard(cards, n)).toBe(-1)
   })
 })
 
@@ -63,7 +68,7 @@ describe('Deck on mobile (slideshow)', () => {
     expect(screen.getByRole('group', { name: 'Card back' })).toBeTruthy()
     fireEvent.click(screen.getByRole('button', { name: 'Flip the first card' }))
     expect(current()).toBe('INTRO')
-    expect(screen.getByRole('group', { name: /^1 of 12: My year in games/ })).toBeTruthy()
+    expect(screen.getByRole('group', { name: new RegExp(`^1 of ${cards.length}: My year in games`) })).toBeTruthy()
     fireEvent.click(screen.getAllByRole('button', { name: 'Next card' })[0]!)
     expect(current()).toBe('MOST_PLAYED_FACTION')
   })
@@ -84,7 +89,11 @@ describe('Deck on mobile (slideshow)', () => {
     fireEvent.pointerDown(card, { clientX: 300 })
     fireEvent.pointerUp(card, { clientX: 100 })
     fireEvent.click(screen.getAllByRole('button', { name: 'Next card' })[0]!)
-    expect(current()).toBe('PAINTING')
+    expect(current()).toBe('PAINTING_AWARD')
+    const place = Number(screen.getByTestId('place').textContent)
+    fireEvent.click(screen.getAllByRole('button', { name: 'Next card' })[0]!)
+    expect(current()).toBe('PAINTING_AWARD')
+    expect(Number(screen.getByTestId('place').textContent)).toBe(place + 1)
   })
 
   test('the last card offers a restart', () => {
@@ -117,7 +126,7 @@ describe('Deck on desktop (draw and discard piles)', () => {
 
     land(flying)
     expect(container.querySelector('.buried-deal')).toBeNull()
-    expect(screen.getByRole('group', { name: /^1 of 12: My year in games/ })).toBeTruthy()
+    expect(screen.getByRole('group', { name: new RegExp(`^1 of ${cards.length}: My year in games`) })).toBeTruthy()
     expect(screen.getByText(`${cards.length - 1} to flip`)).toBeTruthy()
   })
 
@@ -159,12 +168,12 @@ describe('Deck on desktop (draw and discard piles)', () => {
     const { container } = render(<Harness />)
     fireEvent.click(screen.getByRole('button', { name: 'Flip the first card' }))
     expect(container.querySelector('.buried-deal')).toBeNull()
-    expect(screen.getByRole('group', { name: /^1 of 12/ })).toBeTruthy()
+    expect(screen.getByRole('group', { name: new RegExp(`^1 of ${cards.length}`) })).toBeTruthy()
   })
 })
 
 describe('CardFace', () => {
-  test.each(cards.map((c) => [c.key, c] as const))('%s renders', (_, card) => {
+  test.each(cards.map((c, i) => [`${i + 1} ${c.key}`, c] as const))('%s renders', (_, card) => {
     const { container } = render(<CardFace card={card as Card} year={2026} />)
     expect(container.textContent!.length).toBeGreaterThan(5)
   })

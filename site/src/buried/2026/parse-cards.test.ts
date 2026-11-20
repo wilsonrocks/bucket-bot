@@ -11,6 +11,11 @@ describe('parseCards', () => {
     expect(cards.map((c) => c.key)).toEqual(fixture.map((c) => c.key))
   })
 
+  it('keeps every card of a repeatable kind', () => {
+    const award = { key: 'PAINTING_AWARD', award: { event: { id: 1, name: 'E' }, category: 'Best Painted', position: 1 } }
+    expect(parseCards([intro, award, award, award]).map((c) => c.key)).toEqual(['INTRO', 'PAINTING_AWARD', 'PAINTING_AWARD', 'PAINTING_AWARD'])
+  })
+
   it('returns nothing for non-arrays', () => {
     expect(parseCards(null)).toEqual([])
     expect(parseCards({ key: 'INTRO' })).toEqual([])
@@ -39,6 +44,7 @@ describe('parseCard', () => {
     ['bad list entry', { key: 'PODIUMS', events: [{ id: 1, name: 'E', date: '2026-01-01' }] }],
     ['bad optional', { key: 'PODIUMS', events: [{ id: 1, name: 'E', date: '2026-01-01', players: 4, place: '1st' }] }],
     ['nested null', { key: 'PAINTING', awards: [{ event: null, category: 'Best', position: 1 }] }],
+    ['painting award without an award', { key: 'PAINTING_AWARD', awards: [] }],
     ['bad summary faction', { key: 'SUMMARY', playerName: 'A', eventsPlayed: 0, gamesPlayed: 0, wins: 0, podiums: 0, paintingAwards: 0, eventsOrganised: 0, venues: 0, topFaction: {} }],
   ])('rejects %s', (_, raw) => {
     expect(parseCard(raw)).toBeNull()

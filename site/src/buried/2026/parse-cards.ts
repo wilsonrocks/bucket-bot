@@ -1,4 +1,4 @@
-import type { BuriedEvent, BuriedFaction, Card, CardKey } from './cards'
+import type { BuriedEvent, BuriedFaction, Card, CardKey, PaintingAward } from './cards'
 
 /**
  * Turns the stored JSONB into cards the deck can render. Anything malformed
@@ -23,6 +23,16 @@ const isFaction = (v: unknown): v is BuriedFaction =>
 const isEvent = (v: unknown): v is BuriedEvent =>
   isObj(v) && isNum(v.id) && isStr(v.name) && isStr(v.date) && isNum(v.players) && optional(v.place, isNum)
 
+const isAward = (a: unknown): a is PaintingAward =>
+  isObj(a) &&
+  isObj(a.event) &&
+  isNum(a.event.id) &&
+  isStr(a.event.name) &&
+  isStr(a.category) &&
+  isNum(a.position) &&
+  optional(a.model, isStr) &&
+  optional(a.paintingImageKey, isStr)
+
 const GUARDS: { [K in CardKey]: (c: Obj) => boolean } = {
   INTRO: (c) => isStr(c.playerName) && isNum(c.eventsPlayed) && isNum(c.gamesPlayed) && isNum(c.percentile),
   MOST_PLAYED_FACTION: (c) => isFaction(c.faction) && isNum(c.events) && isNum(c.share),
@@ -40,20 +50,8 @@ const GUARDS: { [K in CardKey]: (c: Obj) => boolean } = {
   PODIUMS: (c) => arrayOf(c.events, isEvent, 1),
   EVENTS_WON: (c) => arrayOf(c.events, isEvent, 1),
   RANKING: (c) => isNum(c.finalRank) && isNum(c.bestRank) && isStr(c.bestRankDate) && isNum(c.totalPlayers),
-  PAINTING: (c) =>
-    arrayOf(
-      c.awards,
-      (a): a is Obj =>
-        isObj(a) &&
-        isObj(a.event) &&
-        isNum(a.event.id) &&
-        isStr(a.event.name) &&
-        isStr(a.category) &&
-        isNum(a.position) &&
-        optional(a.model, isStr) &&
-        optional(a.paintingImageKey, isStr),
-      1,
-    ),
+  PAINTING: (c) => arrayOf(c.awards, isAward, 1),
+  PAINTING_AWARD: (c) => isAward(c.award),
   ORGANISED: (c) => arrayOf(c.events, isEvent, 1) && isNum(c.playersHosted),
   ACHIEVEMENTS: (c) =>
     arrayOf(
@@ -79,14 +77,17 @@ export function parseCard(raw: unknown): Card | null {
   }
 }
 
-/** Valid cards in their stored order; each key at most once. */
+/** Kinds a deck can hold more than one of. */
+const REPEATABLE: ReadonlySet<CardKey> = new Set(['PAINTING_AWARD'])
+
+/** Valid cards in their stored order, each key at most once except the repeatable kinds. */
 export function parseCards(raw: unknown): Card[] {
   if (!Array.isArray(raw)) return []
   const seen = new Set<CardKey>()
   const cards: Card[] = []
   for (const item of raw) {
     const card = parseCard(item)
-    if (!card || seen.has(card.key)) continue
+    if (!card || (seen.has(card.key) && !REPEATABLE.has(card.key))) continue
     seen.add(card.key)
     cards.push(card)
   }

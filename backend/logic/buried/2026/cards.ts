@@ -17,6 +17,8 @@ export const CardKey = {
   EVENTS_WON: "EVENTS_WON",
   RANKING: "RANKING",
   PAINTING: "PAINTING",
+  /** One per painting placing; a deck can hold several, each before the PAINTING overview. */
+  PAINTING_AWARD: "PAINTING_AWARD",
   ORGANISED: "ORGANISED",
   ACHIEVEMENTS: "ACHIEVEMENTS",
   SUMMARY: "SUMMARY",
@@ -110,18 +112,25 @@ export const rankingCard = z.object({
   totalPlayers: z.number(),
 });
 
+const paintingAwardSchema = z.object({
+  event: z.object({ id: z.number(), name: z.string() }),
+  category: z.string(),
+  position: z.number(),
+  model: z.string().optional(),
+  paintingImageKey: z.string().optional(),
+});
+export type PaintingAward = z.infer<typeof paintingAwardSchema>;
+
 export const paintingCard = z.object({
   ...base,
   key: z.literal(CardKey.PAINTING),
-  awards: z.array(
-    z.object({
-      event: z.object({ id: z.number(), name: z.string() }),
-      category: z.string(),
-      position: z.number(),
-      model: z.string().optional(),
-      paintingImageKey: z.string().optional(),
-    }),
-  ),
+  awards: z.array(paintingAwardSchema),
+});
+
+export const paintingAwardCard = z.object({
+  ...base,
+  key: z.literal(CardKey.PAINTING_AWARD),
+  award: paintingAwardSchema,
 });
 
 export const organisedCard = z.object({
@@ -164,6 +173,7 @@ export const cardSchema = z.discriminatedUnion("key", [
   eventsWonCard,
   rankingCard,
   paintingCard,
+  paintingAwardCard,
   organisedCard,
   achievementsCard,
   summaryCard,

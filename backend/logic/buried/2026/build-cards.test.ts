@@ -132,7 +132,25 @@ describe("buildCards", () => {
       achievements: [{ playerId: 1, id: "FIRST_BLOOD", name: "First Blood", imageKey: null }],
     });
     expect(find(cards, "PAINTING")!.awards[0]).toEqual({ event: { id: 1, name: "E" }, category: "Best Painted", position: 1 });
+    expect(find(cards, "PAINTING_AWARD")!.award).toEqual({ event: { id: 1, name: "E" }, category: "Best Painted", position: 1 });
     expect(find(cards, "ACHIEVEMENTS")!.achievements[0]).toEqual({ id: "FIRST_BLOOD", name: "First Blood" });
+  });
+
+  test("a card for each painting placing, in order, then the overview", () => {
+    const painting = (position: number, eventName: string) => ({
+      playerId: 1, eventId: position, eventName, category: "Best Painted", position, model: null, imageKey: null,
+    });
+    const cards = buildCards({ ...emptyInputs, paintings: [painting(1, "A"), painting(2, "B"), painting(3, "C")] });
+    const awards = cards.filter((c): c is Extract<CardData, { key: "PAINTING_AWARD" }> => c.key === "PAINTING_AWARD");
+    expect(awards.map((c) => [c.award.event.name, c.award.position])).toEqual([["A", 1], ["B", 2], ["C", 3]]);
+    const firstAward = keys(cards).indexOf("PAINTING_AWARD");
+    expect(keys(cards).slice(firstAward, firstAward + 4)).toEqual(["PAINTING_AWARD", "PAINTING_AWARD", "PAINTING_AWARD", "PAINTING"]);
+    expect(find(cards, "PAINTING")!.awards).toHaveLength(3);
+  });
+
+  test("no painting cards without placings", () => {
+    expect(keys(buildCards(emptyInputs))).not.toContain("PAINTING_AWARD");
+    expect(keys(buildCards(emptyInputs))).not.toContain("PAINTING");
   });
 
   test("every card it builds passes the schema", () => {
@@ -144,7 +162,7 @@ describe("buildCards", () => {
       organised: [{ playerId: 1, eventId: 1, eventName: "E", date: "2026-02-01", players: 12 }],
       achievements: [{ playerId: 1, id: "X", name: "X", imageKey: "achievement/x" }],
     });
-    expect(cards).toHaveLength(12);
+    expect(cards).toHaveLength(13);
     for (const card of cards) expect(cardSchema.safeParse(card).success, card.key).toBe(true);
   });
 });
@@ -177,7 +195,7 @@ describe("site contract", () => {
     const path = join(__dirname, "../../../../site/src/buried/2026/fixture.json");
     const fixture = JSON.parse(readFileSync(path, "utf8")) as { key: string }[];
     // One of every card kind, so a new kind can't skip the contract.
-    expect(fixture.map((c) => c.key).sort()).toEqual(Object.values(CardKey).sort());
+    expect([...new Set(fixture.map((c) => c.key))].sort()).toEqual(Object.values(CardKey).sort());
     for (const card of fixture) expect(cardSchema.safeParse(card).success, card.key).toBe(true);
   });
 });

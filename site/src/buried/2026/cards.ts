@@ -74,15 +74,23 @@ export interface RankingCard extends Base {
   totalPlayers: number
 }
 
+export interface PaintingAward {
+  event: { id: number; name: string }
+  category: string
+  position: number
+  model?: string
+  paintingImageKey?: string
+}
+
 export interface PaintingCard extends Base {
   key: 'PAINTING'
-  awards: {
-    event: { id: number; name: string }
-    category: string
-    position: number
-    model?: string
-    paintingImageKey?: string
-  }[]
+  awards: PaintingAward[]
+}
+
+/** One per painting placing; a deck can hold several, each before the PAINTING overview. */
+export interface PaintingAwardCard extends Base {
+  key: 'PAINTING_AWARD'
+  award: PaintingAward
 }
 
 export interface OrganisedCard extends Base {
@@ -120,6 +128,7 @@ export type Card =
   | EventsWonCard
   | RankingCard
   | PaintingCard
+  | PaintingAwardCard
   | OrganisedCard
   | AchievementsCard
   | SummaryCard

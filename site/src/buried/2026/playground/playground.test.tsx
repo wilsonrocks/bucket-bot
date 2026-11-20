@@ -22,7 +22,7 @@ describe('Buried 2026 playground', () => {
     const chosen: string[] = []
     render(<Playground year={2026} cardKey="RANKING" onKeyChange={(k) => chosen.push(k)} />)
     const select = screen.getByLabelText('Card') as HTMLSelectElement
-    expect([...select.options].map((o) => o.value)).toEqual(cards.map((c) => c.key))
+    expect([...select.options].map((o) => o.value)).toEqual([...new Set(cards.map((c) => c.key))])
     expect(select.value).toBe('RANKING')
     fireEvent.change(select, { target: { value: 'PODIUMS' } })
     expect(chosen).toEqual(['PODIUMS'])

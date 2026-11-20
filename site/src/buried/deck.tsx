@@ -11,7 +11,7 @@ import { useMediaQuery } from '#/helpers/use-media-query'
  * over in the air and lands it face up on the discard; going back returns it.
  * On mobile there's no room for two piles, so it's a swipeable slideshow.
  *
- * The face-up card is mirrored in the URL (?card=KEY) so any card can be
+ * The face-up card is mirrored in the URL (?card=N, its 1-based place in the deck) so any card can be
  * deep-linked and gets its own share preview.
  */
 
@@ -21,6 +21,7 @@ const SWIPE_PX = 40
 const MAX_PILE_LAYERS = 4
 
 export interface DeckCard {
+  /** The card's kind, which may repeat within a deck. */
   key: string
   imageKey?: string
 }
@@ -32,17 +33,16 @@ export interface DeckProps<C extends DeckCard> {
   /** Absolute URL of this deck. */
   url: string
   cardBackImageKey: string | null
-  /** Key of the face-up card, or undefined when nothing has been flipped yet. */
-  activeKey: string | undefined
-  onChange: (key: string | undefined) => void
+  /** Index of the face-up card in `cards`; -1 (or anything out of range) is the card back. */
+  activeIndex: number
+  onChange: (index: number) => void
   renderFace: (card: C) => ReactNode
   cardTitle: (card: C) => string
 }
 
-/** -1 means nothing flipped yet. Unknown keys (e.g. a card that's since been dropped) start there too. */
-export function indexOfKey(cards: DeckCard[], key: string | undefined): number {
-  if (key === undefined) return -1
-  return cards.findIndex((c) => c.key === key)
+/** ?card=N (1-based) → index into `cards`; missing, junk or out of range (a deck that's since shrunk) is the card back, -1. */
+export function indexOfCard(cards: DeckCard[], card: number | undefined): number {
+  return card !== undefined && Number.isInteger(card) && card >= 1 && card <= cards.length ? card - 1 : -1
 }
 
 /** The flip in progress: `id` restarts the animation when flips come quickly. */
@@ -53,8 +53,8 @@ interface Move {
 }
 
 export function Deck<C extends DeckCard>(props: DeckProps<C>) {
-  const { cards, year, playerName, url, activeKey, onChange, cardTitle } = props
-  const index = indexOfKey(cards, activeKey)
+  const { cards, year, playerName, url, activeIndex, onChange, cardTitle } = props
+  const index = activeIndex >= 0 && activeIndex < cards.length ? activeIndex : -1
   const card = index >= 0 ? cards[index] : undefined
 
   const isDesktop = useMediaQuery('(min-width: 768px)')
@@ -67,7 +67,7 @@ export function Deck<C extends DeckCard>(props: DeckProps<C>) {
       const clamped = Math.max(-1, Math.min(cards.length - 1, to))
       if (clamped === index) return
       setMove(reducedMotion ? null : { id: ++moveId.current, from: index, to: clamped })
-      onChange(clamped === -1 ? undefined : cards[clamped]!.key)
+      onChange(clamped)
     },
     [cards, index, onChange, reducedMotion],
   )
@@ -75,7 +75,7 @@ export function Deck<C extends DeckCard>(props: DeckProps<C>) {
   // Straight back to the card back: no flight, since the whole discard pile moves at once.
   const restart = useCallback(() => {
     setMove(null)
-    onChange(undefined)
+    onChange(-1)
   }, [onChange])
 
   useEffect(() => {
@@ -93,7 +93,7 @@ export function Deck<C extends DeckCard>(props: DeckProps<C>) {
     return () => window.removeEventListener('keydown', onKey)
   }, [go, index])
 
-  const deckUrl = (key?: string) => (key ? `${url}?card=${encodeURIComponent(key)}` : url)
+  const deckUrl = (i?: number) => (i !== undefined ? `${url}?card=${i + 1}` : url)
   const imageUrl = card?.imageKey ? `${ASSETS_URL}/${card.imageKey}` : undefined
 
   return (
@@ -106,8 +106,8 @@ export function Deck<C extends DeckCard>(props: DeckProps<C>) {
     >
       {/* Story-style progress */}
       <div className="flex w-full gap-1" aria-hidden>
-        {cards.map((c, i) => (
-          <span key={c.key} className={`h-1 flex-1 rounded-full transition-colors ${i <= index ? 'bg-foreground' : 'bg-muted'}`} />
+        {cards.map((_, i) => (
+          <span key={i} className={`h-1 flex-1 rounded-full transition-colors ${i <= index ? 'bg-foreground' : 'bg-muted'}`} />
         ))}
       </div>
 
@@ -134,12 +134,12 @@ export function Deck<C extends DeckCard>(props: DeckProps<C>) {
               {imageUrl && (
                 <ShareImageButton
                   imageUrl={imageUrl}
-                  fileName={shareFileName(playerName, 'malifaux buried', year, card.key)}
+                  fileName={shareFileName(playerName, 'malifaux buried', year, index + 1, card.key)}
                   title={`${cardTitle(card)} — my Malifaux Buried ${year}`}
                 />
               )}
               <ShareButton
-                url={deckUrl(card.key)}
+                url={deckUrl(index)}
                 title={`${playerName}'s Malifaux Buried ${year}`}
                 text={`${cardTitle(card)} — my Malifaux Buried ${year}`}
                 label="Share link"

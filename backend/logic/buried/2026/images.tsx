@@ -298,6 +298,22 @@ function CardPicture({ card, ctx }: { card: CardData; ctx: ImageContext }) {
           <Line>{card.awards.length === 1 ? "painting award." : "painting awards."}</Line>
         </Frame>
       );
+    case "PAINTING_AWARD": {
+      const { award } = card;
+      return (
+        <Frame ctx={ctx}>
+          <Eyebrow>Brush with greatness</Eyebrow>
+          {ctx.paintingPhoto ? (
+            <div style={{ display: "flex", justifyContent: "center", marginBottom: 32 }}>
+              <img src={ctx.paintingPhoto} height={560} style={{ borderRadius: 24, objectFit: "cover", maxWidth: 780 }} />
+            </div>
+          ) : null}
+          <Big size={ctx.paintingPhoto ? 140 : 260}>{ordinal(award.position)}</Big>
+          <Line>{`${award.category}.`}</Line>
+          <Line size={40}>{award.model ? `${award.model} · ${award.event.name}` : award.event.name}</Line>
+        </Frame>
+      );
+    }
     case "ORGANISED":
       return (
         <Frame ctx={ctx}>

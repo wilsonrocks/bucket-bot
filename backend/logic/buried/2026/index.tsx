@@ -42,8 +42,11 @@ export const edition2026: BuriedEdition = {
           continue;
         }
         const ctx: ImageContext = { year, playerName: player.name, ...(logo ? { logo } : {}) };
-        if (card.key === "PAINTING") {
-          const photoKey = card.awards.find((a) => a.paintingImageKey)?.paintingImageKey;
+        if (card.key === "PAINTING" || card.key === "PAINTING_AWARD") {
+          const photoKey =
+            card.key === "PAINTING_AWARD"
+              ? card.award.paintingImageKey
+              : card.awards.find((a) => a.paintingImageKey)?.paintingImageKey;
           const buf = photoKey ? await images.loadAsset(`${photoKey}-w800.webp`) : null;
           if (buf) ctx.paintingPhoto = await toDataUri(buf, 880);
         }
