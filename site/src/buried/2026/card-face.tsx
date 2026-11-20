@@ -45,8 +45,8 @@ function Face({
   )
 }
 
-// The words fade in one after another, then, after a pause, the stat itself
-// (a <Big>, or anything marked data-stat) comes last. Layout order is
+// The stat itself (a <Big>, or anything marked data-stat) fades in first,
+// then, after a pause, the words one after another. Layout order is
 // unchanged; only the timing is.
 const REVEAL_STEP = 0.25
 const STAT_PAUSE = 0.5
@@ -56,13 +56,13 @@ function reveal(children: ReactNode) {
   const isStat = pieces.map(
     (child) => isValidElement<{ 'data-stat'?: boolean }>(child) && (child.type === Big || child.props['data-stat'] === true),
   )
-  const words = isStat.filter((stat) => !stat).length
+  const stats = isStat.filter(Boolean).length
   let wordAt = 0
   let statAt = 0
   return pieces.map((child, i) => {
     const delay = isStat[i]
-      ? 0.1 + words * REVEAL_STEP + STAT_PAUSE + statAt++ * REVEAL_STEP
-      : 0.1 + wordAt++ * REVEAL_STEP
+      ? 0.1 + statAt++ * REVEAL_STEP
+      : 0.1 + stats * REVEAL_STEP + STAT_PAUSE + wordAt++ * REVEAL_STEP
     return (
       <div key={i} className="buried-fade" style={{ animationDelay: `${delay}s` }}>
         {child}
