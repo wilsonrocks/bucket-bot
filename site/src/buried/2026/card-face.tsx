@@ -361,15 +361,15 @@ export function cardTitle(card: Card): string {
   switch (card.key) {
     case 'INTRO': return 'My year in games'
     case 'MOST_PLAYED_FACTION': return `My faction: ${card.faction.name}`
-    case 'FACTIONS': return `${card.factions.length} factions`
-    case 'VENUES': return `${card.venues.length} venues`
+    case 'FACTIONS': return plural(card.factions.length, 'faction')
+    case 'VENUES': return plural(card.venues.length, 'venue')
     case 'BIGGEST_EVENT': return `My biggest event: ${card.event.name}`
-    case 'PODIUMS': return `${card.events.length} podiums`
-    case 'EVENTS_WON': return `${card.events.length} ${card.events.length === 1 ? 'event' : 'events'} won`
+    case 'PODIUMS': return plural(card.events.length, 'podium')
+    case 'EVENTS_WON': return `${plural(card.events.length, 'event')} won`
     case 'RANKING': return `Ranked #${card.finalRank}`
-    case 'PAINTING': return `${card.awards.length} painting ${card.awards.length === 1 ? 'award' : 'awards'}`
-    case 'ORGANISED': return `${card.events.length} ${card.events.length === 1 ? 'event' : 'events'} organised`
-    case 'ACHIEVEMENTS': return `${card.achievements.length} achievements`
+    case 'PAINTING': return plural(card.awards.length, 'painting award')
+    case 'ORGANISED': return `${plural(card.events.length, 'event')} organised`
+    case 'ACHIEVEMENTS': return plural(card.achievements.length, 'achievement')
     case 'SUMMARY': return 'My year, Buried'
   }
 }
