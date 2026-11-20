@@ -21,6 +21,8 @@ const SEARCH_PAGES: Record<FileRouteTypes['fullPaths'], SearchPage | 'dynamic' |
   '/player/$id': 'dynamic',
   // Reached from the player page (and the Discord DM), not search.
   '/player/$id/buried/$year': 'excluded',
+  // Dev-only card playground.
+  '/player/test/buried/$year': 'excluded',
   '/team/$id': 'dynamic',
   '/upcoming-event/$id': 'dynamic',
   // CMS pages
