@@ -24,6 +24,19 @@ function truncatedPlayersHtml(count: number): string {
   return document.toString();
 }
 
+// New Frontier's standings with the first player's faction blanked out, as
+// happens when a player never sets one on Longshanks.
+function playersHtmlWithMissingFaction(): { html: string; longshanksId: string; name: string } {
+  const { document } = parseHTML(newFrontierPlayersHtml);
+  const el = document.querySelector("[class=player], [class='player drop']")!;
+  el.querySelector(".factions")!.innerHTML = "";
+  return {
+    html: document.toString(),
+    longshanksId: el.getAttribute("id")!.split("_")[1]!,
+    name: el.querySelector(".player_link")!.textContent!.trim(),
+  };
+}
+
 // The importer fetches two Longshanks pages: the standings panel and the event
 // page. Serve the captured New Frontier HTML for each.
 function mockLongshanks(playersHtml = newFrontierPlayersHtml) {
@@ -61,7 +74,7 @@ function makeApp() {
 function importEvent(
   app: ReturnType<typeof makeApp>,
   longshanksId: string,
-  body: { tierCode?: string } = {},
+  body: { tierCode?: string; factionOverrides?: Record<string, string> } = {},
 ) {
   return app.request(`/longshanks-event/${longshanksId}`, {
     method: "POST",
@@ -173,5 +186,58 @@ describe("POST /longshanks-event/{id}", () => {
       .selectAll()
       .execute();
     expect(tourneys).toHaveLength(1);
+  });
+
+  describe("players with no faction on Longshanks", () => {
+    test("rejects with 422 listing the players, and imports nothing", async () => {
+      const missing = playersHtmlWithMissingFaction();
+      mockLongshanks(missing.html);
+      const response = await importEvent(makeApp(), NEW_FRONTIER_ID);
+      expect(response.status).toBe(422);
+
+      const body = (await response.json()) as {
+        missingFactions: unknown[];
+        factions: { code: string }[];
+      };
+      expect(body.missingFactions).toEqual([
+        { longshanksId: missing.longshanksId, name: missing.name, longshanksFaction: null },
+      ]);
+      expect(body.factions.map((f) => f.code)).toContain("NEVERBORN");
+
+      const tourneys = await dbClient
+        .selectFrom("tourney")
+        .where("longshanks_id", "=", NEW_FRONTIER_ID)
+        .selectAll()
+        .execute();
+      expect(tourneys).toHaveLength(0);
+    });
+
+    test("imports using the supplied faction override", async () => {
+      const missing = playersHtmlWithMissingFaction();
+      mockLongshanks(missing.html);
+      const response = await importEvent(makeApp(), NEW_FRONTIER_ID, {
+        factionOverrides: { [missing.longshanksId]: "NEVERBORN" },
+      });
+      expect(response.status).toBe(200);
+      const { id } = (await response.json()) as { id: number };
+
+      const result = await dbClient
+        .selectFrom("result")
+        .innerJoin("player_identity", "player_identity.id", "result.player_identity_id")
+        .where("result.tourney_id", "=", id)
+        .where("player_identity.external_id", "=", missing.longshanksId)
+        .select("result.faction_code")
+        .executeTakeFirstOrThrow();
+      expect(result.faction_code).toBe("NEVERBORN");
+    });
+
+    test("rejects an override with an unknown faction code", async () => {
+      const missing = playersHtmlWithMissingFaction();
+      mockLongshanks(missing.html);
+      const response = await importEvent(makeApp(), NEW_FRONTIER_ID, {
+        factionOverrides: { [missing.longshanksId]: "NOT_A_FACTION" },
+      });
+      expect(response.status).toBe(400);
+    });
   });
 });

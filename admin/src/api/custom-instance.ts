@@ -1,5 +1,17 @@
 import { notifications } from '@mantine/notifications'
 
+// Thrown for non-2xx responses; carries the parsed body so callers can act on
+// structured error responses (e.g. a 422 listing what needs fixing).
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+    readonly body: unknown,
+  ) {
+    super(message)
+  }
+}
+
 export const customFetch = async <T>(
   url: string,
   options: RequestInit = {}
@@ -20,13 +32,15 @@ export const customFetch = async <T>(
 
   if (!response.ok) {
     let message = `${url}: ${response.statusText}`
+    let body: unknown
     try {
-      const body = await response.json()
-      if (body?.error) message = body.error
+      body = await response.json()
+      const error = (body as { error?: unknown } | null)?.error
+      if (typeof error === 'string') message = error
     } catch {}
     console.error(`${method} ${url} failed:`, response.status)
     notifications.show({ title: 'Error', message, color: 'red' })
-    throw new Error(message)
+    throw new ApiError(message, response.status, body)
   }
 
   if (method !== 'GET') {

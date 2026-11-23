@@ -165,4 +165,16 @@ describe("Extract Longshanks Players", () => {
       expect(playerData.length).toBe(12);
     });
   });
+
+  test("leaves faction undefined when a player has none", () => {
+    const playerData = extractPlayersFromLongshanksHTML(`
+      <div class="player" id="player_6236">
+        <a class='player_link'>Angry Paul</a>
+        <div class="factions"></div>
+        <span class="wins">2</span><span class="loss">1</span><span class="ties">0</span>
+      </div>`);
+    expect(playerData).toEqual([
+      expect.objectContaining({ longshanksId: "6236", name: "Angry Paul", faction: undefined }),
+    ]);
+  });
 });

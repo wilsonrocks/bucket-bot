@@ -15,6 +15,19 @@ const otherDataValidator = z.object({
 
 const ErrorSchema = z.object({ error: z.string() });
 
+const MissingFactionsSchema = z.object({
+  error: z.string(),
+  missingFactions: z.array(
+    z.object({
+      longshanksId: z.string(),
+      name: z.string(),
+      // The faction name Longshanks gave, if it gave one we don't recognise
+      longshanksFaction: z.string().nullable(),
+    }),
+  ),
+  factions: z.array(z.object({ code: z.string(), name: z.string() })),
+});
+
 export const newLongshanksEventRoute = createRoute({
   method: "post",
   path: "/longshanks-event/{id}",
@@ -23,7 +36,12 @@ export const newLongshanksEventRoute = createRoute({
     body: {
       content: {
         "application/json": {
-          schema: z.object({ tierCode: z.string().optional() }),
+          schema: z.object({
+            tierCode: z.string().optional(),
+            // Longshanks player id -> faction name_code, for players whose
+            // faction is missing (or unrecognised) on Longshanks
+            factionOverrides: z.record(z.string(), z.string()).optional(),
+          }),
         },
       },
     },
@@ -37,6 +55,10 @@ export const newLongshanksEventRoute = createRoute({
       content: { "application/json": { schema: ErrorSchema } },
       description: "Invalid request or event already exists",
     },
+    422: {
+      content: { "application/json": { schema: MissingFactionsSchema } },
+      description: "Some players have no faction; resubmit with factionOverrides",
+    },
     502: {
       content: { "application/json": { schema: ErrorSchema } },
       description: "Failed to fetch from Longshanks",
@@ -46,7 +68,7 @@ export const newLongshanksEventRoute = createRoute({
 
 export const newLongshanksEvent: RouteHandler<typeof newLongshanksEventRoute, AppEnv> = async (c) => {
   const { id: longshanksEventId } = c.req.valid("param");
-  const { tierCode } = c.req.valid("json");
+  const { tierCode, factionOverrides = {} } = c.req.valid("json");
 
   const [players, otherData] = await Promise.all([
     (async () => {
@@ -75,6 +97,35 @@ export const newLongshanksEvent: RouteHandler<typeof newLongshanksEventRoute, Ap
   factions.forEach((faction) => {
     factionMap[faction.longshanks_html_name] = faction.name_code;
   });
+  const factionCodes = new Set(factions.map((f) => f.name_code));
+
+  for (const [longshanksId, code] of Object.entries(factionOverrides)) {
+    if (!factionCodes.has(code)) {
+      throw Object.assign(
+        new Error(`Unknown faction code ${code} in override for player ${longshanksId}`),
+        { status: 400 },
+      );
+    }
+  }
+
+  const factionCodeFor = (p: (typeof players)[number]) =>
+    factionOverrides[p.longshanksId] ?? (p.faction ? factionMap[p.faction] : undefined);
+
+  const missingFactions = players.filter((p) => !factionCodeFor(p));
+  if (missingFactions.length > 0) {
+    return c.json(
+      {
+        error: `No faction for ${missingFactions.map((p) => p.name).join(", ")}`,
+        missingFactions: missingFactions.map((p) => ({
+          longshanksId: p.longshanksId,
+          name: p.name,
+          longshanksFaction: p.faction ?? null,
+        })),
+        factions: factions.map((f) => ({ code: f.name_code, name: f.name })),
+      },
+      422,
+    );
+  }
 
   await db.transaction().execute(async (trx) => {
     const alreadyExistingTourney = await trx
@@ -105,10 +156,7 @@ export const newLongshanksEvent: RouteHandler<typeof newLongshanksEventRoute, Ap
 
     await Promise.all(
       players.map(async (longshanksPlayer) => {
-        const faction_code = factionMap[longshanksPlayer.faction];
-        if (!faction_code) {
-          throw new Error(`Can't derive faction code for ${longshanksPlayer.faction}`);
-        }
+        const faction_code = factionCodeFor(longshanksPlayer)!;
 
         let dbPlayerIdentity = await trx
           .selectFrom("player_identity")
