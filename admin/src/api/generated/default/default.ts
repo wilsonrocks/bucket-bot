@@ -155,6 +155,7 @@ import type {
   PostGenerateTeamRankings200,
   PostLongshanksEventId200,
   PostLongshanksEventId400,
+  PostLongshanksEventId422,
   PostLongshanksEventId502,
   PostLongshanksEventIdBody,
   PostMatchPlayerToDiscordUser200,
@@ -3855,6 +3856,11 @@ export type postLongshanksEventIdResponse400 = {
   status: 400
 }
 
+export type postLongshanksEventIdResponse422 = {
+  data: PostLongshanksEventId422
+  status: 422
+}
+
 export type postLongshanksEventIdResponse502 = {
   data: PostLongshanksEventId502
   status: 502
@@ -3863,7 +3869,7 @@ export type postLongshanksEventIdResponse502 = {
 export type postLongshanksEventIdResponseSuccess = (postLongshanksEventIdResponse200) & {
   headers: Headers;
 };
-export type postLongshanksEventIdResponseError = (postLongshanksEventIdResponse400 | postLongshanksEventIdResponse502) & {
+export type postLongshanksEventIdResponseError = (postLongshanksEventIdResponse400 | postLongshanksEventIdResponse422 | postLongshanksEventIdResponse502) & {
   headers: Headers;
 };
 
@@ -3893,7 +3899,7 @@ export const postLongshanksEventId = async (id: string,
 
 
 
-export const getPostLongshanksEventIdMutationOptions = <TError = PostLongshanksEventId400 | PostLongshanksEventId502,
+export const getPostLongshanksEventIdMutationOptions = <TError = PostLongshanksEventId400 | PostLongshanksEventId422 | PostLongshanksEventId502,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postLongshanksEventId>>, TError,{id: string;data: PostLongshanksEventIdBody}, TContext>, request?: SecondParameter<typeof customFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof postLongshanksEventId>>, TError,{id: string;data: PostLongshanksEventIdBody}, TContext> => {
 
@@ -3922,9 +3928,9 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type PostLongshanksEventIdMutationResult = NonNullable<Awaited<ReturnType<typeof postLongshanksEventId>>>
     export type PostLongshanksEventIdMutationBody = PostLongshanksEventIdBody
-    export type PostLongshanksEventIdMutationError = PostLongshanksEventId400 | PostLongshanksEventId502
+    export type PostLongshanksEventIdMutationError = PostLongshanksEventId400 | PostLongshanksEventId422 | PostLongshanksEventId502
 
-    export const usePostLongshanksEventId = <TError = PostLongshanksEventId400 | PostLongshanksEventId502,
+    export const usePostLongshanksEventId = <TError = PostLongshanksEventId400 | PostLongshanksEventId422 | PostLongshanksEventId502,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postLongshanksEventId>>, TError,{id: string;data: PostLongshanksEventIdBody}, TContext>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof postLongshanksEventId>>,

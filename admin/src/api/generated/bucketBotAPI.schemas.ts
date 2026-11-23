@@ -651,14 +651,35 @@ export type GetStatsCommunity200 = {
   totalEvents: number;
 };
 
+export type PostLongshanksEventIdBodyFactionOverrides = {[key: string]: string};
+
 export type PostLongshanksEventIdBody = {
   tierCode?: string;
+  factionOverrides?: PostLongshanksEventIdBodyFactionOverrides;
 };
 
 export type PostLongshanksEventId200 = {[key: string]: unknown | null};
 
 export type PostLongshanksEventId400 = {
   error: string;
+};
+
+export type PostLongshanksEventId422MissingFactionsItem = {
+  longshanksId: string;
+  name: string;
+  /** @nullable */
+  longshanksFaction: string | null;
+};
+
+export type PostLongshanksEventId422FactionsItem = {
+  code: string;
+  name: string;
+};
+
+export type PostLongshanksEventId422 = {
+  error: string;
+  missingFactions: PostLongshanksEventId422MissingFactionsItem[];
+  factions: PostLongshanksEventId422FactionsItem[];
 };
 
 export type PostLongshanksEventId502 = {

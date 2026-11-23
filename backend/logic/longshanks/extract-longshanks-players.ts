@@ -4,7 +4,8 @@ interface LongshanksPlayerData {
   longshanksId: string;
   rank: number;
   name: string;
-  faction: string;
+  // Undefined when the player hasn't set a faction on Longshanks
+  faction: string | undefined;
   team: string | undefined;
   roundsPlayed: number;
 }
@@ -44,13 +45,8 @@ export const extractPlayersFromLongshanksHTML = (
         `No player name found when parsing from Longshanks HTML (name=${name})`
       );
     }
-    const faction = el.querySelector(".factions img")?.getAttribute("title");
-
-    if (typeof faction !== "string") {
-      throw new Error(
-        `No faction found for player when parsing from Longshanks HTML (faction=${faction})`
-      );
-    }
+    const faction =
+      el.querySelector(".factions img")?.getAttribute("title") ?? undefined;
 
     const team = el.querySelectorAll(".player_link")[1]?.textContent?.trim();
     const roundsPlayed =
